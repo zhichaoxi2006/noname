@@ -2842,10 +2842,7 @@ export class Get extends GetCompatible {
 	 */
 	strNumber(num, forced) {
 		if (typeof num !== "number") return;
-		let result = lib.numstrList.entries().reduce((map, list) => {
-			map[list[0]] = list[1];
-			return map;
-		}, {})[num];
+		let result = lib.numstrList.get(num);
 		if (result === undefined && forced) result = num.toString();
 		return result;
 	}
