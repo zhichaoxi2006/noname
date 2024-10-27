@@ -5489,7 +5489,7 @@ const skills = {
 						.indexOf(event) >= 2
 				);
 			}
-			return typeof get.strNumber(get.number(event.card)) === "string";
+			return typeof get.strNumber(get.number(event.card), false) === "string";
 		},
 		forced: true,
 		content: function () {
