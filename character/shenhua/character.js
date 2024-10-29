@@ -9,8 +9,6 @@ const characters = {
 	xiaoqiao: ["female", "wu", 3, ["retianxiang", "hongyan"], ["name:桥|null"]],
 	sp_zhangjiao: ["male", "qun", 3, ["releiji", "guidao", "huangtian"], ["zhu"]],
 	re_yuji: ["male", "qun", 3, ["xinfu_guhuo"]],
-	// yuji:['male','qun',3,['guhuo']],
-	// xin_yuji:['male','qun',3,['guhuo']],
 
 	sp_zhugeliang: ["male", "shu", 3, ["bazhen", "huoji", "kanpo"], ["name:诸葛|亮"]],
 	pangtong: ["male", "shu", 3, ["lianhuan", "oldniepan"]],
