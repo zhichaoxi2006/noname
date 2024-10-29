@@ -205,7 +205,7 @@ const skills = {
 				markimage: "image/card/pss_stone.png",
 				intro: {
 					name: "扬威 - 增伤",
-					content: "本回合下次造成的伤害+#",
+					content: "下次造成的伤害+#",
 				},
 			},
 			defend: {
@@ -220,7 +220,7 @@ const skills = {
 				markimage: "image/card/pss_paper.png",
 				intro: {
 					name: "扬威 - 受伤",
-					content: "本回合下次受到的伤害+#",
+					content: "下次受到的伤害+#",
 				},
 			},
 		},
