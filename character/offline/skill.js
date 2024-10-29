@@ -1862,6 +1862,12 @@ const skills = {
 			if (!bool) return;
 			let skill = get.color(card) === "red" ? "scls_lianhua" : "scls_miaojian";
 			await player.gain(card, "gain2");
+			cards.remove(card);
+			for (let i = cards.length - 1; i >= 0; i--) {
+				ui.cardPile.insertBefore(cards[i], ui.cardPile.firstChild);
+			}
+			game.log(cards, "被放回了牌堆顶");
+			game.updateRoundNumber();
 			if (!player.hasMark(skill)) player.addMark(skill, 1, false);
 			if (skill === "scls_miaojian") player.addTempSkill("scls_chongxu_miaojian");
 			player.addTempSkill("scls_chongxu_lianhua", { player: "phaseBegin" });
@@ -2189,7 +2195,15 @@ const skills = {
 					number = get.number(button.link);
 				return player.getUseValue(button.link, null, number % (player.storage.xingtu_mark || 13) !== 0);
 			});
-			if (card) player.gain(card, "gain2");
+			if (card) {
+				await player.gain(card, "gain2");
+				cards.remove(card);
+			}
+			for (let i = cards.length - 1; i >= 0; i--) {
+				ui.cardPile.insertBefore(cards[i], ui.cardPile.firstChild);
+			}
+			game.log(cards, "被放回了牌堆顶");
+			game.updateRoundNumber();
 		},
 		ai: {
 			order: 1,
