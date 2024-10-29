@@ -7006,27 +7006,15 @@ export default () => {
 				usable: 1,
 				preHidden: true,
 				async content(event, trigger, player) {
-					let cards = get.cards(4);
-					await game.cardsGotoOrdering(cards);
+					let cards = get.cards(4, true);
 					await player.showCards(cards, get.translation(player) + "发动了【诱言】");
 					var evt = trigger.getl(player);
 					var list = [];
 					for (var i of evt.cards2) {
 						list.add(get.suit(i, player));
 					}
-					let gain = [];
-					for (let i = 0; i < cards.length; i++) {
-						if (!list.includes(get.suit(cards[i], false))) {
-							gain.push(cards[i]);
-							cards.splice(i--, 1);
-						}
-					}
-					if (gain.length) await player.gain(gain, "gain2");
-					for (let i = cards.length - 1; i >= 0; i--) {
-						ui.cardPile.insertBefore(cards[i], ui.cardPile.firstChild);
-					}
-					game.log(cards, "被放回了牌堆顶");
-					game.updateRoundNumber();
+					cards = cards.filter(card => !list.includes(get.suit(card, false)));
+					if (cards.length) await player.gain(cards, "gain2");
 				},
 				ai: {
 					effect: {

@@ -467,9 +467,9 @@ export class Get extends GetCompatible {
 	}
 	/**
 	 * 获取牌堆底的牌
-	 * @param { number } [num = 1]
-	 * @param { boolean } [putBack]
-	 * @returns { Card[] }
+	 * @param { number } [num = 1] 默认为1
+	 * @param { boolean } [putBack] 是否放回牌堆底
+	 * @returns { Card[] | Card } num为0返回Card，否则返回Cards
 	 */
 	bottomCards(num, putBack) {
 		if (_status.waitingForCards) {
@@ -2427,9 +2427,9 @@ export class Get extends GetCompatible {
 	}
 	/**
 	 * 返回牌堆顶的牌
-	 * @param { number } [num = 1]
-	 * @param { boolean } [putBack]
-	 * @returns
+	 * @param { number } [num = 1] 默认为1
+	 * @param { boolean } [putBack] 是否放回牌堆顶
+	 * @returns { Card[] | Card } num为0返回Card，否则返回Cards
 	 */
 	cards(num, putBack) {
 		if (_status.waitingForCards) {
