@@ -2701,11 +2701,14 @@ export class Get extends GetCompatible {
 	 */
 	skillTranslation(str, player) {
 		var str2;
+		if (get.itemtype(player) !== "player") {
+			player = undefined;
+		}
 		if (str.startsWith("re")) {
 			str2 = str.slice(2);
 			if (str2) {
 				if (lib.translate[str] == lib.translate[str2]) {
-					if (player.hasSkill(str2)) {
+					if (player?.hasSkill(str2)) {
 						return "界" + lib.translate[str];
 					}
 				}
@@ -2714,7 +2717,7 @@ export class Get extends GetCompatible {
 			str2 = str.slice(3);
 			if (str2) {
 				if (lib.translate[str] == lib.translate[str2]) {
-					if (player.hasSkill(str2)) {
+					if (player?.hasSkill(str2)) {
 						return "新" + lib.translate[str];
 					}
 				}
