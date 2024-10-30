@@ -1068,6 +1068,7 @@ window.noname_character_rank = {
 		"lukai",
 		"ol_lukai",
 		"niufu",
+		"ol_hanfu",
 		"re_liufeng",
 		"huzhao",
 		"guanhai",
@@ -1288,6 +1289,8 @@ window.noname_character_rank = {
 		"ol_sb_huaxiong",
 	],
 	b: [
+		"ol_niufu",
+		"chenggongying",
 		"jiangziya",
 		"shengongbao",
 		"nanjixianweng",
@@ -2425,6 +2428,9 @@ window.noname_character_rank = {
 			"jsrg_lukang",
 		],
 		rare: [
+			"ol_hanfu",
+			"ol_niufu",
+			"chenggongying",
 			"yj_jiling",
 			"yue_diaochan",
 			"jsrg_simaliang",

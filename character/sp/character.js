@@ -1,4 +1,7 @@
 const characters = {
+	ol_hanfu: ["male", "qun", 4, ["olshuzi", "olkuangshou"]],
+	ol_niufu: ["male", "qun", 4, ["olfansuan", "olzonglve"]],
+	chenggongying: ["male", "qun", 4, ["olkuangxiang"]],
 	wangkuang: ["male", "qun", 4, ["olrenxia"]],
 	kongshu: ["female", "qun", 3, ["olleiluan", "olfuchao"]],
 	ol_kebineng: ["male", "qun", 4, ["olpingduan"], ["name:科比|罐头"]],
@@ -179,14 +182,13 @@ const characters = {
 	dingfeng: ["male", "wu", 4, ["reduanbing", "refenxun"]],
 	shamoke: ["male", "shu", 4, ["gzjili"]],
 
-
 	wangyun: ["male", "qun", 4, ["xinlianji", "xinmoucheng"], ["clan:太原王氏"]],
 	sunqian: ["male", "shu", 3, ["qianya", "shuimeng"]],
 	xizhicai: ["male", "wei", 3, ["tiandu", "xianfu", "chouce"]],
 	quyi: ["male", "qun", 4, ["fuqi", "jiaozi"]],
 
 	luzhi: ["male", "wei", 3, ["qingzhong", "weijing"]],
-	
+
 	wangcan: ["male", "qun", 3, ["xinfu_sanwen", "xinfu_qiai", "xinfu_denglou"]],
 	re_jsp_pangtong: ["male", "wu", 3, ["xinfu_guolun", "xinfu_songsang"]],
 	lvqian: ["male", "wei", 4, ["xinfu_weilu", "xinfu_zengdao"]],
