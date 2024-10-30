@@ -148,7 +148,7 @@ const skills = {
 		audio: 2,
 		enable: "phaseUse",
 		filter(event, player) {
-			return game.hasPlayer(current => current != player && current.countCards("h"));
+			return game.hasPlayer(current => current != player && current.countCards("he"));
 		},
 		chooseButton: {
 			dialog() {
