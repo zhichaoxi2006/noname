@@ -16,6 +16,7 @@ const skills = {
 		check(card) {
 			return 7 - get.value(card);
 		},
+		usable: 1,
 		lose: false,
 		discard: false,
 		delay: false,
@@ -168,6 +169,7 @@ const skills = {
 			maixie_hp: true,
 			effect: {
 				target(card, player, target) {
+					if (_status._olfansuan_temp) return;
 					if (get.tag(card, "damage")) {
 						if (player.hasSkillTag("jueqing", false, target) || get.effect(player, { name: "losehp" }, player, player) > 0 || player.isTurnedOver()) return [1, -2];
 						if (
@@ -181,7 +183,12 @@ const skills = {
 										return list;
 									})(card).includes(cardx) &&
 									player.getCardUsable(get.name(card)) >= 2 &&
-									get.effect(target, card, player, player) > 0,
+									(() => {
+										_status._olfansuan_temp = true;
+										let eff = get.effect(target, card, player, player) > 0;
+										delete _status._olfansuan_temp;
+										return eff;
+									})(),
 								"hs"
 							)
 						)

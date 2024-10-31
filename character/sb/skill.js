@@ -1706,7 +1706,7 @@ const skills = {
 				filter: () => true,
 				filterTarget: true,
 				async content(player, target) {
-					await target.draw(Math.min(5, Math.max(2, game.dead.length)));
+					await target.draw(3);
 				},
 				ai: {
 					result: {
