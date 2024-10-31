@@ -205,7 +205,7 @@ const skills = {
 				markimage: "image/card/pss_stone.png",
 				intro: {
 					name: "扬威 - 增伤",
-					content: "本回合下次造成的伤害+#",
+					content: "下次造成的伤害+#",
 				},
 			},
 			defend: {
@@ -220,7 +220,7 @@ const skills = {
 				markimage: "image/card/pss_paper.png",
 				intro: {
 					name: "扬威 - 受伤",
-					content: "本回合下次受到的伤害+#",
+					content: "下次受到的伤害+#",
 				},
 			},
 		},
@@ -938,9 +938,13 @@ const skills = {
 		subSkill: {
 			gain: {
 				audio: "olsbliwen",
-				trigger: { player: "useCard" },
+				trigger: {
+					global: "phaseBefore",
+					player: ["useCardAfter", "enterGame"],
+				},
 				filter(event, player) {
 					if (player.countMark("olsbliwen") >= 5) return false;
+					if (event.name !== "useCard") return event.name !== "phase" || game.phaseNumber === 0;
 					let history = player.getAllHistory("useCard");
 					if (history.length <= 1) return false;
 					const evt = history[history.length - 2];
@@ -950,7 +954,7 @@ const skills = {
 				forced: true,
 				locked: false,
 				content() {
-					player.addMark("olsbliwen", 1);
+					player.addMark("olsbliwen", trigger.name === "useCard" ? 1 : Math.min(3, 5 - player.countMark("olsbliwen")));
 				},
 				mod: {
 					aiOrder(player, card, num) {
@@ -2029,7 +2033,7 @@ const skills = {
 	},
 	//虞翻
 	olzongxuan: {
-		audio: "rezongxuan",
+		audio: 2,
 		trigger: { global: ["loseAfter", "loseAsyncAfter"] },
 		filter(event, player) {
 			if (event.type != "discard" || event.getlx === false) return false;
@@ -2093,8 +2097,7 @@ const skills = {
 		},
 	},
 	olzhiyan: {
-		audio: "zhiyan",
-		audioname: ["re_yufan"],
+		audio: 2,
 		trigger: { global: "phaseJieshuBegin" },
 		filter(event, player) {
 			return event.player == player || event.player == player.getPrevious();

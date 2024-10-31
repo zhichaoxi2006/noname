@@ -3176,26 +3176,44 @@ export class Create {
 		var shareButton = ui.create.div(".menubutton.large.highlight.connectbutton.connectbutton2.pointerdiv", "分享房间", ui.window, function () {
 			var text = `无名杀-联机-${lib.translate[get.mode()]}-${game.connectPlayers.filter(p => p.avatar).length}/${game.connectPlayers.filter(p => !p.classList.contains("unselectable2")).length}\n${get.connectNickname()}邀请你加入${game.roomId}房间\n联机地址:${game.ip}\n请先通过游戏内菜单-开始-联机中启用“读取邀请链接”选项`;
 			window.focus();
-			if (navigator.clipboard && lib.node) {
-				navigator.clipboard
-					.writeText(text)
-					.then(() => {
-						game.alert(`分享内容复制成功`);
-					})
-					.catch(e => {
-						game.alert(`分享内容复制失败${e || ""}`);
-					});
-			} else {
-				var input = ui.create.node("textarea", ui.window, {
-					opacity: "0",
+			const fallbackCopyTextToClipboard = function (text) {
+				const textArea = document.createElement("textarea");
+				textArea.value = text;
+				textArea.style.position = "fixed";
+				textArea.style.top = "0";
+				textArea.style.left = "0";
+				textArea.style.width = "1px";
+				textArea.style.height = "1px";
+				textArea.style.padding = "0";
+				textArea.style.border = "none";
+				textArea.style.outline = "none";
+				textArea.style.boxShadow = "none";
+				textArea.style.background = "transparent";
+				document.body.appendChild(textArea);
+				textArea.focus();
+				textArea.select();
+				try {
+					const successful = document.execCommand("copy");
+					if (!successful) {
+						console.error("Unable to copy using execCommand");
+						game.promises.prompt(`###分享内容复制失败，请自行复制以下内容###${text}`, true);
+					}
+					else {
+						game.alert("分享内容复制成功");
+					}
+				} catch (err) {
+					console.error("Unable to copy using execCommand:", err);
+				}
+				document.body.removeChild(textArea);
+			};
+			if ("clipboard" in navigator) {
+				navigator.clipboard.writeText(text).then(() => {
+					game.alert("分享内容复制成功");
+				}).catch(() => {
+					fallbackCopyTextToClipboard(text);
 				});
-				input.value = text;
-				input.focus();
-				input.select();
-				var result = document.execCommand("copy");
-				input.blur();
-				ui.window.removeChild(input);
-				game.alert(`分享内容复制${result ? "成功" : "失败"}`);
+			} else {
+				fallbackCopyTextToClipboard(text);
 			}
 		});
 

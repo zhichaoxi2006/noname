@@ -1111,8 +1111,10 @@ export class Library {
 						game.saveConfig("dev", bool);
 						if (_status.connectMode) return;
 						if (bool) {
+							window.noname_shijianInterfaces?.showDebugButton?.();
 							lib.cheat.i();
 						} else {
+							window.noname_shijianInterfaces?.hideDebugButton?.();
 							delete window.cheat;
 							delete window.game;
 							delete window.ui;
@@ -6085,7 +6087,7 @@ export class Library {
 					intro: "最后行动的角色获得技能【飞扬】（限定技，准备阶段，你可以弃置两张牌，然后弃置判定区的一张牌）",
 				},
 				connect_choice_num: {
-					name: "侯选武将数",
+					name: "候选武将数",
 					init: "20",
 					frequent: true,
 					item: {
@@ -6648,6 +6650,31 @@ export class Library {
 					init: false,
 					frequent: true,
 					intro: "读取剪贴板以解析邀请链接自动加入联机房间",
+				},
+				check_versionCode: {
+					name: "禁止不同版本玩家进房",
+					init: false,
+					intro: "禁止与自己版本不同的玩家进入房间",
+				},
+				check_extension: {
+					name: "禁止扩展玩家进房",
+					init: false,
+					intro: "禁止开启了扩展的的玩家进入房间",
+				},
+				reset_banBlacklist: {
+					name: "重置黑名单",
+					onclick() {
+						if (this.firstChild.innerHTML != "已重置") {
+							this.firstChild.innerHTML = "已重置";
+							var banBlacklist = [];
+							game.saveConfig("banBlacklist", banBlacklist);
+							var that = this;
+							setTimeout(function () {
+								that.firstChild.innerHTML = "重置黑名单";
+							}, 1000);
+						}
+					},
+					clear: true,
 				},
 			},
 		},
@@ -12283,7 +12310,9 @@ export class Library {
 			 * @this {import("./element/client.js").Client}
 			 */
 			init(version, config, banned_info) {
-				if (lib.node.banned.includes(banned_info)) {
+				this.onlineKey = config.onlineKey;
+				var banBlacklist = lib.config.banBlacklist === undefined ? [] : lib.config.banBlacklist;
+				if (lib.node.banned.includes(banned_info) || banBlacklist.includes(config.onlineKey)) {
 					this.send("denied", "banned");
 				} else if (config.id && lib.playerOL && lib.playerOL[config.id]) {
 					var player = lib.playerOL[config.id];
@@ -12299,6 +12328,12 @@ export class Library {
 					this.send("denied", "version");
 					lib.node.clients.remove(this);
 					this.closed = true;
+				} else if (get.config("check_versionLocal", "connect") && config.versionLocal != lib.version) {
+					this.send("denied", "version");
+					lib.node.clients.remove(this);
+					this.closed = true;
+				} else if (get.config("check_extension", "connect") && config.extension) {
+					this.send("denied", "extension");
 				} else if (!_status.waitingForPlayer) {
 					if (!config.nickname) {
 						this.send("denied", "banned");
@@ -12607,8 +12642,11 @@ export class Library {
 					lib.versionOL,
 					{
 						id: game.onlineID,
+						onlineKey: game.onlineKey,
 						avatar: lib.config.connect_avatar,
 						nickname: get.connectNickname(),
+						versionLocal: lib.version,
+						extension: lib.config.extensions.some(ext => lib.config[`extension_${ext}_enable`]),
 					},
 					lib.config.banned_info
 				);
@@ -13348,6 +13386,16 @@ export class Library {
 							setTimeout(game.resume, 500);
 						}
 						break;
+					case "extension":
+						if(confirm('加入失败：房间禁止使用扩展！是否关闭所有扩展？')){
+							let libexts = lib.config.extensions;
+							for(let i=0;i<libexts.length;i++){
+								game.saveConfig("extension_" + libexts[i] + "_enable",false);
+							}
+						}
+						break;
+					default: 
+						alert(reason);	//其它原因直接弹窗显示
 				}
 				game.ws.close();
 				if (_status.connectDenied) {
@@ -13451,6 +13499,13 @@ export class Library {
 			},
 		},
 	};
+	//为lib.numstrList属性set数字对应花色，即可在get.strNumber和get.numString中获取使用
+	numstrList = new Map([
+		[1, "A"],
+		[11, "J"],
+		[12, "Q"],
+		[13, "K"],
+	]);
 	suit = ["club", "spade", "diamond", "heart"];
 	suits = ["club", "spade", "diamond", "heart", "none"];
 	color = {

@@ -4239,8 +4239,9 @@ export class Game extends GameCompatible {
 			promptContainer.clicked = true;
 		});
 		let strnode = ui.create.div("", str || "", dialog);
-		let input = ui.create.node("input", ui.create.div(dialog));
+		let input = ui.create.node("textarea", ui.create.div(dialog));
 		input.value = str2;
+		input.setAttribute("cols", Math.max(str2.split("\n").length || 1, 10));
 		if (noinput) {
 			input.style.display = "none";
 		}

@@ -7051,7 +7051,7 @@ const skills = {
 					}
 					if (lib.skill.gzbuqu.process(player)) {
 						if (player.isDying()) {
-							const histories = [evt];
+							const histories = [event];
 							let evt = event;
 							while (true) {
 								evt = event.getParent("dying");

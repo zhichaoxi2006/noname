@@ -15,7 +15,7 @@ export default {
 	"#xunxun2": "爱兵如子，胜乃可全。",
 	"#wangxi1": "大丈夫，何拘小节。",
 	"#wangxi2": "前尘往事，莫再提起。",
-	"#re_lidian:die": "报国杀敌，虽死犹荣……",
+	"#lidian:die": "报国杀敌，虽死犹荣……",
 	"#huomo_re_zhongyao1": "笔墨抒胸臆，妙手成汗青。",
 	"#huomo_re_zhongyao2": "胸蕴大家之行，则下笔如有神助。",
 	"#zuoding_re_zhongyao1": "腹有大才，可助阁下成事。",

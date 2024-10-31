@@ -1,4 +1,14 @@
 export default {
+	"#olzongxuan1": "易字从日下月，此乃自然之理。",
+	"#olzongxuan2": "笔著太玄十四卷，继往圣之学。",
+	"#olzhiyan1": "尔降虏，何敢与吾君齐马首乎！",
+	"#olzhiyan2": "当闭反开，当开反闭，匹夫何故反复？",
+	"#ol_yufan:die": "彼皆死人，何语神仙？",
+	"#olsbliwen1": "伐竹筑学宫，大庇天下士子。",
+	"#olsbliwen2": "学而不厌，诲人不倦，何有于我哉。",
+	"#olsbzhengyi1": "保纳舍藏者，融也，当坐之。",
+	"#olsbzhengyi2": "子曰当仁不让，当义，亦不能让。",
+	"#ol_sb_kongrong:die": "为父将去，子何以不辞？",
 	"#olsbhulie1": "匹夫犯我，吾必斩之！",
 	"#olsbhulie2": "鼠辈！这一刀下去定让你看不到明天的太阳。",
 	"#olsbhulie3": "这大汉，就是我江东子弟的天下！",
@@ -90,6 +100,4 @@ export default {
 	"#olsbshishou6": "拔剑四顾，诸位识得我袁本初？",
 	"#ol_sb_yuanshao:die": "众人合而无力，徒负大义也……",
 	"#ol_sb_yuanshao2:die": "袁氏凋零，皆我一人之罪……",
-	"#ol_yufan:die": "唉，主公不能容我啊！",
-	"#ol_jianyong:die": "此景竟无言以对……",
 };
