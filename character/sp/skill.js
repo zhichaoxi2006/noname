@@ -5481,10 +5481,6 @@ const skills = {
 			if (!player.storage.olgangshu_buff) player.storage.olgangshu_buff = [0, 0, 0];
 			return player.storage.olgangshu_buff;
 		},
-		init(player) {
-			let info = lib.skill.olgangshu.getInfo(player);
-			player.addTip("olgangshu_buff", "刚述 " + info.slice().join(" "));
-		},
 		direct: true,
 		group: "olgangshu_reset",
 		content: function () {
@@ -5534,6 +5530,7 @@ const skills = {
 				info[result.index] = Math.min(5, info[result.index] + 1);
 				game.log(player, "的", result.control.slice(0, result.control.indexOf("(")), "#y+1");
 				player.markSkill("olgangshu_buff");
+				lib.skill.olgangshu.subSkill.buff.init(player);
 			}
 		},
 		ai: {
@@ -5541,9 +5538,16 @@ const skills = {
 		},
 		subSkill: {
 			buff: {
-				trigger: { player: "phaseDrawBegin2" },
+				init(player) {
+					let info = lib.skill.olgangshu.getInfo(player);
+					player.addTip("olgangshu_buff", "刚述 " + info.slice().join(" "));
+				},
 				charlotte: true,
-				onremove: true,
+				onremove(player, skill) {
+					delete player.storage[skill];
+					player.removeTip(skill);
+				},
+				trigger: { player: "phaseDrawBegin2" },
 				forced: true,
 				filter: function (event, player) {
 					var info = lib.skill.olgangshu.getInfo(player);

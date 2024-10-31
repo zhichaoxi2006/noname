@@ -988,7 +988,6 @@ const skills = {
 		audioname: ["re_zhangfei", "xiahouba"],
 		audioname2: {
 			old_guanzhang: "paoxiao_old_guanzhang",
-			dc_xiahouba: "paoxiao_xiahouba",
 			guanzhang: "paoxiao_guanzhang",
 		},
 		trigger: { player: "useCard1" },

@@ -16631,12 +16631,11 @@ const skills = {
 		audio: 2,
 		trigger: { player: "useCard" },
 		filter: function (event, player) {
+			if (!(player == _status.currentPhase || player.hasSkill("yaner_zhiren"))) return false;
 			return (
-				(player == _status.currentPhase || player.hasSkill("yaner_zhiren")) &&
-				event.card.isCard &&
 				player
-					.getHistory("useCard", function (evt) {
-						return evt.card.isCard;
+					.getHistory("useCard", evt => {
+						return !evt.cards?.length || evt.card.isCard;
 					})
 					.indexOf(event) == 0
 			);

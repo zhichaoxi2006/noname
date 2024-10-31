@@ -8982,8 +8982,8 @@ export default () => {
 			gzshensu: {
 				audio: "shensu1",
 				audioname: ["xiahouba", "re_xiahouyuan", "ol_xiahouyuan"],
-				group: ["shensu1", "shensu2"],
-				preHidden: ["shensu1", "shensu2", "gzshensu"],
+				group: ["gzshensu_1", "gzshensu_2"],
+				preHidden: ["gzshensu_1", "gzshensu_2", "gzshensu"],
 				trigger: { player: "phaseDiscardBegin" },
 				direct: true,
 				filter: function (event, player) {
@@ -9010,6 +9010,17 @@ export default () => {
 						trigger.cancel();
 						player.useCard({ name: "sha", isCard: true }, target, false);
 					}
+				},
+				subSkill: {
+					1: {
+						audio: "shensu1",
+						inherit: "shensu1",
+						sourceSkill: "gzshensu",
+					},
+					2: {
+						inherit: "shensu2",
+						sourceSkill: "gzshensu",
+					},
 				},
 			},
 			//吕玲绮
