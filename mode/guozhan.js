@@ -11976,19 +11976,10 @@ export default () => {
 				trigger: { target: "useCardToTargeted" },
 				filter: function (event, player) {
 					if (player == event.player || event.targets.length != 1 || !event.player.isIn()) return false;
-					if (
-						!target.hasCard(function (card) {
-							return lib.filter.canBeDiscarded(card, player, target);
-						}, "he") &&
-						_status.event.dying
-					)
-						return false;
+					if (!event.player.countCards("he") && _status.event.dying) return false;
 					var hs = player.getCards("h");
 					if (hs.length == 0) return false;
-					for (var i of hs) {
-						if (!lib.filter.cardDiscardable(i, player, "gzshejian")) return false;
-					}
-					return true;
+					return hs.every(i => lib.filter.cardDiscardable(i, player, "gzshejian"));
 				},
 				check: function (event, player) {
 					var target = event.player;
@@ -12038,12 +12029,7 @@ export default () => {
 					event.target = target;
 					if (!target.isIn()) event.finish();
 					else if (_status.event.dying) event._result = { index: 0 };
-					else if (
-						!target.hasCard(function (card) {
-							return lib.filter.canBeDiscarded(card, player, target);
-						}, "he")
-					)
-						event._result = { index: 1 };
+					else if (target.countCards("he")) event._result = { index: 1 };
 					else
 						player
 							.chooseControl()
