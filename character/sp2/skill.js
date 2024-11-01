@@ -44,6 +44,7 @@ const skills = {
 						player.line(targets);
 						for (const i of targets) await i.damage();
 					}
+					break;
 				case 0:
 					player.addTempSkill("starzhiji_fuqi");
 					break;
