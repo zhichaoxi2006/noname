@@ -2517,6 +2517,27 @@ export class Create {
 			true,
 			true
 		);
+
+
+
+		lib.arenaReady?.push(function () {
+			if (lib.config.show_deckMonitor) {
+				ui.deckMonitor.style.display = "";
+			} else {
+				ui.deckMonitor.style.display = "none";
+			}
+			if (lib.config.show_tip) {
+				game.css({
+					".tipContainer": {
+						display: "flex !important",
+					},
+				});
+			} else {
+				game.css({ ".tipContainer": { display: "none !important" } });
+			}
+		});
+
+
 		//---------------------------------
 		ui.playerids = ui.create.system(
 			"显示身份",
