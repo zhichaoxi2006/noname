@@ -1200,6 +1200,27 @@ const skills = {
 		},
 	},
 	//OL界李儒
+	oljuece: {
+		audio: 2,
+		trigger: { player: "phaseJieshuBegin" },
+		filter(event, player) {
+			return game.hasPlayer(target => target !== player && player.countCards("h") >= target.countCards("h"));
+		},
+		async cost(event, trigger, player) {
+			event.result = await player
+				.chooseTarget(get.prompt2("oljuece"), function (card, player, target) {
+					return target !== player && player.countCards("h") >= target.countCards("h");
+				})
+				.set("ai", target => {
+					const player = get.player();
+					return get.damageEffect(target, player, player);
+				})
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			await event.targets[0].damage();
+		},
+	},
 	olmieji: {
 		audio: 2,
 		inherit: "xinmieji",
@@ -1225,6 +1246,7 @@ const skills = {
 					})
 					.set("prompt", "请弃置第二张非锦囊牌");
 			}
+			/*
 			const cards = game
 				.getGlobalHistory("everything", evt => {
 					return evt.name == "lose" && evt.getParent(3) == event;
@@ -1250,6 +1272,7 @@ const skills = {
 					await player.chooseUseTarget(true, card, false);
 				}
 			}
+			*/
 		},
 	},
 	//OL界蔡夫人

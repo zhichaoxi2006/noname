@@ -4,7 +4,7 @@ const characterReplaces = {
 	yujin: ["yujin", "yujin_yujin", "ol_yujin", "sb_yujin", "xin_yujin", "re_yujin", "jd_sb_yujin", "tw_yujin"],
 	dc_xushu: ["re_xushu", "dc_xushu", "xia_xushu"],
 	xushu: ["xin_xushu", "xushu", "std_xushu"],
-	fazheng: ["xin_fazheng", "ol_fazheng", "re_fazheng", "sb_fazheng", "tw_re_fazheng", "fazheng", "jd_sb_fazheng"],
+	fazheng: ["xin_fazheng", "ol_fazheng", "re_fazheng", "sb_fazheng", "tw_re_fazheng", "fazheng", "jd_sb_fazheng", "star_fazheng"],
 	masu: ["xin_masu", "re_masu", "masu"],
 	xusheng: ["xusheng", "xin_xusheng", "re_xusheng", "old_xusheng"],
 	wuguotai: ["wuguotai", "xin_wuguotai", "re_wuguotai", "ol_wuguotai"],

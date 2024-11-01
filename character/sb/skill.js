@@ -239,7 +239,7 @@ const skills = {
 				position = player.storage.sbwansha ? "hej" : "h";
 			const bool1 = player.storage.sbwansha,
 				bool2 = get.mode() == "identity",
-				num = bool1 ? (bool2 ? 2 : 3) : (bool2 ? 1 : 2),
+				num = bool1 ? (bool2 ? 2 : 3) : bool2 ? 1 : 2,
 				prompt = `选择至多${get.cnNumber(num)}张牌`;
 			let cards = await player.choosePlayerCard(target, position, [1, num], true, prompt).set("visible", true).forResultCards();
 			if (cards.length) {
@@ -583,15 +583,15 @@ const skills = {
 			const targets = game.filterPlayer(current => {
 				return current.inRange(target);
 			});
-			const count = targets.length + 2;
-			if (count <= 2) {
+			const count = targets.length;
+			if (!count) {
 				target.chat("没人打得到我喔！");
 				return;
 			}
 			const controls = ["选项一", "选项二", "背水！"];
 			const control = await target
 				.chooseControl(controls)
-				.set("choiceList", [`令所有攻击范围内含有你的角色依次弃置两张牌（${get.translation(targets)}）`, `你摸等同于攻击范围内含有你的角色数+2的牌（${get.cnNumber(count)}张牌）`, `背水！令${get.translation(player)}的〖解烦〗失效直到其杀死一名角色，然后你依次执行上述所有选项`])
+				.set("choiceList", [`令所有攻击范围内含有你的角色依次弃置一张牌（${get.translation(targets)}）`, `你摸等同于攻击范围内含有你的角色数的牌（${get.cnNumber(count)}张牌）`, `背水！令${get.translation(player)}的〖解烦〗失效直到其杀死一名角色，然后你依次执行上述所有选项`])
 				.set("ai", () => {
 					return get.event("choice");
 				})
@@ -602,7 +602,7 @@ const skills = {
 							.map(current => {
 								let position = "h";
 								if (!current.countCards("h")) position += "e";
-								return get.effect(current, { name: "guohe", position }, target, target);
+								return get.effect(current, { name: "guohe_copy", position }, target, target);
 							})
 							.reduce((p, c) => p + c, 0);
 						const eff2 = (get.effect(target, { name: "wuzhong" }, target) * count) / 2;
@@ -632,11 +632,10 @@ const skills = {
 				for (const current of targets) {
 					target.line(current, "thunder");
 					await current.chooseToDiscard("解烦：请弃置一张牌", "he", true);
-					await current.chooseToDiscard("解烦：请弃置一张牌", "he", true);
 				}
 			}
 			if (control !== "选项一") {
-				target.draw(count);
+				await target.draw(count);
 			}
 		},
 		ai: {
@@ -1703,22 +1702,22 @@ const skills = {
 			},
 			{
 				cost: 2,
-				prompt: () => "令一名角色摸" + get.cnNumber(Math.min(5, Math.max(2, game.dead.length))) + "张牌",
+				prompt: () => "令一名角色摸三张牌",
 				filter: () => true,
 				filterTarget: true,
 				async content(player, target) {
-					await target.draw(Math.min(5, Math.max(2, game.dead.length)));
+					await target.draw(3);
 				},
 				ai: {
 					result: {
-						target(player, target) {
-							return Math.min(5, Math.max(2, game.dead.length));
+						player(player, target) {
+							return get.effect(target, { name: "draw" }, player, player) * 3;
 						},
 					},
 				},
 			},
 			{
-				cost: 5,
+				cost: 3,
 				prompt: () => "令一名体力上限小于10的角色回复1点体力，增加1点体力上限，随机恢复一个废除的装备栏",
 				filter: () => game.hasPlayer(target => target.maxHp < 10),
 				filterTarget: true,
@@ -1746,7 +1745,7 @@ const skills = {
 				},
 			},
 			{
-				cost: 5,
+				cost: 4,
 				prompt: () => "获得一名已阵亡角色的武将牌上的所有技能，然后失去〖行殇〗〖放逐〗〖颂威〗",
 				filter: () => game.dead.some(target => target.getStockSkills(true, true).some(i => get.info(i) && !get.info(i).charlotte)),
 				filterTarget(card, player, target) {
@@ -1892,7 +1891,7 @@ const skills = {
 	sbfangzhu: {
 		getList: [
 			{
-				cost: 1,
+				cost: 2,
 				prompt: () => "令一名其他角色于手牌中只能使用基本牌直到其回合结束",
 				filter: player => game.hasPlayer(target => target != player && !target.getStorage("sbfangzhu_ban").includes("basic")),
 				filterTarget: (card, player, target) => target != player && !target.getStorage("sbfangzhu_ban").includes("basic"),
@@ -1910,7 +1909,7 @@ const skills = {
 				},
 			},
 			{
-				cost: 2,
+				cost: 6,
 				prompt: () => "令一名其他角色于手牌中只能使用锦囊牌直到其回合结束",
 				filter: player => game.hasPlayer(target => target != player && !target.getStorage("sbfangzhu_ban").includes("trick")),
 				filterTarget: (card, player, target) => target != player && !target.getStorage("sbfangzhu_ban").includes("trick"),
@@ -1928,7 +1927,7 @@ const skills = {
 				},
 			},
 			{
-				cost: 3,
+				cost: 8,
 				prompt: () => "令一名其他角色于手牌中只能使用装备牌直到其回合结束",
 				filter: player => get.mode() != "doudizhu" && game.hasPlayer(target => target != player && !target.getStorage("sbfangzhu_ban").includes("equip")),
 				filterTarget: (card, player, target) => target != player && !target.getStorage("sbfangzhu_ban").includes("equip"),
@@ -1946,7 +1945,7 @@ const skills = {
 				},
 			},
 			{
-				cost: 2,
+				cost: 6,
 				prompt: () => "令一名其他角色的非Charlotte技能失效直到其回合结束",
 				filter: player => get.mode() != "doudizhu" && game.hasPlayer(target => target != player),
 				filterTarget: lib.filter.notMe,
@@ -1962,7 +1961,7 @@ const skills = {
 				},
 			},
 			{
-				cost: 2,
+				cost: 4,
 				prompt: () => "令一名其他角色不能响应除其外的角色使用的牌直到其回合结束",
 				filter: player => game.hasPlayer(target => target != player && !target.hasSkill("sbfangzhu_kill")),
 				filterTarget: lib.filter.notMe,
@@ -1978,7 +1977,7 @@ const skills = {
 				},
 			},
 			{
-				cost: 3,
+				cost: 8,
 				prompt: () => "令一名其他角色将武将牌翻面",
 				filter: player => get.mode() != "doudizhu" && game.hasPlayer(target => target != player),
 				filterTarget: lib.filter.notMe,
@@ -2175,7 +2174,7 @@ const skills = {
 		async content(event, trigger, player) {
 			player.addMark("sbxingshang", Math.min(get.info("sbxingshang").getLimit - player.countMark("sbxingshang"), 2 * game.countPlayer(target => target.group == "wei" && target != player)));
 		},
-		group: "sbsongwei_delete",
+		//group: "sbsongwei_delete",
 		subSkill: {
 			delete: {
 				audio: "sbsongwei",

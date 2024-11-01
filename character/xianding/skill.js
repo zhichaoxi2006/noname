@@ -577,13 +577,8 @@ const skills = {
 			)
 				return false;
 			const num = get.number(event.card, player) || 0;
-			if (
-				player.countCards("h", card => {
-					return get.number(card, player) < num;
-				})
-			)
-				return false;
-			return true; //return !player.getStorage("dclianjie_used").includes(num);
+			if (player.hasCard(card => get.number(card, player) < num, "h")) return false;
+			return !player.getStorage("dclianjie_used").includes(num);
 		},
 		async cost(event, trigger, player) {
 			event.result = await player
@@ -601,6 +596,9 @@ const skills = {
 				.forResult();
 		},
 		async content(event, trigger, player) {
+			const num = get.number(trigger.card, player) || 0;
+			player.addTempSkill("dclianjie_used");
+			player.markAuto("dclianjie_used", num);
 			const target = event.targets[0];
 			const cards = target.getCards("h"),
 				minNumber = cards.map(card => get.number(card)).sort((a, b) => a - b)[0];
@@ -622,10 +620,7 @@ const skills = {
 				player.$throw(cardx, 1000, "nobroadcast");
 			}, target);
 			await game.delayx();
-			const num = get.number(trigger.card, player) || 0;
-			if (player.countCards("h") >= player.maxHp || player.getStorage("dclianjie_used").includes(num)) return;
-			player.addTempSkill("dclianjie_used");
-			player.markAuto("dclianjie_used", num);
+			if (player.countCards("h") >= player.maxHp) return;
 			const result = await player.drawTo(player.maxHp).forResult();
 			if (result) player.addGaintag(result, "dclianjie");
 		},
@@ -6128,9 +6123,6 @@ const skills = {
 	dcxiongmu: {
 		audio: 2,
 		trigger: { global: "roundStart" },
-		// filter:function(event,player){
-		// 	return player.countCards('h')<player.maxHp;
-		// },
 		group: "dcxiongmu_minus",
 		prompt2: function (event, player) {
 			return (player.countCards("h") < player.maxHp ? "将手牌摸至" + get.cnNumber(player.maxHp) + "张，然后" : "") + "将任意张牌随机置入牌堆并从牌堆或弃牌堆中获得等量点数为8的牌。";
@@ -16639,12 +16631,11 @@ const skills = {
 		audio: 2,
 		trigger: { player: "useCard" },
 		filter: function (event, player) {
+			if (!(player == _status.currentPhase || player.hasSkill("yaner_zhiren"))) return false;
 			return (
-				(player == _status.currentPhase || player.hasSkill("yaner_zhiren")) &&
-				event.card.isCard &&
 				player
-					.getHistory("useCard", function (evt) {
-						return evt.card.isCard;
+					.getHistory("useCard", evt => {
+						return !evt.cards?.length || evt.card.isCard;
 					})
 					.indexOf(event) == 0
 			);

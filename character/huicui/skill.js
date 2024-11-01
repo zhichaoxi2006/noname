@@ -13,6 +13,7 @@ const skills = {
 			return event.name != "phase" || game.phaseNumber == 0;
 		},
 		forced: true,
+		locked: false,
 		content() {
 			const cards = player.getCards("h");
 			player.addGaintag(cards, "dctanban");
@@ -31,9 +32,12 @@ const skills = {
 				audio: "dctanban",
 				trigger: { player: "phaseDrawEnd" },
 				filter(event, player) {
-					return player.countCards("h", card => !card.hasGaintag("dctanban")) > player.countCards("h", card => card.hasGaintag("dctanban"));
+					return player.countCards("h");
 				},
-				forced: true,
+				prompt2: () => "交换手牌中的“檀板”牌",
+				check(event, player) {
+					return player.countCards("h", card => !card.hasGaintag("dctanban")) * 2 < player.countCards("h");
+				},
 				content() {
 					const cards = player.getCards("h", card => !card.hasGaintag("dctanban"));
 					player.removeGaintag("dctanban");
@@ -69,7 +73,7 @@ const skills = {
 						nature: get.nature(card, player),
 						isCard: true,
 					};
-					return player.getUseValue(cardx) + (shown.includes(card) ? 0 : get.effect(player, { name: "draw" }, player, player));
+					return player.getUseValue(cardx) + (shown.includes(card) && get.event().getTrigger().card.name !== cardx.name) ? 0 : get.effect(player, { name: "draw" }, player, player);
 				})
 				.forResult();
 		},
@@ -89,7 +93,8 @@ const skills = {
 						return evt.name === "showCards" && evt !== next && evt.cards.includes(event.cards[0]);
 					},
 					next
-				).length
+				).length ||
+				trigger.card.name === cardx.name
 			)
 				await player.draw();
 		},
@@ -143,7 +148,7 @@ const skills = {
 		audio: 2,
 		enable: "phaseUse",
 		filter(event, player) {
-			return game.hasPlayer(current => current != player && current.countCards("h"));
+			return game.hasPlayer(current => current != player && current.countCards("he"));
 		},
 		chooseButton: {
 			dialog() {
@@ -11587,11 +11592,13 @@ const skills = {
 			if (get.color(event.card, false) != "red") return false;
 			var evt = event.getParent("phaseUse");
 			if (!evt || evt.player != event.player) return false;
-			return event.player
-				.getHistory("useCard", function (event) {
-					return event.getParent("phaseUse") == evt;
-				})
-				.indexOf(event) === 0;
+			return (
+				event.player
+					.getHistory("useCard", function (event) {
+						return event.getParent("phaseUse") == evt;
+					})
+					.indexOf(event) === 0
+			);
 		},
 		content: function () {
 			"step 0";

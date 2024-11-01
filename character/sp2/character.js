@@ -1,4 +1,5 @@
 const characters = {
+	star_fazheng: ["male", "shu", 3, ["starzhiji", "staranji"]],
 	matie: ["male", "qun", 4, ["dczhuiwang", "dcquxian"]],
 	hansong: ["male", "qun", 3, ["dcyinbi", "dcshuaiyan"]],
 	chezhou: ["male", "wei", 4, ["dcshefu", "dcpigua"]],

@@ -1277,15 +1277,18 @@ export default () => {
 			//徐盛
 			gzyicheng_new: {
 				audio: "yicheng",
-				inherit: "yicheng",
 				trigger: { global: ["useCardToPlayered", "useCardToTargeted"] },
 				filter(event, player, name) {
-					const bool = name === "seCardToPlayered";
+					const bool = name === "useCardToPlayered";
 					if (bool && !event.isFirstTarget) return false;
 					return event.card.name == "sha" && event[bool ? "player" : "target"].isFriendOf(player);
 				},
 				logTarget(event, player, name) {
-					return event[name === "seCardToPlayered" ? "player" : "target"];
+					return event[name === "useCardToPlayered" ? "player" : "target"];
+				},
+				async content(event, trigger, player) {
+					await event.targets[0].draw();
+					await event.targets[0].chooseToDiscard("he", true);
 				},
 			},
 			//陆逊
@@ -1296,8 +1299,9 @@ export default () => {
 					return player.hasUseTarget(new lib.element.VCard({ name: "yiyi" }));
 				},
 				direct: true,
+				preHidden: true,
 				content() {
-					player.chooseUseTarget(get.prompt2(event.name), new lib.element.VCard({ name: "yiyi" }), false).logSkill = event.name;
+					player.chooseUseTarget(get.prompt2(event.name), new lib.element.VCard({ name: "yiyi" }), false).set("hiddenSkill", event.name).logSkill = event.name;
 				},
 			},
 			//臧霸
@@ -8982,8 +8986,8 @@ export default () => {
 			gzshensu: {
 				audio: "shensu1",
 				audioname: ["xiahouba", "re_xiahouyuan", "ol_xiahouyuan"],
-				group: ["shensu1", "shensu2"],
-				preHidden: ["shensu1", "shensu2", "gzshensu"],
+				group: ["gzshensu_1", "gzshensu_2"],
+				preHidden: ["gzshensu_1", "gzshensu_2", "gzshensu"],
 				trigger: { player: "phaseDiscardBegin" },
 				direct: true,
 				filter: function (event, player) {
@@ -9010,6 +9014,17 @@ export default () => {
 						trigger.cancel();
 						player.useCard({ name: "sha", isCard: true }, target, false);
 					}
+				},
+				subSkill: {
+					1: {
+						audio: "shensu1",
+						inherit: "shensu1",
+						sourceSkill: "gzshensu",
+					},
+					2: {
+						inherit: "shensu2",
+						sourceSkill: "gzshensu",
+					},
 				},
 			},
 			//吕玲绮
@@ -11961,19 +11976,10 @@ export default () => {
 				trigger: { target: "useCardToTargeted" },
 				filter: function (event, player) {
 					if (player == event.player || event.targets.length != 1 || !event.player.isIn()) return false;
-					if (
-						!target.hasCard(function (card) {
-							return lib.filter.canBeDiscarded(card, player, target);
-						}, "he") &&
-						_status.event.dying
-					)
-						return false;
+					if (!event.player.countCards("he") && _status.event.dying) return false;
 					var hs = player.getCards("h");
 					if (hs.length == 0) return false;
-					for (var i of hs) {
-						if (!lib.filter.cardDiscardable(i, player, "gzshejian")) return false;
-					}
-					return true;
+					return hs.every(i => lib.filter.cardDiscardable(i, player, "gzshejian"));
 				},
 				check: function (event, player) {
 					var target = event.player;
@@ -12023,12 +12029,7 @@ export default () => {
 					event.target = target;
 					if (!target.isIn()) event.finish();
 					else if (_status.event.dying) event._result = { index: 0 };
-					else if (
-						!target.hasCard(function (card) {
-							return lib.filter.canBeDiscarded(card, player, target);
-						}, "he")
-					)
-						event._result = { index: 1 };
+					else if (target.countCards("he")) event._result = { index: 1 };
 					else
 						player
 							.chooseControl()
