@@ -11,7 +11,7 @@ const skills = {
 		},
 		async cost(event, trigger, player) {
 			const next = player.chooseToDiscard(get.prompt2("starzhiji"), [1, Infinity]).set("logSkill", "starzhiji");
-			if (!(player === game.me || player.isOnline())) {
+			if (_status.auto || !(player === game.me || player.isOnline())) {
 				next.complexCard = true;
 				next.ai = function (card) {
 					const player = get.player();
