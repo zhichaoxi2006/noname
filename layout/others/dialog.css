@@ -1,3 +1,7 @@
+:root {
+    --tip-display: none;
+}
+
 /* addNewRow的对话框的样式 */
 .dialog.addNewRow {
     --bgColor: #2f2f3557;
@@ -244,7 +248,7 @@
     width: 100%;
     bottom: max(48%, var(--bottom, 46%));
     height: fit-content;
-    display: flex;
+    display: var(--tip-display);
     flex-flow: column nowrap;
     justify-content: flex-start;
     z-index: 2;
