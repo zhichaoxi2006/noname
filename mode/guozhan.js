@@ -1277,15 +1277,18 @@ export default () => {
 			//徐盛
 			gzyicheng_new: {
 				audio: "yicheng",
-				inherit: "yicheng",
 				trigger: { global: ["useCardToPlayered", "useCardToTargeted"] },
 				filter(event, player, name) {
-					const bool = name === "seCardToPlayered";
+					const bool = name === "useCardToPlayered";
 					if (bool && !event.isFirstTarget) return false;
 					return event.card.name == "sha" && event[bool ? "player" : "target"].isFriendOf(player);
 				},
 				logTarget(event, player, name) {
-					return event[name === "seCardToPlayered" ? "player" : "target"];
+					return event[name === "useCardToPlayered" ? "player" : "target"];
+				},
+				async content(event, trigger, player) {
+					await event.targets[0].draw();
+					await event.targets[0].chooseToDiscard("he", true);
 				},
 			},
 			//陆逊
@@ -1296,8 +1299,9 @@ export default () => {
 					return player.hasUseTarget(new lib.element.VCard({ name: "yiyi" }));
 				},
 				direct: true,
+				preHidden: true,
 				content() {
-					player.chooseUseTarget(get.prompt2(event.name), new lib.element.VCard({ name: "yiyi" }), false).logSkill = event.name;
+					player.chooseUseTarget(get.prompt2(event.name), new lib.element.VCard({ name: "yiyi" }), false).set("hiddenSkill", event.name).logSkill = event.name;
 				},
 			},
 			//臧霸
