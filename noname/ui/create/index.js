@@ -2526,15 +2526,7 @@ export class Create {
 			} else {
 				ui.deckMonitor.style.display = "none";
 			}
-			if (lib.config.show_tip) {
-				game.css({
-					".tipContainer": {
-						display: "flex !important",
-					},
-				});
-			} else {
-				game.css({ ".tipContainer": { display: "none !important" } });
-			}
+			document.documentElement.style.setProperty("--tip-display", lib.config.show_tip ? "flex" : "none");
 		});
 
 
