@@ -1,4 +1,9 @@
 export default {
+	"#starzhiji1": "筹谋部划，知天机，行人事。",
+	"#starzhiji2": "渊孤军出寨，可一鼓击之。",
+	"#staranji1": "兵法谙熟于胸，今乃施为之时。",
+	"#staranji2": "我军待时而动，以有备击不备。",
+	"#star_fazheng:die": "我当为君之子房，奈何命寿将尽。",
 	"#staranshu1": "与民休养生息，则国可得安泰。",
 	"#staranshu2": "春种其粟，秋得其实。",
 	"#starkuangzuo1": "吾辈向汉，当矢志不渝，不可坐视神州陆沉。",
