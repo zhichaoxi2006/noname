@@ -14,7 +14,7 @@ const characters = {
 	star_caoren: ["male", "wei", 4, ["starsujun", "starlifeng"]],
 	star_sunshangxiang: ["female", "wu", 3, ["starsaying", "starjiaohao"]],
 	dc_jikang: ["male", "wei", 3, ["new_qingxian", "dcjuexiang"], ["die:jikang"]],
-	dc_jsp_guanyu: ["male", "wei", 4, ["new_rewusheng", "dcdanji"]],
+	dc_jsp_guanyu: ["male", "wei", 4, ["new_rewusheng", "dcdanji"], ["die:jsp_guanyu", "tempname:jsp_guanyu"]],
 	dc_mengda: ["male", "wei", 4, ["dclibang", "dcwujie"]],
 	//dc_fuwan:['male','qun',4,['dcmoukui']],
 	guānning: ["male", "shu", 3, ["dcxiuwen", "longsong"]],
