@@ -6,7 +6,7 @@ const characterReplaces = {
 	sunyi: ["re_sunyi", "sunyi", "tw_sunyi", "std_sunyi"],
 	fengfangnv: ["fengfangnv", "re_fengfangnv"],
 	luotong: ["dc_luotong", "luotong", "std_dc_luotong"],
-	dc_wangchang: ["dc_wangchang", "tw_wangchang"],
+	dc_wangchang: ["dc_wangchang", "tw_wangchang", "clan_wangchang"],
 	guozhao: ["guozhao", "xin_guozhao", "jsrg_guozhao"],
 	dingshangwan: ["dingshangwan", "ol_dingshangwan"],
 	qinghegongzhu: ["qinghegongzhu", "dc_qinghegongzhu"],
