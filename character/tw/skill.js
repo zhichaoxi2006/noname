@@ -19265,14 +19265,14 @@ const skills = {
 	twtijin: {
 		audio: 2,
 		trigger: { global: "useCardToPlayer" },
-		filter: function (event, player) {
-			return event.card && event.card.name == "sha" && event.player != player && event.target != player && event.targets.length == 1 && event.player.inRange(player);
+		filter(event, player) {
+			return event.card?.name == "sha" && event.player != player && event.target != player && event.targets.length == 1 && player.inRange(event.player);
 		},
 		logTarget: "target",
-		check: function (event, player) {
+		check(event, player) {
 			return get.effect(event.targets[0], event.card, event.player, player) <= get.effect(player, event.card, event.player, player);
 		},
-		content: function () {
+		content() {
 			"step 0";
 			trigger.targets.length = 0;
 			trigger.getParent().triggeredTargets1.length = 0;
