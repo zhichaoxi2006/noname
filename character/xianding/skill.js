@@ -7687,8 +7687,9 @@ const skills = {
 				event.equipCount[current.playerid] = current.countCards("e");
 			}, true);
 			"step 1";
-			if (!player.countCards("he")) event.goto(5);
-			else
+			if (!player.countCards("he")) {
+				event.finish();
+			} else
 				player.chooseCard("四论：选择一张牌（" + (event.count + 1) + "/" + "4）", "然后选择将此牌置于场上或牌堆的两端", true, "he").set("ai", card => {
 					var player = _status.event.player;
 					if (["equip", "delay"].includes(get.type(card)) && player.hasValueTarget(card)) return 50;
