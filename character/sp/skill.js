@@ -8721,6 +8721,9 @@ const skills = {
 					cardname: function (card) {
 						if (get.itemtype(card) == "card" && card.hasGaintag("olshilu")) return "sha";
 					},
+					cardnature(card) {
+						if (get.itemtype(card) == "card" && card.hasGaintag("olshilu")) return false;
+					}
 				},
 				charlotte: true,
 			},

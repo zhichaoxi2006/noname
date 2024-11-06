@@ -686,7 +686,7 @@ const translates = {
 	dc_jiangqing: "新杀蒋钦",
 	dc_jiangqing_prefix: "新杀",
 	dcshangyi: "尚义",
-	dcshangyi_info: "出牌阶段限一次，你可以令一名其他角色观看你的手牌，然后你观看其手牌并可以弃置其中♠♣花色的牌各一张。",
+	dcshangyi_info: "出牌阶段限一次，你可以令一名其他角色观看你的手牌，然后你观看其手牌并可以弃置其中不同花色的黑色牌至多各一张。",
 	dcniaoxiang: "鸟翔",
 	dcniaoxiang_info: "锁定技，你使用【杀】指定目标后，若你在其攻击范围内，其需要额外使用一张【闪】来抵消此【杀】。",
 	dcchuanxin: "穿心",
