@@ -6149,7 +6149,8 @@ const skills = {
 			var list = [],
 				history = player.getHistory("useCard");
 			for (var i of history) {
-				list.add(get.suit(i.card));
+				let suit = get.suit(i.card);
+				if (lib.suit.includes(suit)) list.add(suit);
 				if (list.length >= player.hp) break;
 			}
 			if (list.length >= player.hp) event.goon = true;

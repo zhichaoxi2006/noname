@@ -3000,7 +3000,7 @@ const skills = {
 			if (control) {
 				player.popup(control);
 				game.log(player, "选择了", "#g" + control, "效果");
-				player.addTempSkill("zhoulin_zhoufa");
+				player.addTempSkill("zhoulin_zhoufa", { player: "phaseBegin" });
 				player.storage.zhoulin_zhoufa = control;
 				player.markSkill("zhoulin_zhoufa");
 				game.broadcastAll(
