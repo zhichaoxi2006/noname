@@ -1311,11 +1311,12 @@ const skills = {
 			});
 			"step 1";
 			if (result.bool) {
-				var suits = result.links.map(i => i[2].slice(6));
+				var suits = result.links.map(i => i[2].slice(6)).sort((a, b) => lib.suit.indexOf(b) - lib.suit.indexOf(a));
 				player.logSkill("qingbei");
 				player.addTempSkill("qingbei_effect", "roundStart");
 				player.setStorage("qingbei_effect", suits);
 				player.markSkill("qingbei_effect");
+				player.addTip("qingbei_effect", get.translation("qingbei_effect") + player.getStorage("qingbei_effect").reduce((str, i) => str + get.translation(i), ""));
 			}
 		},
 		ai: {
@@ -1326,7 +1327,10 @@ const skills = {
 				audio: "qingbei",
 				trigger: { player: "useCardAfter" },
 				charlotte: true,
-				onremove: true,
+				onremove(player, skill) {
+					delete player.storgae[skill];
+					player.removeTip(skill);
+				},
 				forced: true,
 				filter: function (event, player) {
 					if (!lib.suit.includes(get.suit(event.card))) return false;
