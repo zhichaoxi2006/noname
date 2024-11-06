@@ -640,12 +640,34 @@ const skills = {
 		logAudio: index => (typeof index === "number" ? "mbbifeng" + index + ".mp3" : 3),
 		async cost(event, trigger, player) {
 			if (event.triggername == "useCardAfter") event.result = { bool: true };
-			else {
-				let choice = true;
-				if (get.effect(player, trigger.card, trigger.player, player) >= 0) choice = false;
-				if (get.tag(trigger.card, "damage") && trigger.targets.length == 1 && player.hp <= 2) choice = false;
-				event.result = await player.chooseBool(get.prompt2("mbbifeng")).set("choice", choice).forResult();
-			}
+			else event.result = await player
+				.chooseBool(get.prompt2("mbbifeng"))
+				.set("bool", function () {
+					let cancel = get.effect(player, trigger.card, trigger.player, player),
+						name = trigger.card.name;
+					if (get.effect(player, { name: "losehp" }, player, player) - cancel > 0) return true;
+					if (2 * get.effect(player, { name: "draw" }, player, player) - cancel <= 0) return false;
+					let targets = trigger.targets.filter(current => {
+						return player !== current && get.effect(current, trigger.card, trigger.player, current) < 0;
+					});
+					if (name === "sha") return targets.some(target => {
+						return target.mayHaveShan(player, "use");
+					});
+					if (name === "juedou" || name === "nanman") return targets.some(target => {
+						return target.mayHaveSha(player, "respond");
+					});
+					/*if (name === "jiedao") return targets.some(target => {
+						return target.mayHaveSha(player, "use");
+					});*/
+					if (name === "wanjian") return targets.some(target => {
+						return target.mayHaveShan(player, "respond");
+					});
+					if (name === "qizhengxiangsheng") return targets.some(target => {
+						return target.mayHaveSha(player, "respond") || target.mayHaveShan(player, "respond");
+					});
+					return false;
+				}())
+				.forResult();
 		},
 		popup: false,
 		async content(event, trigger, player) {
