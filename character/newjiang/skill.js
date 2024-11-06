@@ -1328,7 +1328,7 @@ const skills = {
 				trigger: { player: "useCardAfter" },
 				charlotte: true,
 				onremove(player, skill) {
-					delete player.storgae[skill];
+					delete player.storage[skill];
 					player.removeTip(skill);
 				},
 				forced: true,
