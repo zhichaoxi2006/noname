@@ -642,6 +642,7 @@ const skills = {
 			if (event.triggername == "useCardAfter") event.result = { bool: true };
 			else event.result = await player
 				.chooseBool(get.prompt2("mbbifeng"))
+				.set("ai", () => get.event("bool"))
 				.set("bool", function () {
 					let cancel = get.effect(player, trigger.card, trigger.player, player),
 						name = trigger.card.name;
