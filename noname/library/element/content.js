@@ -9574,41 +9574,22 @@ export const Content = {
 	},
 	turnOver: function () {
 		game.log(player, "翻面");
-		player.classList.toggle("turnedover");
-		game.broadcast(function (player) {
-			player.classList.toggle("turnedover");
-		}, player);
+		game.broadcastAll(player => player.classList.toggle("turnedover"), player);
 		game.addVideo("turnOver", player, player.classList.contains("turnedover"));
 	},
 	link: function () {
 		const isLinked = player.isLinked();
 		game.log(player, (isLinked ? "解除" : "被") + "连环");
-		game.broadcastAll(isLinked => {
-			if (lib.config.background_audio) {
-				game.playAudio("effect", "link" + (isLinked ? "_clear" : ""));
-			}
-		}, isLinked);
 		game.broadcastAll(
-			function (player, linked) {
+			(player, isLinked) => {
+				if (lib.config.background_audio) game.playAudio("effect", "link" + (isLinked ? "_clear" : ""));
 				player.classList.remove("target");
-				if (get.is.linked2(player)) {
-					if (linked) {
-						player.classList.add("linked2");
-					} else {
-						player.classList.remove("linked2");
-					}
-				} else {
-					if (linked) {
-						player.classList.add("linked");
-					} else {
-						player.classList.remove("linked");
-					}
-				}
+				player.classList.toggle(get.is.linked2(player) ? "linked2" : "linked");
 				ui.updatej(player);
 				ui.updatem(player);
 			},
 			player,
-			player.isLinked()
+			isLinked
 		);
 		game.addVideo("link", player, player.isLinked());
 	},
