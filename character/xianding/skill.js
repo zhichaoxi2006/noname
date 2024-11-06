@@ -7571,6 +7571,13 @@ const skills = {
 				intro: {
 					content: "下次受到的属性伤害+#",
 				},
+				ai: {
+					effect: {
+						target(card, player, target) {
+							if (game.hasNature(card)) return 1 + target.countMark("dcchangqu_add");
+						}
+					}
+				}
 			},
 		},
 	},
