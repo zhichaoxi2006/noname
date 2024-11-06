@@ -11404,7 +11404,32 @@ const skills = {
 				evt.skill = trigger.skill;
 				evt._noTurnOver = true;
 				evt.pushHandler("dcwumei_phase", (event, option) => {
-					if (event.step === 0 && option.state === "begin") event.step = 4;
+					if (event.step === 0 && option.state === "begin") {
+						event.step = 4;
+						_status.globalHistory.push({
+							cardMove: [],
+							custom: [],
+							useCard: [],
+							changeHp: [],
+							everything: [],
+						});
+						var players = game.players.slice(0).concat(game.dead);
+						for (var i = 0; i < players.length; i++) {
+							var current = players[i];
+							current.actionHistory.push({
+								useCard: [],
+								respond: [],
+								skipped: [],
+								lose: [],
+								gain: [],
+								sourceDamage: [],
+								damage: [],
+								custom: [],
+								useSkill: [],
+							});
+							current.stat.push({ card: {}, skill: {} });
+						}
+					}
 				});
 			}
 		},
@@ -11452,7 +11477,7 @@ const skills = {
 				marktext: "梦",
 				intro: {
 					markcount: (storage = [[]]) => storage[0].length,
-					content(storage = [], player) {
+					content(storage = [[]], player) {
 						if (!storage.length) return "无信息";
 						var str = "所有角色于回合开始时的体力值：<br>";
 						for (var i = 0; i < storage[0].length; i++) {
@@ -11468,7 +11493,7 @@ const skills = {
 			all: {
 				mod: {
 					aiOrder(player, card, num) {
-						if (num <= 0) return;
+						if (num <= 0 || !game.hasPlayer(t => t.marks["dcwumei_wake"])) return;
 						if (get.tag(card, "recover") && !_status.event.dying && player.hp > 0) return 0;
 						if (get.tag(card, "damage")) {
 							if (
