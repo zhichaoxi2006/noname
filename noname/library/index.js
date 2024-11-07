@@ -10158,7 +10158,7 @@ export class Library {
 			if (info.usable !== undefined) {
 				let num = info.usable;
 				if (typeof num === "function") num = info.usable(skill, player);
-				if (typeof num === "number" && get.skillCount(skill) >=num) return false;
+				if (typeof num === "number" && get.skillCount(skill, player) >=num) return false;
 			}
 			if (info.chooseButton && _status.event.noButton) return false;
 			if (info.round && info.round - (game.roundNumber - player.storage[skill + "_roundcount"]) > 0) return false;
