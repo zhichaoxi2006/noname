@@ -3769,9 +3769,10 @@ const skills = {
 									target = player.storage.mpsixiao_use;
 								event.result.card = card;
 								event.result.cards = [card];
+								player.logSkill("mpsixiao_use", target);
 								player.addTempSkill("mpsixiao_used");
 								target
-									.when({ global: ["useCard", "respond"] })
+									.when({ global: ["useCardAfter", "respondAfter"] })
 									.filter(evt => evt.player == player && evt.skill == "mpsixiao_use_backup")
 									.then(() => {
 										player.draw();
