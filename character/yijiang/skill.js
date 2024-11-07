@@ -4682,14 +4682,14 @@ const skills = {
 			return player.countCards("h") > player.hp;
 		},
 		filterTarget: function (card, player, target) {
-			return get.distance(target, player, "attack") <= 1 && target.countCards("e") > 0;
+			return player !== target && target.inRange(player) && target.countCards("e") > 0;
 		},
 		content: function () {
 			"step 0";
-			target.chooseToUse({ name: "sha" }, "止戈：使用一张杀，或将其装备区里的一张牌交给" + get.translation(player));
+			target.chooseToUse({ name: "sha" }, "止戈：使用一张杀，或将装备区里的一张牌交给" + get.translation(player));
 			"step 1";
 			if (!result.bool && target.countCards("e")) {
-				target.chooseCard("e", true, "将其装备区里的一张牌交给" + get.translation(player));
+				target.chooseCard("e", true, "将装备区里的一张牌交给" + get.translation(player));
 			} else {
 				event.finish();
 			}
