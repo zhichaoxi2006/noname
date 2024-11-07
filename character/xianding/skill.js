@@ -1907,7 +1907,7 @@ const skills = {
 				const suffixs = ["used", "round", "block", "blocker"];
 				for (const skill of gainSkills) {
 					const info = get.info(skill);
-					if (typeof info.usable == "number") {
+					if (info.usable !== undefined) {
 						if (target.hasSkill("counttrigger") && target.storage.counttrigger[skill] && target.storage.counttrigger[skill] >= 1) {
 							delete target.storage.counttrigger[skill];
 						}
