@@ -9232,12 +9232,12 @@ const skills = {
 	jsrgfendi: {
 		audio: 2,
 		trigger: { player: "useCardToPlayered" },
-		filter: function (event, player) {
+		filter(event, player) {
 			return event.targets.length == 1 && event.card.name == "sha" && event.targets[0].countCards("h") > 0;
 		},
 		usable: 1,
 		logTarget: "target",
-		content: function () {
+		content() {
 			"step 0";
 			var target = trigger.target;
 			event.target = target;
@@ -9263,8 +9263,9 @@ const skills = {
 			if (result.bool) {
 				var cards = result.cards;
 				target.showCards(cards, get.translation(player) + "对" + get.translation(target) + "发动了【分敌】");
+				target.addTempSkill("jsrgfendi_tag");
 				target.addGaintag(cards, "jsrgfendi_tag");
-				target.addTempSkill("jsrgfendi_blocker");
+				target.markAuto("jsrgfendi_tag", [trigger.getParent()]);
 				player.addTempSkill("jsrgfendi_gain");
 				if (!trigger.card.storage) trigger.card.storage = {};
 				trigger.card.storage.jsrgfendi = cards.slice();
@@ -9272,25 +9273,24 @@ const skills = {
 			} else player.storage.counttrigger.jsrgfendi--;
 		},
 		subSkill: {
-			blocker: {
-				trigger: {
-					player: ["damageBefore", "damageCancelled", "damageZero"],
-					target: ["shaMiss", "useCardToExcluded", "useCardToEnd"],
-					global: ["useCardEnd"],
+			tag: {
+				charlotte: true,
+				onremove(player, skill) {
+					player.removeGaintag(skill);
+					delete player.storage[skill];
+				},
+				trigger: { global: "useCardAfter" },
+				filter(event, player) {
+					return player.getStorage("jsrgfendi_tag").includes(event);
 				},
 				forced: true,
 				popup: false,
-				charlotte: true,
-				filter(event) {
-					const evt = event.getParent("useCard", true, true);
-					if (evt && evt.effectedCount < evt.effectCount) return false;
-					return true;
-				},
-				content: function () {
-					player.removeSkill("jsrgfendi_blocker");
+				content() {
+					player.unmarkAuto(event.name, [trigger]);
+					if (!player.getStorage(event.name).length) player.removeSkill(event.name);
 				},
 				mod: {
-					cardEnabled: function (card, player) {
+					cardEnabled(card, player) {
 						if (card.cards) {
 							for (var i of card.cards) {
 								if (!i.hasGaintag("jsrgfendi_tag")) return false;
@@ -9299,21 +9299,19 @@ const skills = {
 							if (!card.hasGaintag("jsrgfendi_tag")) return false;
 						}
 					},
-					cardRespondable: function (card, player) {
+					cardRespondable(card, player) {
 						return lib.skill.jsrgfendi_blocker.mod.cardEnabled.apply(this, arguments);
 					},
-					cardSavable: function (card, player) {
+					cardSavable(card, player) {
 						return lib.skill.jsrgfendi_blocker.mod.cardEnabled.apply(this, arguments);
 					},
 				},
 			},
 			gain: {
-				trigger: { global: "damageSource" },
 				charlotte: true,
-				forced: true,
-				direct: true,
 				onremove: true,
-				filter: function (event, player) {
+				trigger: { global: "damageSource" },
+				filter(event, player) {
 					if (!event.card || !event.card.storage) return false;
 					var cards = event.card.storage.jsrgfendi;
 					var target = player.storage.jsrgfendi_gain;
@@ -9321,11 +9319,10 @@ const skills = {
 					var cardsx = target.getCards("h");
 					cardsx.addArray(Array.from(ui.discardPile));
 					return cards.some(i => cardsx.includes(i));
-					//target.hasCard(card=>{
-					//	return card.hasGaintag('jsrgfendi_tag');
-					//},'h');
 				},
-				content: function () {
+				forced: true,
+				popup: false,
+				content() {
 					var target = player.storage.jsrgfendi_gain;
 					player.logSkill("jsrgfendi_gain", target);
 					var cardsx = target.getCards("h");
@@ -10884,10 +10881,7 @@ const skills = {
 				const bool = cardx => cardx.hasGaintag("jsrgqiantun_tag");
 				return !player?.countCards("h", bool) || bool(card);
 			});
-			if (
-				target.countCards("h") + 1 > result.cards.length * 2
-			)
-				next.set("small", true);
+			if (target.countCards("h") + 1 > result.cards.length * 2) next.set("small", true);
 			const result3 = await next.forResult();
 			target.removeGaintag("jsrgqiantun_tag");
 			if (result3.winner == player) {
@@ -11194,13 +11188,13 @@ const skills = {
 		forced: true,
 		logAudio(event, player) {
 			const num = Math.min(
-				5,
-				game.countPlayer(current => player.inRange(current))
-			),
-			numx = player.countCards("h");
+					5,
+					game.countPlayer(current => player.inRange(current))
+				),
+				numx = player.countCards("h");
 			if (num > numx) return 2;
 			if (num == numx) return ["jsrgcuibing5.mp3"];
-			return ["jsrgcuibing3.mp3", "jsrgcuibing4.mp3"]
+			return ["jsrgcuibing3.mp3", "jsrgcuibing4.mp3"];
 		},
 		async content(event, trigger, player) {
 			const num = Math.min(
@@ -11275,10 +11269,13 @@ const skills = {
 		filterCard: () => false,
 		selectCard: -1,
 		filter(event, player) {
-			const card = { name: "shunshou", isCard: true, storage: { jsrgpiqi: true }};
-			return player.countMark("jsrgpiqi_used") < 2 && game.hasPlayer(current => {
-				return lib.skill.jsrgpiqi.filterTarget(card, player, current);
-			});
+			const card = { name: "shunshou", isCard: true, storage: { jsrgpiqi: true } };
+			return (
+				player.countMark("jsrgpiqi_used") < 2 &&
+				game.hasPlayer(current => {
+					return lib.skill.jsrgpiqi.filterTarget(card, player, current);
+				})
+			);
 		},
 		filterTarget(card, player, target) {
 			if (player.getStorage("jsrgpiqi_targets").includes(target)) return false;

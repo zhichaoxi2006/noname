@@ -7708,7 +7708,7 @@ const skills = {
 		audio: 2,
 		mod: {
 			cardnature: function (card, player) {
-				if (player.hasEmptySlot(1) && get.name(card, player) == "sha") return false;
+				if (!player.getVEquip(1) && get.name(card, player) == "sha") return false;
 			},
 		},
 		trigger: { player: "useCardToPlayered" },
