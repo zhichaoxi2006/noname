@@ -8235,6 +8235,7 @@ const skills = {
 	dcanliao: {
 		audio: 2,
 		enable: "phaseUse",
+		usable: Infinity,
 		filter: function (event, player) {
 			if ((player.getStat().skill.dcanliao || 0) >= game.countPlayer(current => current.group == "qun")) return false;
 			return true;

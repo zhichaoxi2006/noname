@@ -7331,6 +7331,7 @@ const skills = {
 	//西园美鸟
 	midori_nonghuan: {
 		enable: "phaseUse",
+		usable: Infinity,
 		charlotte: true,
 		filter(event, player) {
 			return (player.getStat("skill").midori_nonghuan || 0) < player.hp;
@@ -8154,6 +8155,7 @@ const skills = {
 	noda_xunxin: {
 		audio: 2,
 		enable: "phaseUse",
+		usable: Infinity,
 		viewAs: { name: "juedou" },
 		filter(event, player) {
 			return (player.getStat("skill").noda_xunxin || 0) < player.hp;

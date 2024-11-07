@@ -3520,15 +3520,15 @@ const skills = {
 	tydingpan: {
 		audio: "dingpan",
 		enable: "phaseUse",
-		usable: 3,
+		usable: Infinity,
 		filter(event, player) {
-			if (event.tydingpan && player.countMark("tydingpan") >= event.tydingpan.length) return false;
+			if (event.tydingpan && (player.getStat().skill.tydingpan || 0) >= event.tydingpan.length) return false;
 			return game.hasPlayer(current => current.countCards("e"));
 		},
 		filterTarget(event, player, target) {
 			return target.countCards("e");
 		},
-		onChooseToUse: function (event) {
+		onChooseToUse(event) {
 			if (event.type != "phase" || game.online) return;
 			var list = [],
 				player = event.player;
@@ -3538,13 +3538,7 @@ const skills = {
 			event.set("tydingpan", list);
 		},
 		async content(event, trigger, player) {
-			if (!player.countMark("tydingpan")) {
-				player.when({ global: ["phaseUseBegin", "phaseUseAfter"] }).then(() => {
-					player.removeMark("tydingpan", player.countMark("tydingpan"), false);
-				});
-			}
-			player.addMark("tydingpan", 1, false);
-			const target = event.target;
+			const { target } = event;
 			await target.draw();
 			let goon = get.damageEffect(target, player, target) >= 0;
 			if (!goon && target.hp >= 4 && get.attitude(player, target) < 0) {

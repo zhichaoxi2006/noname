@@ -1832,6 +1832,7 @@ const skills = {
 			player.storage.dczhiheng_hit = [];
 		},
 		enable: "phaseUse",
+		usable: Infinity,
 		position: "he",
 		filterCard: lib.filter.cardDiscardable,
 		discard: false,

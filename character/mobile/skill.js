@@ -10059,6 +10059,7 @@ const skills = {
 	xinshenxing: {
 		audio: 2,
 		enable: "phaseUse",
+		usable: Infinity,
 		filter: function (event, player) {
 			return (player.getStat("skill").xinshenxing || 0) < player.hp && player.countCards("he") > 1;
 		},

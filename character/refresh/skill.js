@@ -1941,6 +1941,7 @@ const skills = {
 	reqice: {
 		audio: 2,
 		enable: "phaseUse",
+		usable: Infinity,
 		filter: function (event, player) {
 			const hs = player.getCards("h");
 			if (!hs.length) return false;
@@ -4143,7 +4144,7 @@ const skills = {
 		trigger: { player: "phaseEnd" },
 		frequent: true,
 		filter: function (event, player) {
-			if (player.countMark("rebotu_count") >= Math.min(3, game.countPlayer())) return false;
+			if (player.countMark("rebotu_used") >= Math.min(3, game.countPlayer())) return false;
 			var suits = [];
 			game.getGlobalHistory("cardMove", function (evt) {
 				if (suits.length >= 4) return;
@@ -4160,13 +4161,13 @@ const skills = {
 			return suits.length >= 4;
 		},
 		content: function () {
-			player.addTempSkill("rebotu_count", "roundStart");
-			player.addMark("rebotu_count", 1, false);
+			player.addTempSkill("rebotu_used", "roundStart");
+			player.addMark("rebotu_used", 1, false);
 			player.insertPhase();
 		},
 		group: "rebotu_mark",
 		subSkill: {
-			count: {
+			used: {
 				onremove: true,
 				charlotte: true,
 			},

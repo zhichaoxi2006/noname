@@ -3708,6 +3708,7 @@ const skills = {
 			qiben: {
 				audio: "sbjiang",
 				enable: "phaseUse",
+				usable: Infinity,
 				viewAs: { name: "juedou" },
 				filterCard: true,
 				position: "h",

@@ -2095,6 +2095,7 @@ const skills = {
 	dcsbwuwei: {
 		audio: 2,
 		enable: "phaseUse",
+		usable: Infinity,
 		filter(event, player) {
 			const count = player.getStat("skill").dcsbwuwei;
 			if (count && count > player.countMark("dcsbwuwei_count")) return false;
@@ -18052,6 +18053,7 @@ const skills = {
 	},
 	liji: {
 		enable: "phaseUse",
+		usable: Infinity,
 		audio: 2,
 		filter: function (event, player) {
 			return (player.getStat().skill.liji || 0) < (event.liji_num || 0);
