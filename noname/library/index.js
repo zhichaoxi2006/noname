@@ -380,14 +380,14 @@ export class Library {
 										typeof yingbianZhuzhanAI == "function"
 											? yingbianZhuzhanAI(player, card, source, targets)
 											: cardx => {
-													var info = get.info(card);
-													if (info && info.ai && info.ai.yingbian) {
-														var ai = info.ai.yingbian(card, source, targets, player);
-														if (!ai) return 0;
-														return ai - get.value(cardx);
-													} else if (get.attitude(player, source) <= 0) return 0;
-													return 5 - get.value(cardx);
-											  },
+												var info = get.info(card);
+												if (info && info.ai && info.ai.yingbian) {
+													var ai = info.ai.yingbian(card, source, targets, player);
+													if (!ai) return 0;
+													return ai - get.value(cardx);
+												} else if (get.attitude(player, source) <= 0) return 0;
+												return 5 - get.value(cardx);
+											},
 								});
 								if (!game.online) return;
 								_status.event._resultid = id;
@@ -4165,15 +4165,7 @@ export class Library {
 					unfrequent: true,
 					onclick(bool) {
 						game.saveConfig("show_tip", bool);
-						if (lib.config.show_tip) {
-							game.css({
-								".tipContainer": {
-									display: "flex !important",
-								},
-							});
-						} else {
-							game.css({ ".tipContainer": { display: "none !important" } });
-						}
+						document.documentElement.style.setProperty("--tip-display", bool ? "flex" : "none");
 					},
 				},
 				show_deckMonitor: {
@@ -6646,6 +6638,16 @@ export class Library {
 					frequent: true,
 					intro: "读取剪贴板以解析邀请链接自动加入联机房间",
 				},
+				check_versionCode: {
+					name: "禁止不同版本玩家进房",
+					init: false,
+					intro: "禁止与自己版本不同的玩家进入房间",
+				},
+				check_extension: {
+					name: "禁止扩展玩家进房",
+					init: false,
+					intro: "禁止开启了扩展的的玩家进入房间",
+				},
 				reset_banBlacklist: {
 					name: "重置黑名单",
 					onclick() {
@@ -8247,10 +8249,10 @@ export class Library {
 	genAwait(item) {
 		return gnc.is.generator(item)
 			? gnc.of(function* () {
-					for (const content of item) {
-						yield content;
-					}
-			  })()
+				for (const content of item) {
+					yield content;
+				}
+			})()
 			: Promise.resolve(item);
 	}
 	gnc = {
@@ -10848,16 +10850,16 @@ export class Library {
 					const cardName = get.name(cards[0], player);
 					return cardName
 						? new lib.element.VCard({
-								name: cardName,
-								nature: get.nature(cards[0], player),
-								suit: get.suit(cards[0], player),
-								number: get.number(cards[0], player),
-								isCard: true,
-								cards: [cards[0]],
-								storage: {
-									stratagem_buffed: 1,
-								},
-						  })
+							name: cardName,
+							nature: get.nature(cards[0], player),
+							suit: get.suit(cards[0], player),
+							number: get.number(cards[0], player),
+							isCard: true,
+							cards: [cards[0]],
+							storage: {
+								stratagem_buffed: 1,
+							},
+						})
 						: new lib.element.VCard();
 				}
 				return null;
@@ -12282,6 +12284,15 @@ export class Library {
 	cardPile = {};
 	message = {
 		server: {
+			cardPile() {
+				this.send(JSON.stringify({
+					type: "cardPile",
+					data: {
+						drawPile: Array.from(ui.cardPile.children),
+						discardPile: Array.from(ui.discardPile.children)
+					}
+				}));
+			},
 			/**
 			 * @this {import("./element/client.js").Client}
 			 */
@@ -12304,6 +12315,12 @@ export class Library {
 					this.send("denied", "version");
 					lib.node.clients.remove(this);
 					this.closed = true;
+				} else if (get.config("check_versionLocal", "connect") && config.versionLocal != lib.version) {
+					this.send("denied", "version");
+					lib.node.clients.remove(this);
+					this.closed = true;
+				} else if (get.config("check_extension", "connect") && config.extension) {
+					this.send("denied", "extension");
 				} else if (!_status.waitingForPlayer) {
 					if (!config.nickname) {
 						this.send("denied", "banned");
@@ -12615,6 +12632,8 @@ export class Library {
 						onlineKey: game.onlineKey,
 						avatar: lib.config.connect_avatar,
 						nickname: get.connectNickname(),
+						versionLocal: lib.version,
+						extension: lib.config.extensions.some(ext => lib.config[`extension_${ext}_enable`]),
 					},
 					lib.config.banned_info
 				);
@@ -12859,7 +12878,7 @@ export class Library {
 								navigator.clipboard
 									.readText()
 									.then(read)
-									.catch(_ => {});
+									.catch(_ => { });
 							} else {
 								var input = ui.create.node("textarea", ui.window, { opacity: "0" });
 								input.select();
@@ -13354,6 +13373,16 @@ export class Library {
 							setTimeout(game.resume, 500);
 						}
 						break;
+					case "extension":
+						if(confirm('加入失败：房间禁止使用扩展！是否关闭所有扩展？')){
+							let libexts = lib.config.extensions;
+							for(let i=0;i<libexts.length;i++){
+								game.saveConfig("extension_" + libexts[i] + "_enable",false);
+							}
+						}
+						break;
+					default: 
+						alert(reason);	//其它原因直接弹窗显示
 				}
 				game.ws.close();
 				if (_status.connectDenied) {
@@ -13457,6 +13486,13 @@ export class Library {
 			},
 		},
 	};
+	//为lib.numstrList属性set数字对应花色，即可在get.strNumber和get.numString中获取使用
+	numstrList = new Map([
+		[1, "A"],
+		[11, "J"],
+		[12, "Q"],
+		[13, "K"],
+	]);
 	suit = ["club", "spade", "diamond", "heart"];
 	suits = ["club", "spade", "diamond", "heart", "none"];
 	color = {

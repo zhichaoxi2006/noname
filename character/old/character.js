@@ -42,8 +42,6 @@ const characters = {
 	xushu: ["male", "shu", 3, ["xswuyan", "jujian"], ["border:wei"]],
 	liru: ["male", "qun", 3, ["juece", "mieji", "fencheng"]],
 	xin_yujin: ["male", "wei", 4, ["jieyue"], ["die:yujin.mp3"]],
-	//lusu:['male','wu',3,['haoshi','dimeng']],
-	//yuanshao:['male','qun',4,['luanji','xueyi'],['zhu']],
 	old_zhonghui: ["male", "wei", 3, ["zzhenggong", "zquanji", "zbaijiang"], ["clan:颍川钟氏"]],
 	old_xusheng: ["male", "wu", 4, ["pojun"]],
 	old_zhuran: ["male", "wu", 4, ["olddanshou"]],

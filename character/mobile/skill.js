@@ -574,7 +574,7 @@ const skills = {
 			player.getHistory("lose", evt => {
 				num += evt.cards2.length;
 			});
-			return num >= player.hp && (player.isDamaged() || game.hasPlayer(current => current.countDiscardableCards(player, "he")));
+			return num >= 3 && (player.isDamaged() || game.hasPlayer(current => current.countDiscardableCards(player, "he")));
 		},
 		async cost(event, trigger, player) {
 			const choices = [];

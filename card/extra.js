@@ -338,7 +338,17 @@ game.import("card", function () {
 				recastable: true,
 				ai: {
 					wuxie: (target, card, player, viewer, status) => {
-						if (status * get.attitude(viewer, player._trueMe || player) > 0 || target.hasSkillTag("nodamage") || target.hasSkillTag("nofire") || target.hasSkillTag("nothunder") || get.attitude(viewer, player) > 0 || (1 + target.countCards("hs")) * _status.event.getRand() > 1.57) return 0;
+						if (
+							status * get.attitude(viewer, player._trueMe || player) > 0 ||
+							target.hasSkillTag("nodamage") ||
+							target.hasSkillTag("nofire") ||
+							target.hasSkillTag("nothunder")
+						) return 0;
+						if (
+							get.damageEffect(target, player, viewer, "thunder") >= 0 ||
+							get.damageEffect(target, player, viewer, "fire") >= 0
+						) return 0;
+						if (target.hp + target.hujia > 2 && target.mayHaveShan(viewer, "use")) return 0;
 					},
 					basic: {
 						order: 7.3,
@@ -1017,7 +1027,7 @@ game.import("card", function () {
 							const lostCards = [];
 							evt.es.forEach(card => {
 								const VEquip = evt.vcard_map.get(card);
-								if (VEquip.name === "baiyin") lostCards.add(VEquip);
+								if (VEquip?.name === "baiyin") lostCards.add(VEquip);
 							});
 							return lostCards;
 						},

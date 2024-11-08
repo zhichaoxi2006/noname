@@ -373,6 +373,7 @@ export class Player extends HTMLDivElement {
 	 */
 	addTip(index, message, isTemp = false, css = {}) {
 		const player = this;
+		if (player.getHiddenSkills(true, true).includes(index)) return;
 		game.broadcastAll(
 			(player, index, message, css) => {
 				player.node.tipContainer ??= ui.create.div(".tipContainer", player);
@@ -415,7 +416,6 @@ export class Player extends HTMLDivElement {
 				})
 				.finish();
 		}
-
 	}
 	/**
 	 * 清除标记，不传参数可以清空所有标记
@@ -3918,6 +3918,16 @@ export class Player extends HTMLDivElement {
 			}
 		}
 		return list;
+	}
+	/**
+	 * 获取一名角色隐藏武将牌上的所有技能
+	 * @param {*} [unowned]
+	 * @param {*} [unique]
+	 * @returns { string[] }
+	 */
+	getHiddenSkills(unowned, unique) {
+		const player = this;
+		return player.getStockSkills(unowned, unique, true).removeArray(player.getStockSkills(unowned, unique));
 	}
 	/**
 	 * @param { string } [arg1='h']
