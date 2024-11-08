@@ -264,7 +264,7 @@ export async function boot() {
 	config.get("all").plays = [];
 	config.get("all").mode = [];
 
-	if (!config.get("errstop") || config.get("compatiblemode")) _status.withError = true;
+	if (config.get("compatiblemode")) _status.withError = true;
 	if (config.get("debug")) {
 		await lib.init.promises.js(`${lib.assetURL}game`, "asset");
 		if (window.noname_skin_list) {
