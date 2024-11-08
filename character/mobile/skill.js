@@ -27,7 +27,7 @@ const skills = {
 			const num1 = history.length,
 				num2 = history.map(evt => get.suit(evt.card)).toUniqued().length,
 				cards = history.reduce((list, evt) => list.addArray(evt.cards.filterInD("d")), []);
-			if (num1 != record[player.playerid][0] && num2 != record[player.playerid][1]) await player.draw(2);
+			if (num1 != record[player.playerid][0] && num2 != record[player.playerid][1]) await player.draw();
 			else {
 				const links =
 					cards.length == 1
