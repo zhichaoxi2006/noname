@@ -10136,15 +10136,17 @@ const skills = {
 	olzhubi: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: Infinity,
-		group: "olzhubi_replace",
-		filter: function (event, player) {
-			return (player.getStat("skill").olzhubi || 0) < player.maxHp;
+		usable(skill, player) {
+			return player.maxHp;
 		},
-		filterTarget: function (card, player, target) {
+		filter(event, player) {
+			return game.hasPlayer(target => lib.skill.olzhubi.filterTarget(null, player, target));
+		},
+		group: "olzhubi_replace",
+		filterTarget(card, player, target) {
 			return target.countCards("he") > 0;
 		},
-		content: function () {
+		content() {
 			"step 0";
 			target.chooseCard("he", true, "铸币：请重铸一张牌", lib.filter.cardRecastable);
 			"step 1";
@@ -10155,7 +10157,7 @@ const skills = {
 		ai: {
 			order: 6,
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					if (target.hasCard(card => card.hasGaintag("olzhubi_tag"), "h")) return 0.5;
 					return 1;
 				},
@@ -10164,13 +10166,13 @@ const skills = {
 		subSkill: {
 			replace: {
 				trigger: { global: "phaseJieshuBegin" },
-				filter: function (event, player) {
+				filter(event, player) {
 					return event.player.hasCard(card => card.hasGaintag("olzhubi_tag"), "h");
 				},
 				forced: true,
 				locked: false,
 				logTarget: "player",
-				content: function () {
+				content() {
 					"step 0";
 					var cards = get.bottomCards(5);
 					event.cards2 = cards;
@@ -20948,17 +20950,18 @@ const skills = {
 	},
 	xinfenyue: {
 		enable: "phaseUse",
-		usable: Infinity,
-		audio: "fenyue",
-		filter: function (event, player) {
-			var num = game.players.length - player.getFriends(true).length;
-			if ((player.getStat().skill.xinfenyue || 0) >= num) return false;
-			return player.countCards("h") > 0;
+		usable(skill, player) {
+			return game.players.length - player.getFriends(true).length;
 		},
-		filterTarget: function (event, player, target) {
+		audio: "fenyue",
+		filter(event, player) {
+			if (!player.countCards("h")) return false;
+			return game.hasPlayer(target => lib.skill.fenyue.filterTarget(null, player, target));
+		},
+		filterTarget(event, player, target) {
 			return player.canCompare(target);
 		},
-		content: function () {
+		content() {
 			"step 0";
 			player.chooseToCompare(target);
 			"step 1";
@@ -20982,7 +20985,7 @@ const skills = {
 		ai: {
 			order: 4,
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					var sort = function (a, b) {
 						return b.number - a.number;
 					};
@@ -21002,10 +21005,8 @@ const skills = {
 	fenyue: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: Infinity,
-		filter: function (event, player) {
-			if (!player.countCards("h")) return false;
-			var num;
+		usable(skill, player) {
+			let num;
 			if (get.mode() == "identity") {
 				num = game.countPlayer(function (current) {
 					return current.identity == "zhong" || current.identity == "mingzhong";
@@ -21013,16 +21014,19 @@ const skills = {
 			} else {
 				num = 1;
 			}
-			if ((player.getStat().skill.fenyue || 0) >= num) return false;
-			return true;
+			return num;
 		},
-		filterTarget: function (card, player, target) {
+		filter(event, player) {
+			if (!player.countCards("h")) return false;
+			return game.hasPlayer(target => lib.skill.fenyue.filterTarget(null, player, target));
+		},
+		filterTarget(card, player, target) {
 			return player.canCompare(target);
 		},
 		ai: {
 			order: 2.8,
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					if (
 						get.attitude(player, target) < 0 &&
 						player.hasCard(function (card) {
@@ -21036,7 +21040,7 @@ const skills = {
 				},
 			},
 		},
-		content: function () {
+		content() {
 			"step 0";
 			player.chooseToCompare(target);
 			"step 1";

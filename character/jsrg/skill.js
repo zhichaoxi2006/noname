@@ -11707,10 +11707,10 @@ const skills = {
 	jsrgfennan: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: Infinity,
+		usable(skill, player) {
+			return player.countVCards("e");
+		},
 		filter(event, player) {
-			const count = player.getStat("skill").jsrgfennan || 0;
-			if (count >= player.countVCards("e")) return false;
 			return game.hasPlayer(target => {
 				return event.jsrgfennan?.includes(target) || target.countCards("h");
 			});

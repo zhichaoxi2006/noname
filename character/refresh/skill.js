@@ -1941,11 +1941,12 @@ const skills = {
 	reqice: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: Infinity,
+		usable(skill, player) {
+			return player.countMark("reqice_mark") + 1;
+		},
 		filter: function (event, player) {
 			const hs = player.getCards("h");
 			if (!hs.length) return false;
-			if ((player.getStat("skill").reqice || 0) >= player.countMark("reqice_mark") + 1) return false;
 			if (
 				hs.some(card => {
 					const mod2 = game.checkMod(card, player, "unchanged", "cardEnabled2", player);
@@ -1960,14 +1961,14 @@ const skills = {
 			});
 		},
 		chooseButton: {
-			dialog: function (event, player) {
+			dialog(event, player) {
 				var list = [];
 				for (var i = 0; i < lib.inpile.length; i++) {
 					if (get.type(lib.inpile[i]) == "trick") list.push(["锦囊", "", lib.inpile[i]]);
 				}
 				return ui.create.dialog(get.translation("reqice"), [list, "vcard"]);
 			},
-			filter: function (button, player) {
+			filter(button, player) {
 				const event = _status.event.getParent(),
 					card = get.autoViewAs(
 						{
@@ -1977,7 +1978,7 @@ const skills = {
 					);
 				return event.filterCard(card, player, event);
 			},
-			check: function (button) {
+			check(button) {
 				var player = _status.event.player;
 				var effect = player.getUseValue(button.link[2]);
 				if (player.countCards("hs", button.link[2]) > 0) return 0;
@@ -1987,7 +1988,7 @@ const skills = {
 				if (effect > 0) return effect;
 				return 0;
 			},
-			backup: function (links, player) {
+			backup(links, player) {
 				return {
 					filterCard: true,
 					selectCard: -1,
@@ -1997,14 +1998,14 @@ const skills = {
 					viewAs: { name: links[0][2] },
 				};
 			},
-			prompt: function (links, player) {
+			prompt(links, player) {
 				return "将所有手牌当【" + get.translation(links[0][2]) + "】使用";
 			},
 		},
 		ai: {
 			order: 1,
 			result: {
-				player: function (player) {
+				player(player) {
 					var num = 0;
 					var cards = player.getCards("h");
 					if (cards.length >= 3 && player.hp >= 3 && player.countMark("reqice_mark") < 2) return 0;
@@ -2018,7 +2019,7 @@ const skills = {
 				},
 			},
 			nokeep: true,
-			skillTagFilter: function (player, tag, arg) {
+			skillTagFilter(player, tag, arg) {
 				if (tag === "nokeep") return (!arg || (arg.card && get.name(arg.card) === "tao")) && player.isPhaseUsing() && !player.getStat("skill").reqice && player.hasCard(card => get.name(card) != "tao", "h");
 			},
 			threaten: 1.7,
@@ -6221,15 +6222,16 @@ const skills = {
 		audio: "tiaoxin",
 		audioname: ["sp_jiangwei", "xiahouba", "re_jiangwei", "gz_jiangwei", "ol_jiangwei"],
 		enable: "phaseUse",
-		usable: 2,
-		filter: function (event, player) {
-			if (player.getStat("skill").oltiaoxin) return !player.hasSkill("oltiaoxin2");
-			return true;
+		usable(skill, player) {
+			return 1 + player.countMark("oltiaoxin_add");
 		},
-		filterTarget: function (card, player, target) {
+		filter(event, player) {
+			return game.hasPlayer(target => lib.skill.oltiaoxin.filterTarget(null, player, target));
+		},
+		filterTarget(card, player, target) {
 			return target != player && target.inRange(player) && target.countCards("he") > 0;
 		},
-		content: function () {
+		content() {
 			"step 0";
 			target
 				.chooseToUse(function (card, player, event) {
@@ -6245,20 +6247,24 @@ const skills = {
 				.set("sourcex", player);
 			"step 1";
 			if (
-				result.bool &&
-				player.getHistory("damage", function (evt) {
+				!result.bool ||
+				!player.hasHistory("damage", evt => {
 					return evt.getParent().type == "card" && evt.getParent(4) == event;
-				}).length > 0
-			)
-				player.addTempSkill("oltiaoxin2", "phaseUseEnd");
-			else if (target.countDiscardableCards(player, "he") > 0) player.discardPlayerCard(target, "he", true).boolline = true;
+				})
+			) {
+				if (target.countDiscardableCards(player, "he") > 0) player.discardPlayerCard(target, "he", true).boolline = true;
+				if (!player.hasMark(event.name + "_add")) {
+					player.addTempSkill(event.name + "_add", "phaseUseEnd");
+					player.addMark(event.name + "_add", 1, false);
+				}
+			}
 		},
 		ai: {
 			order: 4,
 			expose: 0.2,
 			result: {
 				target: -1,
-				player: function (player, target) {
+				player(player, target) {
 					if (target.countCards("h") == 0) return 0;
 					if (target.countCards("h") == 1) return -0.1;
 					if (player.hp <= 2) return -2;
@@ -6268,8 +6274,13 @@ const skills = {
 			},
 			threaten: 1.1,
 		},
+		subSkill: {
+			add: {
+				charlotte: true,
+				onremove: true,
+			},
+		},
 	},
-	oltiaoxin2: {},
 	olzhiji: {
 		skillAnimation: true,
 		animationColor: "fire",

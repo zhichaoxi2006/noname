@@ -1400,32 +1400,34 @@ const skills = {
 	spjungong: {
 		audio: 2,
 		enable: "phaseUse",
-		filter: function (event, player) {
-			var num = player.getStat("skill").spjungong || 0;
-			return (num < player.hp || num <= player.countCards("he"));
+		filter(event, player) {
+			var num = player.countMark("spjungong_used");
+			return num < player.hp || num <= player.countCards("he");
 		},
-		filterTarget: function (card, player, target) {
+		filterTarget(card, player, target) {
 			return target != player && player.canUse("sha", target, false);
 		},
 		filterCard: true,
 		position: "he",
-		selectCard: function () {
+		selectCard() {
 			var player = _status.event.player,
-				num = (player.getStat("skill").spjungong || 0) + 1;
+				num = player.countMark("spjungong_used") + 1;
 			if (ui.selected.cards.length || num > player.hp) return num;
 			return [0, num];
 		},
-		check: function (card) {
+		check(card) {
 			return 6 - get.value(card);
 		},
-		prompt: function () {
+		prompt() {
 			var player = _status.event.player,
-				num = get.cnNumber((player.getStat("skill").spjungong || 0) + 1);
+				num = get.cnNumber(player.countMark("spjungong_used") + 1);
 			return "弃置" + num + "张牌或失去" + num + "点体力，视为使用杀";
 		},
-		content: function () {
+		content() {
 			"step 0";
-			if (!cards.length) player.loseHp(player.getStat("skill").spjungong || 1);
+			player.addTempSkill("spjungong_used");
+			player.addMark("spjungong_used", 1, false);
+			if (!cards.length) player.loseHp(player.countMark("spjungong_used"));
 			player.useCard({ name: "sha", isCard: true }, target, false);
 			"step 1";
 			if (
@@ -1439,14 +1441,21 @@ const skills = {
 				player.tempBanSkill("spjungong");
 		},
 		ai: {
-			order: function (item, player) {
+			order(item, player) {
 				return get.order({ name: "sha" }, player) + 1;
 			},
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					if (!ui.selected.cards.length) return 0;
 					return get.effect(target, { name: "sha" }, player, target);
 				},
+			},
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+				intro: { content: "已发动过#次" },
 			},
 		},
 	},

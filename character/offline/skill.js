@@ -3520,9 +3520,10 @@ const skills = {
 	tydingpan: {
 		audio: "dingpan",
 		enable: "phaseUse",
-		usable: Infinity,
+		usable(skill, player) {
+			return get.event().tydingpan?.length;
+		},
 		filter(event, player) {
-			if (event.tydingpan && (player.getStat().skill.tydingpan || 0) >= event.tydingpan.length) return false;
 			return game.hasPlayer(current => current.countCards("e"));
 		},
 		filterTarget(event, player, target) {

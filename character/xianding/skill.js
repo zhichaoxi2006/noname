@@ -2095,10 +2095,10 @@ const skills = {
 	dcsbwuwei: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: Infinity,
+		usable(skill, player) {
+			return 1 + player.countMark("dcsbwuwei_count");
+		},
 		filter(event, player) {
-			const count = player.getStat("skill").dcsbwuwei;
-			if (count && count > player.countMark("dcsbwuwei_count")) return false;
 			const colors = player.getCards("h").reduce((list, card) => list.add(get.color(card)), []);
 			return colors.some(color => event.filterCard(get.autoViewAs(lib.skill.dcsbwuwei.viewAs, player.getCards("h", { color: color })), player, event));
 		},
@@ -18053,12 +18053,11 @@ const skills = {
 	},
 	liji: {
 		enable: "phaseUse",
-		usable: Infinity,
-		audio: 2,
-		filter: function (event, player) {
-			return (player.getStat().skill.liji || 0) < (event.liji_num || 0);
+		usable(skill, player) {
+			return get.event().liji_num;
 		},
-		onChooseToUse: function (event) {
+		audio: 2,
+		onChooseToUse(event) {
 			if (game.online) return;
 			var num = 0;
 			var evt2 = event.getParent();
@@ -18070,13 +18069,13 @@ const skills = {
 		},
 		filterCard: true,
 		position: "he",
-		check: function (card) {
+		check(card) {
 			var val = get.value(card);
 			if (!_status.event.player.getStorage("refenyin_mark").includes(get.suit(card))) return 12 - val;
 			return 8 - val;
 		},
 		filterTarget: lib.filter.notMe,
-		content: function () {
+		content() {
 			target.damage("nocard");
 		},
 		ai: {

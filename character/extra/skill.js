@@ -3710,11 +3710,8 @@ const skills = {
 	shencai: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: 5,
-		filter(event, player) {
-			var count = player.getStat("skill").shencai;
-			if (count && count > player.countMark("shencai")) return false;
-			return true;
+		usable(skill, player) {
+			return 1 + player.countMark("shencai");
 		},
 		filterTarget: lib.filter.notMe,
 		onremove: true,

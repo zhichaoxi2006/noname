@@ -8235,15 +8235,16 @@ const skills = {
 	dcanliao: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: Infinity,
-		filter: function (event, player) {
-			if ((player.getStat().skill.dcanliao || 0) >= game.countPlayer(current => current.group == "qun")) return false;
-			return true;
+		usable(skill, player) {
+			return game.countPlayer(current => current.group == "qun");
 		},
-		filterTarget: function (card, player, target) {
+		filter(event, player) {
+			return game.hasPlayer(target => lib.skill.dcanliao.filterTarget(null, player, target));
+		},
+		filterTarget(card, player, target) {
 			return target.countCards("he");
 		},
-		content: function () {
+		content() {
 			"step 0";
 			player
 				.choosePlayerCard(target, "he", true)
@@ -8262,7 +8263,7 @@ const skills = {
 		ai: {
 			expose: 0.1,
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					if (target.hasCard(card => get.value(card) >= 6, "e") && get.attitude(player, target) < 0) return -1;
 					return 1;
 				},
@@ -12715,8 +12716,10 @@ const skills = {
 	refenglve: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: 1,
-		filter: function (event, player) {
+		usable(skill, player) {
+			return 1 + player.countMark("refenglve_add");
+		},
+		filter(event, player) {
 			return (
 				player.countCards("h") > 0 &&
 				!player.hasSkillTag("noCompareSource") &&
@@ -12725,10 +12728,10 @@ const skills = {
 				})
 			);
 		},
-		filterTarget: function (card, player, target) {
+		filterTarget(card, player, target) {
 			return target != player && target.countCards("h") > 0 && !target.hasSkillTag("noCompareTarget");
 		},
-		content: function () {
+		content() {
 			"step 0";
 			player.chooseToCompare(target);
 			"step 1";
@@ -12740,7 +12743,8 @@ const skills = {
 					player.gainPlayerCard(target, true, "hej", 2, "获得" + get.translation(target) + "区域里的两张牌");
 				}
 			} else if (result.tie) {
-				delete player.getStat("skill").refenglve;
+				player.addTempSkill(event.name + "_add", "phaseUseAfter");
+				player.addMark(event.name + "_add", 1, false);
 				if (get.position(result.player, true) == "d") player.gain(result.player, "gain2");
 				// event.finish();
 			} else {
@@ -12759,7 +12763,7 @@ const skills = {
 		ai: {
 			order: 8,
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					if (
 						!player.hasCard(function (card) {
 							if (get.position(card) != "h") return false;
@@ -12777,6 +12781,12 @@ const skills = {
 						return 0;
 					return -Math.sqrt(1 + target.countCards("he")) / (1 + target.countCards("j"));
 				},
+			},
+		},
+		subSkill: {
+			add: {
+				charlotte: true,
+				onremove: true,
 			},
 		},
 	},
