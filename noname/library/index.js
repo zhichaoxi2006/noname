@@ -1331,11 +1331,6 @@ export class Library {
 					} else {
 						map.confirm_exit.hide();
 					}
-					if (config.dev) {
-						map.errstop.show();
-					} else {
-						map.errstop.hide();
-					}
 				},
 			},
 		},
