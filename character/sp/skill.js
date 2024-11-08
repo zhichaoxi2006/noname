@@ -22799,7 +22799,6 @@ const skills = {
 	dingpan: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: Infinity,
 		filter: function (event, player) {
 			var num;
 			var mode = get.mode();
