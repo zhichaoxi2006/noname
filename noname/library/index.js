@@ -10094,7 +10094,11 @@ export class Library {
 				return false;
 			if (info.filter && !info.filter(event, player, triggername, indexedData)) return false;
 			if (event._notrigger.includes(player) && !lib.skill.global.includes(skill)) return false;
-			if (typeof info.usable == "number" && player.hasSkill("counttrigger") && player.storage.counttrigger && player.storage.counttrigger[skill] >= info.usable) return false;
+			if (info.usable !== undefined && player.hasSkill("counttrigger") && player.storage.counttrigger) {
+				let num = info.usable;
+				if (typeof num === "function") num = info.usable(skill, player);
+				if (typeof num === "number" && player.storage.counttrigger[skill] >=num) return false;
+			}
 			if (info.round && info.round - (game.roundNumber - player.storage[skill + "_roundcount"]) > 0) return false;
 			for (const item in player.storage) {
 				if (item.startsWith("temp_ban_")) {
@@ -10141,7 +10145,11 @@ export class Library {
 				if (info.viewAsFilter && info.viewAsFilter(player) === false) return false;
 				if (event.filterCard && !event.filterCard(get.autoViewAs(info.viewAs, "unsure"), player, event)) return false;
 			}
-			if (info.usable && get.skillCount(skill) >= info.usable) return false;
+			if (info.usable !== undefined) {
+				let num = info.usable;
+				if (typeof num === "function") num = info.usable(skill, player);
+				if (typeof num === "number" && get.skillCount(skill, player) >=num) return false;
+			}
 			if (info.chooseButton && _status.event.noButton) return false;
 			if (info.round && info.round - (game.roundNumber - player.storage[skill + "_roundcount"]) > 0) return false;
 			for (const item in player.storage) {

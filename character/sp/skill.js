@@ -22793,19 +22793,23 @@ const skills = {
 	dingpan: {
 		audio: 2,
 		enable: "phaseUse",
-		filter: function (event, player) {
-			var num;
-			var mode = get.mode();
+		filter(event, player) {
+			return game.hasPlayer(target => lib.skill.dingpan.filterTarget(null, player, target));
+		},
+		filterTarget(card, player, target) {
+			return target.countCards("e") > 0;
+		},
+		usable(skill, player) {
+			let num, mode = get.mode();
 			if (mode == "identity" || mode == "doudizhu") {
 				if (mode == "identity" && _status.mode == "purple") num = player.getEnemies().length;
 				else num = get.population("fan");
 			} else if (mode == "versus") {
 				if (!_status.mode || _status.mode != "two") num = player.getEnemies().length;
 				else {
-					var target = game.findPlayer(x => {
-						var num = x.getFriends().length;
+					const target = game.findPlayer(x => {
 						return !game.hasPlayer(y => {
-							return x != y && y.getFriends().length > num;
+							return x != y && y.getFriends().length > x.getFriends().length;
 						});
 					});
 					num = target ? target.getFriends(true).length : 1;
@@ -22813,13 +22817,9 @@ const skills = {
 			} else {
 				num = 1;
 			}
-			if ((player.getStat().skill.dingpan || 0) >= num) return false;
-			return true;
+			return num;
 		},
-		filterTarget: function (card, player, target) {
-			return target.countCards("e") > 0;
-		},
-		content: function () {
+		content() {
 			"step 0";
 			target.draw();
 			"step 1";
@@ -22855,7 +22855,7 @@ const skills = {
 		ai: {
 			order: 7,
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					if (get.damageEffect(target, player, target) >= 0) return 2;
 					var att = get.attitude(player, target);
 					if (att == 0) return 0;

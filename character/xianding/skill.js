@@ -1915,7 +1915,7 @@ const skills = {
 				const suffixs = ["used", "round", "block", "blocker"];
 				for (const skill of gainSkills) {
 					const info = get.info(skill);
-					if (typeof info.usable == "number") {
+					if (info.usable !== undefined) {
 						if (target.hasSkill("counttrigger") && target.storage.counttrigger[skill] && target.storage.counttrigger[skill] >= 1) {
 							delete target.storage.counttrigger[skill];
 						}
@@ -11394,98 +11394,106 @@ const skills = {
 	//周宣
 	dcwumei: {
 		audio: 2,
-		trigger: { player: "phaseBeginStart" },
-		filter: function (event, player) {
-			return !player.hasSkill("dcwumei_used");
+		round: 1,
+		trigger: { player: "phaseBeforeEnd" },
+		filter(event, player) {
+			return !player.isTurnedOver() || event._noTurnOver;//笑点解析：回合开始前，但是翻面不能发动
 		},
-		direct: true,
-		content: function () {
-			"step 0";
-			player.chooseTarget(get.prompt2("dcwumei")).set("ai", target => {
-				return get.attitude(_status.event.player, target);
-			});
-			"step 1";
-			if (result.bool) {
-				var target = result.targets[0];
-				player.logSkill("dcwumei", target);
-				player.addTempSkill("dcwumei_used", "roundStart");
-				target.insertPhase();
-				target.addTempSkill("dcwumei_wake", "phaseAfter");
-				var targets = game.filterPlayer();
-				if (!target.storage.dcwumei_wake) target.storage.dcwumei_wake = [[], []];
-				for (var targetx of targets) {
-					target.storage.dcwumei_wake[0].push(targetx);
-					target.storage.dcwumei_wake[1].push(targetx.hp);
-				}
-				target.markSkill("dcwumei_wake");
-				if (!trigger._finished) {
-					player.phaseNumber--;
-					trigger.finish();
-					trigger.untrigger(true);
-					trigger._triggered = 5;
-					game.players
-						.slice()
-						.concat(game.dead)
-						.forEach(current => {
-							current.getHistory().isSkipped = true;
-							current.getStat().isSkipped = true;
+		async cost(event, trigger, player) {
+			event.result = await player
+				.chooseTarget(get.prompt2("dcwumei"))
+				.set("ai", target => get.attitude(get.player(), target))
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			const [target] = event.targets;
+			const next = target.insertPhase();
+			target.addSkill("dcwumei_wake");
+			target.storage["dcwumei_wake"][2].add(next);
+			if (!trigger._finished) {
+				trigger.finish();
+				trigger.untrigger(true);
+				trigger._triggered = 5;
+				const evt = player.insertPhase();
+				evt.relatedEvent = trigger.relatedEvent || trigger.getParent(2);
+				evt.skill = trigger.skill;
+				evt._noTurnOver = true;
+				evt.pushHandler("dcwumei_phase", (event, option) => {
+					if (event.step === 0 && option.state === "begin") {
+						event.step = 4;
+						_status.globalHistory.push({
+							cardMove: [],
+							custom: [],
+							useCard: [],
+							changeHp: [],
+							everything: [],
 						});
-					var evt = player.insertPhase();
-					evt.relatedEvent = trigger.relatedEvent || trigger.getParent(2);
-					if (trigger.skill) evt.skill = trigger.skill;
-					else delete evt.skill;
-					evt.wumei_phase = true;
-					if (!lib.onround.includes(lib.skill.dcwumei.onRound)) {
-						lib.onround.push(lib.skill.dcwumei.onRound);
-					}
-					game.broadcastAll(function (player) {
-						player.classList.remove("glow_phase");
-						delete _status.currentPhase;
-					}, player);
-				}
-			}
-		},
-		onRound(event) {
-			return !event.wumei_phase;
-		},
-		subSkill: {
-			used: { charlotte: true },
-			wake: {
-				init: function (player) {
-					game.addGlobalSkill("dcwumei_all");
-				},
-				onremove: function (player) {
-					game.removeGlobalSkill("dcwumei_all");
-					delete player.storage.dcwumei_wake;
-				},
-				trigger: { player: "phaseJieshuBegin" },
-				charlotte: true,
-				popup: false,
-				forced: true,
-				filter: function (event, player) {
-					return player.storage.dcwumei_wake && player.storage.dcwumei_wake.length;
-				},
-				content: function () {
-					var storage = player.storage.dcwumei_wake;
-					for (var i = 0; i < storage[0].length; i++) {
-						var target = storage[0][i];
-						if (target && target.isIn()) {
-							if (target.hp != storage[1][i]) {
-								game.log(target, "将体力从", get.cnNumber(target.hp, true), "改为", get.cnNumber(storage[1][i], true));
-								target.changeHp(storage[1][i] - target.hp)._triggered = null;
-							}
+						var players = game.players.slice(0).concat(game.dead);
+						for (var i = 0; i < players.length; i++) {
+							var current = players[i];
+							current.actionHistory.push({
+								useCard: [],
+								respond: [],
+								skipped: [],
+								lose: [],
+								gain: [],
+								sourceDamage: [],
+								damage: [],
+								custom: [],
+								useSkill: [],
+							});
+							current.stat.push({ card: {}, skill: {} });
 						}
 					}
-					player.removeSkill("dcwumei_wake");
+				});
+			}
+		},
+		subSkill: {
+			wake: {
+				init(player, skill) {
+					if (!player.storage[skill]) player.storage[skill] = [[], [], []];
 				},
-				marktext: "寐",
+				charlotte: true,
+				onremove: true,
+				trigger: { player: ["phaseBegin", "phaseEnd"] },
+				filter(event, player) {
+					return player.storage["dcwumei_wake"][2].includes(event);
+				},
+				forced: true,
+				popup: false,
+				async content(event, trigger, player) {
+					const name = event.triggername;
+					if (name === "phaseBegin") {
+						for (const playerx of game.filterPlayer()) {
+							player.storage[event.name][0].push(playerx);
+							player.storage[event.name][1].push(playerx.hp);
+						}
+						player.markSkill(event.name);
+					} else {
+						const storage = player.getStorage(event.name);
+						if (storage.length) {
+							for (let i = 0; i < storage[0].length; i++) {
+								const target = storage[0][i];
+								if (target?.isIn()) {
+									if (target.hp != storage[1][i]) {
+										game.log(target, "将体力从", "#y" + target.hp, "改为", "#g" + storage[1][i]);
+										const next = target.changeHp(storage[1][i] - target.hp);
+										next._triggered = null;
+										await next;
+									}
+								}
+							}
+						}
+						player.storage[event.name][2].remove(trigger);
+						player.storage[event.name][0] = player.storage[event.name][1] = [];
+						player[player.storage[event.name][2].length ? "unmarkSkill" : "removeSkill"](event.name);
+					}
+				},
+				marktext: "梦",
 				intro: {
-					markcount: function (storage, player) {
-						if (!storage || !storage.length) return 0;
-						return storage[0].length;
-					},
-					content: function (storage, player) {
-						if (!storage || !storage.length) return "无信息";
+					markcount: (storage = [[]]) => storage[0].length,
+					content(storage = [[]], player) {
+						if (!storage.length) return "无信息";
 						var str = "所有角色于回合开始时的体力值：<br>";
 						for (var i = 0; i < storage[0].length; i++) {
 							var str2 = get.translation(storage[0][i]) + "：" + storage[1][i];
@@ -11495,11 +11503,12 @@ const skills = {
 						return str;
 					},
 				},
+				global: "dcwumei_all",
 			},
 			all: {
 				mod: {
 					aiOrder(player, card, num) {
-						if (num <= 0) return;
+						if (num <= 0 || !game.hasPlayer(t => t.marks["dcwumei_wake"])) return;
 						if (get.tag(card, "recover") && !_status.event.dying && player.hp > 0) return 0;
 						if (get.tag(card, "damage")) {
 							if (
@@ -11513,15 +11522,6 @@ const skills = {
 							return 0;
 						}
 					},
-				},
-				trigger: { player: "dieAfter" },
-				filter: function (event, player) {
-					return !game.hasPlayer(current => current.hasSkill("dcwumei_wake"), true);
-				},
-				silent: true,
-				forceDie: true,
-				content: function () {
-					game.removeGlobalSkill("dcwumei_all");
 				},
 			},
 		},

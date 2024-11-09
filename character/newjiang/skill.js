@@ -1311,11 +1311,12 @@ const skills = {
 			});
 			"step 1";
 			if (result.bool) {
-				var suits = result.links.map(i => i[2].slice(6));
+				var suits = result.links.map(i => i[2].slice(6)).sort((a, b) => lib.suit.indexOf(b) - lib.suit.indexOf(a));
 				player.logSkill("qingbei");
 				player.addTempSkill("qingbei_effect", "roundStart");
 				player.setStorage("qingbei_effect", suits);
 				player.markSkill("qingbei_effect");
+				player.addTip("qingbei_effect", get.translation("qingbei_effect") + player.getStorage("qingbei_effect").reduce((str, i) => str + get.translation(i), ""));
 			}
 		},
 		ai: {
@@ -1326,7 +1327,10 @@ const skills = {
 				audio: "qingbei",
 				trigger: { player: "useCardAfter" },
 				charlotte: true,
-				onremove: true,
+				onremove(player, skill) {
+					delete player.storage[skill];
+					player.removeTip(skill);
+				},
 				forced: true,
 				filter: function (event, player) {
 					if (!lib.suit.includes(get.suit(event.card))) return false;
@@ -3680,7 +3684,7 @@ const skills = {
 		},
 		async cost(event, trigger, player) {
 			event.result = await player
-				.chooseTarget(true, lib.filter.notMe, "死孝：请选择一名角色当其孝子", "当该角色需要使用或打出除【无懈可击】外的牌时，其可以观看你的手牌并可以使用或打出其中一张牌，然后你摸一张牌")
+				.chooseTarget(true, lib.filter.notMe, "死孝：请选择一名角色当其孝子", lib.translate.mpsixiao_info)
 				.set("ai", target => {
 					return get.attitude(get.player(), target);
 				})
@@ -3697,10 +3701,10 @@ const skills = {
 				charlotte: true,
 				mark: "character",
 				intro: {
-					content: "当你需要使用或打出除【无懈可击】外的牌时，你可以观看$的手牌并可以使用或打出其中一张牌，然后$摸一张牌",
+					content: "当你需要使用或打出牌时，你可以观看$的手牌并可以使用或打出其中一张牌，然后$摸一张牌",
 				},
 				hiddenCard(player, name) {
-					if (name == "wuxie" || !lib.inpile.includes(name) || player.hasSkill("mpsixiao_used", null, null, false)) return false;
+					if (!lib.inpile.includes(name) || player.hasSkill("mpsixiao_used", null, null, false)) return false;
 					const target = player.storage.mpsixiao_use;
 					const cards = target.getCards("h");
 					for (var i of cards) {
@@ -3768,9 +3772,10 @@ const skills = {
 									target = player.storage.mpsixiao_use;
 								event.result.card = card;
 								event.result.cards = [card];
+								player.logSkill("mpsixiao_use", target);
 								player.addTempSkill("mpsixiao_used");
 								target
-									.when({ global: ["useCard", "respond"] })
+									.when({ global: ["useCardAfter", "respondAfter"] })
 									.filter(evt => evt.player == player && evt.skill == "mpsixiao_use_backup")
 									.then(() => {
 										player.draw();
