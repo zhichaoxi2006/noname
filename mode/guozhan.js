@@ -11217,12 +11217,24 @@ export default () => {
 							return evt.card == trigger.card;
 						}) &&
 						game.hasPlayer(function (current) {
-							return current.isFriendOf(player) && !current.hasMark("yexinjia_mark") && !current.hasMark("xianqu_mark") && !current.hasMark("yinyang_mark") && !current.hasMark("zhulianbihe_mark");
+							if (current.hasMark("yinyang_mark") || !current.isFriendOf(player)) return false;
+							let names = get.nameList(current).filter(i => i.indexOf("gz_shibing") !== 0);
+							game.getAllGlobalHistory("everything", evt => {
+								if (evt.name !== "showCharacter" || evt.player !== current) return false;
+								names.removeArray(evt.toShow);
+							});
+							return names.length === 0;
 						})
 					) {
 						player
-							.chooseTarget("是否令一名己方角色获得“阴阳鱼”标记？", function (card, player, current) {
-								return current.isFriendOf(player) && !current.hasMark("yexinjia_mark") && !current.hasMark("xianqu_mark") && !current.hasMark("yinyang_mark") && !current.hasMark("zhulianbihe_mark");
+							.chooseTarget("是否令一名武将牌均明置过的己方角色获得“阴阳鱼”标记？", function (card, player, current) {
+								if (current.hasMark("yinyang_mark") || !current.isFriendOf(player)) return false;
+								let names = get.nameList(current).filter(i => i.indexOf("gz_shibing") !== 0);
+								game.getAllGlobalHistory("everything", evt => {
+									if (evt.name !== "showCharacter" || evt.player !== current) return false;
+									names.removeArray(evt.toShow);
+								});
+								return names.length === 0;
 							})
 							.set("ai", function (target) {
 								return get.attitude(_status.event.player, target) * Math.sqrt(1 + target.needsToDiscard());
@@ -12296,79 +12308,6 @@ export default () => {
 					skillTagFilter: function () {
 						return lib.skill.gzxingzhao.getNum() > 3;
 					},
-				},
-			},
-			qiuan: {
-				audio: 2,
-				trigger: { player: "damageBegin2" },
-				filter: function (event, player) {
-					return event.cards && event.cards.filterInD().length > 0 && !player.getExpansions("qiuan").length;
-				},
-				check: function (event, player) {
-					if (get.damageEffect(player, event.source || player, player, event.nature) >= 0) return false;
-					return true;
-				},
-				preHidden: true,
-				content: function () {
-					var cards = trigger.cards.filterInD();
-					player.addToExpansion("gain2", cards).gaintag.add("qiuan");
-					trigger.cancel();
-				},
-				intro: {
-					content: "expansion",
-					markcount: "expansion",
-				},
-				marktext: "函",
-			},
-			liangfan: {
-				audio: 2,
-				trigger: { player: "phaseZhunbeiBegin" },
-				forced: true,
-				filter: function (event, player) {
-					return player.getExpansions("qiuan").length > 0;
-				},
-				content: function () {
-					"step 0";
-					var cards = player.getExpansions("qiuan");
-					player.gain(cards, "gain2").gaintag.add("liangfan");
-					player.addTempSkill("liangfan2");
-					"step 1";
-					player.loseHp();
-				},
-			},
-			liangfan2: {
-				audio: "liangfan",
-				mark: true,
-				mod: {
-					aiOrder: function (player, card, num) {
-						if (get.itemtype(card) == "card" && card.hasGaintag("liangfan")) return num + 0.1;
-					},
-				},
-				intro: { content: "使用“量反”牌造成伤害后，可获得目标角色的一张牌" },
-				trigger: { source: "damageEnd" },
-				logTarget: "player",
-				charlotte: true,
-				onremove: function (player) {
-					player.removeGaintag("liangfan");
-				},
-				prompt: event => "量反：是否获得" + get.translation(event.player) + "的一张牌？",
-				filter: function (event, player) {
-					var evt = event.getParent(2);
-					if (evt.name != "useCard" || evt.card != event.card) return false;
-					if (!event.player.countGainableCards(player, "he")) return false;
-					return (
-						player.getHistory("lose", function (evt2) {
-							if (evt2.getParent() != evt) return false;
-							for (var i in evt2.gaintag_map) {
-								if (evt2.gaintag_map[i].includes("liangfan")) return true;
-							}
-							return false;
-						}).length > 0
-					);
-				},
-				marktext: "反",
-				content: function () {
-					player.gainPlayerCard(trigger.player, true, "he");
 				},
 			},
 			gzwenji: {
@@ -20742,7 +20681,7 @@ export default () => {
 			gzcongcha2: "聪察",
 			gzcongcha_info: "①准备阶段，你可以选择一名未确定势力的其他角色。当其于你的下回合开始前首次明置武将牌后，若其：与你势力相同，则你与其各摸两张牌；与你势力不同，则其失去1点体力。②摸牌阶段开始时，若场上所有角色均有明置的武将牌，则你可以令额定摸牌数+2。",
 			gzchenglve: "成略",
-			gzchenglve_info: "己方角色使用牌结算结束后，若此牌的目标数大于1，则你可以令其摸一张牌。若你受到过渠道为此牌的伤害，则你可以令一名没有国战标记的己方角色获得一枚“阴阳鱼”。",
+			gzchenglve_info: "己方角色使用牌结算结束后，若此牌的目标数大于1，则你可以令其摸一张牌。若你受到过渠道为此牌的伤害，则你可以令一名武将牌均明置过且没有“阴阳鱼”标记的己方角色获得一枚“阴阳鱼”。",
 			gzbaolie: "豹烈",
 			gzbaolie_info: "锁定技，出牌阶段开始时，你令所有攻击范围内包含你的非己方角色依次选择：①对你使用一张【杀】；②令你弃置其一张牌。锁定技，你对体力值不小于你的角色使用【杀】没有距离和次数限制。",
 			gzshicai: "恃才",
@@ -20750,11 +20689,6 @@ export default () => {
 			gzxingzhao: "兴棹",
 			gzxingzhao_info: "锁定技：①摸牌阶段开始时，若X不小于1，则你可以发动〖恂恂〗的效果。②当你受到伤害后或使用装备牌时，若X不小于2且你的手牌数不为全场最多，则你摸一张牌。③若X不小于3，则你的手牌上限+4。④当你失去装备区的牌后，若X不小于4，则你摸一张牌。（X为场上有受伤角色的势力数）",
 			gzxingzhao_old_info: "锁定技：①摸牌阶段开始时，若X不小于1，则你可以发动〖恂恂〗的效果。②当你受到伤害后，若X不小于2且你和伤害来源的手牌数不相等，则你于伤害来源中手牌数较少的角色摸一张牌。③若X不小于3，则你的手牌上限+4。④当你失去装备区的牌后，若X不小于4，则你摸一张牌。（X为场上有受伤角色的势力数）",
-			qiuan: "求安",
-			qiuan_info: "当你受到伤害后，若此伤害的渠道有对应的实体牌且你的武将牌上没有“函”，则你可以防止此伤害并将这些牌置于你的武将牌上，称为“函”。",
-			liangfan: "量反",
-			liangfan2: "量反",
-			liangfan_info: "锁定技，准备阶段，若你的武将牌上有“函”，则你获得这些牌，然后失去1点体力。当你于此回合内因使用实体牌中包含“函”的牌且执行这些牌的效果而对目标角色造成伤害时，你可以获得目标角色的一张牌。",
 			gzwenji: "问计",
 			gzwenji_info: "出牌阶段开始时，你可令一名其他角色交给你一张牌。然后若该角色：未确定势力或势力与你相同，则你于本回合内使用实体牌包含“问计”牌的牌无距离和次数限制，且不可被其他角色响应。与你势力不同，则你交给其一张不为“问计”牌的牌或令其摸一张牌。",
 			gztunjiang: "屯江",
