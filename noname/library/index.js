@@ -1136,11 +1136,6 @@ export class Library {
 					init: false,
 					unfrequent: true,
 				},
-				errstop: {
-					name: "出错时停止游戏",
-					init: false,
-					unfrequent: true,
-				},
 				update_link: {
 					name: "更新地址",
 					init: "coding",
@@ -1335,11 +1330,6 @@ export class Library {
 						map.confirm_exit.show();
 					} else {
 						map.confirm_exit.hide();
-					}
-					if (config.dev) {
-						map.errstop.show();
-					} else {
-						map.errstop.hide();
 					}
 				},
 			},
