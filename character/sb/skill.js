@@ -240,74 +240,71 @@ const skills = {
 			const bool1 = player.storage.sbwansha,
 				bool2 = get.mode() == "identity",
 				num = bool1 ? (bool2 ? 2 : 3) : bool2 ? 1 : 2,
-				prompt = `选择至多${get.cnNumber(num)}张牌`;
-			let cards = await player.choosePlayerCard(target, position, [1, num], true, prompt).set("visible", true).forResultCards();
-			if (cards.length) {
-				let result;
-				if (target.getCards(position).some(card => !cards.includes(card)))
-					result = await target
-						.chooseControl()
-						.set("choiceList", [`${get.translation(player)}将${get.translation(cards)}分配给其他角色`, `弃置不为${get.translation(cards)}的牌`])
-						.set("ai", () => {
-							return get.event("goon") ? 0 : 1;
-						})
-						.set("goon", 2 * cards.length <= target.countCards(position) || get.attitude(target, player) > 0)
-						.forResult();
-				else result = { index: 0 };
-				if (result.index == 0) {
-					if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
-					let given_map = {};
-					while (cards.length) {
-						let result;
-						if (cards.length == 1) result = { bool: true, links: cards.slice() };
-						else {
-							result = await player
-								.chooseCardButton("完杀：请选择要分配的牌", cards, [1, cards.length], true)
-								.set("ai", button => {
-									if (!ui.selected.buttons.length) return get.buttonValue(button);
-									return 0;
-								})
-								.forResult();
-						}
-						const gives = result.links;
-						const result2 = await player
-							.chooseTarget("选择获得" + get.translation(gives) + "的角色", true, (card, player, target) => {
-								return target != get.event().getTrigger().player;
+				prompt = `选择其中〇至${get.cnNumber(num)}张牌`;
+			let cards = await player.choosePlayerCard(target, position, [0, num], true, prompt).set("visible", true).forResultCards();
+			if (!cards.length) return;
+			let result;
+			if (target.getCards(position).some(card => !cards.includes(card)))
+				result = await target
+					.chooseControl()
+					.set("choiceList", [`${get.translation(player)}将${get.translation(cards)}分配给其他角色`, `弃置不为${get.translation(cards)}的牌`])
+					.set("ai", () => {
+						return get.event("goon") ? 0 : 1;
+					})
+					.set("goon", 2 * cards.length <= target.countCards(position) || get.attitude(target, player) > 0)
+					.forResult();
+			else result = { index: 0 };
+			if (result.index == 0) {
+				if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
+				let given_map = {};
+				while (cards.length) {
+					let result;
+					if (cards.length == 1) result = { bool: true, links: cards.slice() };
+					else {
+						result = await player
+							.chooseCardButton("完杀：请选择要分配的牌", cards, [1, cards.length], true)
+							.set("ai", button => {
+								if (!ui.selected.buttons.length) return get.buttonValue(button);
+								return 0;
 							})
-							.set("ai", target => {
-								return get.attitude(get.event("player"), target) * get.sgn(get.sgn(get.event("goon")) + 0.5);
-							})
-							.set(
-								"goon",
-								gives.reduce((sum, card) => sum + get.value(card), 0)
-							)
 							.forResult();
-						if (result2.bool) {
-							cards.removeArray(gives);
-							const id = result2.targets[0].playerid;
-							if (!given_map[id]) given_map[id] = [];
-							given_map[id].addArray(gives);
-						}
 					}
-					if (_status.connectMode) game.broadcastAll(() => delete _status.noclearcountdown);
-					let list = [];
-					for (const i in given_map) {
-						const source = (_status.connectMode ? lib.playerOL : game.playerMap)[i];
-						player.line(source, "green");
-						game.log(source, "获得了", given_map[i]);
-						list.push([source, given_map[i]]);
-					}
-					await game
-						.loseAsync({
-							gain_list: list,
-							giver: player,
-							animate: "gain2",
+					const gives = result.links;
+					const result2 = await player
+						.chooseTarget("选择获得" + get.translation(gives) + "的角色", true, (card, player, target) => {
+							return target != get.event().getTrigger().player;
 						})
-						.setContent("gaincardMultiple");
-				} else await target.discard(target.getCards(position).removeArray(cards));
-			} else {
-				await target.discard(target.getCards(position));
-			}
+						.set("ai", target => {
+							return get.attitude(get.event("player"), target) * get.sgn(get.sgn(get.event("goon")) + 0.5);
+						})
+						.set(
+							"goon",
+							gives.reduce((sum, card) => sum + get.value(card), 0)
+						)
+						.forResult();
+					if (result2.bool) {
+						cards.removeArray(gives);
+						const id = result2.targets[0].playerid;
+						if (!given_map[id]) given_map[id] = [];
+						given_map[id].addArray(gives);
+					}
+				}
+				if (_status.connectMode) game.broadcastAll(() => delete _status.noclearcountdown);
+				let list = [];
+				for (const i in given_map) {
+					const source = (_status.connectMode ? lib.playerOL : game.playerMap)[i];
+					player.line(source, "green");
+					game.log(source, "获得了", given_map[i]);
+					list.push([source, given_map[i]]);
+				}
+				await game
+					.loseAsync({
+						gain_list: list,
+						giver: player,
+						animate: "gain2",
+					})
+					.setContent("gaincardMultiple");
+			} else await target.discard(target.getCards(position).removeArray(cards));
 		},
 		global: "sbwansha_global",
 		subSkill: {
