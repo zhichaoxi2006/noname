@@ -7331,9 +7331,12 @@ const skills = {
 	//西园美鸟
 	midori_nonghuan: {
 		enable: "phaseUse",
+		usable(skill, player) {
+			return player.hp;
+		},
 		charlotte: true,
 		filter(event, player) {
-			return (player.getStat("skill").midori_nonghuan || 0) < player.hp;
+			return game.hasPlayer(target => lib.skill.midori_nonghuan.filterTarget(null, player, target));
 		},
 		filterTarget(card, player, target) {
 			var stat = player.getStat("midori_nonghuan");
@@ -8154,18 +8157,19 @@ const skills = {
 	noda_xunxin: {
 		audio: 2,
 		enable: "phaseUse",
-		viewAs: { name: "juedou" },
-		filter(event, player) {
-			return (player.getStat("skill").noda_xunxin || 0) < player.hp;
+		usable(skill, player) {
+			return player.hp;
 		},
-		filterTarget(event, player, target) {
+		filter(event, player) {
+			return game.hasPlayer(target => lib.skill.noda_xunxin.filterTarget(null, player, target));
+		},
+		viewAs: { name: "juedou" },
+		filterTarget(card, player, target) {
 			if (target.hp < player.hp) return false;
-			return lib.filter.filterTarget.apply(this, arguments);
+			return player.canUse({ name: "juedou" }, target);
 		},
 		selectCard: -1,
-		filterCard() {
-			return false;
-		},
+		filterCard: () => false,
 		group: "noda_xunxin2",
 	},
 	noda_xunxin2: {

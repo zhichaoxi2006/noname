@@ -2103,9 +2103,10 @@ const skills = {
 	dcsbwuwei: {
 		audio: 2,
 		enable: "phaseUse",
+		usable(skill, player) {
+			return 1 + player.countMark("dcsbwuwei_count");
+		},
 		filter(event, player) {
-			const count = player.getStat("skill").dcsbwuwei;
-			if (count && count > player.countMark("dcsbwuwei_count")) return false;
 			const colors = player.getCards("h").reduce((list, card) => list.add(get.color(card)), []);
 			return colors.some(color => event.filterCard(get.autoViewAs(lib.skill.dcsbwuwei.viewAs, player.getCards("h", { color: color })), player, event));
 		},
@@ -7702,8 +7703,9 @@ const skills = {
 				event.equipCount[current.playerid] = current.countCards("e");
 			}, true);
 			"step 1";
-			if (!player.countCards("he")) event.goto(5);
-			else
+			if (!player.countCards("he")) {
+				event.finish();
+			} else
 				player.chooseCard("四论：选择一张牌（" + (event.count + 1) + "/" + "4）", "然后选择将此牌置于场上或牌堆的两端", true, "he").set("ai", card => {
 					var player = _status.event.player;
 					if (["equip", "delay"].includes(get.type(card)) && player.hasValueTarget(card)) return 50;
@@ -18066,11 +18068,11 @@ const skills = {
 	},
 	liji: {
 		enable: "phaseUse",
-		audio: 2,
-		filter: function (event, player) {
-			return (player.getStat().skill.liji || 0) < (event.liji_num || 0);
+		usable(skill, player) {
+			return get.event().liji_num;
 		},
-		onChooseToUse: function (event) {
+		audio: 2,
+		onChooseToUse(event) {
 			if (game.online) return;
 			var num = 0;
 			var evt2 = event.getParent();
@@ -18082,13 +18084,13 @@ const skills = {
 		},
 		filterCard: true,
 		position: "he",
-		check: function (card) {
+		check(card) {
 			var val = get.value(card);
 			if (!_status.event.player.getStorage("refenyin_mark").includes(get.suit(card))) return 12 - val;
 			return 8 - val;
 		},
 		filterTarget: lib.filter.notMe,
-		content: function () {
+		content() {
 			target.damage("nocard");
 		},
 		ai: {

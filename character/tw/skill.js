@@ -9239,34 +9239,41 @@ const skills = {
 	twgyshenxing: {
 		audio: "xinshenxing",
 		enable: "phaseUse",
-		filter: function (event, player) {
-			return player.countCards("he") >= Math.min(2, player.countMark("twgyshenxing"));
+		filter(event, player) {
+			return player.countCards("he") >= Math.min(2, player.countMark("twgyshenxing_used"));
 		},
-		selectCard: function () {
-			return Math.min(2, _status.event.player.countMark("twgyshenxing"));
+		selectCard() {
+			return Math.min(2, _status.event.player.countMark("twgyshenxing_used"));
 		},
-		prompt: function () {
-			return "弃置" + get.cnNumber(Math.min(2, _status.event.player.countMark("twgyshenxing"))) + "张牌并摸一张牌";
+		prompt() {
+			return "弃置" + get.cnNumber(Math.min(2, _status.event.player.countMark("twgyshenxing_used"))) + "张牌并摸一张牌";
 		},
-		check: function (card) {
+		check(card) {
 			var num = _status.event.player.countCards("h", { color: get.color(card) });
 			if (get.position(card) == "e") num++;
 			return (Math.max(4, 7.1 - num) - get.value(card)) / num;
 		},
 		filterCard: true,
 		position: "he",
-		content: function () {
+		content() {
 			player.draw();
-			player.addMark("twgyshenxing", 1);
+			player.addTempSkill("twgyshenxing_used", "phaseUseAfer");
+			player.addMark("twgyshenxing_used", 1, false);
 		},
-		marktext: "慎",
-		intro: { content: "已发动过#次" },
 		ai: {
-			order: function (item, player) {
-				if (!player.hasMark("twgyshenxing")) return 10;
+			order(item, player) {
+				if (!player.hasMark("twgyshenxing_used")) return 10;
 				return 1;
 			},
 			result: { player: 1 },
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+				marktext: "慎",
+				intro: { content: "已发动过#次" },
+			},
 		},
 	},
 	twbingyi: {
@@ -19265,14 +19272,14 @@ const skills = {
 	twtijin: {
 		audio: 2,
 		trigger: { global: "useCardToPlayer" },
-		filter: function (event, player) {
-			return event.card && event.card.name == "sha" && event.player != player && event.target != player && event.targets.length == 1 && event.player.inRange(player);
+		filter(event, player) {
+			return event.card?.name == "sha" && event.player != player && event.target != player && event.targets.length == 1 && player.inRange(event.player);
 		},
 		logTarget: "target",
-		check: function (event, player) {
+		check(event, player) {
 			return get.effect(event.targets[0], event.card, event.player, player) <= get.effect(player, event.card, event.player, player);
 		},
-		content: function () {
+		content() {
 			"step 0";
 			trigger.targets.length = 0;
 			trigger.getParent().triggeredTargets1.length = 0;

@@ -10082,17 +10082,20 @@ const skills = {
 	xinshenxing: {
 		audio: 2,
 		enable: "phaseUse",
-		filter: function (event, player) {
-			return (player.getStat("skill").xinshenxing || 0) < player.hp && player.countCards("he") > 1;
+		usable(skill, player) {
+			return player.hp;
+		},
+		filter(event, player) {
+			return player.countCards("he") > 1;
 		},
 		selectCard: 2,
 		position: "he",
-		check: function (card) {
+		check(card) {
 			if (!ui.selected.cards.length || get.color(card) != get.color(ui.selected.cards[0])) return 6.5 - get.value(card);
 			return 6.5 - get.value(card) - get.value(ui.selected.cards[0]);
 		},
 		filterCard: true,
-		content: function () {
+		content() {
 			player.draw(get.color(cards) == "none" ? 2 : 1);
 		},
 		ai: {

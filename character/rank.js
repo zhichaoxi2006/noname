@@ -733,6 +733,7 @@ window.noname_character_rank = {
 		"sb_gongsunzan",
 		"yue_zoushi",
 		"yue_diaochan",
+		"clan_wangchang",
 	],
 	bp: [
 		"dc_sb_huanggai",
@@ -3094,6 +3095,7 @@ window.noname_character_rank = {
 			"mb_jiachong",
 			"sb_jiaxu",
 			"sb_zhugejin",
+			"clan_wangchang",
 		],
 		junk: ["liuxiecaojie", "std_pengyang", "shen_huangzhong", "ol_peixiu", "ol_sb_guanyu", "junk_guanyu", "sunshao", "gongsunzan", "chengpu", "zangba", "tianfeng", "dingyuan", "caiyong", "xin_chengpu", "junk_zhangrang", "wolongfengchu", "re_chenqun", "sp_ol_zhanghe", "key_youta", "sp_xujing", "fanjiangzhangda", "wangxiang", "duji", "dc_liuba", "dc_lifeng", "bianxi", "clan_wuban", "clan_wukuang", "ahuinan", "sp_caosong", "yangfu", "wangjun", "xin_wuyi", "xin_zhuzhi", "tw_xiahouen", "ol_maliang", "old_bulianshi", "junk_huangyueying", "junk_liubei", "new_caoren", "old_zhoutai", "dongtuna", "junk_lidian", "junk_duanwei", "zerong", "std_panfeng", "re_caochong", "re_caorui", "junk_xuyou", "re_zhongyao", "zhupeilan", "jsrg_dongbai"],
 	},

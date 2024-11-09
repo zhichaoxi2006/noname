@@ -3702,14 +3702,14 @@ const skills = {
 			player: "useCardToPlayered",
 			target: "useCardToTargeted",
 		},
-		filter: function (event, player) {
+		filter(event, player) {
 			if (!(event.card.name == "juedou" || (event.card.name == "sha" && get.color(event.card) == "red"))) return false;
 			return true;
 		},
 		frequent: true,
 		onremove: true,
 		group: ["sbjiang_add", "sbjiang_qiben"],
-		content: function () {
+		content() {
 			player.draw();
 		},
 		ai: {
@@ -3727,7 +3727,7 @@ const skills = {
 				audio: "sbjiang",
 				trigger: { player: "useCard2" },
 				direct: true,
-				filter: function (event, player) {
+				filter(event, player) {
 					if (event.card.name != "juedou") return false;
 					var info = get.info(event.card);
 					if (info.allowMultiple == false) return false;
@@ -3742,7 +3742,7 @@ const skills = {
 					}
 					return false;
 				},
-				content: function () {
+				content() {
 					"step 0";
 					var prompt2 = "为" + get.translation(trigger.card) + "额外指定一个目标，然后失去1点体力";
 					player
@@ -3780,11 +3780,18 @@ const skills = {
 			qiben: {
 				audio: "sbjiang",
 				enable: "phaseUse",
+				usable(skill, player) {
+					return player.hasMark("sbjiang")
+						? game.countPlayer(current => {
+								return current.group == "wu" && current != player;
+						  }) + 1
+						: 1;
+				},
 				viewAs: { name: "juedou" },
 				filterCard: true,
 				position: "h",
 				selectCard: -1,
-				prompt: function () {
+				prompt() {
 					var player = _status.event.player;
 					var limit = player.hasMark("sbjiang")
 						? game.countPlayer(current => {
@@ -3793,13 +3800,7 @@ const skills = {
 						: 1;
 					return "出牌阶段限" + get.cnNumber(limit) + "次。你可以将所有手牌当【决斗】使用";
 				},
-				filter: function (event, player) {
-					var limit = player.hasMark("sbjiang")
-						? game.countPlayer(current => {
-								return current.group == "wu" && current != player;
-						  }) + 1
-						: 1;
-					if ((player.getStat("skill").sbjiang_qiben || 0) >= limit) return false;
+				filter(event, player) {
 					var hs = player.getCards("h");
 					if (!hs.length) return false;
 					for (var i = 0; i < hs.length; i++) {
@@ -3817,7 +3818,7 @@ const skills = {
 						},
 					},
 					nokeep: true,
-					skillTagFilter: function (player, tag, arg) {
+					skillTagFilter(player, tag, arg) {
 						if (tag === "nokeep") {
 							if (arg && (!arg.card || get.name(arg.card) !== "tao")) return false;
 							let limit = player.hasMark("sbjiang")
