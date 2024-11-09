@@ -22,7 +22,7 @@ const translates = {
 	clanyirong: "移荣",
 	clanyirong_info: "出牌阶段限两次。若你的手牌数：小于X，则你可以将手牌摸至X张，然后X-1；大于X，则你可以将手牌弃置至X张，然后X+1。（X为你的手牌上限）",
 	clanguixiang: "贵相",
-	clanguixiang_info: "锁定技。你的非出牌阶段开始前，若此阶段即将成为你本回合内的第X个阶段（X为你的手牌上限），则你终止此阶段，改为进行一个出牌阶段。",
+	clanguixiang_info: "锁定技。你本回合的第X个阶段开始前（X为你的手牌上限），若此阶段不为出牌阶段，则你终止此阶段，改为进行一个出牌阶段。",
 	clanmuyin: "穆荫",
 	clanmuyin_info: "宗族技。回合开始时，你可以选择一名手牌上限不为全场最多的陈留吴氏角色。该角色的手牌上限+1。",
 	chenliuwushi: "陈留·吴氏",

@@ -1361,7 +1361,10 @@ const skills = {
 		check: function (event, player) {
 			var type = get.type2(event.card, event.player);
 			if (type == "equip" && event.player.hasCard(card => event.player.hasValueTarget(card))) return false;
-			if (get.attitude(player, event.player) > 0 && event.player.getHp() + event.player.countCards("hs", ["shan", "caochuan"]) <= 3) return false;
+			if (get.attitude(player, event.player) > 0 && (
+				!event.player.isAllCardsKnown(player) ||
+				2 * event.player.getHp() + 0.7 * event.player.countCards("hs") <= 6 - player.countMark("zhenfeng")
+			)) return false;
 			return true;
 		},
 		onremove: true,

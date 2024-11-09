@@ -274,7 +274,7 @@ const skills = {
 		multiline: true,
 		multitarget: true,
 		chooseCard(boss, current) {
-			const next = current.chooseCard("h");
+			const next = current.chooseCard("he");
 			next.set("prompt", "是否交给" + get.translation(boss) + "一张牌？");
 			next.set("_global_waiting", true);
 			next.set("ai", card => {
@@ -432,7 +432,7 @@ const skills = {
 				game.log(target, "没有手牌");
 				return;
 			}
-			let cards = game.cardsGotoOrdering(get.cards(target.countCards("h"))).cards;
+			let cards = game.cardsGotoOrdering(get.cards(Math.min(5, target.countCards("h")))).cards;
 			await player.showCards(cards, get.translation(player) + "发动了〖撰文〗");
 			let damages = cards.filter(card => get.tag(card, "damage") && player.canUse(card, target, false)),
 				nodamages = cards.filter(card => !get.tag(card, "damage"));
@@ -1003,12 +1003,20 @@ const skills = {
 			const target = event.target;
 			await target.viewHandcards(player);
 			if (!target.countCards("h")) return;
-			await player.discardPlayerCard(target, "h", 2, "visible", "是否弃置♠♣花色的牌各一张？").set("filterButton", button => {
-				if (!["spade", "club"].includes(get.suit(button.link))) return false;
-				return ui.selected.buttons?.every(buttonx => {
-					return get.suit(buttonx.link) != get.suit(button.link);
+			await player
+				.discardPlayerCard(
+					target,
+					"h",
+					[1, 2],
+					"visible",
+					"是否弃置" + get.translation(target) + "不同花色的黑色牌至多各一张？"
+				)
+				.set("filterButton", button => {
+					if (get.color(button.link) !== "black") return false;
+					return ui.selected.buttons?.every(buttonx => {
+						return get.suit(buttonx.link) !== get.suit(button.link);
+					});
 				});
-			});
 		},
 		ai: {
 			order: 6,
@@ -7571,6 +7579,13 @@ const skills = {
 				intro: {
 					content: "下次受到的属性伤害+#",
 				},
+				ai: {
+					effect: {
+						target(card, player, target) {
+							if (game.hasNature(card)) return 1 + target.countMark("dcchangqu_add");
+						}
+					}
+				}
 			},
 		},
 	},
