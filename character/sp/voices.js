@@ -1,4 +1,7 @@
 export default {
+	"#olhunjiang1": "边野有豪强，敢执干戈动玄黄！",
+	"#olhunjiang2": "漫天浑雪，弥散八荒。",
+	"#mawan:die": "曹贼势大，唯避其锋芒。",
 	"#olrenxia1": "俊毅如风，任胸中长虹惊云。",
 	"#olrenxia2": "侠之大者，为国为民。",
 	"#wangkuang:die": "人心不古，世态炎凉。",
