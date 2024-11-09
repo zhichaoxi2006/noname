@@ -6998,79 +6998,53 @@ const skills = {
 		skillAnimation: true,
 		animationColor: "thunder",
 		derivation: "olxieju",
-		filter: function (event, player) {
-			var targets = [];
+		filter(event, player) {
+			const targets = [];
 			game.getGlobalHistory("useCard", evt => {
-				if (evt.targets && evt.targets.length) {
+				if (evt.targets?.length) {
 					targets.addArray(evt.targets);
 				}
 			});
 			return targets.length == 3 && targets.includes(player);
 		},
-		content: function () {
-			"step 0";
-			player.awakenSkill("olhuiqi");
-			if (player.isDamaged()) player.recover();
-			"step 1";
-			player.addSkills("olxieju");
+		async content(event, trigger, player) {
+			player.awakenSkill(event.name);
+			if (player.isDamaged()) await player.recover();
+			await player.addSkills("olxieju");
+			player.insertPhase();
 		},
 	},
 	olxieju: {
 		audio: 2,
 		enable: "phaseUse",
 		usable: 1,
-		filter: function (event, player) {
-			return event.olxieju && event.olxieju.length;
+		filter(event, player) {
+			return event.olxieju?.length;
 		},
-		onChooseToUse: function (event) {
+		onChooseToUse(event) {
 			if (!event.olxieju && !game.online) {
-				var targets = [];
+				const targets = [];
 				game.getGlobalHistory("useCard", evt => {
-					if (evt.targets && evt.targets.length) {
+					if (evt.targets?.length) {
 						targets.addArray(evt.targets);
 					}
 				});
 				event.set("olxieju", targets);
 			}
 		},
-		filterTarget: function (card, player, target) {
-			var event = _status.event;
-			if (event.olxieju.includes(target)) return true;
-			return false;
+		filterTarget(card, player, target) {
+			return get.event().olxieju.includes(target) && target.hasUseTarget({ name: "sha" }, false);
 		},
 		selectTarget: [1, Infinity],
-		content: function () {
-			let next = target.chooseToUse();
-			next.set("openskilldialog", "偕举：是否将一张黑色牌当杀使用？");
-			next.set("norestore", true);
-			next.set("_backupevent", "olxieju_backup");
-			next.set("custom", {
-				add: {},
-				replace: { window: function () {} },
-			});
-			next.backup("olxieju_backup");
+		async content(event, trigger, player) {
+			await event.target.chooseUseTarget({ name: "sha" }, "偕举：是否视为使用一张【杀】？", false);
 		},
 		ai: {
 			order: 1,
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					var val = target.getUseValue({ name: "sha" }, true);
 					return Math.sign(val);
-				},
-			},
-		},
-		subSkill: {
-			backup: {
-				filterCard: function (card) {
-					return get.itemtype(card) == "card" && get.color(card) == "black";
-				},
-				position: "hes",
-				viewAs: {
-					name: "sha",
-				},
-				prompt: "将一张黑色牌当杀使用",
-				check: function (card) {
-					return 7 - get.value(card);
 				},
 			},
 		},

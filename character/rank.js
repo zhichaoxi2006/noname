@@ -391,6 +391,7 @@ window.noname_character_rank = {
 		"jsrg_malong",
 		"xin_simayi",
 		"new_simayi",
+		"ol_sb_dongzhuo",
 	],
 	am: [
 		"scl_pangdegong",
@@ -2059,6 +2060,7 @@ window.noname_character_rank = {
 			"key_mia",
 			"jsrg_yuanshao",
 			"jd_simayan",
+			"ol_sb_dongzhuo",
 		],
 		epic: [
 			"dc_sb_huanggai",

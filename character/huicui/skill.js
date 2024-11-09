@@ -96,7 +96,7 @@ const skills = {
 				).length ||
 				trigger.card.name === cardx.name
 			)
-				await player.draw();
+				await player.draw(2);
 		},
 	},
 	//黄舞蝶

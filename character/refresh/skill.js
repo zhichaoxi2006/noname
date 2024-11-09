@@ -2173,7 +2173,7 @@ const skills = {
 	},
 	dcfencheng: {
 		audio: 2,
-		audioname: ["ol_liru"],
+		audioname: ["ol_liru", "ol_sb_dongzhuo"],
 		enable: "phaseUse",
 		filterTarget: lib.filter.notMe,
 		limited: true,
