@@ -3617,6 +3617,11 @@ export class Library {
 						map.show_time.show();
 						map.watchface.hide();
 					}
+					if (lib.config.show_deckMonitor) {
+						map.show_deckMonitor_online.show();
+					} else {
+						map.show_deckMonitor_online.hide();
+					}
 					if (lib.config.show_extensionmaker) {
 						map.show_extensionshare.show();
 					} else {
@@ -4168,11 +4173,34 @@ export class Library {
 					init: true,
 					unfrequent: true,
 					onclick(bool) {
-						game.saveConfig("show_deckMonitor", bool);
-						if (lib.config.show_deckMonitor) {
-							ui.deckMonitor.style.display = "";
+						if (_status.connectMode) {
+							if(confirm('当前为联机模式，修改此设置需重启，是否重启？')){
+								game.saveConfig("show_deckMonitor", bool);
+								game.reload();
+							} else this.classList.toggle("on");
 						} else {
-							ui.deckMonitor.style.display = "none";
+							game.saveConfig("show_deckMonitor", bool);
+							if (lib.config.show_deckMonitor) {
+								ui.deckMonitor.style.display = "";
+							} else {
+								ui.deckMonitor.style.display = "none";
+							}
+						}
+					},
+				},
+				show_deckMonitor_online: {
+					name: "联机显示记牌器",
+					intro: "如果你是房主，此设置对所有人生效",
+					init: false,
+					unfrequent: true,
+					onclick(bool) {
+						if (_status.connectMode) {
+							if(confirm('当前为联机模式，修改此设置须重启，是否重启？')){
+								game.saveConfig("show_deckMonitor_online", bool);
+								game.reload();
+							} else this.classList.toggle("on");
+						} else {
+							game.saveConfig("show_deckMonitor_online", bool);
 						}
 					},
 				},
@@ -6633,7 +6661,7 @@ export class Library {
 					frequent: true,
 					intro: "读取剪贴板以解析邀请链接自动加入联机房间",
 				},
-				check_versionCode: {
+				check_versionLocal: {
 					name: "禁止不同版本玩家进房",
 					init: false,
 					intro: "禁止与自己版本不同的玩家进入房间",
@@ -12300,6 +12328,17 @@ export class Library {
 			 * @this {import("./element/client.js").Client}
 			 */
 			init(version, config, banned_info) {
+				var show_deckMonitor = false;
+				if (lib.config.show_deckMonitor && lib.config.show_deckMonitor_online) {
+					show_deckMonitor = true;
+				}
+				this.send(function (show_deckMonitor) {
+					if (show_deckMonitor) {
+						ui.deckMonitor.style.display = "";
+					} else {
+						ui.deckMonitor.style.display = "none";
+					}
+				}, show_deckMonitor);
 				this.onlineKey = config.onlineKey;
 				var banBlacklist = lib.config.banBlacklist === undefined ? [] : lib.config.banBlacklist;
 				if (lib.node.banned.includes(banned_info) || banBlacklist.includes(config.onlineKey)) {
