@@ -3574,8 +3574,10 @@ const skills = {
 					}
 				},
 				mod: {
-					attackRange: function (player, num) {
-						if (lib.card.guanshi && player.hasEmptySlot(1)) return num - lib.card.guanshi.distance.attackFrom;
+					attackRangeBase(player) {
+						var num = lib.card?.guanshi?.distance?.attackFrom;
+						if (typeof num != "number" || !player.hasEmptySlot(1)) return;
+						return Math.max(player.getEquipRange(player.getCards("e")), 1 - num);
 					},
 				},
 				ai: {
@@ -7037,7 +7039,7 @@ const skills = {
 		},
 		selectTarget: [1, Infinity],
 		async content(event, trigger, player) {
-			await event.target.chooseUseTarget({ name: "sha" }, "偕举：是否视为使用一张【杀】？", false);
+			await event.target.chooseUseTarget({ name: "sha" }, "偕举：视为使用一张【杀】", true, false);
 		},
 		ai: {
 			order: 1,
@@ -12298,18 +12300,7 @@ const skills = {
 					attackRangeBase(player) {
 						var map = player.storage.shanduan_effect;
 						if (typeof map.range != "number") return;
-						var range = 1;
-						var equips = player.getCards("e", function (card) {
-							return !ui.selected.cards || !ui.selected.cards.includes(card);
-						});
-						for (var i = 0; i < equips.length; i++) {
-							var info = get.info(equips[i], false).distance;
-							if (!info) continue;
-							if (info.attackFrom) {
-								range -= info.attackFrom;
-							}
-						}
-						return Math.max(range, map.range);
+						return Math.max(player.getEquipRange(player.getCards("e")), map.range);
 					},
 					cardUsable(card, player, num) {
 						if (card.name == "sha") {
