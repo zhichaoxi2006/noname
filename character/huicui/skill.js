@@ -7415,7 +7415,9 @@ const skills = {
 					if (choice == "draw") return 10;
 					if (choice == "sha") return 9;
 					var del = 3 - player.hp;
-					if (choice == "hand" && player.needsToDiscard() > 0 && del <= 0) return 8;
+					if (choice == "hand") {
+						if (del <= 0 || player.needsToDiscard()) return 8;
+					}
 					return 0;
 				})
 				.set("selectButton", [1, 3]);

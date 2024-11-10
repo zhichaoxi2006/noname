@@ -6369,7 +6369,7 @@ const skills = {
 			return (lib.skill.baonvezhi.baonvezhi_max || 5) - _status.event.player.countMark("baonvezhi");
 		},
 		check: function (card) {
-			return 6 - get.value(card);
+			return 8 - get.value(card);
 		},
 		position: "he",
 		filterTarget: function (card, player, target) {
@@ -6381,10 +6381,17 @@ const skills = {
 		ai: {
 			combo: "twjuntun",
 			expose: 0.25,
-			order: 8,
+			order: 1,
 			result: {
+				player(player, target) {
+					let num = -ui.selected.cards.length;
+					if (player.hasSkill("twxiongjun") && !player.storage.counttrigger?.twxiongjun) num += game.countPlayer(current => {
+						if (current.hasSkill("twxiongjun")) return get.sgnAttitude(player, current);
+					});
+					return num * get.effect(player, { name: "draw" }, player, player);
+				},
 				target: function (player, target) {
-					return get.damageEffect(target, player, player);
+					return get.damageEffect(target, player, target);
 				},
 			},
 		},
