@@ -7177,7 +7177,7 @@ const skills = {
 			},
 			nokeep: true,
 			skillTagFilter: function (player, tag, arg) {
-				if (tag === "nokeep") return (!arg || (arg.card && get.name(arg.card) === "tao")) && player.isPhaseUsing() && player.countSkill("zhanjue_draw") < 2 && player.hasCard(card => get.name(card) != "tao", "h");
+				if (tag === "nokeep") return (!arg || (arg.card && get.name(arg.card) === "tao")) && player.isPhaseUsing() && get.skillCount("zhanjue_draw") < 2 && player.hasCard(card => get.name(card) != "tao", "h");
 			},
 		},
 	},

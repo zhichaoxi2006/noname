@@ -2817,7 +2817,7 @@ const skills = {
 					return (
 						(!arg || (arg.card && get.name(arg.card) === "tao")) &&
 						player.isPhaseUsing() &&
-						player.countSkill("rezhanjue_draw") < 3 &&
+						get.skillCount("rezhanjue_draw", player) < 3 &&
 						player.hasCard(card => {
 							return get.name(card) !== "tao" && !card.hasGaintag("reqinwang");
 						}, "h")
