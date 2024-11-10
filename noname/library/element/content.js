@@ -3340,7 +3340,7 @@ export const Content = {
 			player.logSkill(popup_info, info.logLine === false ? false : targets, info.line, null, args);
 		}
 		var next = game.createEvent(event.skill);
-		if (typeof info.usable == "number") {
+		if (info.usable !== undefined) {
 			player.addSkill("counttrigger");
 			if (!player.storage.counttrigger) player.storage.counttrigger = {};
 			if (!player.storage.counttrigger[event.skill]) player.storage.counttrigger[event.skill] = 1;
