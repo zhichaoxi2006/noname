@@ -5546,31 +5546,42 @@ const skills = {
 	reshenxing: {
 		audio: 2,
 		enable: "phaseUse",
-		filter: function (event, player) {
-			return player.countCards("he") >= Math.min(2, player.getStat("skill").reshenxing || 0);
+		filter(event, player) {
+			return player.countCards("he") >= Math.min(2, player.countMark("reshenxing_used"));
 		},
-		selectCard: function () {
-			return Math.min(2, _status.event.player.getStat("skill").reshenxing || 0);
+		selectCard() {
+			return Math.min(2, _status.event.player.countMark("reshenxing_used"));
 		},
-		prompt: function () {
-			return "弃置" + get.cnNumber(Math.min(2, _status.event.player.getStat("skill").reshenxing || 0)) + "张牌并摸一张牌";
+		prompt() {
+			return "弃置" + get.cnNumber(Math.min(2, _status.event.player.countMark("reshenxing_used"))) + "张牌并摸一张牌";
 		},
-		check: function (card) {
+		check(card) {
 			var num = _status.event.player.countCards("h", { color: get.color(card) });
 			if (get.position(card) == "e") num++;
 			return (Math.max(4, 7.1 - num) - get.value(card)) / num;
 		},
 		filterCard: true,
 		position: "he",
-		content: function () {
+		content() {
 			player.draw();
+			player.addTempSkill(event.name + "_used", "phaseUseAfer");
+			player.addMark(event.name + "_used", 1, false);
 		},
 		ai: {
-			order: function (item, player) {
-				if (!player.getStat("skill").reshenxing) return 10;
+			order(item, player) {
+				if (!player.hasMark("reshenxing_used")) return 10;
 				return 1;
 			},
 			result: { player: 1 },
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+				intro: {
+					content: "已发动过#次",
+				},
+			},
 		},
 	},
 	rebingyi: {

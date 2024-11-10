@@ -740,7 +740,9 @@ const skills = {
 		},
 		logTarget: "target",
 		async content(event, trigger, player) {
-			const num = player.getHistory("useSkill", evt => evt.skill == "xkxianxing").length;
+			player.addTempSkill(event.name + "_used");
+			player.addMark(event.name + "_used", 1, false);
+			const num = player.countMark(event.name + "_used");
 			await player.draw(num);
 			if (num > 1) {
 				player
@@ -755,9 +757,8 @@ const skills = {
 									if (get.event("num") > 1) return 1;
 									return [0, 1].randomGet();
 								})
-								.set("num", num)
-						}
-						else event.finish();
+								.set("num", num);
+						} else event.finish();
 					})
 					.then(() => {
 						if (result.index == 0) player.loseHp(num - 1);
@@ -768,6 +769,15 @@ const skills = {
 						num: num,
 					});
 			}
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+				intro: {
+					content: "已发动过#次",
+				},
+			},
 		},
 	},
 	xk_qiyijun: {

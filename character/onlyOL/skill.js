@@ -198,18 +198,28 @@ const skills = {
 		},
 		filter(event, player) {
 			const num = get.info("olzhibin").getNum(player);
-			return (num >= 3 && !game.getAllGlobalHistory("everything", evt => evt.name == "gainMaxHp" && evt.player == player && evt.getParent().name == "olzhibin").length) || (num >= 6 && !player.hasSkill("dcfencheng", null, null, false)) || (num >= 9 && !player.hasSkill("benghuai", null, null, false));
+			return get.info("olzhibin").filterx(player, num) || get.info("olzhibin").filtery(player, num) || get.info("olzhibin").filterz(player, num);
+		},
+		filterx(player, num) {
+			return num >= 3 && !game.getAllGlobalHistory("everything", evt => evt.name == "gainMaxHp" && evt.player == player && evt.getParent().name == "olzhibin").length;
+		},
+		filtery(player, num) {
+			return num >= 6 && !player.hasSkill("dcfencheng", null, null, false) && !game.getAllGlobalHistory("everything", evt => evt.name == "changeSkills" && evt.player == player && evt.getParent().name == "olzhibin" && evt.addSkill.includes("dcfencheng")).length;
+		},
+		filterz(player, num) {
+			return num >= 9 && !player.hasSkill("benghuai", null, null, false) && !game.getAllGlobalHistory("everything", evt => evt.name == "changeSkills" && evt.player == player && evt.getParent().name == "olzhibin" && evt.addSkill.includes("benghuai")).length;
 		},
 		zhuSkill: true,
 		forced: true,
 		async content(event, trigger, player) {
-			const num = get.info(event.name).getNum(player);
-			if (num >= 3 && !game.getAllGlobalHistory("everything", evt => evt.name == "gainMaxHp" && evt.player == player && evt.getParent().name == event.name).length) {
+			const skillName = event.name,
+				num = get.info(skillName).getNum(player);
+			if (get.info(skillName).filterx(player, num)) {
 				await player.gainMaxHp();
 				await player.recover();
 			}
-			if (num >= 6 && !player.hasSkill("dcfencheng", null, null, false)) await player.addSkills("dcfencheng");
-			if (num >= 9 && !player.hasSkill("benghuai", null, null, false)) await player.addSkills("benghuai");
+			if (get.info(skillName).filtery(player, num)) await player.addSkills("dcfencheng");
+			if (get.info(skillName).filterz(player, num)) await player.addSkills("benghuai");
 		},
 		derivation: ["dcfencheng", "benghuai"],
 	},
