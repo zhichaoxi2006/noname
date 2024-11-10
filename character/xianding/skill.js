@@ -15641,7 +15641,7 @@ const skills = {
 							if (get.attitude(player, target) > 0) {
 								return [0, 0.2];
 							}
-							if (get.attitude(player, target) < 0 && !player.hasSkillTag("damageBonus")) {
+							if (get.attitude(player, target) < 0) {
 								var sha = player.getCardUsable({ name: "sha" });
 								player._jinjian_tmp = true;
 								var num = player.countCards("h", function (card) {

@@ -3887,9 +3887,21 @@ export class Player extends HTMLDivElement {
 	 * @returns { number }
 	 */
 	countSkill(skill) {
-		var num = this.getStat("skill")[skill];
-		if (num == undefined) return 0;
-		return num;
+		const info = lib.skill[skill];
+		let num = 0;
+		if (!info) {
+			console.log("“" + skill + "”为无效技能ID！");
+			return 0;
+		}
+		if (info.usable !== undefined && this.hasSkill("counttrigger") && this.storage.counttrigger) {
+			num = this.storage.counttrigger[skill];
+			if (typeof num === "number") return num;
+		}
+		num = this.getStat("skill")[skill];
+		if (typeof num === "number") return num;
+		return this.getHistory("useSkill", evt => {
+			return evt.name === skill;
+		}).length;
 	}
 	/**
 	 * @param {*} [unowned]
@@ -9906,9 +9918,9 @@ export class Player extends HTMLDivElement {
 	}
 	/**
 	 * @param { string } skill
-	 * @param { Parameters<this['getSkills']>[0] } arg2
-	 * @param { Parameters<this['getSkills']>[1] } arg3
-	 * @param { Parameters<this['getSkills']>[2] } arg4
+	 * @param { Parameters<this['getSkills']>[0] } [arg2]
+	 * @param { Parameters<this['getSkills']>[1] } [arg3]
+	 * @param { Parameters<this['getSkills']>[2] } [arg4]
 	 * @returns { boolean }
 	 */
 	hasSkill(skill, arg2, arg3, arg4) {
