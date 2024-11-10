@@ -1,4 +1,9 @@
 export default {
+	"#dctanban1": "将军，妾身奏的如何？",
+	"#dctanban2": "将军还想再听一曲？",
+	"#dcdiou1": "一日不见兮，思之如狂。",
+	"#dcdiou2": "有一美人兮，见之不忘。",
+	"#yue_diaochan:die": "红颜薄命，一曲离歌终。",
 	"#dcshuangrui1": "刚柔并济，武学之道可不分男女。",
 	"#dcshuangrui2": "人言女子柔弱，我偏要以武证道。",
 	"#dcfuxie1": "箭射辕角，夏侯老贼必中疑兵之计。",
