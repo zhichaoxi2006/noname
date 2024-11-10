@@ -32210,27 +32210,36 @@ const skills = {
 	},
 	xinfu_kannan: {
 		audio: 2,
-		subSkill: {
-			phase: {
-				sub: true,
-			},
-		},
 		enable: "phaseUse",
-		usable: Infinity,
-		filter: function (event, player) {
-			if ((player.getStat().skill.xinfu_kannan || 0) >= player.hp) return false;
-			return player.countCards("h") > 0;
+		usable(skill, player) {
+			return player.hp;
 		},
-		filterTarget: function (card, player, target) {
+		filter(event, player) {
+			return game.hasPlayer(current => lib.skill.xinfu_kannan.filterTarget(null, player, current));
+		},
+		filterTarget(card, player, target) {
 			if (target.hasSkill("xinfu_kannan_phase")) return false;
 			return player.canCompare(target);
 		},
+		async content(event, trigger, player) {
+			const { target, name: skillName } = event;
+			target.addTempSkill(skillName + "_phase");
+			const bool = await player.chooseToCompare(target).forResultBool();
+			if (bool) {
+				player.tempBanSkill(skillName);
+				player.addSkill(skillName + "_effect");
+				player.addMark(skillName + "_effect", 1, false);
+			} else {
+				target.addSkill(skillName + "_effect");
+				target.addMark(skillName + "_effect", 1, false);
+			}
+		},
 		ai: {
-			order: function () {
+			order() {
 				return get.order({ name: "sha" }) + 0.4;
 			},
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					if (
 						player.hasCard(function (card) {
 							if (get.position(card) != "h") return false;
@@ -32250,59 +32259,28 @@ const skills = {
 				},
 			},
 		},
-		content: function () {
-			"step 0";
-			player.chooseToCompare(target);
-			"step 1";
-			if (result.bool) {
-				player.tempBanSkill("xinfu_kannan");
-				if (!player.hasSkill("kannan_eff")) {
-					player.addSkill("kannan_eff");
-				} else {
-					if (!player.storage.kannan_eff) player.storage.kannan_eff = 0;
-				}
-				player.storage.kannan_eff++;
-				player.markSkill("kannan_eff");
-			} else {
-				target.addTempSkill("xinfu_kannan_phase");
-				if (!target.hasSkill("kannan_eff")) {
-					target.addSkill("kannan_eff");
-				} else {
-					if (!target.storage.kannan_eff) player.storage.kannan_eff = 0;
-					//target.storage.kannan_eff++;
-					//target.markSkill('kannan_eff');
-				}
-				target.storage.kannan_eff++;
-				target.markSkill("kannan_eff");
-			}
-		},
-	},
-	kannan_eff: {
-		mark: true,
-		intro: {
-			content: "下一张杀的伤害基数+#",
-		},
-		trigger: {
-			player: "useCard",
-		},
-		filter: function (event) {
-			return event.card && event.card.name == "sha";
-		},
-		forced: true,
-		sourceSkill: "xinfu_kannan",
-		content: function () {
-			if (!trigger.baseDamage) trigger.baseDamage = 1;
-			trigger.baseDamage += player.storage.kannan_eff;
-			player.removeSkill("kannan_eff");
-		},
-		init: function (player) {
-			player.storage.kannan_eff = 0;
-		},
-		onremove: function (player) {
-			delete player.storage.kannan_eff;
-		},
-		ai: {
-			damageBonus: true,
+		subSkill: {
+			phase: { charlotte: true },
+			effect: {
+				charlotte: true,
+				onremove: true,
+				trigger: {
+					player: "useCard",
+				},
+				filter(event) {
+					return event.card?.name == "sha";
+				},
+				forced: true,
+				popup: false,
+				async content(event, trigger, player) {
+					if (!trigger.baseDamage) trigger.baseDamage = 1;
+					trigger.baseDamage += player.countMark(event.name);
+					player.removeSkill(event.name);
+				},
+				intro: {
+					content: "下一张杀的伤害基数+#",
+				},
+			},
 		},
 	},
 	xinfu_tushe: {
