@@ -11300,8 +11300,8 @@ export class Library {
 				if (!zhengsus || !zhengsus.length) return false;
 				return zhengsus.some(zhengsu => player.storage[zhengsu]);
 			},
-			content: function () {
-				player.chooseDrawRecover(2, "整肃奖励：摸两张牌或回复1点体力");
+			async content(event, trigger, player) {
+				await player.chooseDrawRecover(2, "整肃奖励：摸两张牌或回复1点体力", true);
 			},
 			subSkill: {
 				leijin: {

@@ -310,20 +310,18 @@ const skills = {
 					if (!player.storage[data]) return "houfeng3.mp3";
 					return "houfeng2.mp3";
 				},
-				content: function () {
-					"step 0";
+				async content(event, trigger, player) {
 					player.unmarkAuto("houfeng", event.indexedData);
 					if (!player.storage[event.indexedData]) {
 						player.popup("整肃失败", "fire");
 						game.log(player, "整肃失败");
-						event.finish();
 						return;
 					}
 					player.popup("整肃成功", "wood");
 					game.log(player, "整肃成功");
 					var list = player.getStorage("houfeng_share").filter(i => i[1] == event.indexedData && i[0].isIn()).map(i => i[0]);
 					list.unshift(player);
-					event.list = list;
+					let control;
 					if (list.some(i => i.isDamaged())) {
 						var num1 = 0,
 							num2 = 0;
@@ -331,23 +329,20 @@ const skills = {
 							num1 += 2 * get.effect(target, { name: "draw" }, player, player);
 							num2 += get.recoverEffect(target, player, player);
 						}
-						trigger.player
+						control = await trigger.player
 							.chooseControl("摸两张牌", "回复体力")
 							.set("prompt", "整肃奖励：请选择" + get.translation(list) + "的整肃奖励")
 							.set("ai", function () {
 								return ["摸两张牌", "回复体力"][_status.event.goon.indexOf(Math.max.apply(Math, _status.event.goon))];
 							})
-							.set("goon", [num1, num2]);
+							.set("goon", [num1, num2])
+							.forResultControl();
 					}
-					else event._result = { control: "摸两张牌" };
-					"step 1";
-					if (result.control != "cancel2") {
-						if (result.control == "摸两张牌") game.asyncDraw(event.list, 2);
-						else {
-							for (var i of event.list) i.recover();
-						}
-					} else event.finish();
-					"step 2";
+					else control = "摸两张牌";
+					if (control === "摸两张牌") await game.asyncDraw(list, 2);
+					else {
+						for (const target of list) await target.recover();
+					}
 					game.delayx();
 				},
 			},
@@ -393,47 +388,51 @@ const skills = {
 					if (!player.storage[data]) return "spzhengjun3.mp3";
 					return "spzhengjun2.mp3";
 				},
-				content: function () {
-					"step 0";
+				async content(event, trigger, player) {
 					player.unmarkAuto("spzhengjun", event.indexedData);
 					if (!player.storage[event.indexedData]) {
 						player.popup("整肃失败", "fire");
 						game.log(player, "整肃失败");
-						event.finish();
 						return;
 					}
 					player.popup("整肃成功", "wood");
 					game.log(player, "整肃成功");
-					player.chooseDrawRecover(2, "整肃奖励：摸两张牌或回复1点体力", true);
-					"step 1";
-					if (result.control == "cancel2") {
-						event.finish();
-						return;
-					}
-					player.chooseTarget("整军：是否令一名其他角色也回复1点体力或摸两张牌？", lib.filter.notMe).set("ai", function (target) {
-						var player = _status.event.player;
-						return Math.max(2 * get.effect(target, { name: "draw" }, target, player), get.recoverEffect(target, target, player));
-					});
-					"step 2";
+					let control = "摸牌";
+					if (player.isDamaged()) await player
+						.chooseControl("摸牌", "回复体力")
+						.set("prompt", "整肃奖励：摸两张牌或回复1点体力")
+						.set("ai", () => get.event("idx"))
+						.set("idx", function () {
+							if (2 * get.effect(player, { name: "draw" }, player, player) < get.recoverEffect(player, player, player)) return 1;
+							return 0;
+						}());
+					if (control === "摸牌") await player.draw(2);
+					else await player.recover();
+					let result = await player
+						.chooseTarget("整军：是否令一名其他角色也获得整肃奖励？", lib.filter.notMe)
+						.set("ai", function (target) {
+							const player = _status.event.player;
+							return Math.max(2 * get.effect(target, { name: "draw" }, target, player), get.recoverEffect(target, target, player));
+						})
+						.forResult();
 					if (result.bool) {
 						var target = result.targets[0];
-						event.target = target;
 						var num1 = 2 * get.effect(target, { name: "draw" }, target, player);
 						var num2 = get.recoverEffect(target, target, player);
 						player.line(target);
 						if (target.isHealthy()) result.index = 0;
 						else
-							player
+							result = await player
 								.chooseControl("摸牌", "回血")
 								.set("prompt", "整肃奖励：令" + get.translation(target) + "摸两张牌或回复1点体力")
 								.set("ai", function () {
 									return _status.event.goon ? 0 : 1;
 								})
-								.set("goon", num1 >= num2);
-					} else event.finish();
-					"step 3";
-					if (result.index == 0) target.draw(2);
-					else target.recover();
+								.set("goon", num1 >= num2)
+								.forResult();
+					} else return;
+					if (result.index) await target.recover();
+					else await target.draw(2);
 				},
 			},
 		},
@@ -810,17 +809,16 @@ const skills = {
 					if (!player.storage[data]) return "spyanji3.mp3";
 					return "spyanji2.mp3";
 				},
-				content: function () {
+				async content(event, trigger, player) {
 					player.unmarkAuto("spyanji", event.indexedData);
 					if (!player.storage[event.indexedData]) {
 						player.popup("整肃失败", "fire");
 						game.log(player, "整肃失败");
-						event.finish();
 						return;
 					}
 					player.popup("整肃成功", "wood");
 					game.log(player, "整肃成功");
-					player.chooseDrawRecover(2, "整肃奖励：摸两张牌或回复1点体力");
+					await player.chooseDrawRecover(2, "整肃奖励：摸两张牌或回复1点体力", true);
 				},
 			},
 		},
