@@ -886,6 +886,7 @@ const skills = {
 				},
 			},
 			use: {
+				audio: "twbeiding",
 				trigger: {
 					global: "phaseDiscardEnd",
 				},

@@ -11,8 +11,8 @@ export default () => {
 				lib.characterPack.mode_versus = lib.jiangeboss;
 			} else if (get.config("versus_mode") == "siguo") {
 				lib.characterPack.mode_versus = {
-					tangzi: ["male", ["wei", "wu"].randomGet(), 4, ["xingzhao"], []],
-					liuqi: ["male", ["shu", "qun"].randomGet(), 3, ["wenji", "tunjiang"], []],
+					tangzi: ["male", ["wei", "wu"].randomGet(), 4, ["xingzhao"], ["die:xf_tangzi"]],
+					liuqi: ["male", ["shu", "qun"].randomGet(), 3, ["wenji", "tunjiang"], ["die:sp_liuqi"]],
 				};
 				for (var i in lib.characterPack.mode_versus) {
 					lib.character[i] = lib.characterPack.mode_versus[i];

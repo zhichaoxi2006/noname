@@ -15364,7 +15364,10 @@ const skills = {
 					return 4 + player.getUseValue(card) - get.value(card, player);
 				});
 			"step 1";
-			if (result.bool) trigger.cancel();
+			if (result.bool) {
+				player.logSkill("zhuangshu_basic");
+				trigger.cancel();
+			}
 		},
 		/*usable:1,
 		trigger:{player:'useCard2'},
@@ -15459,6 +15462,7 @@ const skills = {
 			return player.countCards("h") < Math.min(5, player.getHandcardLimit());
 		},
 		content: function () {
+			player.logSkill("zhuangshu_equip");
 			player.drawTo(Math.min(5, player.getHandcardLimit()));
 		},
 	},

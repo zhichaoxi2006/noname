@@ -3743,6 +3743,9 @@ const skills = {
 				return "选择 顺手牵羊（" + get.translation(links[0]) + "）的目标";
 			},
 		},
+		subSkill: {
+			backup: {},
+		},
 		ai: {
 			order: 10,
 			result: {
