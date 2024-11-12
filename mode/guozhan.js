@@ -1388,7 +1388,7 @@ export default () => {
 						.forResult();
 				},
 				async content(event, trigger, player) {
-					const result = await target
+					const result = await event.targets[0]
 						.chooseToGive(player, "he", true, "give")
 						.set("ai", card => {
 							const player = get.player(),
