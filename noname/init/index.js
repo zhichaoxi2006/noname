@@ -847,6 +847,7 @@ async function loadConfig() {
 async function loadCss() {
 	Reflect.set(ui, "css", {
 		menu: await lib.init.promises.css(lib.assetURL + "layout/default", "menu"),
+		newmenu: await lib.init.promises.css(lib.assetURL + "layout/default", "newmenu"),
 		default: await lib.init.promises.css(lib.assetURL + "layout/default", "layout"),
 	});
 }
