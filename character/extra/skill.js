@@ -719,6 +719,7 @@ const skills = {
 		},
 		subSkill: {
 			directHit: {
+				audio: "dczhanjue",
 				charlotte: true,
 				forced: true,
 				mod: {
@@ -739,6 +740,7 @@ const skills = {
 				},
 			},
 			recover: {
+				audio: "dczhanjue",
 				trigger: {
 					source: "damageSource",
 				},

@@ -63,7 +63,7 @@ const characters = {
 	dongxie: ["female", "qun", 4, ["dcjiaoxia", "dchumei"]],
 	wangrong: ["female", "qun", 3, ["minsi", "jijing", "zhuide"]],
 	ol_dingyuan: ["male", "qun", 4, ["cixiao", "xianshuai"]],
-	re_hejin: ["male", "qun", 4, ["spmouzhu", "spyanhuo"]],
+	re_hejin: ["male", "qun", 4, ["spmouzhu", "spyanhuo"], ["die:hejin"]],
 	re_hansui: ["male", "qun", 4, ["spniluan", "spweiwu"], ["die:hansui"]],
 	liuhong: ["male", "qun", 4, ["yujue", "tuxing"]],
 	zhujun: ["male", "qun", 4, ["gongjian", "kuimang"]],

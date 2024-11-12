@@ -61,6 +61,7 @@ export default {
 	"#juanjia2": "舍衣事力，提兵驱敌！",
 	"#qiexie1": "今挟双戟搏战，定护主公太平！",
 	"#qiexie2": "吾乃典韦是也，谁敢向前，谁敢向前！",
+	"#shen_dianwei:die": "战死沙场，快哉快哉！",
 	"#cuijue1": "当锋摧决，贯遐洞坚！",
 	"#cuijue2": "殒身不恤，死战成仁！",
 	"#shen_dianwei:die": "主公快走！",

@@ -7273,7 +7273,7 @@ const skills = {
 	},
 	//牛金
 	recuorui: {
-		audio: "cuorui",
+		audio: 2,
 		enable: "phaseUse",
 		limited: true,
 		skillAnimation: true,
@@ -7308,7 +7308,7 @@ const skills = {
 		},
 	},
 	reliewei: {
-		audio: "liewei",
+		audio: 2,
 		trigger: { global: "dying" },
 		filter: function (event, player) {
 			return player == _status.currentPhase || player.getHistory("useSkill", evt => evt.skill == "reliewei").length < player.getHp();

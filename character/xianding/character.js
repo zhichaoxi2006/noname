@@ -80,7 +80,7 @@ const characters = {
 	dc_tengfanglan: ["female", "wu", 3, ["dcluochong", "dcaichen"]],
 	yanghong: ["male", "qun", 3, ["dcjianji", "dcyuanmo"]],
 	xuelingyun: ["female", "wei", 3, ["dcxialei", "dcanzhi"]],
-	dc_wangyun: ["male", "qun", 4, ["dclianji", "dcmoucheng"], ["clan:太原王氏"]],
+	dc_wangyun: ["male", "qun", 4, ["dclianji", "dcmoucheng"], ["die:wangyun", "clan:太原王氏"]],
 	dc_zhouxuān: ["male", "wei", 3, ["dcwumei", "dczhanmeng"]],
 	chengbing: ["male", "wu", 3, ["dcjingzao", "dcenyu"]],
 	dongguiren: ["female", "qun", 3, ["dclianzhi", "dclingfang", "dcfengying"], ["name:董|null"]],
