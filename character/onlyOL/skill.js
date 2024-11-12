@@ -2842,21 +2842,7 @@ const skills = {
 					position: "hse",
 					viewAs: { name: links[0][2], nature: links[0][3] },
 					precontent() {
-						if (!player.storage.olsbweilin_backup) {
-							player.storage.olsbweilin_backup = true;
-							player
-								.when("useCardToTargeted")
-								.filter(evt => evt.getParent().skill == "olsbweilin_backup" && evt.getParent().triggeredTargets3.length == evt.targets.length)
-								.then(() => {
-									delete player.storage.olsbweilin_backup;
-									const targets = trigger.targets.slice().sortBySeat();
-									player.line(targets);
-									for (const target of targets) {
-										target.addTempSkill("olsbweilin_wusheng");
-										target.markAuto("olsbweilin_wusheng", [get.color(trigger.card)]);
-									}
-								});
-						}
+						player.addTempSkill("olsbweilin_effect");
 					},
 					ai: {
 						directHit_ai: true,
@@ -2918,6 +2904,20 @@ const skills = {
 		},
 		subSkill: {
 			backup: {},
+			effect: {
+				charlotte: true,
+				trigger: { global: "useCardToBegin" },
+				filter(event, player) {
+					return event.skill === "olsbweilin_backup";
+				},
+				forced: true,
+				popup: false,
+				content() {
+					const target = trigger.target;
+					target.addTempSkill("olsbweilin_wusheng");
+					target.markAuto("olsbweilin_wusheng", [get.color(trigger.card)]);
+				},
+			},
 			wusheng: {
 				charlotte: true,
 				onremove: true,
