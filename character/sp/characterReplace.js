@@ -76,6 +76,7 @@ const characterReplaces = {
 	buzhi: ["buzhi", "ty_buzhi"],
 	hanfu: ["hanfu", "ol_hanfu"],
 	niufu: ["niufu", "ol_niufu"],
+	dongxie: ["dongxie", "ol_dongxie"],
 };
 
 export default characterReplaces;

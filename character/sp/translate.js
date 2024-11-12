@@ -1392,6 +1392,14 @@ const translates = {
 	chenggongying: "成公英",
 	olkuangxiang: "匡襄",
 	olkuangxiang_info: "准备阶段，你令一名角色将手牌数调整至四张。其以此法获得的黑色牌造成的伤害+1；其每以此法获得一张红色牌，下个摸牌阶段少摸一张牌。",
+	ol_dongxie: "OL董翓",
+	ol_dongxie_prefix: "OL",
+	oljiaowei: "狡威",
+	oljiaowei_info: "锁定技。①你的黑色牌不计入手牌上限。②当你使用黑色牌时，若你的手牌数大于体力值，则体力值不大于你的角色无法响应此牌。",
+	olbianyu: "鞭御",
+	olbianyu_info: "锁定技，当你使用【杀】造成伤害后或受到【杀】造成的伤害后，你选择受伤角色至多X张手牌（X为其已损失的体力值），令这些牌视为无次数限制的【杀】直到其使用非基本牌。",
+	olfengyao: "凤瑶",
+	olfengyao_info: "锁定技。①有黑桃牌离开装备区后，你回复1点体力。②当你造成伤害时，你弃置你或其场上的一张黑桃牌，令此伤害+1。",
 };
 
 export default translates;
