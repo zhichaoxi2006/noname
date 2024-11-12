@@ -5121,7 +5121,7 @@ const skills = {
 			if (!target.hasMark("dcjizhong")) {
 				const result = await target
 					.chooseBool(`集众：令${get.translation(player)}获得你三张牌，或点击“取消”获得“信众”标记`)
-					.set("choice", get.attitude(target, player) >= 0)
+					.set("ai", () => false)
 					.forResult();
 				if (!result.bool) {
 					target.addMark("dcjizhong", 1);
