@@ -73,7 +73,7 @@ const skills = {
 		usable: 1,
 		async cost(event, trigger, player) {
 			const result = await player
-				.chooseButton([get.prompt2("yjqiaosi"), [[3, 1].map(i => ["", "", "lukai_" + player.getStorage("chuanxie")[i]]), "vcard"]], true)
+				.chooseButton([get.prompt2("yjqiaosi"), [[3, 1].map(i => ["", "", "lukai_" + player.getStorage("chuanxie")[i]]), "vcard"]])
 				.set("ai", () => 1 + Math.random())
 				.forResult();
 			if (result.bool) result.cost_data = result.links[0][2].slice("lukai_".length);
@@ -82,7 +82,7 @@ const skills = {
 		async content(event, trigger, player) {
 			player.popup(event.cost_data);
 			game.log(player, "将", "#g【传械】", "的首个花色改为了", "#y" + get.translation(event.cost_data));
-			while (suits.indexOf(event.cost_data) !== 0) {
+			while (player.getStorage("chuanxie").indexOf(event.cost_data) !== 0) {
 				const suit = player.getStorage("chuanxie")[0];
 				player.unmarkAuto("chuanxie", [suit]);
 				player.markAuto("chuanxie", [suit]);
