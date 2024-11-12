@@ -7082,6 +7082,14 @@ const skills = {
 		},
 		ai: {
 			mingzhi: true,
+			effect: {
+				target(card, player, target) {
+					if (get.tag(card, "damage") || get.tag(card, "losehp")) {
+						let num = target.getExpansions("gzbuqu").length || target.getHp();
+						return (num + 1) / 5;
+					}
+				},
+			},
 		},
 	},
 	buqu: {
@@ -7129,8 +7137,7 @@ const skills = {
 				target(card, player, target) {
 					if (get.tag(card, "damage") || get.tag(card, "losehp")) {
 						let num = target.getExpansions("buqu").length || target.getHp();
-						if (!num) return;
-						return Math.pow(2, Math.min(6, num));
+						return (num + 1) / 5;
 					}
 				},
 			},

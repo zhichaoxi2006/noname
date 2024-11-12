@@ -3165,7 +3165,7 @@ export class Get extends GetCompatible {
 		return num;
 	}
 	/**
-	 * 返回玩家本回合技能的使用次数
+	 * 返回玩家本回合某个主动技的使用次数
 	 * @param { string } skill 技能ID
 	 * @param { Player } [player = _status.event.player]
 	 * @returns { number }

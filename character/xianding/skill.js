@@ -14,13 +14,9 @@ const skills = {
 			const suits = player.getStorage("dcyitong");
 			if (name === "useCardToTargeted") {
 				if (!suits.includes(get.suit(event.card))) return false;
-				return (
-					game
-						.getGlobalHistory("everything", evt => {
-							return evt.name === "useCard" && evt.targets.includes(player);
-						})
-						.indexOf(event.getParent()) === 0 && [1, 2, 3].includes(suits.length)
-				);
+				return game.getGlobalHistory("everything", evt => {
+					return evt.name === "useCard" && evt.targets.includes(player) && suits.includes(get.suit(evt.card));
+				}).indexOf(event.getParent()) === 0;
 			}
 			return suits.length < 4 && (event.name !== "phase" || game.phaseNumber === 0);
 		},
@@ -67,7 +63,7 @@ const skills = {
 			effect: {
 				target(card, player, target) {
 					if (get.itemtype(player) !== "player") return 1;
-					if (!target.getStorage("dcyitong").includes(get.suit(card)) || target.hasHistory("gain", evt => evt.getParent().name === "dcyitong")) return 1;
+					if (!target.getStorage("dcyitong").includes(get.suit(card)) || target.countSkill("dcyitong")) return 1;
 					const name = get.name(card);
 					if (get.tag(card, "lose") || name === "huogong" || name === "juedou" || name === "tiesuo") return [1, 3];
 					if (!target.hasFriend()) return 1;
