@@ -4957,7 +4957,7 @@ const skills = {
 				event.result = {
 					bool: result.bool,
 					targets: [target],
-					cost_data: result.links[0],
+					cost_data: result.links?.[0],
 				};
 			} else event.result = { bool: false };
 		},
