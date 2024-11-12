@@ -3890,7 +3890,7 @@ export class Player extends HTMLDivElement {
 		const info = lib.skill[skill];
 		let num = 0;
 		if (!info) {
-			console.log("“" + skill + "”为无效技能ID！");
+			console.warn("“" + skill + "”为无效技能ID！");
 			return 0;
 		}
 		if (info.usable !== undefined && this.hasSkill("counttrigger") && this.storage.counttrigger) {
@@ -3900,7 +3900,7 @@ export class Player extends HTMLDivElement {
 		num = this.getStat("skill")[skill];
 		if (typeof num === "number") return num;
 		return this.getHistory("useSkill", evt => {
-			return evt.name === skill;
+			return evt.skill === skill;
 		}).length;
 	}
 	/**
