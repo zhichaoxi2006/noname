@@ -154,11 +154,13 @@ waitUpdate
 					})
 					.catch(e => {
 						console.log(e);
-						if (!(e instanceof window.FileError)) {
-							alert(typeof e?.message == "string" ? e.message : JSON.stringify(e));
-						}
-						else {
-							console.error(`noname.config.txt读取失败: ${Object.keys(window.FileError).find(msg => window.FileError[msg] === e.code)}`);
+						if (window.FileError) {
+							if (!(e instanceof window.FileError)) {
+								alert(typeof e?.message == "string" ? e.message : JSON.stringify(e));
+							}
+							else {
+								console.error(`noname.config.txt读取失败: ${Object.keys(window.FileError).find(msg => window.FileError[msg] === e.code)}`);
+							}
 						}
 					})
 					.finally(() => {
