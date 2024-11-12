@@ -12,7 +12,7 @@ const characterSort = {
 	sp_zhongdan: ["cuiyan", "huangfusong"],
 	sp_guozhan2: ["sp_dongzhuo"],
 	sp_others: ["hanba", "caiyang"],
-	sp_waitforsort: ["kongshu", "ol_tw_zhangji", "mawan", "ol_hanfu", "ol_niufu", "chenggongying"],
+	sp_waitforsort: ["kongshu", "ol_tw_zhangji", "mawan", "ol_hanfu", "ol_niufu", "chenggongying", "ol_dongxie"],
 };
 
 const characterSortTranslate = {
