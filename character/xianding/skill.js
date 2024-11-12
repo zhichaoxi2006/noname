@@ -7259,7 +7259,7 @@ const skills = {
 			player: "enterGame",
 		},
 		forced: true,
-		filter: function (event, player) {
+		filter(event, player) {
 			if (game.countGroup() > 4) return false;
 			if (event.name == "die") return true;
 			return event.name != "phase" || game.phaseNumber == 0;
@@ -7268,12 +7268,14 @@ const skills = {
 			const player = map.player;
 			player.removeSkill("dctongye_buff");
 			player.addSkill("dctongye_buff");
-			var num = game.countGroup();
+			const num = game.countGroup();
 			if (num <= 4) {
 				player.addMark("dctongye_handcard", 3, false);
 				game.log(player, "手牌上限", "#y+3");
-				player.addMark("dctongye_draw", 4 - num, false);
-				game.log(player, "摸牌阶段额定摸牌数", "#y+" + parseFloat(4 - num));
+				if (4 - num > 0) {
+					player.addMark("dctongye_draw", 4 - num, false);
+					game.log(player, "摸牌阶段额定摸牌数", "#y+" + parseFloat(4 - num));
+				}
 			}
 			if (num <= 3) {
 				player.addMark("dctongye_range", 3, false);
@@ -7292,11 +7294,11 @@ const skills = {
 				audio: "dctongye",
 				trigger: { player: "phaseDrawBegin2" },
 				forced: true,
-				filter: function (event, player) {
+				filter(event, player) {
 					if (!player.hasMark("dctongye_draw")) return false;
 					return !event.numFixed;
 				},
-				content: function () {
+				content() {
 					trigger.num += player.countMark("dctongye_draw");
 				},
 				charlotte: true,
@@ -7304,7 +7306,7 @@ const skills = {
 				mark: true,
 				marktext: "统",
 				intro: {
-					content: function (storage, player) {
+					content(storage, player) {
 						var str = "";
 						var hand = player.countMark("dctongye_handcard"),
 							range = player.countMark("dctongye_range"),
@@ -7327,13 +7329,13 @@ const skills = {
 					},
 				},
 				mod: {
-					maxHandcard: function (player, num) {
+					maxHandcard(player, num) {
 						return num + player.countMark("dctongye_handcard");
 					},
-					attackRange: function (player, num) {
+					attackRange(player, num) {
 						return num + player.countMark("dctongye_range");
 					},
-					cardUsable: function (card, player, num) {
+					cardUsable(card, player, num) {
 						if (card.name == "sha") {
 							return num + player.countMark("dctongye_sha");
 						}

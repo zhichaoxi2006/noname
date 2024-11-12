@@ -3574,8 +3574,10 @@ const skills = {
 					}
 				},
 				mod: {
-					attackRange: function (player, num) {
-						if (lib.card.guanshi && player.hasEmptySlot(1)) return num - lib.card.guanshi.distance.attackFrom;
+					attackRangeBase(player) {
+						var num = lib.card?.guanshi?.distance?.attackFrom;
+						if (typeof num != "number" || !player.hasEmptySlot(1)) return;
+						return Math.max(player.getEquipRange(player.getCards("e")), 1 - num);
 					},
 				},
 				ai: {
@@ -6998,79 +7000,53 @@ const skills = {
 		skillAnimation: true,
 		animationColor: "thunder",
 		derivation: "olxieju",
-		filter: function (event, player) {
-			var targets = [];
+		filter(event, player) {
+			const targets = [];
 			game.getGlobalHistory("useCard", evt => {
-				if (evt.targets && evt.targets.length) {
+				if (evt.targets?.length) {
 					targets.addArray(evt.targets);
 				}
 			});
 			return targets.length == 3 && targets.includes(player);
 		},
-		content: function () {
-			"step 0";
-			player.awakenSkill("olhuiqi");
-			if (player.isDamaged()) player.recover();
-			"step 1";
-			player.addSkills("olxieju");
+		async content(event, trigger, player) {
+			player.awakenSkill(event.name);
+			if (player.isDamaged()) await player.recover();
+			await player.addSkills("olxieju");
+			player.insertPhase();
 		},
 	},
 	olxieju: {
 		audio: 2,
 		enable: "phaseUse",
 		usable: 1,
-		filter: function (event, player) {
-			return event.olxieju && event.olxieju.length;
+		filter(event, player) {
+			return event.olxieju?.length;
 		},
-		onChooseToUse: function (event) {
+		onChooseToUse(event) {
 			if (!event.olxieju && !game.online) {
-				var targets = [];
+				const targets = [];
 				game.getGlobalHistory("useCard", evt => {
-					if (evt.targets && evt.targets.length) {
+					if (evt.targets?.length) {
 						targets.addArray(evt.targets);
 					}
 				});
 				event.set("olxieju", targets);
 			}
 		},
-		filterTarget: function (card, player, target) {
-			var event = _status.event;
-			if (event.olxieju.includes(target)) return true;
-			return false;
+		filterTarget(card, player, target) {
+			return get.event().olxieju.includes(target) && target.hasUseTarget({ name: "sha" }, false);
 		},
 		selectTarget: [1, Infinity],
-		content: function () {
-			let next = target.chooseToUse();
-			next.set("openskilldialog", "偕举：是否将一张黑色牌当杀使用？");
-			next.set("norestore", true);
-			next.set("_backupevent", "olxieju_backup");
-			next.set("custom", {
-				add: {},
-				replace: { window: function () {} },
-			});
-			next.backup("olxieju_backup");
+		async content(event, trigger, player) {
+			await event.target.chooseUseTarget({ name: "sha" }, "偕举：视为使用一张【杀】", true, false);
 		},
 		ai: {
 			order: 1,
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					var val = target.getUseValue({ name: "sha" }, true);
 					return Math.sign(val);
-				},
-			},
-		},
-		subSkill: {
-			backup: {
-				filterCard: function (card) {
-					return get.itemtype(card) == "card" && get.color(card) == "black";
-				},
-				position: "hes",
-				viewAs: {
-					name: "sha",
-				},
-				prompt: "将一张黑色牌当杀使用",
-				check: function (card) {
-					return 7 - get.value(card);
 				},
 			},
 		},
@@ -12324,18 +12300,7 @@ const skills = {
 					attackRangeBase(player) {
 						var map = player.storage.shanduan_effect;
 						if (typeof map.range != "number") return;
-						var range = 1;
-						var equips = player.getCards("e", function (card) {
-							return !ui.selected.cards || !ui.selected.cards.includes(card);
-						});
-						for (var i = 0; i < equips.length; i++) {
-							var info = get.info(equips[i], false).distance;
-							if (!info) continue;
-							if (info.attackFrom) {
-								range -= info.attackFrom;
-							}
-						}
-						return Math.max(range, map.range);
+						return Math.max(player.getEquipRange(player.getCards("e")), map.range);
 					},
 					cardUsable(card, player, num) {
 						if (card.name == "sha") {
@@ -32236,27 +32201,36 @@ const skills = {
 	},
 	xinfu_kannan: {
 		audio: 2,
-		subSkill: {
-			phase: {
-				sub: true,
-			},
-		},
 		enable: "phaseUse",
-		usable: Infinity,
-		filter: function (event, player) {
-			if ((player.getStat().skill.xinfu_kannan || 0) >= player.hp) return false;
-			return player.countCards("h") > 0;
+		usable(skill, player) {
+			return player.hp;
 		},
-		filterTarget: function (card, player, target) {
+		filter(event, player) {
+			return game.hasPlayer(current => lib.skill.xinfu_kannan.filterTarget(null, player, current));
+		},
+		filterTarget(card, player, target) {
 			if (target.hasSkill("xinfu_kannan_phase")) return false;
 			return player.canCompare(target);
 		},
+		async content(event, trigger, player) {
+			const { target, name: skillName } = event;
+			target.addTempSkill(skillName + "_phase");
+			const bool = await player.chooseToCompare(target).forResultBool();
+			if (bool) {
+				player.tempBanSkill(skillName);
+				player.addSkill(skillName + "_effect");
+				player.addMark(skillName + "_effect", 1, false);
+			} else {
+				target.addSkill(skillName + "_effect");
+				target.addMark(skillName + "_effect", 1, false);
+			}
+		},
 		ai: {
-			order: function () {
+			order() {
 				return get.order({ name: "sha" }) + 0.4;
 			},
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					if (
 						player.hasCard(function (card) {
 							if (get.position(card) != "h") return false;
@@ -32276,59 +32250,28 @@ const skills = {
 				},
 			},
 		},
-		content: function () {
-			"step 0";
-			player.chooseToCompare(target);
-			"step 1";
-			if (result.bool) {
-				player.tempBanSkill("xinfu_kannan");
-				if (!player.hasSkill("kannan_eff")) {
-					player.addSkill("kannan_eff");
-				} else {
-					if (!player.storage.kannan_eff) player.storage.kannan_eff = 0;
-				}
-				player.storage.kannan_eff++;
-				player.markSkill("kannan_eff");
-			} else {
-				target.addTempSkill("xinfu_kannan_phase");
-				if (!target.hasSkill("kannan_eff")) {
-					target.addSkill("kannan_eff");
-				} else {
-					if (!target.storage.kannan_eff) player.storage.kannan_eff = 0;
-					//target.storage.kannan_eff++;
-					//target.markSkill('kannan_eff');
-				}
-				target.storage.kannan_eff++;
-				target.markSkill("kannan_eff");
-			}
-		},
-	},
-	kannan_eff: {
-		mark: true,
-		intro: {
-			content: "下一张杀的伤害基数+#",
-		},
-		trigger: {
-			player: "useCard",
-		},
-		filter: function (event) {
-			return event.card && event.card.name == "sha";
-		},
-		forced: true,
-		sourceSkill: "xinfu_kannan",
-		content: function () {
-			if (!trigger.baseDamage) trigger.baseDamage = 1;
-			trigger.baseDamage += player.storage.kannan_eff;
-			player.removeSkill("kannan_eff");
-		},
-		init: function (player) {
-			player.storage.kannan_eff = 0;
-		},
-		onremove: function (player) {
-			delete player.storage.kannan_eff;
-		},
-		ai: {
-			damageBonus: true,
+		subSkill: {
+			phase: { charlotte: true },
+			effect: {
+				charlotte: true,
+				onremove: true,
+				trigger: {
+					player: "useCard",
+				},
+				filter(event) {
+					return event.card?.name == "sha";
+				},
+				forced: true,
+				popup: false,
+				async content(event, trigger, player) {
+					if (!trigger.baseDamage) trigger.baseDamage = 1;
+					trigger.baseDamage += player.countMark(event.name);
+					player.removeSkill(event.name);
+				},
+				intro: {
+					content: "下一张杀的伤害基数+#",
+				},
+			},
 		},
 	},
 	xinfu_tushe: {
