@@ -14435,7 +14435,7 @@ const skills = {
 			maixie: true,
 			effect: {
 				target: function (card, player, target) {
-					if (get.tag(card, "damage") && !target.hasSkill("oltiaoxin", null, null, false)) {
+					if (get.tag(card, "damage") && !target.hasSkill("tiaoxin", null, null, false)) {
 						if (!target.hasFriend()) return;
 						if (target.hp >= 4) return [0, 1];
 					}
