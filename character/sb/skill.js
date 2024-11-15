@@ -7628,7 +7628,15 @@ const skills = {
 			return player.hujia > 0 && event.card.name == "sha";
 		},
 		check: function (event, player) {
-			return event.target.countGainableCards(player, "he") > 0 || player.countCards("hs", { name: "sha" }) > 0;
+			return (
+				get.attitude(player, event.target) <= 0 &&
+				event.target.countGainableCards(player, "h") > 0 ||
+				player.getCardUsable("sha") === 0 &&
+				player.countCards("hs", card => {
+					if (get.name(card) !== "sha") return false;
+					return player.hasValueTarget(card, true, true);
+				}) > 0
+			);
 		},
 		logTarget: "target",
 		content: function () {
@@ -7638,7 +7646,7 @@ const skills = {
 			trigger.card.storage.sbduojing = true;
 			"step 1";
 			var target = trigger.target;
-			if (target.countGainableCards(player, "he") > 0) player.gainPlayerCard(target, "he", true);
+			if (target.countGainableCards(player, "h") > 0) player.gainPlayerCard(target, "h", true);
 			player.addTempSkill("sbduojing_add", "phaseUseAfter");
 			player.addMark("sbduojing_add", 1, false);
 			player.markSkill("sbduojing_add");
