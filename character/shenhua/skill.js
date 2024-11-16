@@ -3743,6 +3743,9 @@ const skills = {
 				return "选择 顺手牵羊（" + get.translation(links[0]) + "）的目标";
 			},
 		},
+		subSkill: {
+			backup: {},
+		},
 		ai: {
 			order: 10,
 			result: {
@@ -5239,7 +5242,7 @@ const skills = {
 	},
 	benghuai: {
 		audio: 2,
-		audioname: ["re_dongzhuo", "ol_dongzhuo", "re_zhugedan"],
+		audioname: ["re_dongzhuo", "ol_dongzhuo", "re_zhugedan", "ol_sb_dongzhuo"],
 		audioname2: { zhugedan: "benghuai_zhugedan" },
 		trigger: { player: "phaseJieshuBegin" },
 		forced: true,
@@ -5370,9 +5373,10 @@ const skills = {
 						if (att > 0) att = 1;
 						if (att < 0) att = -1;
 						if (players[i] != player && players[i].hp <= 3) {
-							if (players[i].countCards("h") == 0) num += att / players[i].hp;
-							else if (players[i].countCards("h") == 1) num += att / 2 / players[i].hp;
-							else if (players[i].countCards("h") == 2) num += att / 4 / players[i].hp;
+							const hs = players[i].countCards("hs");
+							if (hs === 0) num += att / players[i].hp;
+							else if (hs === 1) num += att / 2 / players[i].hp;
+							else if (hs === 2) num += att / 4 / players[i].hp;
 						}
 						if (players[i].hp == 1) num += att * 1.5;
 					}
@@ -7078,6 +7082,14 @@ const skills = {
 		},
 		ai: {
 			mingzhi: true,
+			effect: {
+				target(card, player, target) {
+					if (get.tag(card, "damage") || get.tag(card, "losehp")) {
+						let num = target.getExpansions("gzbuqu").length || target.getHp();
+						return (num + 1) / 5;
+					}
+				},
+			},
 		},
 	},
 	buqu: {
@@ -7125,8 +7137,7 @@ const skills = {
 				target(card, player, target) {
 					if (get.tag(card, "damage") || get.tag(card, "losehp")) {
 						let num = target.getExpansions("buqu").length || target.getHp();
-						if (!num) return;
-						return Math.pow(2, Math.min(6, num));
+						return (num + 1) / 5;
 					}
 				},
 			},

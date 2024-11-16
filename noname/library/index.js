@@ -1136,11 +1136,6 @@ export class Library {
 					init: false,
 					unfrequent: true,
 				},
-				errstop: {
-					name: "出错时停止游戏",
-					init: false,
-					unfrequent: true,
-				},
 				update_link: {
 					name: "更新地址",
 					init: "coding",
@@ -1335,11 +1330,6 @@ export class Library {
 						map.confirm_exit.show();
 					} else {
 						map.confirm_exit.hide();
-					}
-					if (config.dev) {
-						map.errstop.show();
-					} else {
-						map.errstop.hide();
 					}
 				},
 			},
@@ -3627,6 +3617,11 @@ export class Library {
 						map.show_time.show();
 						map.watchface.hide();
 					}
+					if (lib.config.show_deckMonitor) {
+						map.show_deckMonitor_online.show();
+					} else {
+						map.show_deckMonitor_online.hide();
+					}
 					if (lib.config.show_extensionmaker) {
 						map.show_extensionshare.show();
 					} else {
@@ -4178,11 +4173,34 @@ export class Library {
 					init: true,
 					unfrequent: true,
 					onclick(bool) {
-						game.saveConfig("show_deckMonitor", bool);
-						if (lib.config.show_deckMonitor) {
-							ui.deckMonitor.style.display = "";
+						if (_status.connectMode) {
+							if(confirm('当前为联机模式，修改此设置需重启，是否重启？')){
+								game.saveConfig("show_deckMonitor", bool);
+								game.reload();
+							} else this.classList.toggle("on");
 						} else {
-							ui.deckMonitor.style.display = "none";
+							game.saveConfig("show_deckMonitor", bool);
+							if (lib.config.show_deckMonitor) {
+								ui.deckMonitor.style.display = "";
+							} else {
+								ui.deckMonitor.style.display = "none";
+							}
+						}
+					},
+				},
+				show_deckMonitor_online: {
+					name: "联机显示记牌器",
+					intro: "如果你是房主，此设置对所有人生效",
+					init: false,
+					unfrequent: true,
+					onclick(bool) {
+						if (_status.connectMode) {
+							if(confirm('当前为联机模式，修改此设置须重启，是否重启？')){
+								game.saveConfig("show_deckMonitor_online", bool);
+								game.reload();
+							} else this.classList.toggle("on");
+						} else {
+							game.saveConfig("show_deckMonitor_online", bool);
 						}
 					},
 				},
@@ -6643,7 +6661,7 @@ export class Library {
 					frequent: true,
 					intro: "读取剪贴板以解析邀请链接自动加入联机房间",
 				},
-				check_versionCode: {
+				check_versionLocal: {
 					name: "禁止不同版本玩家进房",
 					init: false,
 					intro: "禁止与自己版本不同的玩家进入房间",
@@ -10104,7 +10122,11 @@ export class Library {
 				return false;
 			if (info.filter && !info.filter(event, player, triggername, indexedData)) return false;
 			if (event._notrigger.includes(player) && !lib.skill.global.includes(skill)) return false;
-			if (typeof info.usable == "number" && player.hasSkill("counttrigger") && player.storage.counttrigger && player.storage.counttrigger[skill] >= info.usable) return false;
+			if (info.usable !== undefined && player.hasSkill("counttrigger") && player.storage.counttrigger) {
+				let num = info.usable;
+				if (typeof num === "function") num = info.usable(skill, player);
+				if (typeof num === "number" && player.storage.counttrigger[skill] >=num) return false;
+			}
 			if (info.round && info.round - (game.roundNumber - player.storage[skill + "_roundcount"]) > 0) return false;
 			for (const item in player.storage) {
 				if (item.startsWith("temp_ban_")) {
@@ -10151,7 +10173,11 @@ export class Library {
 				if (info.viewAsFilter && info.viewAsFilter(player) === false) return false;
 				if (event.filterCard && !event.filterCard(get.autoViewAs(info.viewAs, "unsure"), player, event)) return false;
 			}
-			if (info.usable && get.skillCount(skill) >= info.usable) return false;
+			if (info.usable !== undefined) {
+				let num = info.usable;
+				if (typeof num === "function") num = info.usable(skill, player);
+				if (typeof num === "number" && get.skillCount(skill, player) >=num) return false;
+			}
 			if (info.chooseButton && _status.event.noButton) return false;
 			if (info.round && info.round - (game.roundNumber - player.storage[skill + "_roundcount"]) > 0) return false;
 			for (const item in player.storage) {
@@ -11274,8 +11300,8 @@ export class Library {
 				if (!zhengsus || !zhengsus.length) return false;
 				return zhengsus.some(zhengsu => player.storage[zhengsu]);
 			},
-			content: function () {
-				player.chooseDrawRecover(2, "整肃奖励：摸两张牌或回复1点体力");
+			async content(event, trigger, player) {
+				await player.chooseDrawRecover(2, "整肃奖励：摸两张牌或回复1点体力", true);
 			},
 			subSkill: {
 				leijin: {
@@ -12302,6 +12328,17 @@ export class Library {
 			 * @this {import("./element/client.js").Client}
 			 */
 			init(version, config, banned_info) {
+				var show_deckMonitor = false;
+				if (lib.config.show_deckMonitor && lib.config.show_deckMonitor_online) {
+					show_deckMonitor = true;
+				}
+				this.send(function (show_deckMonitor) {
+					if (show_deckMonitor) {
+						ui.deckMonitor.style.display = "";
+					} else {
+						ui.deckMonitor.style.display = "none";
+					}
+				}, show_deckMonitor);
 				this.onlineKey = config.onlineKey;
 				var banBlacklist = lib.config.banBlacklist === undefined ? [] : lib.config.banBlacklist;
 				if (lib.node.banned.includes(banned_info) || banBlacklist.includes(config.onlineKey)) {

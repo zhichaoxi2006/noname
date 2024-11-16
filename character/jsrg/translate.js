@@ -67,7 +67,6 @@ const translates = {
 	jsrg_zhujun: "起朱儁",
 	jsrg_zhujun_prefix: "起",
 	jsrgfendi: "分敌",
-	jsrgfendi_tag: "分敌",
 	jsrgfendi_info: "每回合限一次。当你使用【杀】指定唯一目标后，你可以展示其任意张手牌，令其不能使用或打出对应实体牌不全为这些牌的牌直到此【杀】结算结束。然后当此【杀】对其造成伤害后，你于其手牌区或弃牌堆获得这些牌。",
 	jsrgjuxiang: "拒降",
 	jsrgjuxiang_info: "当你不于摸牌阶段得到牌后，你可以弃置之，令当前回合角色于此回合额定的出牌阶段内使用【杀】的次数上限+X（X为你以此法弃置的牌的花色数）。",

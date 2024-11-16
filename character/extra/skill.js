@@ -719,6 +719,7 @@ const skills = {
 		},
 		subSkill: {
 			directHit: {
+				audio: "dczhanjue",
 				charlotte: true,
 				forced: true,
 				mod: {
@@ -739,6 +740,7 @@ const skills = {
 				},
 			},
 			recover: {
+				audio: "dczhanjue",
 				trigger: {
 					source: "damageSource",
 				},
@@ -3710,11 +3712,8 @@ const skills = {
 	shencai: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: 5,
-		filter(event, player) {
-			var count = player.getStat("skill").shencai;
-			if (count && count > player.countMark("shencai")) return false;
-			return true;
+		usable(skill, player) {
+			return 1 + player.countMark("shencai");
 		},
 		filterTarget: lib.filter.notMe,
 		onremove: true,
@@ -5478,6 +5477,14 @@ const skills = {
 			effect: {
 				target(card, player, target) {
 					if (get.tag(card, "recover") && _status.event.type == "phase" && !player.needsToDiscard()) return 0.2;
+					if (card.name === "tiesuo" && target.maxHp > 1) return 0.1;
+					if (get.tag(card, "damage") && target.maxHp > 1 && player !== target && target.countCards("h") > 0) {
+						let fs = game.findPlayer(cur => {
+							return cur !== target && get.attitude(target, cur) > 0;
+						});
+						if (fs) return [0, -player.hp / player.maxHp, 0, 0];
+						return [0, -1 - player.hp / player.maxHp, 0, 1];
+					}
 				},
 			},
 		},

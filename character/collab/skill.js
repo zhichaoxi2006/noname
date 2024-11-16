@@ -1832,16 +1832,15 @@ const skills = {
 			player.storage.dczhiheng_hit = [];
 		},
 		enable: "phaseUse",
+		usable(skill, player) {
+			return 1 + player.getStorage("dczhiheng_hit").length;
+		},
 		position: "he",
 		filterCard: lib.filter.cardDiscardable,
 		discard: false,
 		lose: false,
 		delay: false,
 		selectCard: [1, Infinity],
-		filter(event, player) {
-			var skill = player.getStat().skill;
-			return !skill.dczhiheng || skill.dczhiheng < 1 + player.getStorage("dczhiheng_hit").length;
-		},
 		check(card) {
 			let player = _status.event.player;
 			if (

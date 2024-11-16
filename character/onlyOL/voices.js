@@ -1,4 +1,9 @@
 export default {
+	"#olsbbojue1": "匹夫，今日便让你尝尝我大刀之利！",
+	"#olsbbojue2": "孙坚！你若有胆，便与我一对一！",
+	"#olsbyangwei1": "本将军刀下，不分强弱，只问生死！",
+	"#olsbyangwei2": "敌将何在，速来受死！",
+	"#ol_sb_huaxiong:die": "我已连战三场，匹夫胜之不武……",
 	"#olzongxuan1": "易字从日下月，此乃自然之理。",
 	"#olzongxuan2": "笔著太玄十四卷，继往圣之学。",
 	"#olzhiyan1": "尔降虏，何敢与吾君齐马首乎！",

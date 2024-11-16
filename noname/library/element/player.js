@@ -1,4 +1,3 @@
-
 import { ai } from "../../ai/index.js";
 import { get } from "../../get/index.js";
 import { game } from "../../game/index.js";
@@ -379,14 +378,17 @@ export class Player extends HTMLDivElement {
 				player.node.tipContainer ??= ui.create.div(".tipContainer", player);
 				player.tips ??= new Map();
 				if (!player.tips.has(index)) player.tips.set(index, ui.create.div(".tip", player.node.tipContainer));
-				player.tips.get(index).innerHTML = message.replace(/ /g, "&nbsp;").replace(/[♥︎♦︎]/g, '<span style="color: red; ">$&</span>').replace(/\n/g, '<br>');
+				player.tips.get(index).innerHTML = message
+					.replace(/ /g, "&nbsp;")
+					.replace(/[♥︎♦︎]/g, '<span style="color: red; ">$&</span>')
+					.replace(/\n/g, "<br>");
 				player.tips.get(index).css(css);
 
-				let double = player.classList.contains('fullskin2') && lib.config.layout !== 'long2';
+				let double = player.classList.contains("fullskin2") && lib.config.layout !== "long2";
 
 				const width = player.node.avatar.clientWidth;
 				let w = width * (double ? 2 : 1);
-				player.style.setProperty('--w', `${w}px`);
+				player.style.setProperty("--w", `${w}px`);
 
 				//检查tip的高度，使其不覆盖装备
 				game.callHook("checkTipBottom", [player]);
@@ -437,7 +439,6 @@ export class Player extends HTMLDivElement {
 					player.node.tipContainer?.remove();
 					delete player.node.tipContainer;
 				}
-
 			},
 			this,
 			index
@@ -461,20 +462,20 @@ export class Player extends HTMLDivElement {
 		this.markSkill("stratagem_fury");
 	}
 	/**
-	 * 
+	 *
 	 * 链式创建一次性的API。
-	 * 
+	 *
 	 * 使用者只需关注技能的效果，而不是技能本身
-	 * 
+	 *
 	 *  @example
 	 * when('xxx') when([xxx1,xxx2])//均会被解析为：player:xxx或player:[xxx1,xxx2]
-	 * 
+	 *
 	 * when({player:xxx})或when({gloal:[xxx]})//对象类型将直接应用
-	 * 
+	 *
 	 * when(xxx1,xxx2)//解析为player:[xxx1,xxx2]
-	 * 
+	 *
 	 * when({player: 'xxAfter'}, {global: 'yyBegin'})//合并解析
-	 * @param  {[Signal[]]|Signal[]|SkillTrigger[]} triggerNames 
+	 * @param  {[Signal[]]|Signal[]|SkillTrigger[]} triggerNames
 	 * @returns {When}
 	 */
 	when(...triggerNames) {
@@ -1104,10 +1105,10 @@ export class Player extends HTMLDivElement {
 		return Math.max(
 			0,
 			this.countEnabledSlot(type) -
-			this.getVEquips(type).reduce((num, card) => {
-				let types = get.subtypes(card, false);
-				return num + get.numOf(types, type);
-			}, 0)
+				this.getVEquips(type).reduce((num, card) => {
+					let types = get.subtypes(card, false);
+					return num + get.numOf(types, type);
+				}, 0)
 		);
 	}
 	/**
@@ -1136,11 +1137,11 @@ export class Player extends HTMLDivElement {
 		return Math.max(
 			0,
 			this.countEnabledSlot(type) -
-			this.getVEquips(type).reduce((num, card) => {
-				let types = get.subtypes(card, false);
-				if (!lib.filter.canBeReplaced(card, this)) num += get.numOf(types, type);
-				return num;
-			}, 0)
+				this.getVEquips(type).reduce((num, card) => {
+					let types = get.subtypes(card, false);
+					if (!lib.filter.canBeReplaced(card, this)) num += get.numOf(types, type);
+					return num;
+				}, 0)
 		);
 	}
 	/**
@@ -1488,11 +1489,11 @@ export class Player extends HTMLDivElement {
 	/**
 	 * @deprecated
 	 */
-	$disableEquip() { }
+	$disableEquip() {}
 	/**
 	 * @deprecated
 	 */
-	$enableEquip() { }
+	$enableEquip() {}
 	//装备区End
 	chooseToDebate() {
 		var next = game.createEvent("chooseToDebate");
@@ -2225,10 +2226,10 @@ export class Player extends HTMLDivElement {
 		m = game.checkMod(from, to, m, "attackFrom", from);
 		m = game.checkMod(from, to, m, "attackTo", to);
 		const equips1 = from.getVCards("e", function (card) {
-			return !card.cards?.some(card => {
-				return ui.selected.cards?.includes(card);
-			});
-		}),
+				return !card.cards?.some(card => {
+					return ui.selected.cards?.includes(card);
+				});
+			}),
 			equips2 = to.getVCards("e", function (card) {
 				return !card.cards?.some(card => {
 					return ui.selected.cards?.includes(card);
@@ -3089,6 +3090,9 @@ export class Player extends HTMLDivElement {
 		this.classList.remove("unseen2");
 		this.classList.remove("unseen_show");
 		this.classList.remove("unseen2_show");
+		this.classList.remove("turnedover");
+		this.classList.remove("linked");
+		this.classList.remove("linked2");
 
 		this.node.identity.style.backgroundColor = "";
 		this.node.intro.innerHTML = "";
@@ -3104,6 +3108,8 @@ export class Player extends HTMLDivElement {
 		for (var mark in this.marks) {
 			this.marks[mark].remove();
 		}
+		this.removeTip();
+		ui.updatej(this);
 		ui.updatem(this);
 	}
 	getLeft() {
@@ -3881,9 +3887,21 @@ export class Player extends HTMLDivElement {
 	 * @returns { number }
 	 */
 	countSkill(skill) {
-		var num = this.getStat("skill")[skill];
-		if (num == undefined) return 0;
-		return num;
+		const info = lib.skill[skill];
+		let num = 0;
+		if (!info) {
+			console.warn("“" + skill + "”为无效技能ID！");
+			return 0;
+		}
+		if (info.usable !== undefined && this.hasSkill("counttrigger") && this.storage.counttrigger) {
+			num = this.storage.counttrigger[skill];
+			if (typeof num === "number") return num;
+		}
+		num = this.getStat("skill")[skill];
+		if (typeof num === "number") return num;
+		return this.getHistory("useSkill", evt => {
+			return evt.skill === skill;
+		}).length;
 	}
 	/**
 	 * @param {*} [unowned]
@@ -8695,10 +8713,10 @@ export class Player extends HTMLDivElement {
 		return skill;
 	}
 	/**
-	 * 
-	 * @param {SAAType<string>} skillsToAdd 
-	 * @param {SAAType<Signal>|SkillTrigger} [expire] 
-	 * @returns 
+	 *
+	 * @param {SAAType<string>} skillsToAdd
+	 * @param {SAAType<Signal>|SkillTrigger} [expire]
+	 * @returns
 	 */
 	addTempSkills(skillsToAdd, expire) {
 		//请注意，该方法的底层实现并非tempSkill，而是additionalSkills和player.when！
@@ -8884,7 +8902,7 @@ export class Player extends HTMLDivElement {
 	/**
 	 * 快速获取一名角色当前轮次/倒数第X轮次的历史
 	 *	@template {Exclude< keyof ActionHistory, 'isRound'|'isMe'>} T
-	 * @param {T} key 
+	 * @param {T} key
 	 * @param {(event:GameEventPromise)=>boolean} filter 筛选条件
 	 * @param {number} [num] 获取倒数第num轮的历史，默认为0，表示当前轮
 	 * @param {boolean} [keep] 若为true,则获取倒数第num轮到现在的所有历史
@@ -8920,7 +8938,7 @@ export class Player extends HTMLDivElement {
 	 * @returns { ActionHistory }
 	 */
 	/**
-	 * 
+	 *
 	 * @overload
 	 * @param { 'isRound'|'isMe' } key
 	 * @returns { boolean}
@@ -8953,7 +8971,7 @@ export class Player extends HTMLDivElement {
 	 * @template { Exclude<keyof ActionHistory,'isRound'|'isMe'> } T
 	 * @param { T } key
 	 * @param { (event: GameEventPromise) => void } filter 遍历过程需要执行的函数
-	 * @param { GameEventPromise } [last] 
+	 * @param { GameEventPromise } [last]
 	 */
 	checkHistory(key, filter, last) {
 		if (!key || !filter) return;
@@ -9119,7 +9137,7 @@ export class Player extends HTMLDivElement {
 	/**
 	 * @template {keyof Stat} T
 	 * @overload
-	 * @param {T} key 
+	 * @param {T} key
 	 * @returns {Stat[T]}
 	 */
 	getStat(key) {
@@ -9134,7 +9152,7 @@ export class Player extends HTMLDivElement {
 	/**
 	 * @template {keyof Stat} T
 	 * @overload
-	 * @param {T} key 
+	 * @param {T} key
 	 * @returns {Stat[T]}
 	 */
 	getLastStat(key) {
@@ -9900,9 +9918,9 @@ export class Player extends HTMLDivElement {
 	}
 	/**
 	 * @param { string } skill
-	 * @param { Parameters<this['getSkills']>[0] } arg2
-	 * @param { Parameters<this['getSkills']>[1] } arg3
-	 * @param { Parameters<this['getSkills']>[2] } arg4
+	 * @param { Parameters<this['getSkills']>[0] } [arg2]
+	 * @param { Parameters<this['getSkills']>[1] } [arg3]
+	 * @param { Parameters<this['getSkills']>[2] } [arg4]
 	 * @returns { boolean }
 	 */
 	hasSkill(skill, arg2, arg3, arg4) {

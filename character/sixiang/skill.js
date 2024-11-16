@@ -146,7 +146,9 @@ const skills = {
 			},
 			nokeep: true,
 			skillTagFilter: function (player, tag, arg) {
-				if (tag === "nokeep") return (!arg || (arg.card && get.name(arg.card) === "tao")) && player.isPhaseUsing() && player.countSkill("zhanjue_draw") < 2 && player.hasCard(card => get.name(card) != "tao", "h");
+				if (tag === "nokeep") return (!arg || (arg.card && get.name(arg.card) === "tao")) && player.isPhaseUsing() && !player.countSkill("stdzhanjue") && player.hasCard(card => {
+					return get.name(card) !== "tao";
+				}, "h");
 			},
 		},
 		group: "stdzhanjue_draw",
@@ -698,6 +700,9 @@ const skills = {
 		filter(event, player) {
 			if (!event.source || !event.source.isIn() || event.source == player) return false;
 			return player.inRange(event.player);
+		},
+		check(event, player) {
+			return get.damageEffect(event.player, event.source, player, event.nature) > 0;
 		},
 		async content(event, trigger, player) {
 			trigger.num++;
@@ -2609,17 +2614,15 @@ const skills = {
 				target: function (card, player, target) {
 					if (player.hasSkillTag("jueqing", false, target)) return;
 					if (player._stdjinjian_tmp) return;
-					const count = player.storage.counttrigger;
-					if (count && count.stdjinjian_player && count.stdjinjian_player > 0) return;
 					if (_status.event.getParent("useCard", true) || _status.event.getParent("_wuxie", true)) return;
 					if (get.tag(card, "damage")) {
 						if (target.hasSkill("stdjinjian_effect4")) {
 							return [1, -2];
-						} else {
+						} else if (!target.getStorage("stdjinjian_used").includes("4")) {
 							if (get.attitude(player, target) > 0) {
 								return [0, 0.2];
 							}
-							if (get.attitude(player, target) < 0 && !player.hasSkillTag("damageBonus")) {
+							if (get.attitude(player, target) < 0) {
 								var sha = player.getCardUsable({ name: "sha" });
 								player._stdjinjian_tmp = true;
 								var num = player.countCards("h", function (card) {

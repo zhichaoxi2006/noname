@@ -1040,16 +1040,17 @@ export const Content = {
 						"aiCard",
 						event.aiCard ||
 							function (target) {
-								const getAi = get.event("ai") || function (card) {
-									return Math.random();
-								};
+								const getAi =
+									get.event("ai") ||
+									function (card) {
+										return Math.random();
+									};
 								let hs = target.getCards("h").sort((a, b) => getAi(b) - getAi(a));
 								return { bool: true, cards: [hs[0]] };
 							}
 					);
 				next._args.remove("glow_result");
-			}
-			else event.noselected = true;
+			} else event.noselected = true;
 		}
 		"step 1";
 		var red = [],
@@ -3339,7 +3340,7 @@ export const Content = {
 			player.logSkill(popup_info, info.logLine === false ? false : targets, info.line, null, args);
 		}
 		var next = game.createEvent(event.skill);
-		if (typeof info.usable == "number") {
+		if (info.usable !== undefined) {
 			player.addSkill("counttrigger");
 			if (!player.storage.counttrigger) player.storage.counttrigger = {};
 			if (!player.storage.counttrigger[event.skill]) player.storage.counttrigger[event.skill] = 1;
@@ -5368,13 +5369,13 @@ export const Content = {
 		}
 		event.card2 = lose_list[1][1][0];
 		event.lose_list = lose_list;
-		"step 3"
+		"step 3";
 		if (event.card2.number >= 10 || event.card2.number <= 4) {
 			if (target.countCards("h") > 2) {
 				event.addToAI = true;
 			}
 		}
-		"step 4"
+		"step 4";
 		if (event.lose_list.length) {
 			game.loseAsync({
 				lose_list: event.lose_list,
@@ -7017,7 +7018,7 @@ export const Content = {
 				cards = current.getVCards(pos, filterCard),
 				att2 = get.sgn(get.attitude(player, current));
 			let maxEff = 0;
-			for(let card of cards) {
+			for (let card of cards) {
 				if (att2 <= 0 && get.sgn(get.value(card, current)) < 0) continue;
 				let att3 = get.sgn(get.attitude(player, target)),
 					val = get.effect(target, card, player, target);
@@ -8092,11 +8093,11 @@ export const Content = {
 		}
 		"step 3";
 		event.vcards1?.forEach(card => {
-			if(card.cards?.every(cardx => get.position(cardx) != "e")) player.removeVirtualEquip(card);
+			if (card.cards?.every(cardx => get.position(cardx) != "e")) player.removeVirtualEquip(card);
 			else event.getParent().vcards[0].remove(card);
 		});
 		event.vcards2?.forEach(card => {
-			if(card.cards?.every(cardx => get.position(cardx) != "e")) target.removeVirtualEquip(card);
+			if (card.cards?.every(cardx => get.position(cardx) != "e")) target.removeVirtualEquip(card);
 			else event.getParent().vcards[1].remove(card);
 		});
 		if (!event.delayed) game.delay();
@@ -9573,49 +9574,22 @@ export const Content = {
 	},
 	turnOver: function () {
 		game.log(player, "翻面");
-		player.classList.toggle("turnedover");
-		game.broadcast(function (player) {
-			player.classList.toggle("turnedover");
-		}, player);
+		game.broadcastAll(player => player.classList.toggle("turnedover"), player);
 		game.addVideo("turnOver", player, player.classList.contains("turnedover"));
 	},
 	link: function () {
 		const isLinked = player.isLinked();
 		game.log(player, (isLinked ? "解除" : "被") + "连环");
-		game.broadcastAll(isLinked => {
-			if (lib.config.background_audio) {
-				game.playAudio("effect", "link" + (isLinked ? "_clear" : ""));
-			}
-		}, isLinked);
-		player.classList.remove("target");
-		if (get.is.linked2(player)) {
-			player.classList.toggle("linked2");
-		} else {
-			player.classList.toggle("linked");
-		}
-		ui.updatej(player);
-		ui.updatem(player);
-		game.broadcast(
-			function (player, linked) {
+		game.broadcastAll(
+			(player, isLinked) => {
+				if (lib.config.background_audio) game.playAudio("effect", "link" + (isLinked ? "_clear" : ""));
 				player.classList.remove("target");
-				if (get.is.linked2(player)) {
-					if (linked) {
-						player.classList.add("linked2");
-					} else {
-						player.classList.remove("linked2");
-					}
-				} else {
-					if (linked) {
-						player.classList.add("linked");
-					} else {
-						player.classList.remove("linked");
-					}
-				}
+				player.classList.toggle(get.is.linked2(player) ? "linked2" : "linked");
 				ui.updatej(player);
 				ui.updatem(player);
 			},
 			player,
-			player.isLinked()
+			isLinked
 		);
 		game.addVideo("link", player, player.isLinked());
 	},

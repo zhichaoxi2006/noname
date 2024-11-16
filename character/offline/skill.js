@@ -740,7 +740,9 @@ const skills = {
 		},
 		logTarget: "target",
 		async content(event, trigger, player) {
-			const num = player.getHistory("useSkill", evt => evt.skill == "xkxianxing").length;
+			player.addTempSkill(event.name + "_used");
+			player.addMark(event.name + "_used", 1, false);
+			const num = player.countMark(event.name + "_used");
 			await player.draw(num);
 			if (num > 1) {
 				player
@@ -755,9 +757,8 @@ const skills = {
 									if (get.event("num") > 1) return 1;
 									return [0, 1].randomGet();
 								})
-								.set("num", num)
-						}
-						else event.finish();
+								.set("num", num);
+						} else event.finish();
 					})
 					.then(() => {
 						if (result.index == 0) player.loseHp(num - 1);
@@ -768,6 +769,15 @@ const skills = {
 						num: num,
 					});
 			}
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+				intro: {
+					content: "已发动过#次",
+				},
+			},
 		},
 	},
 	xk_qiyijun: {
@@ -3520,15 +3530,16 @@ const skills = {
 	tydingpan: {
 		audio: "dingpan",
 		enable: "phaseUse",
-		usable: 3,
+		usable(skill, player) {
+			return get.event().tydingpan?.length;
+		},
 		filter(event, player) {
-			if (event.tydingpan && player.countMark("tydingpan") >= event.tydingpan.length) return false;
 			return game.hasPlayer(current => current.countCards("e"));
 		},
 		filterTarget(event, player, target) {
 			return target.countCards("e");
 		},
-		onChooseToUse: function (event) {
+		onChooseToUse(event) {
 			if (event.type != "phase" || game.online) return;
 			var list = [],
 				player = event.player;
@@ -3538,13 +3549,7 @@ const skills = {
 			event.set("tydingpan", list);
 		},
 		async content(event, trigger, player) {
-			if (!player.countMark("tydingpan")) {
-				player.when({ global: ["phaseUseBegin", "phaseUseAfter"] }).then(() => {
-					player.removeMark("tydingpan", player.countMark("tydingpan"), false);
-				});
-			}
-			player.addMark("tydingpan", 1, false);
-			const target = event.target;
+			const { target } = event;
 			await target.draw();
 			let goon = get.damageEffect(target, player, target) >= 0;
 			if (!goon && target.hp >= 4 && get.attitude(player, target) < 0) {
@@ -4962,7 +4967,7 @@ const skills = {
 				event.result = {
 					bool: result.bool,
 					targets: [target],
-					cost_data: result.links[0],
+					cost_data: result.links?.[0],
 				};
 			} else event.result = { bool: false };
 		},

@@ -1998,6 +1998,17 @@ const skills = {
 				return cards.filterInD("od").length > 0;
 			} else return event.cards.filterInD("od").length > 0;
 		},
+		check(event, player) {
+			if (player.hasSkill("funan_jiexun") || get.attitude(player, event.player) > 0) return true;
+			let cards = [];
+			if (get.itemtype(event.respondTo[1]) == "card") cards.push(event.respondTo[1]);
+			else if (event.respondTo[1].cards) cards.addArray(event.respondTo[1].cards);
+			return event.cards.filterInD("od").reduce((acc, card) => {
+				return acc + get.value(card);
+			}, 0) - cards.filterInD("od").reduce((acc, card) => {
+				return acc + get.value(card);
+			});
+		},
 		logTarget: "player",
 		content: function () {
 			"step 0";
@@ -4671,14 +4682,14 @@ const skills = {
 			return player.countCards("h") > player.hp;
 		},
 		filterTarget: function (card, player, target) {
-			return get.distance(target, player, "attack") <= 1 && target.countCards("e") > 0;
+			return player !== target && target.inRange(player) && target.countCards("e") > 0;
 		},
 		content: function () {
 			"step 0";
-			target.chooseToUse({ name: "sha" }, "止戈：使用一张杀，或将其装备区里的一张牌交给" + get.translation(player));
+			target.chooseToUse({ name: "sha" }, "止戈：使用一张杀，或将装备区里的一张牌交给" + get.translation(player));
 			"step 1";
 			if (!result.bool && target.countCards("e")) {
-				target.chooseCard("e", true, "将其装备区里的一张牌交给" + get.translation(player));
+				target.chooseCard("e", true, "将装备区里的一张牌交给" + get.translation(player));
 			} else {
 				event.finish();
 			}
@@ -7166,7 +7177,7 @@ const skills = {
 			},
 			nokeep: true,
 			skillTagFilter: function (player, tag, arg) {
-				if (tag === "nokeep") return (!arg || (arg.card && get.name(arg.card) === "tao")) && player.isPhaseUsing() && player.countSkill("zhanjue_draw") < 2 && player.hasCard(card => get.name(card) != "tao", "h");
+				if (tag === "nokeep") return (!arg || (arg.card && get.name(arg.card) === "tao")) && player.isPhaseUsing() && get.skillCount("zhanjue_draw") < 2 && player.hasCard(card => get.name(card) != "tao", "h");
 			},
 		},
 	},
