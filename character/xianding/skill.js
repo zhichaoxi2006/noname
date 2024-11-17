@@ -10,7 +10,6 @@ const skills = {
 			source: "damageBegin3",
 		},
 		frequent: true,
-		logTarget: "player",
 		async content(event, trigger, player) {
 			player.draw().gaintag = ["newj_yuxi"];
 			player.addSkill(event.name + "_use");
