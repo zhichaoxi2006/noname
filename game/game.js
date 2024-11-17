@@ -16,7 +16,7 @@
 	const {
 		game,
 		get,
-		util: { nonameInitialized, assetURL, userAgent },
+		util: { nonameInitialized, assetURL, userAgent, compatibleEnvironment },
 		UpdateReason,
 	} = await import("../noname-compatible.js").catch(importFallback);
 
@@ -184,7 +184,7 @@
 			}
 		} catch (e_1) {
 			console.log("serviceWorker加载失败: ", e_1);
-			alert(globalText.SERVICE_WORKER_LOAD_FAILED);
+			return alert(globalText.SERVICE_WORKER_LOAD_FAILED);
 		}
 	}
 
@@ -270,7 +270,7 @@
 
 				/**
 				 * @param {*} url
-				 * @param {typeof import("../library/update.js")} param1
+				 * @param {typeof import("../noname/library/update.js")} param1
 				 * @returns {Promise<File>}
 				 */
 				function update(url, { request, createProgress }) {
@@ -521,7 +521,7 @@
 		};
 
 		const nonameInitialized = localStorage.getItem("noname_inited");
-		const assetURL = typeof nonameInitialized != "string" || nonameInitialized === "nodejs" ? "" : nonameInitialized;
+		const assetURL = "";
 		const userAgent = navigator.userAgent.toLowerCase();
 
 		return {
@@ -531,6 +531,7 @@
 				nonameInitialized,
 				assetURL,
 				userAgent,
+				compatibleEnvironment: true,
 			},
 			UpdateReason,
 		};
