@@ -13,6 +13,7 @@ import voices from "./voices.js";
 import { characterSort, characterSortTranslate } from "./sort.js";
 
 game.import("character", function () {
+	lib.group.add("western");
 	return {
 		name: "tw",
 		connect: true,
