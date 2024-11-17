@@ -254,8 +254,7 @@ export const otherMenu = function (/** @type { boolean | undefined } */ connectM
 										// 特殊处理
 										if (
 											name == "noname-server.exe" &&
-											e.message.includes("resource busy or locked") &&
-											location.protocol.startsWith("http")
+											e.message.includes("resource busy or locked")
 										) {
 											if (
 												typeof window.require == "function" &&
