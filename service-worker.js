@@ -26,8 +26,6 @@ if (typeof sfc != 'undefined') {
 	console.error(`sfc undefined`);
 }
 
-console.log('serviceWorker version 2.3');
-
 self.addEventListener("install", (event) => {
 	// The promise that skipWaiting() returns can be safely ignored.
 	self.skipWaiting();
@@ -35,21 +33,41 @@ self.addEventListener("install", (event) => {
 
 self.addEventListener("activate", (event) => {
 	// 当一个 service worker 被初始注册时，页面在下次加载之前不会使用它。 claim() 方法会立即控制这些页面
-	event.waitUntil(self.clients.claim());
+	// event.waitUntil(self.clients.claim());
+	console.log("service worker加载完成，执行重启操作");
+	sendReload();
 });
 
 self.addEventListener('message', event => {
 	console.log(event.data);
+	const { action } = event.data;
+	switch (action) {
+		case "reload":
+			sendReload();
+			break;
+		default:
+			console.log('Unknown action');
+	}
 });
+
+function sendReload() {
+	self.clients.matchAll().then(clients => {
+		clients.forEach(client => {
+			client.postMessage({ type: 'reload' });
+		});
+	});
+}
 
 /**
  * 将vue编译的结果放在这里，调用的时候直接返回就好了
  */
 const vueFileMap = new Map();
 
-self.addEventListener('fetch', event => {
+const searchParams = ["raw", "worker", "sharedworker", "module", "url"];
+
+self.addEventListener("fetch", event => {
 	const request = event.request;
-	if (typeof request.url != 'string') return;
+	if (typeof request.url != "string") return;
 	const url = new URL(request.url);
 	// 直接返回vue编译好的结果
 	if (vueFileMap.has(request.url)) {
@@ -65,8 +83,8 @@ self.addEventListener('fetch', event => {
 	}
 	if (!['.ts', '.json', '.vue', 'css', '.js'].some(ext => url.pathname.endsWith(ext)) && !request.url.replace(location.origin, '').startsWith('/noname-builtinModules/')) return;
 	// 普通js请求不处理
-	if (url.pathname.endsWith('.js') && url.searchParams.size == 0) {
-		return;
+	if (url.pathname.endsWith('.js')) {
+		if (url.searchParams.size == 0 || !url.searchParams.keys().some(key => searchParams.includes(key))) return;
 	}
 	if (url.pathname.endsWith('.ts')) {
 		// 不处理视频文件
@@ -110,9 +128,10 @@ self.addEventListener('fetch', event => {
 		});
 		console.log(moduleName, '编译成功');
 		event.respondWith(Promise.resolve(rep));
+		return;
 	} else {
 		// 请求原文件
-		const res = fetch(request.url.replace(/\?.*/, ''), {
+		const response = fetch(request.url.replace(/\?.*/, ''), {
 			method: request.method,
 			mode: "no-cors",
 			headers: new Headers({
@@ -121,7 +140,7 @@ self.addEventListener('fetch', event => {
 		});
 		// 修改请求结果
 		event.respondWith(
-			res.then(res => {
+			response.then(res => {
 				if (!res.ok) return res;
 				console.log('正在编译', request.url);
 				return res.text().then(text => {
@@ -209,6 +228,23 @@ self.addEventListener('fetch', event => {
 								resolveJsonModule: true,
 								esModuleInterop: true,
 							}, request.url);
+						} else if (request.url.endsWith('css')) {
+							// 兼容import with
+							if (requestAcceptHeader?.includes('text/css')) {
+								js = text;
+								responseContentType = 'text/css';
+							}
+							else {
+								const id = Date.now().toString();
+								const scopeId = `data-v-${ id }`;
+								js = dedent`
+									const style = document.createElement('style');
+									style.setAttribute('type', 'text/css');
+									style.setAttribute('data-vue-dev-id', \`${ scopeId }\`);
+									style.textContent = ${ JSON.stringify(text) };
+									document.head.appendChild(style);
+								`;
+							}
 						} else if (request.url.endsWith('.vue')) {
 							const id = Date.now().toString();
 							const scopeId = `data-v-${ id }`;
@@ -229,26 +265,22 @@ self.addEventListener('fetch', event => {
 							});
 							// 用于存放代码，最后 join('\n') 合并成一份完整代码
 							const codeList = [];
-	
 							// 保存url并且拼接参数
 							const url = new URL(request.url);
 							const scriptSearchParams = new URLSearchParams(url.search.slice(1));
 							scriptSearchParams.append('type', 'script');
-	
 							const templateSearchParams = new URLSearchParams(url.search.slice(1));
 							templateSearchParams.append('type', 'template');
-	
 							vueFileMap.set(
-								url.origin + url.pathname + '?' + scriptSearchParams.toString(),
+								`${url.origin}${url.pathname}?${scriptSearchParams.toString()}`,
 								// 重写 default
 								sfc.rewriteDefault(script.attrs && script.attrs.lang == 'ts' ? ts.transpile(script.content, {
 									module: ts.ModuleKind.ES2015,
-									//@todo: ES2019 -> ES2020
-									target: ts.ScriptTarget.ES2019,
+									target: ts.ScriptTarget.ES2020,
 									inlineSourceMap: true,
 									resolveJsonModule: true,
 									esModuleInterop: true,
-								}, url.origin + url.pathname + '?' + scriptSearchParams.toString()) : script.content, "__sfc_main__")
+								}, `${url.origin}${url.pathname}?${scriptSearchParams.toString()}`) : script.content, "__sfc_main__")
 									.replace(`const __sfc_main__`, `export const __sfc_main__`)
 									// import vue重新指向
 									.replaceAll(`from "vue"`, `from "/game/vue.esm-browser.js"`)
@@ -270,7 +302,7 @@ self.addEventListener('fetch', event => {
 							});
 	
 							vueFileMap.set(
-								url.origin + url.pathname + '?' + templateSearchParams.toString(),
+								`${url.origin}${url.pathname}?${templateSearchParams.toString()}`,
 								template.code
 								// .replace(`function render(_ctx, _cache) {`, str => str + 'console.log(_ctx);')
 								.replaceAll(`from "vue"`, `from "/game/vue.esm-browser.js"`)
@@ -295,23 +327,6 @@ self.addEventListener('fetch', event => {
 							}
 							js = codeList.join('\n');
 							// console.log(js);
-						} else if (request.url.endsWith('css')) {
-							// 兼容import with
-							if (requestAcceptHeader?.includes('text/css')) {
-								js = text;
-								responseContentType = 'text/css';
-							}
-							else {
-								const id = Date.now().toString();
-								const scopeId = `data-v-${ id }`;
-								js = dedent`
-									const style = document.createElement('style');
-									style.setAttribute('type', 'text/css');
-									style.setAttribute('data-vue-dev-id', \`${ scopeId }\`);
-									style.textContent = ${ JSON.stringify(text) };
-									document.head.appendChild(style);
-								`;
-							}
 						}
 					}
 
@@ -331,5 +346,6 @@ self.addEventListener('fetch', event => {
 				throw e;
 			})
 		);
+		return;
 	}
 });
