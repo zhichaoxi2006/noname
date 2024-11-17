@@ -439,7 +439,7 @@ const skills = {
 					if (!event.card) return false;
 					const evt = event.getParent("useCard");
 					if (!evt || evt.card !== event.card || evt.cards?.length !== 1) return false;
-					return player.hasHistory("lose", evtx => evtx.getParent() === evt && Object.keys(evtx.gaintag_map).some(i => evtx.gaintag_map[i].includes("olkuangxiang_buff")));
+					return player.hasHistory("lose", evtx => evtx.getParent() === evt && Object.keys(evtx.gaintag_map).some(i => evtx.gaintag_map[i].includes("olkuangxiang_effect")));
 				},
 				forced: true,
 				logTarget: "player",

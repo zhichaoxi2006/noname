@@ -1898,7 +1898,7 @@ const skills = {
 			if (removeSkills.length) target.removeSkill(removeSkills);
 			const gainSkills = target.getStockSkills(true, true).filter(i => {
 				const info = get.info(i);
-				if (info && info.zhuSkill && !player.isZhu2()) return false;
+				if (info && info.zhuSkill && !target.isZhu2()) return false;
 				return !info || !info.charlotte;
 			});
 			if (gainSkills.length) {
