@@ -184,7 +184,7 @@
 			}
 		} catch (e_1) {
 			console.log("serviceWorker加载失败: ", e_1);
-			alert(globalText.SERVICE_WORKER_LOAD_FAILED);
+			return alert(globalText.SERVICE_WORKER_LOAD_FAILED);
 		}
 	}
 
