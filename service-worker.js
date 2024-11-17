@@ -63,9 +63,11 @@ function sendReload() {
  */
 const vueFileMap = new Map();
 
-self.addEventListener('fetch', event => {
+const searchParams = ["raw", "worker", "sharedworker", "module", "url"];
+
+self.addEventListener("fetch", event => {
 	const request = event.request;
-	if (typeof request.url != 'string') return;
+	if (typeof request.url != "string") return;
 	const url = new URL(request.url);
 	// 直接返回vue编译好的结果
 	if (vueFileMap.has(request.url)) {
@@ -81,8 +83,8 @@ self.addEventListener('fetch', event => {
 	}
 	if (!['.ts', '.json', '.vue', 'css', '.js'].some(ext => url.pathname.endsWith(ext)) && !request.url.replace(location.origin, '').startsWith('/noname-builtinModules/')) return;
 	// 普通js请求不处理
-	if (url.pathname.endsWith('.js') && url.searchParams.size == 0) {
-		return;
+	if (url.pathname.endsWith('.js')) {
+		if (url.searchParams.size == 0 || !url.searchParams.keys().some(key => searchParams.includes(key))) return;
 	}
 	if (url.pathname.endsWith('.ts')) {
 		// 不处理视频文件
