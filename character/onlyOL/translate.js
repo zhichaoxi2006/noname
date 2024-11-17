@@ -152,7 +152,7 @@ const translates = {
 	olsbbojue: "搏决",
 	olsbbojue_info: "出牌阶段限两次，你可以选择一名其他角色，然后同时与其选择摸一张牌或弃置一张牌，然后若你与其的手牌数之和的变化值为：0，你与其依次弃置对方一张牌；2，你与其依次视为对对方使用一张【杀】。",
 	olsbyangwei: "扬威",
-	olsbyangwei_info: "锁定技。①当你于一回合不因摸牌阶段获得至少两张牌后，你下次造成的伤害+1。②当你于一回合不因弃牌阶段弃置至少两张牌后，你下次受到的伤害+1。",
+	olsbyangwei_info: "锁定技。当你于摸牌/弃牌阶段外摸/弃置了本回合的第二张牌后，你下一次造成/受到的伤害+1。",
 	ol_sb_dongzhuo: "OL谋董卓",
 	ol_sb_dongzhuo_prefix: "OL谋",
 	olguanbian: "观变",

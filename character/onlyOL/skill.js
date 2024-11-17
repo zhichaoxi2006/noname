@@ -370,7 +370,7 @@ const skills = {
 	olsbyangwei: {
 		audio: 2,
 		trigger: { player: "gainAfter" },
-		getIndex(event, player) {
+		filter(event, player) {
 			if (event.getParent().name !== "draw" || event.getParent("phaseDraw").player === player) return false;
 			let history = player.getHistory(
 				"gain",
@@ -383,12 +383,10 @@ const skills = {
 				.slice()
 				.map(evt => evt.cards)
 				.flat();
-			for (let i = history.length; i >= 0; i--) {
-				if (i % 2 === 0) history.remove(history[i]);
-			}
-			return history.filter(card => event.cards.includes(card)).length;
+			return history.length >= 2 && event.cards.includes(history[1]);
 		},
 		forced: true,
+		usable: 1,
 		content() {
 			player.addSkill("olsbyangwei_attack");
 			player.addMark("olsbyangwei_attack", 1, false);
@@ -401,7 +399,8 @@ const skills = {
 					player: "loseAfter",
 					global: "loseAsyncAfter",
 				},
-				getIndex(event, player) {
+				filter(event, player) {
+					if (player.countSkill("olsbyangwei_discard")) return false;
 					if (event.type != "discard" || event.getlx === false || event.getParent("phaseDiscard").player === player) return false;
 					if (!event.getl(player)?.cards2?.length) return false;
 					let history = game.getGlobalHistory(
@@ -417,12 +416,10 @@ const skills = {
 						.slice()
 						.map(evt => evt.getl(player).cards2)
 						.flat();
-					for (let i = history.length; i >= 0; i--) {
-						if (i % 2 === 0) history.remove(history[i]);
-					}
-					return history.filter(card => event.getl(player).cards2.includes(card)).length;
+					return history.length >= 2 && event.getl(player).cards2.includes(history[1]);
 				},
 				forced: true,
+				usable: 1,
 				content() {
 					player.addSkill("olsbyangwei_defend");
 					player.addMark("olsbyangwei_defend", 1, false);
@@ -442,6 +439,14 @@ const skills = {
 					name: "扬威 - 增伤",
 					content: "下次造成的伤害+#",
 				},
+				ai: {
+					damageBonus: true,
+					effect: {
+						player(card, player, target) {
+							if (get.tag(card, "damage")) return [1, 0, 2, 0];
+						}
+					}
+				},
 			},
 			defend: {
 				charlotte: true,
@@ -456,6 +461,13 @@ const skills = {
 				intro: {
 					name: "扬威 - 受伤",
 					content: "下次受到的伤害+#",
+				},
+				ai: {
+					effect: {
+						target(card, player, target) {
+							if (get.tag(card, "damage")) return 2;
+						}
+					}
 				},
 			},
 		},
