@@ -772,10 +772,17 @@ const skills = {
 					return !player.getStorage("dckengqiang_used").includes(button.link);
 				})
 				.set("ai", button => {
-					const player = get.player();
-					if (button.link == "draw") return player.maxHp;
-					return get.damageEffect(get.event().getTrigger().player, player);
+					alert(button.link)
+					return get.event("value")[button.link] || 0;
 				})
+				.set("value", function () {
+					let draw = player.maxHp * get.effect(player, { name: "draw" }, player, player),
+						damage = get.damageEffect(trigger.player, player, player, trigger.nature);
+					if (trigger.cards) damage += trigger.cards.reduce((acc, card) => {
+						return acc + get.value(card, player);
+					}, 0);
+					return { damage, draw };
+				}())
 				.forResult();
 			event.result = {
 				bool: result.bool,

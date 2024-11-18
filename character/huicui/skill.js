@@ -2571,7 +2571,7 @@ const skills = {
 				ai: {
 					effect: {
 						player_use(card, player, target) {
-							if (player._dczixi_effect_use || get.tag(card, "multitarget")) return;
+							if (!target || player._dczixi_effect_use || get.tag(card, "multitarget")) return;
 							let js = target.countCards("j");
 							if (js == 1) return [2, 0, 2, 0];
 							else if (js == 2) return [1, 2];
