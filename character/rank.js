@@ -737,6 +737,8 @@ window.noname_character_rank = {
 		"yue_zoushi",
 		"yue_diaochan",
 		"clan_wangchang",
+		"sb_guojia",
+		"sb_zhangliao",
 	],
 	bp: [
 		"dongxie",
@@ -1294,6 +1296,7 @@ window.noname_character_rank = {
 		"ol_sb_huaxiong",
 	],
 	b: [
+		"mb_sp_ganfuren",
 		"ol_niufu",
 		"chenggongying",
 		"jiangziya",
@@ -2066,6 +2069,8 @@ window.noname_character_rank = {
 			"ol_sb_dongzhuo",
 		],
 		epic: [
+			"sb_guojia",
+			"sb_zhangliao",
 			"cx_majun",
 			"qq_majun",
 			"dc_sb_huanggai",
@@ -2438,6 +2443,7 @@ window.noname_character_rank = {
 			"niufu",
 		],
 		rare: [
+			"mb_sp_ganfuren",
 			"dongxie",
 			"ol_dongxie",
 			"ol_hanfu",

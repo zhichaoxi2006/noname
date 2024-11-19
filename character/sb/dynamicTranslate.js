@@ -53,5 +53,9 @@ const dynamicTranslates = {
 		}
 		return str;
 	},
+	sbtiandu(player) {
+		if (player.storage.sbtiandu) return '转换技，出牌阶段开始时，阴：你可以弃置两张手牌，然后视为使用一张普通锦囊牌；<span class="bluetext">阳：你进行判定并获得判定牌，然后若判定结果与你本局游戏因〖天妒〗弃置的牌花色相同，你受到1点无来源伤害</span>。';
+		return '转换技，出牌阶段开始时，<span class="bluetext">阴：你可以弃置两张手牌，然后视为使用一张普通锦囊牌</span>；阳：你进行判定并获得判定牌，然后若判定结果与你本局游戏因〖天妒〗弃置的牌花色相同，你受到1点无来源伤害。';
+	},
 };
 export default dynamicTranslates;

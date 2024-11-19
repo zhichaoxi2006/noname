@@ -34,6 +34,9 @@ const skills = {
 			cardDiscardable(card, player, name) {
 				if (name == "phaseDiscard" && get.color(card) == "black") return false;
 			},
+			targetInRange(card, player, target) {
+				if (target.getHp() < player.getHp() && get.color(card) == "black") return true;
+			},
 		},
 	},
 	olbianyu: {
@@ -62,6 +65,7 @@ const skills = {
 			if (result?.bool && result.cards?.length) {
 				target.addSkill("olbianyu_viewAs");
 				target.addGaintag(result.cards, "olbianyu_viewAs");
+				if ([player, target].some(current => current.getCards("h").every(card => get.name(card, current) == "sha"))) await player.draw(2);
 			}
 		},
 		subSkill: {
