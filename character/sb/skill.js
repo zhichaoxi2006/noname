@@ -256,19 +256,29 @@ const skills = {
 				num = bool1 ? (bool2 ? 2 : 3) : bool2 ? 1 : 2,
 				prompt = `选择其中〇至${get.cnNumber(num)}张牌`;
 			let cards = await player.choosePlayerCard(target, position, [0, num], true, prompt).set("visible", true).forResultCards();
-			if (!cards.length) return;
-			let result;
-			if (target.getCards(position).some(card => !cards.includes(card)))
-				result = await target
-					.chooseControl()
-					.set("choiceList", [`${get.translation(player)}将${get.translation(cards)}分配给其他角色`, `弃置不为${get.translation(cards)}的牌`])
-					.set("ai", () => {
-						return get.event("goon") ? 0 : 1;
-					})
-					.set("goon", 2 * cards.length <= target.countCards(position) || get.attitude(target, player) > 0)
-					.forResult();
-			else result = { index: 0 };
-			if (result.index == 0) {
+			let result = await target
+				.chooseControl()
+				.set("choiceList", [
+					`令${get.translation(player)}将${player === target ? get.translation(cards) : "其选择的牌"}分配给其他角色`, 
+					`弃置所有未被${get.translation(player)}选择的牌`
+				])
+				.set("ai", () => {
+					return get.event("goon") ? 0 : 1;
+				})
+				.set("goon", function () {
+					const att = get.sgnAttitude(target, player), hs = target.countCards(position);
+					if (att > 0 || hs > 5) return true;
+					if (hs < 2) return false;
+					let num;
+					if (att === 0) {
+						num = Math.min(hs, 2);
+						return hs > 2 * num;
+					}
+					num = Math.min(hs, 0.5 + 1.2 * Math.random());
+					return hs > 3 * num;
+				}())
+				.forResult();
+			if (result.index === 0 && cards.length) {
 				if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
 				let given_map = {};
 				while (cards.length) {
@@ -318,7 +328,10 @@ const skills = {
 						animate: "gain2",
 					})
 					.setContent("gaincardMultiple");
-			} else await target.discard(target.getCards(position).removeArray(cards));
+			} else if (result.index) {
+				const discard = target.getCards(position).removeArray(cards);
+				if (discard.length) await target.discard(discard);
+			}
 		},
 		global: "sbwansha_global",
 		subSkill: {

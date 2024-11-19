@@ -772,7 +772,6 @@ const skills = {
 					return !player.getStorage("dckengqiang_used").includes(button.link);
 				})
 				.set("ai", button => {
-					alert(button.link)
 					return get.event("value")[button.link] || 0;
 				})
 				.set("value", function () {
