@@ -251,9 +251,7 @@ const skills = {
 		async content(event, trigger, player) {
 			const target = trigger.player,
 				position = player.storage.sbwansha ? "hej" : "h";
-			const bool1 = player.storage.sbwansha,
-				bool2 = get.mode() == "identity",
-				num = bool1 ? (bool2 ? 2 : 3) : bool2 ? 1 : 2,
+			const num = 2,
 				prompt = `选择其中〇至${get.cnNumber(num)}张牌`;
 			let cards = await player.choosePlayerCard(target, position, [0, num], true, prompt).set("visible", true).forResultCards();
 			let result = await target
@@ -496,7 +494,7 @@ const skills = {
 				if (player == current) return false;
 				num += current.getRoundHistory("useCard", evt => evt.targets?.includes(player), 1).length;
 			});
-			return num <= (get.mode == "identity" ? 1 : 2) && Array.from(ui.discardPile.childNodes).some(card => get.info("sbweimu").filterCardx(card));
+			return num <= 1 && Array.from(ui.discardPile.childNodes).some(card => get.info("sbweimu").filterCardx(card));
 		},
 		filterCardx(card) {
 			return get.subtype(card) == "equip2" || (get.type(card) == "trick" && get.color(card) == "black");
