@@ -1296,7 +1296,7 @@ window.noname_character_rank = {
 		"ol_sb_huaxiong",
 	],
 	b: [
-		"mb_sp_ganfuren",
+		"mb_ganfuren",
 		"ol_niufu",
 		"chenggongying",
 		"jiangziya",
@@ -2443,7 +2443,7 @@ window.noname_character_rank = {
 			"niufu",
 		],
 		rare: [
-			"mb_sp_ganfuren",
+			"mb_ganfuren",
 			"dongxie",
 			"ol_dongxie",
 			"ol_hanfu",
