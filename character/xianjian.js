@@ -6,22 +6,22 @@ game.import("character", function () {
 			pal_lixiaoyao: ["male", "qun", 4, ["tianjian", "xjyufeng"]],
 			pal_zhaoliner: ["female", "wei", 3, ["huimeng", "tianshe"]],
 			pal_linyueru: ["female", "wei", 3, ["guiyuan", "qijian"]],
-			pal_anu: ["female", "wu", 3, ["lingdi", "anwugu"]],
+			pal_anu: ["female", "wu", 3, ["lingdi", "anwugu"], ["name:null|奴"]],
 
 			pal_wangxiaohu: ["male", "qun", 4, ["husha"]],
 			pal_sumei: ["female", "shu", 3, ["sheying", "dujiang", "huahu"]],
 			pal_shenqishuang: ["female", "wei", 3, ["qixia", "jianzhen", "binxin"]],
 
 			pal_jingtian: ["male", "wu", 3, ["sajin", "jtjubao"]],
-			pal_xuejian: ["female", "shu", 3, ["xshuangren", "shenmu", "duci"]],
+			pal_xuejian: ["female", "shu", 3, ["xshuangren", "shenmu", "duci"], ["name:唐|雪见"]],
 			pal_longkui: ["female", "qun", 3, ["fenxing", "diewu", "lingyu"]],
 			pal_zixuan: ["female", "wei", 3, ["shuiyun", "wangyou", "changnian"]],
-			pal_changqing: ["male", "wei", 4, ["luanjian", "ctianfu"]],
+			pal_changqing: ["male", "wei", 4, ["luanjian", "ctianfu"], ["name:徐|长卿"]],
 
 			pal_nangonghuang: ["male", "wei", 3, ["zhaoyao", "sheling", "zhangmu"], ["name:南宫|煌"]],
 			pal_wenhui: ["female", "shu", 4, ["huxi", "longxiang"]],
 			pal_wangpengxu: ["female", "shu", 3, ["duxinshu", "feixu"]],
-			pal_xingxuan: ["male", "wei", 3, ["feizhua", "leiyu", "lingxue"]],
+			pal_xingxuan: ["male", "wei", 3, ["feizhua", "leiyu", "lingxue"], ["name:周|煊"]],
 			pal_leiyuange: ["male", "shu", 4, ["feng", "ya", "song"]],
 
 			pal_yuntianhe: ["male", "wu", 4, ["longxi", "zhuyue", "guanri"]],
@@ -33,11 +33,11 @@ game.import("character", function () {
 			pal_jiangyunfan: ["male", "wei", 4, ["xunying", "liefeng"]],
 			pal_tangyurou: ["female", "shu", 3, ["txianqu", "qiongguang"]],
 			pal_longyou: ["male", "wei", 4, ["yuexing", "minsha"]],
-			pal_xiaoman: ["female", "shu", 3, ["anwugu", "lingquan", "shenwu"]],
+			pal_xiaoman: ["female", "shu", 3, ["anwugu", "lingquan", "shenwu"], ["name:韩|小蛮"]],
 
-			pal_xiahoujinxuan: ["male", "shu", 3, ["xuanmo", "danqing"]],
+			pal_xiahoujinxuan: ["male", "shu", 3, ["xuanmo", "danqing"], ["name:夏侯|瑾轩"]],
 			pal_muchanglan: ["female", "wu", 3, ["feixia", "lueying"]],
-			pal_xia: ["female", "shu", 3, ["xjzongyu", "fanling"]],
+			pal_xia: ["female", "shu", 3, ["xjzongyu", "fanling"], ["name:null|瑕"]],
 			pal_jiangcheng: ["male", "qun", 4, ["yanzhan", "fenshi"]],
 
 			pal_yuejinzhao: ["male", "wei", 4, ["ywuhun", "xjyingfeng"]],

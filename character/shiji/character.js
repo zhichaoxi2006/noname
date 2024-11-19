@@ -7,7 +7,7 @@ const characters = {
 	sp_jiangwan: ["male", "shu", 3, ["spzhenting", "spjincui"]],
 	sp_zhangchangpu: ["female", "wei", 3, ["spdifei", "spyanjiao"]],
 	sp_cuiyan: ["male", "wei", 3, ["spyajun", "spzundi"]],
-	sp_huaman: ["female", "shu", 4, ["spxiangzhen", "spfangzong", "spxizhan"]],
+	sp_huaman: ["female", "shu", 4, ["spxiangzhen", "spfangzong", "spxizhan"], ["name:孟|null"]],
 	sp_gaolan: ["male", "qun", 4, ["spjungong", "spdengli"]],
 	sunyi: ["male", "wu", 4, ["zaoli"]],
 	sp_wangshuang: ["male", "wei", 4, ["yiyong", "shanxie"]],

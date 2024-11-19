@@ -488,12 +488,14 @@ const characters = {
 		hp: 3,
 		maxHp: 4,
 		skills: ["jsrgsheju", "jsrgzuwang"],
+		names: "司马|亮",
 	},
 	jsrg_tufashujineng: {
 		sex: "male",
 		group: "qun",
 		hp: 4,
 		skills: ["jsrgqinrao", "jsrgfuran"],
+		names: "秃发|树机能",
 	},
 	jsrg_lukang: {
 		sex: "male",

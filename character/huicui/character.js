@@ -1,8 +1,8 @@
 const characters = {
-	yue_diaochan: ["female", "qun", 3, ["dctanban", "dcdiou"]],
+	yue_diaochan: ["female", "qun", 3, ["dctanban", "dcdiou"], ["name:null|null"]],
 	dc_huangwudie: ["female", "shu", 4, ["dcshuangrui", "dcfuxie"]],
 	dc_mateng: ["male", "qun", 4, ["mashu", "dcxiongyi"], ["die:mateng"]],
-	dc_sp_zhurong: ["female", "qun", 4, ["dcmanhou"]],
+	dc_sp_zhurong: ["female", "qun", 4, ["dcmanhou"], ["name:null|null"]],
 	yue_zhugeguo: ["female", "shu", 3, ["dcxidi", "dcchengyan"], ["name:诸葛|果"]],
 	yue_zoushi: ["female", "qun", 3, ["dcyunzheng", "dchuoxin"], ["name:邹|null"]],
 	yue_miheng: ["male", "qun", 3, ["dcjigu", "dcsirui"]],
