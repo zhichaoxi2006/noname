@@ -466,7 +466,7 @@ const skills = {
 		},
 	},
 	//牛辅
-	olfansuan: {
+	olshisuan: {
 		audio: 2,
 		trigger: { player: "damageEnd" },
 		filter(event, player) {
@@ -512,7 +512,7 @@ const skills = {
 			maixie_hp: true,
 			effect: {
 				target(card, player, target) {
-					if (_status._olfansuan_temp) return;
+					if (_status._olshisuan_temp) return;
 					if (get.tag(card, "damage")) {
 						if (player.hasSkillTag("jueqing", false, target) || get.effect(player, { name: "losehp" }, player, player) > 0 || player.isTurnedOver()) return [1, -2];
 						if (
@@ -527,9 +527,9 @@ const skills = {
 									})(card).includes(cardx) &&
 									player.getCardUsable(get.name(card)) >= 2 &&
 									(() => {
-										_status._olfansuan_temp = true;
+										_status._olshisuan_temp = true;
 										let eff = get.effect(target, card, player, player) > 0;
-										delete _status._olfansuan_temp;
+										delete _status._olshisuan_temp;
 										return eff;
 									})(),
 								"hs"
