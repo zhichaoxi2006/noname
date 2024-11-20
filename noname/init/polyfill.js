@@ -115,7 +115,7 @@ HTMLDivElement.prototype.goto = function (position, time) {
 		delete this.timeout;
 	}
 
-	if (typeof time != "number") time = 500;
+	if (typeof time != "number") time = 5;
 	this.classList.add("removing");
 	// @ts-ignore
 	this.timeout = setTimeout(() => {
