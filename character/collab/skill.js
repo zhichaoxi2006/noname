@@ -776,9 +776,18 @@ const skills = {
 		async content(event, trigger, player) {
 			if (!_status.characterlist) lib.skill.pingjian.initList();
 			_status.characterlist.randomSort();
-			const characters = _status.characterlist.randomGets(6);
-			const first = characters.slice(0, 3),
-				last = characters.slice(3, 6);
+			let characters = [];
+			for (let i = 0; i >= _status.characterlist.length; i++) {
+				if (get.character(_status.characterlist[i], 3).some(skill => {
+					return lib.skill[skill] && !lib.skill[skill].charlotte;
+				})) {
+					characters.push(_status.characterlist[i]);
+					if (characters.length >= 6) break;
+				}
+			}
+			if (characters.length < 2) return;
+			const first = characters.slice(0, characters.length / 2),
+				last = characters.slice(characters.length / 2, 6);
 			const skills1 = [],
 				skills2 = [];
 			for (let i of first) skills1.push(get.character(i, 3).randomGet());
