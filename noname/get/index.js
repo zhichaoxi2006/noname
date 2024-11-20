@@ -350,6 +350,7 @@ export class Get extends GetCompatible {
 		if (info.charlotte) list.add("Charlotte");
 		if (info.sunbenSkill) list.add("昂扬技");
 		if (info.persevereSkill) list.add("持恒技");
+		if (info.comboSkill) list.add("连招技");
 		if (info.categories) list.addArray(info.categories(skill, player));
 		return list;
 	}

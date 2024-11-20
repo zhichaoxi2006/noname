@@ -234,15 +234,17 @@ const skills = {
 		},
 		filter(event, player, name) {
 			if (event.name == "damage") return event.num > 0;
-			for (let i = player.actionHistory.length - 1; i >= 0; i--) {
-				const history = _status.globalHistory[i].everything.filter(evt => evt.name === "dying");
-				if (i == player.actionHistory.length - 1) {
-					if (history.indexOf(event) > 0) return false;
-				} else if (history.some(evt => evt != event)) return false;
-				if (_status.globalHistory[i].isRound) break;
+			const history = game.getAllGlobalHistory();
+			for (let i = history.length - 1; i >= 0; i--) {
+				const evt = history[i]["everything"];
+				for (let j = evt.length - 1; j >= 0; j--) {
+					if (evt[j].name == "dying" && evt[j].player == player && evt[j] != event) return false;
+				}
+				if (history[i].isRound) break;
 			}
 			return true;
 		},
+		frequent: true,
 		async content(event, trigger, player) {
 			let num = trigger.name == "damage" ? 2 : 1;
 			await player.draw(num);

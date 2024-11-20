@@ -2025,7 +2025,7 @@ const skills = {
 			threaten: 1.7,
 		},
 		subSkill: {
-			bakcup: {},
+			backup: {},
 			mark: {
 				charlotte: true,
 				onremove: true,
