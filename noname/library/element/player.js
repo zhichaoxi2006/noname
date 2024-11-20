@@ -5974,7 +5974,7 @@ export class Player extends HTMLDivElement {
 		for (let i = 0; i < arguments.length; i++) {
 			if (get.itemtype(arguments[i]) === "player") {
 				next.source = arguments[i];
-				if (this !== source) next.notBySelf = true;
+				if (this !== next.source) next.notBySelf = true;
 			} else if (get.itemtype(arguments[i]) === "cards") {
 				next.cards = arguments[i].slice(0);
 			} else if (get.itemtype(arguments[i]) === "card") {
@@ -6006,19 +6006,24 @@ export class Player extends HTMLDivElement {
 			skills.sort((a, b) => get.priority(a) - get.priority(b));
 		}
 		for(let skill of skills) {
-			const info = get.info(skill).mod;
-			let mods = [info.cardDiscardable, info.canBeDiscarded].filter(mod => {
-				return typeof mod === "function";
-			});
-			while (mods.length) {
-				for (let i = 0; i < next.cards.length; i++) {
-					let arg = [next.cards[i], this, event, "unchanged"],
-						result = mods.pop().call(game, ...arg);
-					if (result !== undefined && typeof arg[arg.length - 1] !== "object") arg[arg.length - 1] = result;
-					if (!arg[arg.length - 1]) {
-						next.skills.add(skill);
-						next.protected_cards.push(next.cards.splice(i--, 1));
-					}
+			let mod = get.info(skill).mod.canBeDiscarded;
+			if (mod) for (let i = 0; i < next.cards.length; i++) {
+				let arg = [next.cards[i], next.source, this, event, "unchanged"],
+					result = mod.call(game, ...arg);
+				if (result !== undefined && typeof arg[arg.length - 1] !== "object") arg[arg.length - 1] = result;
+				if (!arg[arg.length - 1]) {
+					next.skills.add(skill);
+					next.protected_cards.push(next.cards.splice(i--, 1)[0]);
+				}
+			}
+			mod = get.info(skill).mod.cardDiscardable;
+			if (mod) for (let i = 0; i < next.cards.length; i++) {
+				let arg = [next.cards[i], this, event, "unchanged"],
+					result = mod.call(game, ...arg);
+				if (result !== undefined && typeof arg[arg.length - 1] !== "object") arg[arg.length - 1] = result;
+				if (!arg[arg.length - 1]) {
+					next.skills.add(skill);
+					next.protected_cards.push(next.cards.splice(i--, 1)[0]);
 				}
 			}
 		}
