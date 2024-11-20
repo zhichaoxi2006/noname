@@ -5561,7 +5561,7 @@ const skills = {
 				}) &&
 				event.player
 					.getHistory("useCard", event2 => {
-						return event2.getParent("phaseUse") === evt;
+						return event2.getParent("phaseUse") === evt && get.color(event2.card) === "black";
 					})
 					.indexOf(event) === 0 &&
 				player.hasCard(card => {
