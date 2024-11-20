@@ -790,8 +790,12 @@ const skills = {
 				last = characters.slice(characters.length / 2, 6);
 			const skills1 = [],
 				skills2 = [];
-			for (let i of first) skills1.push(get.character(i, 3).randomGet());
-			for (let i of last) skills2.push(get.character(i, 3).randomGet());
+			for (let i of first) skills1.push(get.character(i, 3).filter(skill => {
+				return lib.skill[skill] && !lib.skill[skill].charlotte;
+			}).randomGet());
+			for (let i of last) skills2.push(get.character(i, 3).filter(skill => {
+				return lib.skill[skill] && !lib.skill[skill].charlotte;
+			}).randomGet());
 			const result1 = await player
 				.chooseControl(skills1)
 				.set("dialog", ["无名：请选择姓氏", [first, "character"]])
