@@ -11368,7 +11368,7 @@ const skills = {
 			var ai1 = function (card) {
 				var player = _status.event.player,
 					current = _status.event.current;
-				var card = get.color(card);
+				var color = get.color(card);
 				if (color == "black") {
 					if (!current.hasSha() || !current.hasUseTarget({ name: "sha" })) return 0;
 					if (targets.length) return 5.5 - get.value(card);
