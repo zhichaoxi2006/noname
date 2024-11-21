@@ -1,4 +1,8 @@
 export default {
+	"#jsrgsaojian1": "今某作司隶，此曹子安得容乎！",
+	"#jsrgsaojian2": "满朝虫豸，何以言政，必诛之！",
+	"#jsrgsaojian3": "哎，奸路既生，再难尽除！",
+	"#jsrg_yangqiu:die": "臣何敢违君言？但恐生祸患啊！",
 	"#jsrgxiezheng1": "烈祖明皇帝乘舆仍出，陛下何妨效之。",
 	"#jsrgxiezheng2": "陛下宜誓临戎，使将士得凭天威。",
 	"#jsrgxiezheng_jin_jsrg_simazhao1": "既得众将之力，何愁贼不得平？",

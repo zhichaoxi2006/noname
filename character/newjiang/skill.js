@@ -521,6 +521,7 @@ const skills = {
 	},
 	//向秀
 	mpmiaoxi: {
+		audio: 2,
 		enable: "phaseUse",
 		usable: 1,
 		filterCard: true,
@@ -576,6 +577,7 @@ const skills = {
 		},
 	},
 	mpsijiu: {
+		audio: 2,
 		trigger: {
 			global: "roundStart",
 		},
