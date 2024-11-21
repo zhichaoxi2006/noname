@@ -12646,9 +12646,17 @@ const skills = {
 			} else
 				target.chooseCard(true, "h").set("ai", function (card) {
 					var player = _status.event.player;
-					if ((player.hasShan() || player.hp < 3) && get.color(card) == "black") return 0.5;
-					return Math.max(1, 20 - get.value(card));
-				});
+					if (get.color(card) == "black") return 18 - get.event("black") - get.value(card);
+					return 18 - get.value(card);
+				}).set("black", function () {
+					if (get.attitude(target, player) > 0) return 18;
+					if (target.hasCard(card => {
+						const name = get.name(card, target);
+						return name === "shan" || name === "tao" || name === "jiu" && target.hp < 3;
+					})) return 18 / target.hp;
+					if (target.hp < 3) return 12 / target.hp;
+					return 0;
+				}());
 			"step 1";
 			target.showCards(result.cards);
 			event.card2 = result.cards[0];
