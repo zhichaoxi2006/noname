@@ -3939,7 +3939,7 @@ const skills = {
 							player.markAuto("rejianyan_used", "color");
 							card = get.cardPile2(function (card) {
 								return get.color(card) == info;
-							});
+							}, "top");
 						} else {
 							player.markAuto("rejianyan_used", "type");
 							card = get.cardPile2(function (card) {
@@ -14802,7 +14802,7 @@ const skills = {
 				if (get.color(card) == result.control) return true;
 				if (get.type(card, "trick") == result.control) return true;
 				return false;
-			}, "cardPile");
+			}, "cardPile", "top");
 			if (!event.card) {
 				event.finish();
 				return;
