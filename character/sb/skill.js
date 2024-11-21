@@ -3451,7 +3451,7 @@ const skills = {
 			"step 0";
 			var card = get.discardPile(card => {
 				return card.name == "nanman";
-			});
+			}, "random");
 			if (card) {
 				player.gain(card, "gain2");
 			} else {

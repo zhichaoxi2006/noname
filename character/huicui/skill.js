@@ -3303,7 +3303,7 @@ const skills = {
 			const len = get.cardNameLength(trigger.card) + get.cardNameLength(evt.card);
 			const card = get.cardPile(card => {
 				return get.cardNameLength(card, false) == len;
-			});
+			}, false, "random");
 			if (card) {
 				yield player.gain(card, "gain2");
 			} else {
@@ -3343,12 +3343,12 @@ const skills = {
 		content: function* (event, map) {
 			const player = map.player,
 				trigger = map.trigger;
-			const position = player == _status.currentPhase ? "cardPile" : "discardPile";
+			const position = player == _status.currentPhase ? "cardPile2" : "discardPile";
 			let cards = [],
 				num = Math.pow(2, player.countMark("dccaisi_more"));
 			while (num > 0) {
 				num--;
-				let card = get[position](card => get.type(card) != "basic" && !cards.includes(card));
+				let card = get[position](card => get.type(card) != "basic" && !cards.includes(card), "random");
 				if (card) cards.add(card);
 				else break;
 			}
@@ -7774,7 +7774,7 @@ const skills = {
 			player.awakenSkill("dcshuaijie");
 			player.loseMaxHp();
 			var choices = [];
-			var choiceList = ["获得“私掠”角色至多三张牌", "从牌堆中获得三张类型各不相同的牌"];
+			var choiceList = ["获得“私掠”角色至多三张牌", "从牌堆随机获得三张类型各不相同的牌"];
 			var targets = player.getStorage("dcsilve").filter(i => i.isIn());
 			event.targets = targets;
 			if (targets.length) choices.push("选项一");
@@ -7809,9 +7809,9 @@ const skills = {
 			} else {
 				var cards = [];
 				for (var i = 0; i < 3; i++) {
-					var card = get.cardPile(cardx => {
+					var card = get.cardPile2(cardx => {
 						return cards.filter(cardxx => get.type2(cardxx) == get.type2(cardx)).length == 0;
-					});
+					}, "random");
 					if (card) cards.push(card);
 				}
 				if (cards.length) player.gain(cards, "gain2");

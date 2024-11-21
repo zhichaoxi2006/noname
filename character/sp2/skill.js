@@ -3228,7 +3228,7 @@ const skills = {
 			if (subtypes.length) {
 				subtypes.randomSort();
 				for (var subtype of subtypes) {
-					var card = get.cardPile2(card => get.subtype(card) == subtype);
+					var card = get.cardPile2(card => get.subtype(card) == subtype, "random");
 					if (card && target.canUse(card, target)) {
 						target.chooseUseTarget(card, true, "nopopup");
 						break;
@@ -6333,7 +6333,7 @@ const skills = {
 					var num = get.number(trigger.card, false),
 						card = get.cardPile2(function (i) {
 							return get.number(i, false) == num;
-						});
+						}, "random");
 					if (card) player.gain(card, "gain2");
 				}
 			}
@@ -7112,7 +7112,7 @@ const skills = {
 			player
 				.chooseControl(lib.suit.slice(0), "cancel2")
 				.set("prompt", get.prompt("jielie"))
-				.set("prompt2", "防止伤害并改为失去等量体力，且令" + get.translation(player.storage.kangge) + "从弃牌堆中获得等量的花色牌")
+				.set("prompt2", "防止伤害并改为失去等量体力，且令" + get.translation(player.storage.kangge) + "从弃牌堆中随机获得等量的花色牌")
 				.set("ai", function () {
 					var player = _status.event.player;
 					if (get.attitude(player, player.storage.kangge) <= 0) return "cancel2";
@@ -7130,7 +7130,7 @@ const skills = {
 			while (cards.length < trigger.num) {
 				var card = get.discardPile(function (card) {
 					return get.suit(card, false) == event.suit && !cards.includes(card);
-				});
+				}, "random");
 				if (card) cards.push(card);
 				else break;
 			}
@@ -8931,7 +8931,7 @@ const skills = {
 				) {
 					var card = get.cardPile2(function (card) {
 						return get.type2(card, false) == i;
-					});
+					}, "random");
 					if (card) cards.push(card);
 				}
 			}
@@ -11820,7 +11820,7 @@ const skills = {
 		content: function () {
 			var card = get.cardPile2(function (card) {
 				return card.number == 6;
-			});
+			}, "random");
 			if (!card) {
 				player.chat("无牌可得了吗");
 				game.log("但是牌堆里面已经没有点数为6的牌了！");
@@ -11918,7 +11918,7 @@ const skills = {
 					if (get.type(card) == "equip" && get.subtype(card) == get.subtype(event.toequip[i])) bool1 = false;
 				}
 				return get.type(card) == "equip" && !event.toequip.includes(card) && target.hasEmptySlot(card) && bool1;
-			});
+			}, false, "random");
 			if (equip) event.toequip.push(equip);
 			else event.num = 0;
 			event.num--;

@@ -3280,7 +3280,7 @@ export class Get extends GetCompatible {
 	/**
 	 * 从指定区域获得一张牌
 	 * @param { function | string | object | true } name 牌的筛选条件或名字，true为任意一张牌
-	 * @param { string | true } [position] 筛选区域，默认牌堆+弃牌堆：
+	 * @param { string | boolean } [position] 筛选区域，默认牌堆+弃牌堆：
 	 * 
 	 * cardPile: 仅牌堆；discardPile: 仅弃牌堆；filed: 牌堆+弃牌堆+场上
 	 * 

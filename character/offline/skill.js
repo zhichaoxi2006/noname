@@ -5683,7 +5683,7 @@ const skills = {
 			if (!result.bool) {
 				let gains = [];
 				while (gains.length < 2) {
-					const card = get.cardPile(i => get.type(i) == "trick" && !gains.includes(i));
+					const card = get.cardPile(i => get.type(i) == "trick" && !gains.includes(i), false, "random");
 					if (card) gains.push(card);
 					else break;
 				}
