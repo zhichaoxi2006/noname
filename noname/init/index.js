@@ -965,7 +965,11 @@ async function setOnError() {
 		if (errorReporter) game.print(errorReporter.report(str + "\n代码出现错误"));
 		else {
 			if (typeof line == "number" && (typeof Reflect.get(game, "readFile") == "function" || location.origin != "file://")) {
-				const createShowCode = function (lines) {
+				/**
+				 * @param { string[] } lines 代码分割行数
+				 * @param { number } lines 代码报错行数
+				 */
+				const createShowCode = function (lines, line) {
 					let showCode = "";
 					if (lines.length >= 10) {
 						if (line > 4) {
@@ -982,22 +986,11 @@ async function setOnError() {
 					}
 					return showCode;
 				};
-				//协议名须和html一致(网页端防跨域)，且文件是js
-				if (typeof src == "string" && src.startsWith(location.protocol) && src.endsWith(".js")) {
-					//获取代码
-					const codes = lib.init.reqSync("local:" + decodeURI(src).replace(lib.assetURL, "").replace(winPath, ""));
-					if (codes) {
-						const lines = codes.split("\n");
-						str += "\n" + createShowCode(lines);
-						str += "\n-------------";
-					}
-				}
-				//解析parsex里的content fun内容(通常是技能content)
-				// @ts-ignore
-				else if (
+				// 解析step content的错误
+				if (
 					err &&
 					err.stack &&
-					["at Object.eval [as content]", "at Proxy.content"].some(str => {
+					["at GameEvent.eval (eval at packStep", "at StepParser.eval (eval at packStep"].some(str => {
 						let stackSplit1 = err.stack.split("\n")[1];
 						if (stackSplit1) {
 							return stackSplit1.trim().startsWith(str);
@@ -1005,10 +998,25 @@ async function setOnError() {
 						return false;
 					})
 				) {
-					const codes = _status.event.content;
+					// @ts-ignore
+					const codes = _status.event.content.originals[_status.event.step];
 					if (typeof codes == "function") {
-						const lines = codes.toString().split("\n");
-						str += "\n" + createShowCode(lines);
+						const regex = /<anonymous>:(\d+):\d+/;
+						const match = err.stack.split("\n")[1].match(regex);
+						if (match) {
+							const lines = codes.toString().split("\n");
+							str += "\n" + createShowCode(lines, Number(match[1]));
+							str += "\n-------------";
+						}
+					}
+				}
+				// 协议名须和html一致(网页端防跨域)，且文件是js
+				else if (typeof src == "string" && src.startsWith(location.protocol) && src.endsWith(".js")) {
+					//获取代码
+					const codes = lib.init.reqSync("local:" + decodeURI(src).replace(lib.assetURL, "").replace(winPath, ""));
+					if (codes) {
+						const lines = codes.split("\n");
+						str += "\n" + createShowCode(lines, line);
 						str += "\n-------------";
 					}
 				}
