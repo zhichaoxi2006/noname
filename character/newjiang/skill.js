@@ -344,7 +344,7 @@ const skills = {
 						const cards = lib.skill.yanxie_backup.effect;
 						await player.loseToDiscardpile(cards);
 						await player.draw(cards.length);
-						const card = get.cardPile2(card => get.type(card) === "equip");
+						const card = get.cardPile2(card => get.type(card) === "equip", "random");
 						if (card) await player.gain(card, "gain2");
 					},
 				};
@@ -1317,7 +1317,7 @@ const skills = {
 				while (target.hasEmptySlot(num)) {
 					const card = get.cardPile2(card => {
 						return !cards.includes(card) && get.subtype(card) == "equip" + num && target.canUse(card, target);
-					});
+					}, "random");
 					if (card) {
 						cards.push(card);
 						target.$gain2(card, false);

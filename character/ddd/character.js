@@ -24,7 +24,7 @@ const characters = {
 	ddd_wangkanglvkai: ["male", "shu", 4, ["dddbingjian"], ["name:王|伉-吕|凯"]],
 	ddd_sunliang: ['male', 'wu', 3, ['ddddiedang', 'dddanliu', 'dddguiying'], ['zhu']],
 	ddd_lie: ["female", "wu", 3, ["dddyeshen", "dddqiaoduan"]],
-	ddd_kebineng: ["male", "qun", 4, ["dddxiaoxing", "dddlangzhi", "dddfuyi"], ["zhu"]],
+	ddd_kebineng: ["male", "qun", 4, ["dddxiaoxing", "dddlangzhi", "dddfuyi"], ["zhu", "name:null|null"]],
 	ddd_qianzhao: ["male", "wei", 4, ["dddyuanzhen", "dddzhishu"]],
 	ddd_zhangmiao: ["male", "qun", 4, ["dddxiaxing"]],
 	ddd_zhangcheng: ["male", "wu", 3, ["dddjuxian", "dddjungui"]],

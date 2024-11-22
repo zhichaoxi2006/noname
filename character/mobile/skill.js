@@ -16122,7 +16122,7 @@ const skills = {
 			if (!equip1 || Math.random() > 0.5) {
 				equip1 = get.cardPile2(function (card) {
 					return get.subtype(card) == "equip1" && target.canUse(card, target);
-				});
+				}, "random");
 			}
 			if (equip1) {
 				if (equip1.name == "qinggang" && !lib.inpile.includes("qibaodao")) {

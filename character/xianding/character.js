@@ -118,7 +118,7 @@ const characters = {
 	re_liuzan: ["male", "wu", 4, ["refenyin", "liji"]],
 	wenyang: ["male", "wei", 5, ["xinlvli", "choujue"]],
 	wangshuang: ["male", "wei", 8, ["spzhuilie"]],
-	huaman: ["female", "shu", 3, ["manyi", "mansi", "souying", "zhanyuan"]],
+	huaman: ["female", "shu", 3, ["manyi", "mansi", "souying", "zhanyuan"], ["name:孟|null"]],
 	puyuan: ["male", "shu", 4, ["pytianjiang", "pyzhuren"]],
 	guanlu: ["male", "wei", 3, ["tuiyan", "busuan", "mingjie"]],
 	gexuan: ["male", "wu", 3, ["gxlianhua", "zhafu"]],
