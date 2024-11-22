@@ -395,7 +395,6 @@ window.noname_character_rank = {
 		"ol_sb_dongzhuo",
 	],
 	am: [
-		"wei_zhangliao",
 		"cx_majun",
 		"qq_majun",
 		"scl_pangdegong",
