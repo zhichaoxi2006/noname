@@ -5118,14 +5118,11 @@ export class Game extends GameCompatible {
 	}
 	/**
 	 * @overload
-	 * @returns { Card }
-	 */
-	/**
-	 * @overload
-	 * @param { Card | string } name
+	 * @param { Card | | VCard | object | string } name
 	 * @param { string } [suit]
 	 * @param { number | string } [number]
 	 * @param { string } [nature]
+	 * @returns { Card }
 	 */
 	createCard(name, suit, number, nature) {
 		if (typeof name == "object") {

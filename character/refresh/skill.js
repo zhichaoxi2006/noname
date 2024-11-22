@@ -967,7 +967,7 @@ const skills = {
 			"step 2";
 			var equip = get.cardPile(function (card) {
 				return get.type(card) == "equip" && target.hasUseTarget(card);
-			});
+			}, false, "random");
 			if (target.isMinEquip() && equip) {
 				target.chooseUseTarget(equip, "nothrow", "nopopup", true);
 				event.e = true;
@@ -3939,12 +3939,12 @@ const skills = {
 							player.markAuto("rejianyan_used", "color");
 							card = get.cardPile2(function (card) {
 								return get.color(card) == info;
-							});
+							}, "top");
 						} else {
 							player.markAuto("rejianyan_used", "type");
 							card = get.cardPile2(function (card) {
 								return get.type(card) == info;
-							});
+							}, "top");
 						}
 						if (card) {
 							event.card = card;
@@ -9915,11 +9915,11 @@ const skills = {
 				filter: function (event, player) {
 					return player.storage.chengzhang == true;
 				},
-				prompt: "是否发动【酒诗】，获得牌堆中的一张锦囊牌？",
+				prompt: "是否发动【酒诗】，从牌堆中随机获得一张锦囊牌？",
 				content: function () {
 					var card = get.cardPile2(function (card) {
 						return get.type2(card) == "trick";
-					});
+					}, "random");
 					if (card) player.gain(card, "gain2", "log");
 				},
 			},
@@ -12646,9 +12646,17 @@ const skills = {
 			} else
 				target.chooseCard(true, "h").set("ai", function (card) {
 					var player = _status.event.player;
-					if ((player.hasShan() || player.hp < 3) && get.color(card) == "black") return 0.5;
-					return Math.max(1, 20 - get.value(card));
-				});
+					if (get.color(card) == "black") return 18 - get.event("black") - get.value(card);
+					return 18 - get.value(card);
+				}).set("black", function () {
+					if (get.attitude(target, player) > 0) return 18;
+					if (target.hasCard(card => {
+						const name = get.name(card, target);
+						return name === "shan" || name === "tao" || name === "jiu" && target.hp < 3;
+					})) return 18 / target.hp;
+					if (target.hp < 3) return 12 / target.hp;
+					return 0;
+				}());
 			"step 1";
 			target.showCards(result.cards);
 			event.card2 = result.cards[0];
@@ -14802,7 +14810,7 @@ const skills = {
 				if (get.color(card) == result.control) return true;
 				if (get.type(card, "trick") == result.control) return true;
 				return false;
-			}, "cardPile");
+			}, "cardPile", "top");
 			if (!event.card) {
 				event.finish();
 				return;

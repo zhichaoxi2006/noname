@@ -1,4 +1,9 @@
 export default {
+	"#olshuzi1": "本初啊，冀州虽大，却也没有余粮！",
+	"#olshuzi2": "不是韩某小气，是实在没有一粒米了。",
+	"#olkuangshou1": "常言道以和为贵，打打杀杀作甚？",
+	"#olkuangshou2": "诸位都是体面人，不可妄动刀兵。",
+	"#ol_hanfu:die": "本初，我可是请你吃过饭的！",
 	"#olhunjiang1": "边野有豪强，敢执干戈动玄黄！",
 	"#olhunjiang2": "漫天浑雪，弥散八荒。",
 	"#mawan:die": "曹贼势大，唯避其锋芒。",

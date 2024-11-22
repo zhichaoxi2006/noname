@@ -442,12 +442,14 @@ export default () => {
 			game.gameDraw(game.zhu, function (player) {
 				if (_status.mode == "dianjiang") return 4;
 				if (_status.mode == "wuxianhuoli") return 4;
-				if (_status.mode == "normal") return player == game.zhu ? 3 : 4;
-				if (_status.mode == "changban") return player == game.fan ? 5 : 4;
-				if (player.hasSkill("cuorui")) {
-					player.logSkill("cuorui");
-					return 2 + _status.characterChoice[player.identity].length;
+				if (_status.mode == "normal") {
+					if (player.hasSkill("cuorui")) {
+						player.logSkill("cuorui");
+						return 2 + _status.characterChoice[player.identity].length;
+					}
+					return player == game.zhu ? 3 : 4;
 				}
+				if (_status.mode == "changban") return player == game.fan ? 5 : 4;
 				return player.maxHp;
 			});
 			if (_status.connectMode && lib.configOL.change_card) game.replaceHandcards(game.players.slice(0));

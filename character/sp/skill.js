@@ -8356,7 +8356,7 @@ const skills = {
 						var type = get.type2(cardx, player);
 						var card = get.discardPile(function (card) {
 							return get.type2(card, false) == type && !cards2.includes(card) && !cards.includes(card);
-						});
+						}, "random");
 						if (card) cards.push(card);
 					}
 					if (cards.length) player.gain(cards, "gain2");
@@ -18385,7 +18385,7 @@ const skills = {
 			//player.addMark('xinlianji',1,false);
 			var card = get.cardPile2(function (card) {
 				return get.subtype(card) == "equip1" && targets[0].hasUseTarget(card);
-			});
+			}, "random");
 			if (card) {
 				if (card.name == "qinggang" && !lib.inpile.includes("qibaodao")) {
 					card.remove();
@@ -20226,7 +20226,7 @@ const skills = {
 			"step 0";
 			event.type = get.type(trigger.card, "trick");
 			player
-				.chooseTarget(get.prompt("xinyingyuan"), "令一名其他角色从牌堆中获得一张" + get.translation(event.type) + "牌", function (card, player, target) {
+				.chooseTarget(get.prompt("xinyingyuan"), "令一名其他角色随机从牌堆中获得一张" + get.translation(event.type) + "牌", function (card, player, target) {
 					return target != player;
 				})
 				.set("ai", function (target) {
@@ -20241,7 +20241,7 @@ const skills = {
 				player.logSkill("xinyingyuan", result.targets[0]);
 				var card = get.cardPile2(function (cardx) {
 					return get.type(cardx, "trick") == event.type;
-				});
+				}, "random");
 				if (card) result.targets[0].gain(card, "log", "gain2");
 				player.getHistory("custom").push({ xinyingyuan_name: event.type });
 			}
@@ -20701,7 +20701,7 @@ const skills = {
 			"step 1";
 			var equip1 = get.cardPile2(function (card) {
 				return get.subtype(card) == "equip1";
-			});
+			}, "random");
 			if (!equip1) {
 				player.popup("杯具");
 				game.log("牌堆中无装备");
@@ -30774,19 +30774,19 @@ const skills = {
 			//if(!event.hasNature()) return false;
 			return player.hasMark("xinfu_falu_diamond");
 		},
-		prompt2: "弃置「勾陈♦」标记，从牌堆中获得每种类型的牌各一张。",
+		prompt2: "弃置「勾陈♦」标记，从牌堆中随机获得每种类型的牌各一张。",
 		content: function () {
 			"step 0";
 			player.removeMark("xinfu_falu_diamond");
 			event.num = 0;
 			event.togain = [];
 			"step 1";
-			var card = get.cardPile(function (card) {
+			var card = get.cardPile2(function (card) {
 				for (var i = 0; i < event.togain.length; i++) {
 					if (get.type(card, "trick") == get.type(event.togain[i], "trick")) return false;
 				}
 				return true;
-			});
+			}, "random");
 			if (card) {
 				event.togain.push(card);
 				event.num++;

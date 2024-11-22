@@ -10350,6 +10350,13 @@ export class Library {
 			}
 			return false;
 		},
+		/**
+		 * player的card在event事件中能否被自己弃置
+		 * @param { Card } card 要被弃置的牌
+		 * @param { Player } player 执行弃牌的角色
+		 * @param { string } [event] 弃置牌事件的名称
+		 * @returns { boolean }
+		 */
 		cardDiscardable: function (card, player, event) {
 			event = event || _status.event;
 			if (typeof event != "string") event = event.getParent().name;
@@ -10359,8 +10366,8 @@ export class Library {
 		},
 		/**
 		 * target的card在event事件中能否被player弃置
-		 * @param { Card } card 考虑要被弃置的牌
-		 * @param { Player } player 考虑执行弃置牌的角色
+		 * @param { Card } card 要被弃置的牌
+		 * @param { Player } player 执行弃牌的角色
 		 * @param { Player } target 被弃置牌的现持有者
 		 * @param { string } [event] 弃置牌事件的名称
 		 * @returns { boolean }
@@ -10374,8 +10381,8 @@ export class Library {
 		},
 		/**
 		 * target的card在event事件中能否被player获得
-		 * @param { Card } card 考虑要被获得的牌
-		 * @param { Player } player 考虑获得牌的角色
+		 * @param { Card } card 要被获得的牌
+		 * @param { Player } player 获得牌的角色
 		 * @param { Player } target 被获得牌的现持有者
 		 * @param { string } [event] 获得牌事件的名称
 		 * @returns { boolean }
