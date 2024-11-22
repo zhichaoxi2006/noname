@@ -2,6 +2,199 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	// SP曹操
+	spolxixiang: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filter(event, player) {
+			if (!player.countCards("hes")) return false;
+			return ["sha", "juedou"].some(name => event.filterCard({ name: name }, player, event));
+		},
+		chooseButton: {
+			dialog() {
+				return ui.create.dialog("西向", [["sha", "juedou"], "vcard"]);
+			},
+			filter(button, player) {
+				const evt = get.event().getParent();
+				return evt.filterCard({ name: button.link[2] }, player, evt);
+			},
+			check(button) {
+				return get.player().getUseValue({ name: button.link[2] }) * (button.link[2] == "juedou" ? 3 : 1);
+			},
+			backup(links) {
+				return {
+					audio: "spolxixiang",
+					viewAs: { name: links[0][2] },
+					filterCard: true,
+					selectCard: [1, Infinity],
+					ai1(card) {
+						if (ui.selected.cards.length) return 0;
+						return 6 - get.value(card);
+					},
+					position: "hes",
+					precontent() {
+						player.addTempSkill("spolxixiang_effect");
+					},
+				};
+			},
+			prompt(links) {
+				return "将任意张牌当做" + get.translation(links[0][2]) + "使用";
+			},
+		},
+		ai: {
+			order(item, player) {
+				return Math.max(get.order({ name: "sha" }), get.order({ name: "juedou" })) + 0.2;
+			},
+			result: {
+				player: 1,
+			},
+		},
+		subSkill: {
+			backup: {},
+			effect: {
+				charlotte: true,
+				trigger: {
+					player: "useCardAfter",
+				},
+				filter(event, player) {
+					return (
+						event.skill == "spolxixiang_backup" &&
+						(event.targets || []).some(current => {
+							if (!current.isIn()) return false;
+							return current.getHp() > player.countCards("h") || (current.getHp() > player.getHp() && current.countGainableCards(player, "he"));
+						})
+					);
+				},
+				forced: true,
+				popup: false,
+				async content(event, trigger, player) {
+					for (const target of trigger.targets.sortBySeat()) {
+						if (target.getHp() > player.countCards("h")) await player.draw();
+						if (target.getHp() > player.getHp() && target.countGainableCards(player, "he")) await player.gainPlayerCard(target, "he", true);
+					}
+				},
+			},
+		},
+	},
+	spolaige: {
+		audio: 2,
+		trigger: { global: "dyingAfter" },
+		filter(event, player) {
+			return game.getGlobalHistory("everything", evt => evt.name == "dying").indexOf(event) == 1;
+		},
+		juexingji: true,
+		forced: true,
+		skillAnimation: "epic",
+		animationColor: "thunder",
+		async content(event, trigger, player) {
+			const { player: target } = trigger,
+				num = target.maxHp;
+			player.awakenSkill(event.name);
+			await player.changeSkills(["spolzhubei"], ["spolxixiang"]);
+			if (player.countCards("h") < num) await player.drawTo(num);
+			if (player.getHp() < num) await player.recoverTo(num);
+		},
+		derivation: "spolzhubei",
+	},
+	spolzhubei: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filter(event, player) {
+			return game.hasPlayer(current => get.info("spolzhubei").filterTarget(null, player, current));
+		},
+		filterTarget(card, player, target) {
+			return player != target && target.countCards("hes", cardx => ["sha", "juedou"].some(name => target.canUse(get.autoViewAs({ name: name }, [cardx]), player, false)));
+		},
+		async content(event, trigger, player) {
+			const { target } = event;
+			const list = get.inpileVCardList(info => {
+				if (!["sha", "juedou"].includes(info[2]) || info[3]) return false;
+				return target.countCards("hes", cardx => ["sha", "juedou"].some(name => target.canUse(get.autoViewAs({ name: info[2] }, [cardx]), player, false)));
+			});
+			if (!list.length) return;
+			const links =
+				list.length == 1
+					? list[0]
+					: await target
+							.chooseButton([`请选择要对${get.translation(player)}使用的牌`, [list, "vcard"]], true)
+							.set("ai", button => {
+								const player = get.player(),
+									target = get.event().getParent().player,
+									{ link } = button;
+								return get.effect(target, { name: link[2] }, player, player);
+							})
+							.forResultLinks();
+			if (!links || !links.length) return;
+			const viewAs = { name: links[0][2], storage: { spolzhubei: true } };
+			game.broadcastAll(viewAs => {
+				lib.skill.spolzhubei_backup.viewAs = viewAs;
+			}, viewAs);
+			const next = target.chooseToUse();
+			next.set("openskilldialog", `逐北：将任意张牌当作${get.translation(viewAs.name)}对${get.translation(player)}使用`);
+			next.set("norestore", true);
+			next.set("_backupevent", "spolzhubei_backup");
+			next.set("custom", {
+				add: {},
+				replace: { window: function () {} },
+			});
+			next.backup("spolzhubei_backup");
+			next.set("targetRequired", true);
+			next.set("complexSelect", true);
+			next.set("filterTarget", function (card, player, target) {
+				if (target != _status.event.sourcex && !ui.selected.targets.includes(_status.event.sourcex)) return false;
+				return lib.filter.targetEnabled.apply(this, arguments);
+			});
+			next.set("sourcex", player);
+			next.set("addCount", false);
+			next.set("forced", true);
+			player
+				.when({ player: "damageEnd" })
+				.filter(evt => evt.getParent(4) == event && evt.cards.someInD())
+				.step(async (event, trigger, player) => {
+					await player.gain(trigger.cards.filterInD(), "gain2");
+				});
+			player
+				.when({ global: "useCardAfter" })
+				.filter(evt => evt.getParent(2) == event && !player.hasHistory("damage", evtx => evtx.card == evt.card) && evt.player.isIn() && [player, evt.player].some(current => current.countCards("h")))
+				.step(async () => {
+					const bool = await player
+						.chooseBool(`逐北`, `与${get.translation(target)}交换手牌？`)
+						.set("choice", get.attitude(player, target) > 0 || player.countCards("h") < target.countCards("h"))
+						.forResultBool();
+					if (bool) await player.swapHandcards(target);
+				});
+			await next;
+		},
+		ai: {
+			order: 2,
+			result: {
+				player(player, target) {
+					return (
+						1 +
+						Math.max.apply(
+							Math,
+							["sha", "juedou"].map(name => get.effect(player, { name: name }, target, player))
+						)
+					);
+				},
+			},
+		},
+		subSkill: {
+			backup: {
+				filterCard(card, player) {
+					return get.itemtype(card) == "card";
+				},
+				position: "hes",
+				selectCard: [1, Infinity],
+				ai1(card) {
+					if (ui.selected.cards.length) return 0;
+					return 5 - get.value(card);
+				},
+			},
+		},
+	},
 	//董翓
 	oljiaowei: {
 		audio: 2,
@@ -34,9 +227,13 @@ const skills = {
 			cardDiscardable(card, player, name) {
 				if (name == "phaseDiscard" && get.color(card) == "black") return false;
 			},
+			targetInRange(card, player, target) {
+				if (target.getHp() < player.getHp() && get.color(card) == "black") return true;
+			},
 		},
 	},
 	olbianyu: {
+		audio: 2,
 		trigger: {
 			source: "damageSource",
 			player: "damageEnd",
@@ -62,6 +259,7 @@ const skills = {
 			if (result?.bool && result.cards?.length) {
 				target.addSkill("olbianyu_viewAs");
 				target.addGaintag(result.cards, "olbianyu_viewAs");
+				if ([player, target].some(current => current.getCards("h").every(card => get.name(card, current) == "sha"))) await player.draw(2);
 			}
 		},
 		subSkill: {
@@ -268,7 +466,7 @@ const skills = {
 		},
 	},
 	//牛辅
-	olfansuan: {
+	olshisuan: {
 		audio: 2,
 		trigger: { player: "damageEnd" },
 		filter(event, player) {
@@ -314,7 +512,7 @@ const skills = {
 			maixie_hp: true,
 			effect: {
 				target(card, player, target) {
-					if (_status._olfansuan_temp) return;
+					if (_status._olshisuan_temp) return;
 					if (get.tag(card, "damage")) {
 						if (player.hasSkillTag("jueqing", false, target) || get.effect(player, { name: "losehp" }, player, player) > 0 || player.isTurnedOver()) return [1, -2];
 						if (
@@ -329,9 +527,9 @@ const skills = {
 									})(card).includes(cardx) &&
 									player.getCardUsable(get.name(card)) >= 2 &&
 									(() => {
-										_status._olfansuan_temp = true;
+										_status._olshisuan_temp = true;
 										let eff = get.effect(target, card, player, player) > 0;
-										delete _status._olfansuan_temp;
+										delete _status._olshisuan_temp;
 										return eff;
 									})(),
 								"hs"

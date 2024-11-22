@@ -725,11 +725,13 @@ const skills = {
 		trigger: { player: "equipAfter" },
 		forced: true,
 		filter(event, player) {
-			return event.cards?.length > 0;
+			const subtypes = get.subtypes(event?.card || event?.cards[0]);
+			return event.cards?.length > 0 && !game.getGlobalHistory("everything", evt => evt.name == "draw" && evt.player == player && (evt.jingyi_subtype || []).flat().some(i => subtypes.includes(i))).length;
 		},
 		async content(event, trigger, player) {
+			const subtypes = get.subtypes(trigger?.card || trigger?.cards[0]);
 			const num = player.countCards("e");
-			if (num > 0) await player.draw(num);
+			if (num > 0) await player.draw(num).set("jingyi_subtype", [subtypes]);
 			if (player.countCards("he") > 0) await player.chooseToDiscard(2, "he", true);
 		},
 	},

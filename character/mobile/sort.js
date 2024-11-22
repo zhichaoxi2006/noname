@@ -9,7 +9,7 @@ const characterSort = {
 	mobile_sp11: ["fuqian", "qiaozhou", "ruanhui", "sp_caosong", "sp_maojie", "wangjun", "yanpu", "mayuanyi", "xin_mamidi"],
 	mobile_sp12: ["hujinding", "lifeng", "zhaotongzhaoguang", "wangyuanji", "yanghuiyu", "liuye", "simazhao", "zhuling", "yangbiao"],
 	mobile_sp13: ["sp_pengyang", "liwei", "xin_guozhao", "qianzhao", "peixiu", "yanxiang", "xin_hansui", "yangfu"],
-	mobile_sp_default: ["mb_sp_zhenji", "mb_xianglang", "xin_wuban", "laimin", "xin_huojun", "mb_huban", "sp_jianggan", "jiangji", "zhangbu", "muludawang", "yangfeng", "mb_chengui", "baoxin"],
+	mobile_sp_default: ["mb_ganfuren","mb_sp_zhenji", "mb_xianglang", "xin_wuban", "laimin", "xin_huojun", "mb_huban", "sp_jianggan", "jiangji", "zhangbu", "muludawang", "yangfeng", "mb_chengui", "baoxin"],
 	mobile_xlqk1: ["lingcao", "sunru", "liuzan"],
 	mobile_xlqk2: ["pangdegong", "miheng"],
 	mobile_xlqk3: ["majun", "zhengxuan", "simashi"],

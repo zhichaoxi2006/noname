@@ -1457,10 +1457,13 @@ const skills = {
 	//司马师
 	dcsanshi: {
 		audio: 2,
-		trigger: { global: "roundStart" },
+		trigger: {
+			global: "phaseBefore",
+			player: "enterGame",
+		},
 		forced: true,
 		filter(event, player) {
-			return game.roundNumber === 1;
+			return event.name != "phase" || game.phaseNumber == 0;
 		},
 		group: ["dcsanshi_gain", "dcsanshi_directHit"],
 		async content(event, trigger, player) {
@@ -5357,108 +5360,97 @@ const skills = {
 	dcmoshou: {
 		audio: 2,
 		trigger: { target: "useCardToTargeted" },
-		init: function (player, skill) {
-			if (typeof player.storage[skill] != "number") player.storage[skill] = 0;
-		},
-		filter: function (event, player) {
-			return get.color(event.card) == "black" && event.player != player;
+		filter(event, player) {
+			return get.color(event.card) == "black" && event.player != player && player.maxHp - player.countMark("dcmoshou_count") > 0;
 		},
 		frequent: true,
-		prompt2: function (event, player) {
-			var num = (player.getAllHistory("useSkill", evt => evt.skill == "dcmoshou").length % 3) + 1;
+		prompt2(event, player) {
+			const num = player.maxHp - player.countMark("dcmoshou_count");
 			return "摸" + get.cnNumber(num) + "张牌";
 		},
-		content: function () {
-			var num = player.getAllHistory("useSkill", evt => evt.skill == "dcmoshou").length;
-			player.storage.dcmoshou = num;
-			player.syncStorage("dcmoshou");
-			player.markSkill("dcmoshou");
-			num = ((num - 1) % 3) + 1;
-			player.draw(num);
+		async content(event, trigger, player) {
+			const skillName = event.name + "_count";
+			let num = player.maxHp - player.countMark(skillName);
+			player.addSkill(skillName);
+			if (num > 1) {
+				player.addMark(skillName, 1, false);
+			} else {
+				player.clearMark(skillName, false);
+			}
+			if (num > 0) await player.draw(num);
 		},
-		mark: true,
-		marktext: "守",
-		intro: {
-			markcount: function (storage, player) {
-				if (typeof storage != "number") return 1;
-				return (storage % 3) + 1;
+		subSkill: {
+			count: {
+				charlotte: true,
+				onremove: true,
+				intro: {
+					content: (storage, player) => `下次【墨守】摸牌数：${player.maxHp - player.countMark("dcmoshou_count")}`,
+				},
 			},
-			content: "本局游戏已发动过$次技能",
 		},
 	},
 	dcyunjiu: {
 		audio: 2,
 		trigger: { global: "dieAfter" },
-		direct: true,
-		content: function () {
-			"step 0";
-			var evt = trigger.player.getHistory("lose", evtx => {
-				return evtx.getParent(2) == trigger;
-			})[0];
-			if (!evt) event.finish();
-			else {
-				var cards = [];
-				//冷知识，角色死亡后只有手牌区和装备区的牌是被系统弃置的，其余牌的处理方式均为置入弃牌堆
-				cards.addArray(evt.hs).addArray(evt.es);
-				event.cards = cards.filterInD("d");
-				var num = cards.length;
-				if (num) {
-					event.videoId = lib.status.videoId++;
-					var func = function (cards, id) {
-						var num = cards.length;
-						var dialog = ui.create.dialog(get.prompt("dcyunjiu"), '<div class="text center">弃置' + get.cnNumber(num) + "张牌，令一名其他角色获得以下这些牌</div>", cards);
-						dialog.videoId = id;
-						return dialog;
-					};
-					if (player.isOnline2()) {
-						player.send(func, cards, event.videoId);
-					}
-					event.dialog = func(cards, event.videoId);
-					if (player != game.me || _status.auto) {
-						event.dialog.style.display = "none";
-					}
-					player.chooseCardTarget({
-						prompt: false,
-						filterTarget: lib.filter.notMe,
-						filterCard: lib.filter.cardDiscardable,
-						selectCard: num,
-						position: "he",
-						goon: (function () {
-							if (!game.hasPlayer(current => get.attitude(player, current)) > 0) return false;
-							var value = 0;
-							for (var card of cards) {
-								value += get.value(card, player, "raw") - 1.2;
-							}
-							return value > 0;
-						})(),
-						ai1: function (card) {
-							if (_status.event.goon) {
-								if (ui.selected.cards.length == _status.event.selectCard[1] - 1 && ui.selected.cards.length > 0) return 7 - get.value(card);
-								return 5.5 - get.value(card);
-							}
+		getCards(event, player) {
+			const cards = [];
+			const evt = player.getHistory("lose", evtx => evtx.getParent(2) == event)[0];
+			return evt ? cards.addArray(evt.hs).addArray(evt.es).filterInD("d") : [];
+		},
+		filter(event, player) {
+			return get.info("dcyunjiu").getCards(event, event.player).length;
+		},
+		async cost(event, trigger, player) {
+			const { player: target } = trigger,
+				cards = get.info("dcyunjiu").getCards(trigger, target);
+			let result;
+			if (cards.length > 1) {
+				result = await player
+					.chooseCardButton("运柩：请选择要分配的牌", cards)
+					.set("ai", button => {
+						const player = get.player(),
+							{ link } = button;
+						if (!game.hasPlayer(current => get.attitude(player, current)) > 0) {
+							if (player.getHp() < 3) return -get.value(link);
 							return 0;
-						},
-						ai2: function (target) {
-							return get.attitude(_status.event.player, target) / Math.sqrt(target.countCards("h") + 1);
-						},
-					});
-				} else event.finish();
-			}
-			"step 1";
-			if (player.isOnline2()) {
-				player.send("closeDialog", event.videoId);
-			}
-			event.dialog.close();
-			if (result.bool) {
-				var cardsx = result.cards,
-					target = result.targets[0];
-				player.logSkill("dcyunjiu", target);
-				player.discard(cardsx);
-				target.gain(cards.filterInD("d"), "gain2").giver = player;
-			} else event.finish();
-			"step 2";
-			player.gainMaxHp();
-			player.recover();
+						}
+						return get.value(link);
+					})
+					.forResult();
+			} else if (cards.length === 1) result = { bool: true, links: cards.slice(0) };
+			else return;
+			if (!result.bool) return;
+			const toGive = result.links.slice(0);
+			result = await player
+				.chooseTarget("选择一名其他角色获得" + get.translation(toGive), lib.filter.notMe)
+				.set("ai", target => {
+					const { player, enemy } = get.event();
+					const att = get.attitude(player, target);
+					if (enemy) {
+						return -att;
+					} else if (att > 0) {
+						return att / (1 + target.countCards("h"));
+					} else {
+						return att / 100;
+					}
+				})
+				.set("enemy", get.value(toGive[0], player, "raw") < 0)
+				.forResult();
+			event.result = {
+				bool: result.bool,
+				targets: result.targets,
+				cost_data: toGive,
+			};
+		},
+		async content(event, trigger, player) {
+			const {
+				cost_data: cards,
+				targets: [target],
+			} = event;
+			player.line(target, "green");
+			await target.gain(cards, "gain2").set("giver", player);
+			await player.gainMaxHp();
+			await player.recover();
 		},
 	},
 	//高翔

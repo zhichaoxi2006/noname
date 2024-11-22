@@ -9265,7 +9265,7 @@ const skills = {
 		position: "he",
 		content() {
 			player.draw();
-			player.addTempSkill("twgyshenxing_used", "phaseUseAfer");
+			player.addTempSkill("twgyshenxing_used", "phaseUseAfter");
 			player.addMark("twgyshenxing_used", 1, false);
 		},
 		ai: {

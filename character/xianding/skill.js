@@ -3,6 +3,114 @@ import cards from "../sp2/card.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	// 威张辽
+	dcyuxi: {
+		audio: 2,
+		mod: {
+			cardUsable(card, player, num) {
+				if (!card.cards) return;
+				if (card.cards.some(i => i.hasGaintag("dcyuxi"))) return Infinity;
+			},
+		},
+		trigger: {
+			source: "damageBegin1",
+			player: ["damageBegin4", "useCard1"],
+		},
+		filter(event, player) {
+			return (
+				event.name == "damage" ||
+				(player.hasHistory("lose", evt => {
+					return evt.getParent() == event && evt.hs.length && Object.values(evt.gaintag_map).flat().includes("dcyuxi");
+				}) &&
+					event.addCount !== false)
+			);
+		},
+		forced: true,
+		locked: false,
+		async content(event, trigger, player) {
+			if (trigger.name == "damage") {
+				const next = player.draw();
+				next.gaintag = [event.name];
+				await next;
+			} else {
+				trigger.addCount = false;
+				const stat = player.getStat().card,
+					name = trigger.card.name;
+				if (typeof stat[name] == "number") stat[name]--;
+			}
+		},
+	},
+	dcporong: {
+		audio: 2,
+		comboSkill: true,
+		mod: {
+			aiOrder(player, card, num) {
+				if (typeof card == "object") {
+					const evt = lib.skill.dcjianying.getLastUsed(player);
+					if (evt?.card && get.tag(evt.card, "damage") && !evt.dcporong && get.name(card, player) == "sha") {
+						return num + 10;
+					}
+				}
+			},
+		},
+		trigger: {
+			player: "useCard",
+		},
+		filter(event, player) {
+			if (event.card.name != "sha") return false;
+			const evt = lib.skill.dcjianying.getLastUsed(player, event);
+			if (!evt || !evt.card || evt.dcporong) return false;
+			return get.tag(evt.card, "damage");
+		},
+		forced: true,
+		locked: false,
+		logTarget(event, player) {
+			return event.targets.sortBySeat();
+		},
+		async content(event, trigger, player) {
+			const { targets, name } = event;
+			trigger.set(name, true);
+			game.log(trigger.card, "不可被响应");
+			trigger.directHit.addArray(game.filterPlayer());
+			for (const target of targets) {
+				const targetsx = [target, target.getNext(), target.getPrevious()].filter(current => current != player && current.countGainableCards(player, "h")).sortBySeat();
+				if (targetsx.length) await player.gainMultiple(targetsx);
+			}
+			trigger.effectCount++;
+		},
+		init(player, skill) {
+			const evt = lib.skill.dcjianying.getLastUsed(player);
+			if (evt?.card && get.tag(evt.card, "damage") && !evt.dcporong) player.addTip("dcporong", "破戎 可连击");
+		},
+		onremove(player, skill) {
+			player.removeTip(skill);
+		},
+		ai: {
+			directHit_ai: true,
+			skillTagFilter(player, tag, arg) {
+				if (!arg?.card || get.name(arg.card) !== "sha") return;
+				const evt = lib.skill.dcjianying.getLastUsed(player);
+				return evt?.card && get.tag(evt.card, "damage") && !evt.dcporong;
+			},
+		},
+		group: "dcporong_mark",
+		subSkill: {
+			mark: {
+				charlotte: true,
+				trigger: {
+					player: "useCardAfter",
+				},
+				forced: true,
+				popup: false,
+				firstDo: true,
+				async content(event, trigger, player) {
+					if (!trigger.dcporong && get.tag(trigger.card, "damage")) {
+						player.addTip("dcporong", "破戎 可连击");
+					} else player.removeTip("dcporong");
+				},
+			},
+		},
+	},
 	//庞凤衣
 	dcyitong: {
 		trigger: {

@@ -1480,20 +1480,12 @@ const skills = {
 			return get.type2(card) == "trick";
 		},
 		async content(event, trigger, player) {
-			const target = event.target;
-			player.$throw(event.cards.length, 1000);
-			const result = await target.chooseToDiscard("he", true).set("prompt", "请弃置一张锦囊牌，或依次弃置两张非锦囊牌。").forResult();
-			if (
-				(!result.cards || get.type(result.cards[0], "trick", result.cards[0].original == "h" ? target : false) != "trick") &&
-				target.countCards("he", function (card) {
-					return get.type(card, "trick") != "trick";
-				})
-			) {
-				await target
-					.chooseToDiscard("he", true, function (card) {
-						return get.type(card, "trick") != "trick";
-					})
-					.set("prompt", "请弃置第二张非锦囊牌");
+			const { target, cards } = event;
+			player.$throw(cards.length, 1000);
+			if (!target.countCards("he", card => lib.filter.cardDiscardable(card, target))) return;
+			const result = await target.chooseToDiscard("he", true).set("prompt", "请弃置一张锦囊牌，或依次弃置两张牌。").forResult();
+			if ((!result.cards || get.type(result.cards[0], "trick", result.cards[0].original == "h" ? target : false) != "trick") && target.countCards("he", card => lib.filter.cardDiscardable(card, target))) {
+				await target.chooseToDiscard("he", true).set("prompt", "请弃置第二张牌");
 			}
 			/*
 			const cards = game

@@ -2025,7 +2025,7 @@ const skills = {
 			threaten: 1.7,
 		},
 		subSkill: {
-			bakcup: {},
+			backup: {},
 			mark: {
 				charlotte: true,
 				onremove: true,
@@ -5564,7 +5564,7 @@ const skills = {
 		position: "he",
 		content() {
 			player.draw();
-			player.addTempSkill(event.name + "_used", "phaseUseAfer");
+			player.addTempSkill(event.name + "_used", "phaseUseAfter");
 			player.addMark(event.name + "_used", 1, false);
 		},
 		ai: {
