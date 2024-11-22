@@ -73,12 +73,25 @@ const skills = {
 			game.log(trigger.card, "不可被响应");
 			trigger.directHit.addArray(game.filterPlayer());
 			for (const target of targets) {
-				const targetsx = [target.getNext(), target.getPrevious()].filter(current => current != player && current.countGainableCards(player, "h")).sortBySeat();
+				const targetsx = [target, target.getNext(), target.getPrevious()].filter(current => current != player && current.countGainableCards(player, "h")).sortBySeat();
 				if (targetsx.length) await player.gainMultiple(targetsx);
 			}
+			trigger.effectCount++;
+		},
+		init(player, skill) {
+			const evt = lib.skill.dcjianying.getLastUsed(player);
+			if (evt?.card && get.tag(evt.card, "damage") && !evt.dcporong) player.addTip("dcporong", "破戎 可连击");
 		},
 		onremove(player, skill) {
 			player.removeTip(skill);
+		},
+		ai: {
+			directHit_ai: true,
+			skillTagFilter(player, tag, arg) {
+				if (!arg?.card || get.name(arg.card) !== "sha") return;
+				const evt = lib.skill.dcjianying.getLastUsed(player);
+				return evt?.card && get.tag(evt.card, "damage") && !evt.dcporong;
+			},
 		},
 		group: "dcporong_mark",
 		subSkill: {

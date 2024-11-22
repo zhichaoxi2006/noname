@@ -5,7 +5,7 @@ const characterReplaces = {
 	jin_simayi: ["jin_simayi", "junk_simayi", "huan_simayi", "ps_jin_simayi"],
 	zhenji: ["zhenji", "re_zhenji", "sb_zhenji", "yj_zhenji"],
 	xuzhu: ["xuzhu", "re_xuzhu"],
-	zhangliao: ["zhangliao", "re_zhangliao", "sb_zhangliao", "wei_zhangliao"],
+	zhangliao: ["zhangliao", "re_zhangliao", "sb_zhangliao", "v_zhangliao"],
 	sp_zhangliao: ["sp_zhangliao", "yj_zhangliao", "jsrg_zhangliao"],
 	xiahoudun: ["xiahoudun", "re_xiahoudun", "xin_xiahoudun", "sb_xiahoudun", "xia_xiahoudun", "sp_xiahoudun"],
 	liubei: ["liubei", "re_liubei", "sb_liubei", "dc_liubei", "junk_liubei", "jd_sb_liubei", "ty_liubei", "xia_liubei", "sp_liubei", "jsrg_liubei"],

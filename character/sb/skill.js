@@ -107,7 +107,7 @@ const skills = {
 			} = event;
 			if (control == "背水！") await player.loseHp();
 			if (["选项一", "背水！"].includes(control) && target.countCards("e")) {
-				const cards = await player.gainPlayerCard(target, true, "e", [1, 2], `选择${get.translation(target)}至多两张装备牌令其获得之`).forResultCards();
+				const cards = await player.choosePlayerCard(target, true, "e", [1, 2], `选择${get.translation(target)}至多两张装备牌令其获得之`).forResultCards();
 				if (cards?.length) await target.gain(cards, "gain2");
 			}
 			if (["选项二", "背水！"].includes(control)) {
