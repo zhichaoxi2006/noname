@@ -282,6 +282,7 @@ const skills = {
 		},
 		subSkill: {
 			effect: {
+				audio: "dcsblieji",
 				charlotte: true,
 				onremove(player, skill) {
 					let tags = player.getCards("h", card => card.gaintag?.some(tag => tag.startsWith(skill)));

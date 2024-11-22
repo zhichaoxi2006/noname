@@ -426,6 +426,7 @@ const skills = {
 				},
 			},
 			attack: {
+				audio: "olsbyangwei",
 				charlotte: true,
 				onremove: true,
 				trigger: { source: "damageBegin1" },
@@ -449,6 +450,7 @@ const skills = {
 				},
 			},
 			defend: {
+				audio: "olsbyangwei",
 				charlotte: true,
 				onremove: true,
 				trigger: { player: "damageBegin2" },
