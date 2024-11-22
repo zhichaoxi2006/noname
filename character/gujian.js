@@ -13,14 +13,14 @@ game.import("character", function () {
 			gjqt_yuewuyi: ["male", "wei", 4, ["yanjia", "xiuhua", "liuying"]],
 			gjqt_wenrenyu: ["female", "shu", 4, ["chizhen", "dangping"], ["name:闻人|羽"]],
 			gjqt_xiayize: ["male", "qun", 3, ["xuanning", "liuguang", "yangming"]],
-			gjqt_aruan: ["female", "wu", 3, ["zhaolu", "jiehuo", "yuling"]],
+			gjqt_aruan: ["female", "wu", 3, ["zhaolu", "jiehuo", "yuling"], ["name:null|阮"]],
 
 			gjqt_xunfang: ["female", "shu", 3, ["manwu", "xfanghua"]],
 			gjqt_ouyangshaogong: ["male", "shu", 3, ["yunyin", "shishui", "duhun"], ["name:欧阳|少恭"]],
 
 			gjqt_xieyi: ["male", "qun", 3, ["lingyan", "xunjian", "humeng"]],
 			gjqt_yanjiaxieyi: ["male", "qun", 2, ["xianju"], ["unseen"]],
-			gjqt_chuqi: ["male", "qun", 2, ["xuanci"], ["unseen"]],
+			gjqt_chuqi: ["male", "qun", 2, ["xuanci"], ["unseen", "name:谢|衣"]],
 
 			gjqt_beiluo: ["male", "qun", 4, ["lingnu", "zhenying", "cihong"]],
 			gjqt_yunwuyue: ["female", "wei", 3, ["yange", "woxue", "lianjing"]],
@@ -2603,6 +2603,7 @@ game.import("character", function () {
 			gjqt_aruan: "阿阮",
 			gjqt_xieyi: "谢衣",
 			gjqt_yanjiaxieyi: "偃甲谢衣",
+			gjqt_yanjiaxieyi_ab: "谢衣",
 			gjqt_chuqi: "初七",
 
 			gjqt_beiluo: "北洛",

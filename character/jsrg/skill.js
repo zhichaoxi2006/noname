@@ -818,8 +818,10 @@ const skills = {
 	},
 	//阳球
 	jsrgsaojian: {
+		audio: 3,
 		enable: "phaseUse",
 		usable: 1,
+		logAudio: index => (typeof index === "number" ? "jsrgsaojian" + index + ".mp3" : 2),
 		filter(event, player) {
 			return game.hasPlayer(current => current != player && current.countCards("h") > 0);
 		},
@@ -862,7 +864,10 @@ const skills = {
 						.forResult("cards");
 					if (!discarded || !discarded.length || discarded[0] === card) break;
 				}
-				if (target.countCards("h") > player.countCards("h")) player.loseHp();
+				if (target.countCards("h") > player.countCards("h")) {
+					player.logSkill("jsrgsaojian", null, null, null, [3]);
+					player.loseHp();
+				}
 			}
 		},
 		ai: {

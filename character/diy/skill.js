@@ -4078,7 +4078,7 @@ const skills = {
 							break;
 						}
 					}
-					var togain = get.cardPile(name, "cardPile");
+					var togain = get.cardPile(name, "cardPile", "random");
 					if (togain) {
 						player.gain(togain, "gain2");
 					} else {

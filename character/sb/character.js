@@ -43,7 +43,7 @@ const characters = {
 	sb_sunce: ["male", "wu", 4, ["sbjiang", "sbhunzi", "sbzhiba"], ["zhu"]],
 	sb_daqiao: ["female", "wu", 3, ["sbguose", "sbliuli"], ["name:桥|null"]],
 	sb_liubiao: ["male", "qun", 3, ["sbzishou", "sbzongshi"]],
-	sb_zhurong: ["female", "shu", 4, ["sblieren", "sbjuxiang"], ["doublegroup:shu:qun"]],
+	sb_zhurong: ["female", "shu", 4, ["sblieren", "sbjuxiang"], ["doublegroup:shu:qun", "name:null|null"]],
 	sb_menghuo: ["male", "shu", 4, ["sbhuoshou", "sbzaiqi"], ["doublegroup:shu:qun"]],
 	sb_yl_luzhi: ["male", "qun", 3, ["nzry_mingren", "sbzhenliang"]],
 	sb_xiaoqiao: ["female", "wu", 3, ["sbtianxiang", "xinhongyan"], ["name:桥|null"]],

@@ -1,4 +1,9 @@
 export default {
+	"#dcmoshou1": "好战必亡，此亘古之理。",
+	"#dcmoshou2": "天下汹汹之势，恪守方得自保。",
+	"#dcyunjiu1": "此吾主之柩，请诸君勿扰。",
+	"#dcyunjiu2": "故者为大，尔等欲欺大者乎？",
+	"#yuanyin:die": "臣不负忠，虽死如是。",
 	"#dctanban1": "将军，妾身奏的如何？",
 	"#dctanban2": "将军还想再听一曲？",
 	"#dcdiou1": "一日不见兮，思之如狂。",

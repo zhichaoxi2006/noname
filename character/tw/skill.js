@@ -11469,7 +11469,7 @@ const skills = {
 		content: function () {
 			var card = get.cardPile2(function (card) {
 				return get.type(card) == "equip" && get.subtype(card) == "equip1";
-			});
+			}, "random");
 			event.card = card;
 			if (card) player.equip(card);
 			else {

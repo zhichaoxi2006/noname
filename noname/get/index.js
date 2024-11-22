@@ -3278,61 +3278,126 @@ export class Get extends GetCompatible {
 				return 1;
 		}
 	}
-	cardPile(name, create) {
-		var filter = function (card) {
-			if (typeof name == "string") {
-				if (card.name == name) {
-					return true;
+	/**
+	 * 从指定区域获得一张牌
+	 * @param { function | string | object | true } name 牌的筛选条件或名字，true为任意一张牌
+	 * @param { string | boolean } [position] 筛选区域，默认牌堆+弃牌堆：
+	 * 
+	 * cardPile: 仅牌堆；discardPile: 仅弃牌堆；filed: 牌堆+弃牌堆+场上
+	 * 
+	 * 若为true且name为string | object类型，则在筛选区域内没有找到卡牌时创建一张name条件的牌
+	 * 
+	 * @param { string } [start] 遍历方式。默认top
+	 * 
+	 * top: 从牌堆/弃牌堆顶自顶向下遍历
+	 * bottom: 从牌堆/弃牌堆底自底向上遍历
+	 * random: 随机位置遍历
+	 * @returns { Card | ChildNode | null }
+	 */
+	cardPile(name, position, start = "top") {
+		let filter, create = null;
+		if (typeof name === "function") filter = function (card) {
+			return name(card);
+		};
+		else if (name === true) filter = () => true;
+		else if (name) {
+			if (typeof name === "string") name = { name };
+			filter = function (card) {
+				for (let i in name) {
+					if (card[i] && card[i] !== name[i]) return false;
 				}
-			} else if (typeof name == "function") {
-				if (name(card)) {
-					return true;
+				return true;
+			};
+			if (position === true) create = true;
+		}
+		else {
+			console.error("调用Get.cardPile()时未传入符合条件的参数name！");
+			return null;
+		}
+		if (start === "bottom") {
+			if (position !== "cardPile") for (let i = ui.discardPile.childNodes.length - 1; i >= 0; i--) {
+				if (filter(ui.discardPile.childNodes[i])) {
+					return ui.discardPile.childNodes[i];
 				}
 			}
-			return false;
-		};
-		if (create != "discardPile") {
-			var num = get.rand(0, ui.cardPile.childNodes.length - 1);
-			for (var i = 0; i < ui.cardPile.childNodes.length; i++) {
-				var j = i;
+			if (position !== "discardPile") for (let i = ui.cardPile.childNodes.length - 1; i >= 0; i--) {
+				if (filter(ui.cardPile.childNodes[i])) {
+					return ui.cardPile.childNodes[i];
+				}
+			}
+			if (position === "field") {
+				let curs = game.filterPlayer(() => true);
+				for (let i = curs.length - 1; i >= 0; i--) {
+					const ej = curs[i].getCards("ej");
+					for (let j = ej.length - 1; j >= 0; j--) {
+						if (filter(ej[j])) return ej[j];
+					}
+				}
+			}
+			if (create) {
+				return game.createCard(name);
+			}
+			return null;
+		}
+		if (position !== "discardPile") {
+			let j = 0;
+			if (start === "random") j = get.rand(0, ui.cardPile.childNodes.length - 1);
+			for (let i = 0; i < ui.cardPile.childNodes.length; i++, j++) {
 				if (j >= ui.cardPile.childNodes.length) j -= ui.cardPile.childNodes.length;
 				if (filter(ui.cardPile.childNodes[j])) {
 					return ui.cardPile.childNodes[j];
 				}
 			}
 		}
-		if (create != "cardPile") {
-			for (var i = 0; i < ui.discardPile.childNodes.length; i++) {
-				var j = i;
+		if (position !== "cardPile") {
+			let j = 0;
+			if (start !== "random") j = get.rand(0, ui.discardPile.childNodes.length - 1);
+			for (let i = 0; i < ui.discardPile.childNodes.length; i++, j++) {
 				if (j >= ui.discardPile.childNodes.length) j -= ui.discardPile.childNodes.length;
 				if (filter(ui.discardPile.childNodes[j])) {
 					return ui.discardPile.childNodes[j];
 				}
 			}
 		}
-		if (create == "field") {
-			var found = null;
-			game.findPlayer(function (current) {
-				var ej = current.getCards("ej");
-				for (var i = 0; i < ej.length; i++) {
-					if (filter(ej[i])) {
-						found = ej[i];
-						return true;
-					}
+		if (position === "field") {
+			let curs = game.filterPlayer(() => true);
+			for (let i = 0; i < curs.length; i++) {
+				const ej = curs[i].getCards("ej");
+				for (let j = 0; j < ej.length; j++) {
+					if (filter(ej[j])) return ej[j];
 				}
-			});
-			return found;
+			}
 		}
-		if (create && !["cardPile", "discardPile", "field"].includes(create)) {
+		if (create) {
 			return game.createCard(name);
 		}
 		return null;
 	}
-	cardPile2(name) {
-		return get.cardPile(name, "cardPile");
+	/**
+	 * 从牌堆获得一张牌
+	 * @param { function | string | object | true } name 牌的筛选条件或名字，true为任意一张牌
+	 * @param { string } [start] 遍历方式。默认top
+	 * 
+	 * top：从牌堆顶自顶向下遍历
+	 * bottom：从牌堆底自底向上遍历
+	 * random: 随机位置遍历
+	 * @returns { Card | ChildNode | null }
+	 */
+	cardPile2(name, start) {
+		return get.cardPile(name, "cardPile", start || "top");
 	}
-	discardPile(name) {
-		return get.cardPile(name, "discardPile");
+	/**
+	 * 从弃牌堆获得一张牌
+	 * @param { function | string | object | true } name 牌的筛选条件或名字，true为任意一张牌
+	 * @param { string } [start] 遍历方式。默认top
+	 * 
+	 * top：从弃牌堆顶自顶向下遍历
+	 * bottom：从弃牌堆底自底向上遍历
+	 * random: 随机位置遍历
+	 * @returns { Card | ChildNode | null }
+	 */
+	discardPile(name, start) {
+		return get.cardPile(name, "discardPile", start || "top");
 	}
 	aiStrategy() {
 		switch (get.config("ai_strategy")) {

@@ -19,7 +19,7 @@ const characters = {
 	re_yuanshao: ["male", "qun", 4, ["luanji", "xueyi"], ["zhu", "die:yuanshao"]],
 
 	menghuo: ["male", "shu", 4, ["huoshou", "zaiqixx", "twqiushou"], ["zhu", "doublegroup:shu:qun"]],
-	zhurong: ["female", "shu", 4, ["juxiang", "lieren"], ["doublegroup:shu:qun"]],
+	zhurong: ["female", "shu", 4, ["juxiang", "lieren"], ["doublegroup:shu:qun", "name:null|null"]],
 	caopi: ["male", "wei", 3, ["xingshang", "fangzhu", "songwei"], ["zhu"]],
 	re_lusu: ["male", "wu", 3, ["haoshi", "dimeng"]],
 	sunjian: ["male", "wu", 4, ["gzyinghun"]],

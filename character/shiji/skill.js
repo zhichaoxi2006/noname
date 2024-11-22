@@ -5894,7 +5894,7 @@ const skills = {
 				content: function () {
 					var card = get.cardPile2(function (card) {
 						return get.color(card, false) == "red";
-					});
+					}, "random");
 					if (card) player.gain(card, "gain2");
 				},
 			},

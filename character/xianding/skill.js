@@ -240,6 +240,7 @@ const skills = {
 		},
 		subSkill: {
 			effect: {
+				audio: "dcsblieji",
 				charlotte: true,
 				onremove(player, skill) {
 					let tags = player.getCards("h", card => card.gaintag?.some(tag => tag.startsWith(skill)));
@@ -867,10 +868,16 @@ const skills = {
 					return !player.getStorage("dckengqiang_used").includes(button.link);
 				})
 				.set("ai", button => {
-					const player = get.player();
-					if (button.link == "draw") return player.maxHp;
-					return get.damageEffect(get.event().getTrigger().player, player);
+					return get.event("value")[button.link] || 0;
 				})
+				.set("value", function () {
+					let draw = player.maxHp * get.effect(player, { name: "draw" }, player, player),
+						damage = get.damageEffect(trigger.player, player, player, trigger.nature);
+					if (trigger.cards) damage += trigger.cards.reduce((acc, card) => {
+						return acc + get.value(card, player);
+					}, 0);
+					return { damage, draw };
+				}())
 				.forResult();
 			event.result = {
 				bool: result.bool,
@@ -1303,7 +1310,7 @@ const skills = {
 					} else break;
 				}
 				cards = cards.filter(i => get.owner(i) == target);
-				if (cards.length) await target.discard(cards);
+				if (cards.length) await target.modedDiscard(cards);
 			}
 		},
 		ai: {
@@ -10095,7 +10102,7 @@ const skills = {
 			var card = get.cardPile2(cardx => {
 				var type = get.type2(cardx);
 				return (type == "basic" || type == "trick") && !cards.some(cardxx => get.name(cardx, false) == get.name(cardxx, false));
-			});
+			}, "random");
 			if (card) player.addToExpansion(card, "gain2").gaintag.add("dcwangyuan");
 		},
 		ai: {
@@ -11384,7 +11391,7 @@ const skills = {
 			"step 0";
 			var card = get.cardPile2(function (card) {
 				return get.subtype(card) == "equip1" && targets[0].hasUseTarget(card);
-			});
+			}, "random");
 			if (card) {
 				if (card.name == "qinggang" && !lib.inpile.includes("qibaodao")) {
 					card.remove();
@@ -12137,7 +12144,7 @@ const skills = {
 			"step 0";
 			player.removeMark("dclingfang", 1);
 			"step 1";
-			var card = get.discardPile(card => get.color(card, false) == "black");
+			var card = get.discardPile(card => get.color(card, false) == "black", "random");
 			if (card) player.gain(card, "gain2");
 			player.loseHp();
 		},
@@ -12571,7 +12578,7 @@ const skills = {
 					if (get[fn](card, player) == get[fn](cardxx, player) && !cards.includes(cardxx)) {
 						return true;
 					}
-				});
+				}, "random");
 				if (cardx) cards.push(cardx);
 			}
 			/*if(cards.length&&!player.isMaxHandcard(true)) player.draw();
@@ -13585,7 +13592,7 @@ const skills = {
 					for (var i = 0; i < num; i++) {
 						var card = get.discardPile(function (card) {
 							return get.type(card) != "basic" && !cards.includes(card);
-						});
+						}, "random");
 						if (card) cards.push(card);
 						else break;
 					}
@@ -19134,7 +19141,7 @@ const skills = {
 				var card = get.cardPile(function (card) {
 					if (get.type(card) != "equip") return false;
 					return list.length == 0 || get.subtype(card) != get.subtype(list[0]);
-				});
+				}, false, "random");
 				if (card) list.push(card);
 			}
 			if (!list.length) {

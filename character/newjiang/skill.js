@@ -344,7 +344,7 @@ const skills = {
 						const cards = lib.skill.yanxie_backup.effect;
 						await player.loseToDiscardpile(cards);
 						await player.draw(cards.length);
-						const card = get.cardPile2(card => get.type(card) === "equip");
+						const card = get.cardPile2(card => get.type(card) === "equip", "random");
 						if (card) await player.gain(card, "gain2");
 					},
 				};
@@ -521,6 +521,7 @@ const skills = {
 	},
 	//向秀
 	mpmiaoxi: {
+		audio: 2,
 		enable: "phaseUse",
 		usable: 1,
 		filterCard: true,
@@ -576,6 +577,7 @@ const skills = {
 		},
 	},
 	mpsijiu: {
+		audio: 2,
 		trigger: {
 			global: "roundStart",
 		},
@@ -1315,7 +1317,7 @@ const skills = {
 				while (target.hasEmptySlot(num)) {
 					const card = get.cardPile2(card => {
 						return !cards.includes(card) && get.subtype(card) == "equip" + num && target.canUse(card, target);
-					});
+					}, "random");
 					if (card) {
 						cards.push(card);
 						target.$gain2(card, false);

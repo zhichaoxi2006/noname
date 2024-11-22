@@ -1073,7 +1073,7 @@ export class GameEvent {
 			game.getGlobalHistory("everything").push(this);
 			if (this.manager.eventStack.length === 0) this.manager.rootEvent = this;
 			this.manager.eventStack.push(this);
-			await this.loop().finally(() => {
+			await this.loop().then(() => {
 				this.manager.eventStack.pop();
 			});
 		})();

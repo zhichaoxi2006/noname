@@ -1858,7 +1858,7 @@ const skills = {
 			"step 2";
 			var equip = get.cardPile(function (card) {
 				return get.type(card) == "equip" && target.hasUseTarget(card);
-			});
+			}, false, "random");
 			if (target.isMinEquip() && equip) {
 				target.chooseUseTarget(equip, "nothrow", "nopopup", true);
 				event.e = true;
@@ -1876,7 +1876,7 @@ const skills = {
 			if (!event.e && player.isMinEquip()) {
 				var equip = get.cardPile(function (card) {
 					return get.type(card) == "equip" && player.hasUseTarget(card);
-				});
+				}, false, "random");
 				if (equip) player.chooseUseTarget(equip, "nothrow", "nopopup", true);
 			}
 			"step 6";
@@ -2497,7 +2497,7 @@ const skills = {
 				target.loseHp();
 				event.card = get.cardPile(function (card) {
 					return get.type(card) == "equip" && target.canUse(card, target);
-				});
+				}, false, "random");
 				if (event.card) {
 					target.chooseUseTarget(event.card, "nothrow", "nopopup", true);
 					event.goto(3);
@@ -2579,7 +2579,7 @@ const skills = {
 					trigger.source.loseHp();
 					var card = get.cardPile(function (card) {
 						return get.type(card) == "equip" && trigger.source.canUse(card, trigger.source);
-					});
+					}, false, "random");
 					if (card) {
 						trigger.source.chooseUseTarget(card, "nothrow", "nopopup", true);
 					}
@@ -2631,7 +2631,7 @@ const skills = {
 						target.loseHp();
 						var card = get.cardPile(function (card) {
 							return get.type(card) == "equip" && target.canUse(card, target);
-						});
+						}, false, "random");
 						if (card) {
 							target.chooseUseTarget(card, true, "nothrow", "nopopup", true);
 						}
