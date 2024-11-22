@@ -769,16 +769,26 @@ const skills = {
 				})
 				.set("ai", target => {
 					const player = get.player();
-					if (
-						player.hasCard(card => {
-							return game.hasPlayer(current => {
-								return get.effect(current, card, player, player) > 0 && player.canUse(card, current, true, true);
-							});
-						}, "hs")
-					)
-						return 0;
-					return -get.attitude(player, target);
+					let idx = 0.7, shas = player.getCardUsable("sha");
+					return player.countCards("hs", card => {
+						if (!player.canUse(card, target, false, true)) return 0;
+						let eff = get.effect(target, card, player, player);
+						if (eff <= 0) return 0;
+						if (get.tag(card, "damage")) {
+							if (card.name === "sha" && shas-- <= 0) return 0;
+							if (idx < 4) idx++;
+							return eff * idx;
+						}
+						return eff;
+					}) - get.event("original");
 				})
+				.set("original", function () {
+					let shas = player.getCardUsable("sha");
+					return player.countCards("hs", card => {
+						if (card.name === "sha" && shas-- <= 0) return 0;
+						return player.getUseValue(card, true, true);
+					});
+				}())
 				.forResult();
 		},
 		async content(event, trigger, player) {
@@ -812,6 +822,21 @@ const skills = {
 					});
 					if (evts.length) num += evts.lastItem.num;
 					trigger.num = Math.min(5, num);
+				},
+				ai: {
+					damageBonus: true,
+					skillTagFilter(player, tag, arg) {
+						if (tag !== "damageBonus") return false;
+						return arg && arg.target && player.hasHistory("sourceDamage", evt => {
+							return evt.source === player && evt.player === arg.target && evt.getParent("phaseUse") === _status.event.getParent("phaseUse");
+						});
+					},
+					effect: {
+						player(card, player, target) {
+							if (!target || !player.getStorage("starruijun_effect").includes(target) || !get.tag(card, "damage")) return;
+							return [2.5, 0, 2.5, 0];
+						}
+					}
 				},
 				mod: {
 					inRange(from, to) {
