@@ -38,7 +38,7 @@ const skills = {
 				},
 				mod: {
 					cardUsable(card) {
-						if (card.cards?.some(i => i.hasGaintag("dcyuxi"))) return Infinity;
+						if (get.number(card) === "unsure" || card.cards?.every(card => card.hasGaintag("dcyuxi"))) return Infinity;
 					},
 				},
 			},
