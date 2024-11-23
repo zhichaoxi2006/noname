@@ -748,8 +748,12 @@ const skills = {
 		audio: 2,
 		mod: {
 			aiOrder(player, card, num) {
-				if (num <= 0 || !player.isPhaseUsing() || player.hasSkill("starruijun_effect")) return num;
-				if (get.tag(card, "damage")) return num / 10;
+				if (num <= 0 || !player.isPhaseUsing()) return num;
+				if (get.tag(card, "recover")) {
+					if (player.needsToDiscard()) return num / 3;
+					return 0;
+				}
+				if (player.hasSkill("starruijun_effect") && get.tag(card, "damage")) return num / 10;
 			}
 		},
 		trigger: {
@@ -809,7 +813,7 @@ const skills = {
 					for (let card of cards) {
 						if (card.name === "sha" && shas-- <= 0) continue; //【杀】只能用次数上限张
 						if (get.tag(card, "damage")) for (let arr of damage) {
-							if (player.canUse(card, arr[0], false, true) && get.effect(tar, card, player, player) > 0) {
+							if (player.canUse(card, arr[0], false, true) && get.effect(arr[0], card, player, player) > 0) {
 								arr[1]++; //统计每个可狙敌人可以用的伤害牌数
 								if (arr[1] > 5) return damage.filter(cur => {
 									return cur[1] > 4;
@@ -831,6 +835,12 @@ const skills = {
 			await player.draw(player.getDamagedHp() + 1);
 			player.addTempSkill("starruijun_effect", "phaseChange");
 			player.markAuto("starruijun_effect", event.targets[0]);
+		},
+		ai: {
+			threaten(player, target) {
+				if (target.hp < 3) return 9 / (1 + target.getHp());
+				return 1 + 0.3 * target.getDamagedHp();
+			}
 		},
 		subSkill: {
 			effect: {
@@ -882,19 +892,6 @@ const skills = {
 						if (player.getStorage("starruijun_effect").includes(target)) return true;
 					},
 				},
-			},
-		},
-		mod: {
-			aiOrder(player, card, num) {
-				const event = get.event();
-				if (!event || event.type !== "phase") return;
-				if (
-					game.hasPlayer(current => {
-						return get.effect(current, card, player, player) > 0 && player.canUse(card, current, true, true) && get.damageEffect(current, player, player) > 0;
-					})
-				)
-					return num * 2;
-				return num / 1.5;
 			},
 		},
 	},

@@ -5476,7 +5476,7 @@ const skills = {
 		ai: {
 			effect: {
 				target(card, player, target) {
-					if (get.tag(card, "recover") && _status.event.type == "phase" && !player.needsToDiscard()) return 0.2;
+					if (get.tag(card, "recover") && _status.event.type == "phase" && !player.needsToDiscard()) return 0;
 					if (card.name === "tiesuo" && target.maxHp > 1) return 0.1;
 					if (get.tag(card, "damage") && target.maxHp > 1 && player !== target && target.countCards("h") > 0) {
 						let fs = game.findPlayer(cur => {
