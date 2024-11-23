@@ -399,7 +399,11 @@ const skills = {
 		},
 		async cost(event, trigger, player) {
 			event.result = await player
-				.chooseTarget(get.prompt2(event.name.slice(0, -5)), lib.filter.notMe)
+				.chooseTarget(
+					get.prompt2(event.name.slice(0, -5), (card, player, current) => {
+						return current != player && current.countCards("h");
+					})
+				)
 				.set("ai", target => {
 					return -get.attitude(get.player(), target) / (target.countCards("h") + 1);
 				})
