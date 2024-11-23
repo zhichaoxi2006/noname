@@ -3304,9 +3304,13 @@ const skills = {
 			const ind = history.indexOf(trigger) - 1,
 				evt = history[ind];
 			const len = get.cardNameLength(trigger.card) + get.cardNameLength(evt.card);
-			const card = get.cardPile(card => {
-				return get.cardNameLength(card, false) == len;
-			}, false, "random");
+			const card = get.cardPile(
+				card => {
+					return get.cardNameLength(card, false) == len;
+				},
+				false,
+				"random"
+			);
 			if (card) {
 				yield player.gain(card, "gain2");
 			} else {
@@ -5361,12 +5365,12 @@ const skills = {
 		audio: 2,
 		trigger: { target: "useCardToTargeted" },
 		filter(event, player) {
-			return get.color(event.card) == "black" && event.player != player && player.maxHp - player.countMark("dcmoshou_count") > 0;
+			return get.color(event.card) == "black";
 		},
 		frequent: true,
 		prompt2(event, player) {
 			const num = player.maxHp - player.countMark("dcmoshou_count");
-			return "摸" + get.cnNumber(num) + "张牌";
+			return num <= 0 ? "重置【墨守】摸牌数" : "摸" + get.cnNumber(num) + "张牌";
 		},
 		async content(event, trigger, player) {
 			const skillName = event.name + "_count";
@@ -14642,7 +14646,9 @@ const skills = {
 		useShaValue(player) {
 			let cache = _status.event.getTempCache("xinkuangfu", "useShaValue");
 			if (cache) return cache;
-			let eff = -Infinity, odds = 0, tar = null;
+			let eff = -Infinity,
+				odds = 0,
+				tar = null;
 			game.countPlayer(cur => {
 				if (!player.canUse("sha", cur, false)) return;
 				let eff2 = get.effect(cur, { name: "sha" }, player, player);
@@ -14658,7 +14664,7 @@ const skills = {
 			_status.event.putTempCache("xinkuangfu", "useShaValue", {
 				tar,
 				eff,
-				odds
+				odds,
 			});
 			return { tar, eff, odds };
 		},
@@ -14685,7 +14691,8 @@ const skills = {
 			},
 			result: {
 				player(player, target) {
-					let cache = lib.skill.xinkuangfu.useShaValue(player), eff = cache.eff / 10;
+					let cache = lib.skill.xinkuangfu.useShaValue(player),
+						eff = cache.eff / 10;
 					if (player === target) {
 						return 2 * cache.odds + eff;
 					}
