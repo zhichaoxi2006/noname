@@ -478,7 +478,7 @@ const skills = {
 			return game.hasPlayer(target => lib.skill.twguihan.filterTarget(null, player, target));
 		},
 		filterTarget(card, player, target) {
-			return target != player && target.isDamaged() && target.countCards("h");
+			return target != player && target.countCards("h");
 		},
 		selectTarget: [1, 3],
 		usable: 1,
