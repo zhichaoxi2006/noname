@@ -118,6 +118,7 @@ const skills = {
 	},
 	// 谋郭嘉
 	sbtiandu: {
+		zhuanhuanji: true,
 		mark: true,
 		marktext: "☯",
 		intro: {
