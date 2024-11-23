@@ -753,7 +753,22 @@ const skills = {
 					if (player.needsToDiscard()) return num / 3;
 					return 0;
 				}
-				if (player.hasSkill("starruijun_effect") && get.tag(card, "damage")) return num / 10;
+				if (player.hasSkill("starruijun_effect")) return num;
+				const info = get.info(card);
+				if (info?.toself) return num;
+				if (game.hasPlayer(cur => {
+					return (
+						player.canUse(card, cur, true, true) &&
+						get.attitude(player, cur) < 0 &&
+						get.effect(cur, card, player, player) > 0 &&
+						get.damageEffect(cur, player, player) > 0 &&
+						!cur.hasSkillTag("filterDamage", null, {
+							player,
+							card
+						})
+					);
+				})) return num + 2;
+				return num / 10;
 			}
 		},
 		trigger: {
@@ -781,51 +796,47 @@ const skills = {
 					const player = get.player(),
 						original = get.event("original"),
 						draw = 1 + player.getDamagedHp();
-					if (original === true) return 0;
 					if (Array.isArray(original)) {
 						if (original.includes(target)) return -get.attitude(player, target);
 						return 0;
 					}
 					if (get.attitude(player, target) >= 0) return draw * get.effect(player, { name: "draw" }, player, player) - original;
-					let idx = 0, shas = player.getCardUsable("sha");
+					let shas = player.getCardUsable("sha"), filterDamage = target.hasSkillTag("filterDamage", null, {
+						player
+					}), idx = filterDamage ? 1 : 0;
 					return player.countCards("hs", card => {
-						if (!get.tag(card, "damage") || !player.canUse(card, target, false, true)) return 0;
+						if (get.info(card).toself || !player.canUse(card, target, false, true)) return 0;
 						let eff = get.effect(target, card, player, player);
 						if (eff <= 0) return 0;
 						if (card.name === "sha" && shas-- <= 0) return 0;
-						if (idx < 3) idx += 0.65;
+						if (!get.tag(card, "damage") || get.type(card, null, player) === "delay") return eff;
+						if (!filterDamage && idx < 3) idx += 0.65;
 						return eff * idx;
 					}) + draw * get.effect(player, { name: "draw" }, player, player) - original;
 				})
 				.set("original", function () {
-					const cards = player.getCards("hs"),
-						enemies = game.filterPlayer(tar => { //筛选可狙敌人
+					const cards = player.getCards("hs");
+					let shas = player.getCardUsable("sha"), //【杀】的剩余使用次数
+						damage = trigger.targets.filter(tar => { //筛选目标中可狙敌人
 							return get.attitude(player, tar) < 0 && get.damageEffect(tar, player, player) > 0 && !tar.hasSkillTag("filterDamage", null, {
 								player,
 							});
-						});
-					let shas = player.getCardUsable("sha"),
-						draw = (player.getDamagedHp() + 1) * 0.35, //〖锐军〗摸到的伤害牌期望
-						damage = trigger.targets.filter(tar => { //筛选目标中可狙敌人
-							return enemies.includes(tar);
-						}).map(i => [i, draw]),
+						}).map(i => [i, 0]),
 						eff = 0;
 					for (let card of cards) {
 						if (card.name === "sha" && shas-- <= 0) continue; //【杀】只能用次数上限张
-						if (get.tag(card, "damage")) for (let arr of damage) {
+						if (get.info(card).toself) continue;
+						if (get.tag(card, "damage") && get.type(card, null, player) !== "delay") for (let arr of damage) {
 							if (player.canUse(card, arr[0], false, true) && get.effect(arr[0], card, player, player) > 0) {
 								arr[1]++; //统计每个可狙敌人可以用的伤害牌数
-								if (arr[1] > 5) return damage.filter(cur => {
-									return cur[1] > 4;
+								if (arr[1] > 4) return damage.filter(cur => {
+									return cur[1] > 3;
 								}).map(i => i[0]); //针对目标中敌方角色的伤害牌已经足够多，为降低计算开销直接狙他
 							}
 						}
-						else if (enemies.some(tar => { //仍有能对可狙敌人用的非伤害牌
-							return player.canUse(card, tar, true, true) && get.effect(tar, card, player, player) > 0;
-						})) return true; //用完再用技能
 						let val = player.getUseValue(card, true, true);
 						if (val <= 0) continue;
-						eff += val; //统计正常用牌收益
+						eff += val; //正常对其他人用牌的总收益
 					}
 					return eff;
 				}())
@@ -837,6 +848,20 @@ const skills = {
 			player.markAuto("starruijun_effect", event.targets[0]);
 		},
 		ai: {
+			effect: {
+				player_use(card, player, target) {
+					if (!target || target === player || player._starruijun_effect_use || !player.isPhaseUsing() || player.countSkill("starruijun")) return;
+					player._starruijun_effect_use = true;
+					if (get.attitude(player, target) < 0 && get.damageEffect(target, player, player) > 0 && !target.hasSkillTag("filterDamage", null, {
+						player,
+						card
+					})) {
+						delete player._starruijun_effect_use;
+						return [1, 1 + player.getDamagedHp(), 1, -1.8 * player.countCards("hs", i => get.tag(i, "damage") > 0.5)];
+					}
+					delete player._starruijun_effect_use;
+				}
+			},
 			threaten(player, target) {
 				if (target.hp < 3) return 9 / (1 + target.getHp());
 				return 1 + 0.3 * target.getDamagedHp();
@@ -906,6 +931,9 @@ const skills = {
 		async content(event, trigger, player) {
 			player.addTempSkill("stargangyi_access");
 		},
+		ai: {
+			halfneg: true,
+		},
 		subSkill: {
 			recover: {
 				audio: "stargangyi",
@@ -920,6 +948,13 @@ const skills = {
 				forced: true,
 				async content(event, trigger, player) {
 					trigger.num++;
+				},
+				ai: {
+					effect: {
+						target(card, player, target) {
+							if (target.hp <= 0 && get.tag(card, "recover")) return 2;
+						}
+					}
 				},
 			},
 			access: {
