@@ -9203,29 +9203,33 @@ const skills = {
 		trigger: { player: "damageBegin4" },
 		filter: function (event, player) {
 			var list = player.getStorage("jsrglirang_used");
-			if (!list.length) return false;
+			if (!list.length || player.hasSkill("jsrgzhengyi_damage")) return false;
 			return !player.getHistory("damage").length && list[0].isIn();
 		},
 		direct: true,
-		content: function () {
-			"step 0";
-			var target = player.getStorage("jsrglirang_used")[0];
-			event.target = target;
-			target
+		async content(event, trigger, player) {
+			player.addTempSkill("jsrgzhengyi_damage");
+			const target = player.getStorage("jsrglirang_used")[0];
+			const result = await target
 				.chooseBool("是否对" + get.translation(player) + "发动【争义】？", "将此" + (trigger.source ? "来源为" + get.translation(trigger.source) : "无来源") + "的" + trigger.num + "点伤害转移给你")
 				.set("ai", () => {
 					return _status.event.bool;
 				})
-				.set("bool", get.damageEffect(player, trigger.source, target) > get.damageEffect(target, trigger.source, target));
-			"step 1";
+				.set("bool", get.damageEffect(player, trigger.source, target) < get.damageEffect(target, trigger.source, target))
+				.forResult();
 			if (result.bool) {
 				target.logSkill("jsrgzhengyi", player);
 				trigger.cancel();
-				target.damage(trigger.source, trigger.nature, trigger.num).set("card", trigger.card).set("cards", trigger.cards);
+				await target.damage(trigger.source, trigger.nature, trigger.num).set("card", trigger.card).set("cards", trigger.cards);
 			}
 		},
 		ai: {
 			combo: "jsrglirang",
+		},
+		subSkill: {
+			damage: {
+				charlotte: true
+			}
 		},
 	},
 	//朱儁
