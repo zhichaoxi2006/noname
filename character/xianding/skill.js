@@ -51,7 +51,7 @@ const skills = {
 			aiOrder(player, card, num) {
 				if (typeof card == "object") {
 					const evt = lib.skill.dcjianying.getLastUsed(player);
-					if (evt?.card && get.tag(evt.card, "damage") && !evt.dcporong && get.name(card, player) == "sha") {
+					if (evt?.card && get.tag(evt.card, "damage") > 0.5 && !evt.dcporong && get.name(card, player) == "sha") {
 						return num + 10;
 					}
 				}
@@ -64,12 +64,15 @@ const skills = {
 			if (event.card.name != "sha") return false;
 			const evt = lib.skill.dcjianying.getLastUsed(player, event);
 			if (!evt || !evt.card || evt.dcporong) return false;
-			return get.tag(evt.card, "damage");
+			return get.tag(evt.card, "damage") > 0.5;
 		},
-		forced: true,
-		locked: false,
 		logTarget(event, player) {
 			return event.targets.sortBySeat();
+		},
+		check(event, player) {
+			if (event.targets.reduce((sum, target) => sum + get.effect(target, event.card, player, player), 0) > 0) return true;
+			const targets = event.targets.map(target => [target, target.getNext(), target.getPrevious()].filter(current => current != player && current.countGainableCards(player, "h"))).flat();
+			return targets.reduce((sum, target) => sum + get.effect(target, { name: "shunshou_copy2" }, player, player), 0) > 0;
 		},
 		async content(event, trigger, player) {
 			const { targets, name } = event;
@@ -84,7 +87,7 @@ const skills = {
 		},
 		init(player, skill) {
 			const evt = lib.skill.dcjianying.getLastUsed(player);
-			if (evt?.card && get.tag(evt.card, "damage") && !evt[skill]) player.addTip(skill, "破戎 可连击");
+			if (evt?.card && get.tag(evt.card, "damage") > 0.5 && !evt[skill]) player.addTip(skill, "破戎 可连击");
 		},
 		onremove(player, skill) {
 			player.removeTip(skill);
@@ -94,7 +97,7 @@ const skills = {
 			skillTagFilter(player, tag, arg) {
 				if (!arg?.card || get.name(arg.card) !== "sha") return;
 				const evt = lib.skill.dcjianying.getLastUsed(player);
-				return evt?.card && get.tag(evt.card, "damage") && !evt.dcporong;
+				return evt?.card && get.tag(evt.card, "damage") > 0.5 && !evt.dcporong;
 			},
 		},
 		group: "dcporong_mark",
@@ -108,7 +111,7 @@ const skills = {
 				popup: false,
 				firstDo: true,
 				async content(event, trigger, player) {
-					if (!trigger.dcporong && get.tag(trigger.card, "damage")) {
+					if (!trigger.dcporong && get.tag(trigger.card, "damage") > 0.5) {
 						player.addTip("dcporong", "破戎 可连击");
 					} else player.removeTip("dcporong");
 				},
