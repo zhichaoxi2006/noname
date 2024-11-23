@@ -746,6 +746,12 @@ const skills = {
 	//星孙坚
 	starruijun: {
 		audio: 2,
+		mod: {
+			aiOrder(player, card, num) {
+				if (num <= 0 || !player.isPhaseUsing() || player.hasSkill("starruijun_effect")) return num;
+				if (get.tag(card, "damage")) return num / 10;
+			}
+		},
 		trigger: {
 			player: "useCardToPlayered",
 		},
@@ -768,26 +774,56 @@ const skills = {
 					return target != player && get.event().getTrigger().targets.includes(target) && target.isIn();
 				})
 				.set("ai", target => {
-					const player = get.player();
-					let idx = 0.7, shas = player.getCardUsable("sha");
+					const player = get.player(),
+						original = get.event("original"),
+						draw = 1 + player.getDamagedHp();
+					if (original === true) return 0;
+					if (Array.isArray(original)) {
+						if (original.includes(target)) return -get.attitude(player, target);
+						return 0;
+					}
+					if (get.attitude(player, target) >= 0) return draw * get.effect(player, { name: "draw" }, player, player) - original;
+					let idx = 0, shas = player.getCardUsable("sha");
 					return player.countCards("hs", card => {
-						if (!player.canUse(card, target, false, true)) return 0;
+						if (!get.tag(card, "damage") || !player.canUse(card, target, false, true)) return 0;
 						let eff = get.effect(target, card, player, player);
 						if (eff <= 0) return 0;
-						if (get.tag(card, "damage")) {
-							if (card.name === "sha" && shas-- <= 0) return 0;
-							if (idx < 4) idx++;
-							return eff * idx;
-						}
-						return eff;
-					}) - get.event("original");
+						if (card.name === "sha" && shas-- <= 0) return 0;
+						if (idx < 3) idx += 0.65;
+						return eff * idx;
+					}) + draw * get.effect(player, { name: "draw" }, player, player) - original;
 				})
 				.set("original", function () {
-					let shas = player.getCardUsable("sha");
-					return player.countCards("hs", card => {
-						if (card.name === "sha" && shas-- <= 0) return 0;
-						return player.getUseValue(card, true, true);
-					});
+					const cards = player.getCards("hs"),
+						enemies = game.filterPlayer(tar => { //筛选可狙敌人
+							return get.attitude(player, tar) < 0 && get.damageEffect(tar, player, player) > 0 && !tar.hasSkillTag("filterDamage", null, {
+								player,
+							});
+						});
+					let shas = player.getCardUsable("sha"),
+						draw = (player.getDamagedHp() + 1) * 0.35, //〖锐军〗摸到的伤害牌期望
+						damage = trigger.targets.filter(tar => { //筛选目标中可狙敌人
+							return enemies.includes(tar);
+						}).map(i => [i, draw]),
+						eff = 0;
+					for (let card of cards) {
+						if (card.name === "sha" && shas-- <= 0) continue; //【杀】只能用次数上限张
+						if (get.tag(card, "damage")) for (let arr of damage) {
+							if (player.canUse(card, arr[0], false, true) && get.effect(tar, card, player, player) > 0) {
+								arr[1]++; //统计每个可狙敌人可以用的伤害牌数
+								if (arr[1] > 5) return damage.filter(cur => {
+									return cur[1] > 4;
+								}).map(i => i[0]); //针对目标中敌方角色的伤害牌已经足够多，为降低计算开销直接狙他
+							}
+						}
+						else if (enemies.some(tar => { //仍有能对可狙敌人用的非伤害牌
+							return player.canUse(card, tar, true, true) && get.effect(tar, card, player, player) > 0;
+						})) return true; //用完再用技能
+						let val = player.getUseValue(card, true, true);
+						if (val <= 0) continue;
+						eff += val; //统计正常用牌收益
+					}
+					return eff;
 				}())
 				.forResult();
 		},
