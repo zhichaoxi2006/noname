@@ -736,7 +736,7 @@ const translates = {
 	v_zhangliao: "威张辽",
 	v_zhangliao_prefix: "威",
 	dcyuxi: "驭袭",
-	dcyuxi_info: "当你造成或受到伤害时，你摸一张牌。你使用以此法获得的牌无次数限制。",
+	dcyuxi_info: "当你造成或受到伤害时，你可以摸一张牌。你使用以此法获得的牌无次数限制。",
 	dcporong: "破戎",
 	dcporong_info: "连招技（伤害牌 + 杀）。你可以获得目标角色的相邻角色各一张手牌，且此牌额外结算一次。",
 };

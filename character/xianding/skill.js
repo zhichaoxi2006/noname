@@ -6,38 +6,42 @@ const skills = {
 	//威张辽
 	dcyuxi: {
 		audio: 2,
-		mod: {
-			cardUsable(card, player, num) {
-				if (!card.cards) return;
-				if (card.cards.some(i => i.hasGaintag("dcyuxi"))) return Infinity;
-			},
-		},
 		trigger: {
-			source: "damageBegin1",
-			player: ["damageBegin4", "useCard1"],
+			source: "damageBegin3",
+			player: "damageBegin4",
 		},
-		filter(event, player) {
-			return (
-				event.name == "damage" ||
-				(player.hasHistory("lose", evt => {
-					return evt.getParent() == event && evt.hs.length && Object.values(evt.gaintag_map).flat().includes("dcyuxi");
-				}) &&
-					event.addCount !== false)
-			);
+		frequent: true,
+		content() {
+			player.addSkill(event.name + "_effect");
+			player.draw().gaintag = [event.name];
 		},
-		forced: true,
-		locked: false,
-		async content(event, trigger, player) {
-			if (trigger.name == "damage") {
-				const next = player.draw();
-				next.gaintag = [event.name];
-				await next;
-			} else {
-				trigger.addCount = false;
-				const stat = player.getStat().card,
-					name = trigger.card.name;
-				if (typeof stat[name] == "number") stat[name]--;
-			}
+		subSkill: {
+			effect: {
+				charlotte: true,
+				trigger: { player: "useCard1" },
+				filter(event, player) {
+					return (
+						event.addCount !== false &&
+						player.hasHistory("lose", evt => {
+							return evt.getParent() == event && evt.hs.length && Object.values(evt.gaintag_map).flat().includes("dcyuxi");
+						})
+					);
+				},
+				forced: true,
+				popup: false,
+				content() {
+					trigger.addCount = false;
+					const stat = player.getStat().card,
+						name = trigger.card.name;
+					if (typeof stat[name] == "number") stat[name]--;
+					game.log(trigger.card, "不计入次数");
+				},
+				mod: {
+					cardUsable(card) {
+						if (card.cards?.some(i => i.hasGaintag("dcyuxi"))) return Infinity;
+					},
+				},
+			},
 		},
 	},
 	dcporong: {
