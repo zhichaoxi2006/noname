@@ -5365,12 +5365,12 @@ const skills = {
 		audio: 2,
 		trigger: { target: "useCardToTargeted" },
 		filter(event, player) {
-			return get.color(event.card) == "black";
+			return get.color(event.card) == "black" && event.player != player && player.maxHp - player.countMark("dcmoshou_count") > 0;
 		},
 		frequent: true,
 		prompt2(event, player) {
 			const num = player.maxHp - player.countMark("dcmoshou_count");
-			return num <= 0 ? "重置【墨守】摸牌数" : "摸" + get.cnNumber(num) + "张牌";
+			return "摸" + get.cnNumber(num) + "张牌";
 		},
 		async content(event, trigger, player) {
 			const skillName = event.name + "_count";
