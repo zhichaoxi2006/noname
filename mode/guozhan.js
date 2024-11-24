@@ -8356,27 +8356,26 @@ export default () => {
 			gzdeshao: {
 				audio: "dcdeshao",
 				trigger: { target: "useCardToTargeted" },
+				usable(skill, player) {
+					return player.hp;
+				},
 				preHidden: true,
-				countUnseen: function (player) {
-					var num = 0;
+				countUnseen(player) {
+					let num = 0;
 					if (player.isUnseen(0)) num++;
 					if (player.isUnseen(1)) num++;
 					return num;
 				},
-				filter: function (event, player) {
+				filter(event, player) {
 					if (player == event.player || event.targets.length != 1 || get.color(event.card) != "black") return false;
-					if (lib.skill.gzdeshao.countUnseen(event.player) < lib.skill.gzdeshao.countUnseen(player) || !event.player.countCards("he")) return false;
-					return (
-						player.getHistory("useSkill", function (evt) {
-							return evt.skill == "gzdeshao";
-						}).length < player.hp
-					);
+					if (lib.skill.gzdeshao.countUnseen(event.player) < lib.skill.gzdeshao.countUnseen(player)) return false;
+					return event.player.countDiscardableCards(player, "he");
 				},
-				check: function (event, player) {
+				check(event, player) {
 					return get.effect(event.player, { name: "guohe_copy2" }, player, player) > 0;
 				},
 				logTarget: "player",
-				content: function () {
+				content() {
 					player.discardPlayerCard(trigger.player, true, "he");
 				},
 			},

@@ -5361,32 +5361,27 @@ const skills = {
 		audio: 2,
 		trigger: { target: "useCardToTargeted" },
 		filter(event, player) {
-			return get.color(event.card) == "black" && event.player != player && player.maxHp - player.countMark("dcmoshou_count") > 0;
+			return get.color(event.card) == "black";
 		},
 		frequent: true,
 		prompt2(event, player) {
-			const num = player.maxHp - player.countMark("dcmoshou_count");
-			return "摸" + get.cnNumber(num) + "张牌";
+			const num = player.maxHp - player.countMark("dcmoshou");
+			return num <= 0 ? "重置【墨守】摸牌数" : "摸" + get.cnNumber(num) + "张牌";
 		},
 		async content(event, trigger, player) {
-			const skillName = event.name + "_count";
-			let num = player.maxHp - player.countMark(skillName);
-			player.addSkill(skillName);
+			const { name: mark } = event;
+			let num = player.maxHp - player.countMark(mark);
 			if (num > 1) {
-				player.addMark(skillName, 1, false);
+				player.addMark(mark, 1, false);
 			} else {
-				player.clearMark(skillName, false);
+				player.clearMark(mark, false);
 			}
 			if (num > 0) await player.draw(num);
 		},
-		subSkill: {
-			count: {
-				charlotte: true,
-				onremove: true,
-				intro: {
-					content: (storage, player) => `下次【墨守】摸牌数：${player.maxHp - player.countMark("dcmoshou_count")}`,
-				},
-			},
+		onremove: true,
+		intro: {
+			markcount: (storage, player) => player.maxHp - player.countMark("dcmoshou"),
+			content: (storage, player) => `下次【墨守】摸牌数：${player.maxHp - player.countMark("dcmoshou")}`,
 		},
 	},
 	dcyunjiu: {
@@ -11060,31 +11055,38 @@ const skills = {
 	weilie: {
 		audio: 2,
 		enable: "phaseUse",
-		filter: function (event, player) {
-			return player.countMark("weilie") <= player.getStorage("fuping").length && player.countCards("he") > 0 && game.hasPlayer(current => current.isDamaged());
+		filter(event, player) {
+			return player.countMark("weilie_used") <= player.getStorage("fuping").length && player.countCards("he") > 0 && game.hasPlayer(current => current.isDamaged());
 		},
 		filterCard: true,
 		position: "he",
 		filterTarget: (card, player, target) => target.isDamaged(),
-		check: function (card) {
+		check(card) {
 			return 8 - get.value(card);
 		},
-		content: function () {
-			"step 0";
-			player.addMark("weilie", 1, false);
-			target.recover();
-			"step 1";
-			if (target.isDamaged()) target.draw();
+		async content(event, trigger, player) {
+			const { target, name } = event;
+			player.addSkill(name + "_used");
+			player.addMark(name + "_used", 1, false);
+			await target.recover();
+			if (target.isDamaged()) await target.draw();
 		},
 		onremove: true,
 		ai: {
 			order: 1,
 			result: {
-				player: function (player, target) {
+				player(player, target) {
 					var eff = get.recoverEffect(target, player, player);
 					if (target.getDamagedHp() > 1) eff += get.effect(target, { name: "draw" }, player, player);
 					return eff;
 				},
+			},
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+				intro: { content: "本局游戏已发动#次【炜烈】" },
 			},
 		},
 	},

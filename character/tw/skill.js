@@ -10707,89 +10707,77 @@ const skills = {
 		},
 	},
 	twzhenliang: {
-		group: ["twzhenliang_1", "twzhenliang_2"],
-		audio: "nzry_zhenliang_1",
-		mark: true,
-		zhuanhuanji: true,
-		marktext: "☯",
+		inherit: "nzry_zhenliang",
 		intro: {
-			content: function (storage, player, skill) {
-				if (player.storage.twzhenliang == true) return "当你或你攻击范围内的一名角色于你的回合外受到伤害时，你可以弃置一张牌令此伤害-1。然后若你以此法弃置的牌颜色与“任”的颜色相同，你摸一张牌。";
+			content(storage, player, skill) {
+				if (storage) return "当你或你攻击范围内的一名角色于你的回合外受到伤害时，你可以弃置一张牌令此伤害-1。然后若你以此法弃置的牌颜色与“任”的颜色相同，你摸一张牌。";
 				return "出牌阶段限一次。你可以弃置一张牌并对攻击范围内的一名角色造成1点伤害。然后若你以此法弃置的牌颜色与“任”的颜色相同，你摸一张牌。";
 			},
 		},
-		subSkill: {
-			1: {
-				audio: "nzry_zhenliang_1",
-				enable: "phaseUse",
-				filter: function (event, player) {
-					if (player.storage.twzhenliang) return false;
-					return game.hasPlayer(function (current) {
-						return player.inRange(current);
-					});
-				},
-				position: "he",
-				filterCard: true,
-				filterTarget: function (card, player, target) {
-					return player.inRange(target);
-				},
-				check: function (card) {
-					var player = _status.event.player,
+		trigger: { global: "damageBegin4" },
+		filter(event, player) {
+			if (!player.countCards("he")) return false;
+			if (event.name == "chooseToUse") {
+				if (player.storage.twzhenliang || player.hasSkill("twzhenliang_used", null, null, false)) return false;
+				return game.hasPlayer(current => player.inRange(current));
+			} else {
+				if (_status.currentPhase == player || !player.storage.twzhenliang) return false;
+				return (event.num > 0 && event.player == player) || player.inRange(event.player);
+			}
+		},
+		async cost(event, trigger, player) {
+			const { player: target } = trigger;
+			const {
+				result: { bool, cards },
+			} = await player
+				.chooseToDiscard("he", get.prompt(event.name.slice(0, -5), target), "弃置一张牌令此伤害-1")
+				.set("ai", card => {
+					const { player, goon } = get.event();
+					if (goon) {
 						cardx = player.getExpansions("twmingren")[0];
-					if (cardx && get.color(cardx, player) == get.color(card, player)) return 10 - get.value(card);
-					return 7 - get.value(card);
-				},
-				prompt: "弃置一张牌并对攻击范围内的一名角色造成1点伤害",
-				content: function () {
-					"step 0";
-					player.changeZhuanhuanji("twzhenliang");
-					var cardx = player.getExpansions("twmingren")[0];
-					target.damage("nocard");
-					if (!cardx || get.color(cards[0], player) != get.color(cardx, player)) event.finish();
-					"step 1";
-					player.draw();
-				},
-				ai: {
-					order: 5,
-					result: {
-						player: function (player, target) {
-							return get.damageEffect(target, player, player);
-						},
-					},
-				},
-			},
-			2: {
-				audio: "nzry_zhenliang_1",
-				trigger: { global: "damageBegin4" },
-				filter: function (event, player) {
-					if (_status.currentPhase == player || !player.storage.twzhenliang) return false;
-					return player.countCards("he") && event.num > 0 && (event.player == player || player.inRange(event.player));
-				},
-				direct: true,
-				content: function () {
-					"step 0";
-					player
-						.chooseToDiscard("he", get.prompt("twzhenliang", trigger.player), "弃置一张牌令此伤害-1")
-						.set("ai", function (card) {
-							if (_status.event.goon) {
-								var player = _status.event.player,
-									cardx = player.getExpansions("twmingren")[0];
-								if (cardx && get.color(cardx, player) == get.color(card, player)) return 10 - get.value(card);
-								return 6 - get.value(card);
-							}
-							return 0;
-						})
-						.set("goon", get.attitude(player, trigger.player) > 0).logSkill = ["twzhenliang", trigger.player];
-					"step 1";
-					if (result.bool) {
-						player.changeZhuanhuanji("twzhenliang");
-						var cardx = player.getExpansions("twmingren")[0];
-						if (cardx && get.color(result.cards[0], player) == get.color(cardx, player)) player.draw();
-						trigger.num--;
+						if (cardx && get.color(cardx, player) == get.color(card, player)) return 10 - get.value(card);
+						return 6 - get.value(card);
 					}
+					return 0;
+				})
+				.set("goon", get.attitude(player, target) > 0);
+			event.result = {
+				bool: bool,
+				cards: cards,
+				targets: [target],
+			};
+		},
+		filterCard: true,
+		check(card) {
+			const player = get.player(),
+				cardx = player.getExpansions("twmingren")[0];
+			if (cardx && get.color(cardx, player) == get.color(card, player)) return 10 - get.value(card);
+			return 7 - get.value(card);
+		},
+		prompt: "弃置一张牌并对攻击范围内的一名角色造成1点伤害",
+		async content(event, trigger, player) {
+			const {
+				targets: [target],
+				name: skill,
+				cards,
+			} = event;
+			player.changeZhuanhuanji(skill);
+			const cardx = player.getExpansions("twmingren")[0];
+			if (!trigger) {
+				player.addTempSkill(skill + "_used", "phaseUseAfter");
+				await target.damage("nocard");
+			} else trigger.num--;
+			if (cardx && get.color(cards[0], player) == get.color(cardx, player)) await player.draw();
+		},
+		ai: {
+			order: 5,
+			result: {
+				player(player, target) {
+					return get.damageEffect(target, player, player);
 				},
 			},
 		},
+		subSkill: { used: { charlotte: true } },
 	},
 	//张南
 	twfenwu: {
@@ -19356,180 +19344,150 @@ const skills = {
 	},
 	chijie: {
 		audio: true,
+		getGroups(player) {
+			return lib.group.filter(group => {
+				return group != player.group && game.hasPlayer(current => current.group == group);
+			});
+		},
 		trigger: {
 			global: "phaseBefore",
 			player: "enterGame",
 		},
-		direct: true,
-		filter: function (event, player) {
-			return (
-				(event.name != "phase" || game.phaseNumber == 0) &&
-				game.hasPlayer(function (current) {
-					return current.group != player.group && lib.group.includes(current.group);
-				})
-			);
+		filter(event, player) {
+			return (event.name != "phase" || game.phaseNumber == 0) && get.info("chijie").getGroups(player).length;
 		},
-		content: function () {
-			"step 0";
-			var list = lib.group.filter(function (group) {
-				return (
-					group != player.group &&
-					game.hasPlayer(function (current) {
-						return current.group == group;
-					})
-				);
-			});
-			list.push("cancel2");
-			player
-				.chooseControl(list)
-				.set("prompt", get.prompt("chijie"))
+		async cost(event, trigger, player) {
+			const list = get.info("chijie").getGroups(player);
+			const control = await player
+				.chooseControl(list, "cancel2")
+				.set("prompt", get.prompt(event.name.slice(0, -5)))
 				.set("prompt2", "将自己的势力变更为场上存在的一个势力")
-				.set("ai", function () {
-					return list.randomGet();
-				});
-			"step 1";
-			if (result.control != "cancel2") {
-				player.logSkill("chijie");
-				player.changeGroup(result.control);
-			}
+				.set("ai", () => {
+					return get.event("controls").randomGet();
+				})
+				.forResultControl();
+			event.result = {
+				bool: control != "cancel2",
+				cost_data: control,
+			};
+		},
+		async content(event, trigger, player) {
+			await player.changeGroup(event.cost_data);
 		},
 		ai: {
-			combo: "waishi"
+			combo: "waishi",
 		},
 	},
 	waishi: {
 		audio: 2,
 		enable: "phaseUse",
-		filter: function (event, player) {
-			let used = player.getStat("skill").waishi;
-			if (used && used > player.countMark("waishi_remover")) return false;
+		usable(skill, player) {
+			return 1 + player.countMark("waishi_add");
+		},
+		filter(event, player) {
 			return player.countCards("he") > 0 && game.hasPlayer(target => target != player && target.countCards("h") > 0);
 		},
-		filterTarget: function (card, player, target) {
+		filterTarget(card, player, target) {
 			return target != player && target.countCards("h") >= ui.selected.cards.length;
 		},
 		filterCard: true,
 		position: "he",
-		check: function (card) {
-			if (
-				!game.hasPlayer(function (current) {
-					return current != _status.event.player && current.countCards("h") > ui.selected.cards.length;
-				})
-			)
-				return 0;
+		check(card) {
+			if (!game.hasPlayer(curren => current != get.player() && current.countCards("h") > ui.selected.cards.length)) return 0;
 			return 6 - get.value(card);
 		},
-		selectCard: function () {
+		selectCard() {
 			if (!ui.selected.targets.length) return [1, game.countGroup()];
 			return [1, Math.min(ui.selected.targets[0].countCards("h"), game.countGroup())];
 		},
 		discard: false,
 		lose: false,
 		delay: 0,
-		content: function () {
-			"step 0";
-			player.choosePlayerCard(target, true, "h", cards.length);
-			"step 1";
-			player.swapHandcards(target, cards, result.cards);
-			game.delayex();
-			"step 2";
-			if (target.countCards("h") > player.countCards("h") || player.group == target.group) player.draw();
+		async content(event, trigger, player) {
+			const { cards, target } = event;
+			const links = await player.choosePlayerCard(target, true, "h", cards.length).forResultLinks();
+			if (!links || !links.length) return;
+			await player.swapHandcards(target, cards, links);
+			await game.delayex();
+			if (target.countCards("h") > player.countCards("h") || player.group == target.group) await player.draw();
 		},
 		ai: {
 			order: 7,
 			result: {
-				player: function (player, target) {
+				player(player, target) {
 					if (player.countCards("h") < target.countCards("h") || player.group == target.group) return 1;
 					return 0.1;
 				},
 			},
 		},
 		subSkill: {
-			remover: {
+			add: {
 				charlotte: true,
-				onremove: function (player) {
-					player.clearMark("waishi_remover", false);
-				},
-				intro: {
-					content: "〖外使〗的发动次数+#",
-				},
+				onremove: true,
+				intro: { content: "〖外使〗的发动次数+#" },
 			},
 		},
 	},
 	renshe: {
 		audio: 2,
 		trigger: { player: "damageEnd" },
-		direct: true,
-		content: function () {
-			"step 0";
-			var choiceList = ["将势力变更为场上现存的一个其他势力", "令〖外使〗的发动次数+1直到下个出牌阶段结束", "与另一名其他角色各摸一张牌"];
-			var controls = ["选项二"];
-			if (
-				game.hasPlayer(current => {
-					return current.group != player.group && lib.group.includes(current.group);
-				})
-			)
-				controls.unshift("选项一");
-			if (game.hasPlayer(current => current != player)) controls.push("选项三");
-			player
-				.chooseControl(controls, "cancel2")
-				.set("prompt", get.prompt("renshe"))
+		async cost(event, trigger, player) {
+			const choices = [];
+			const choiceList = ["将势力变更为场上现存的一个其他势力", "令〖外使〗的发动次数+1直到下个出牌阶段结束", "与另一名其他角色各摸一张牌"];
+			if (get.info("chijie").getGroups(player).length) choices.push("选项一");
+			else choiceList[0] = '<span style="opacity:0.5">' + choiceList[0] + "</span>";
+			choices.push("选项二");
+			if (game.hasPlayer(current => player != current)) choices.push("选项三");
+			else choiceList[2] = '<span style="opacity:0.5">' + choiceList[2] + "</span>";
+			const control = await player
+				.chooseControl(choices, "cancel2")
+				.set("prompt", get.prompt(event.name.slice(0, -5)))
 				.set("choiceList", choiceList)
-				.set("ai", function () {
+				.set("ai", () => {
 					if (
-						game.hasPlayer(function (current) {
+						game.hasPlayer(current => {
+							if (player == current) return false;
 							return get.attitude(player, current) > 0 || current.hasSkillTag("nogain");
 						})
 					)
 						return "选项三";
 					return "选项二";
+				})
+				.forResultControl();
+			event.result = {
+				bool: control != "cancel2",
+				cost_data: control,
+			};
+		},
+		async content(event, trigger, player) {
+			const { cost_data: control } = event;
+			if (control == "选项一") {
+				const list = get.info("chijie").getGroups(player);
+				if (!list.length) return;
+				const { result } = await player
+					.chooseControl(list)
+					.set("prompt", get.prompt(event.name))
+					.set("prompt2", "将自己的势力变更为场上存在的一个势力")
+					.set("ai", () => {
+						return get.event("controls").randomGet();
+					});
+				await player.changeGroup(result.control);
+			} else if (control == "选项二") {
+				player.addTempSkill("waishi_add", { player: "phaseUseAfter" });
+				player.addMark("waishi_add", 1, false);
+			} else {
+				if (!game.hasPlayer(current => player != current)) return;
+				const { result } = await player.chooseTarget("请选择一名角色，与其各摸一张牌", lib.filter.notMe, true).set("ai", target => {
+					const player = get.player();
+					if (target.hasSkillTag("nogain")) return 0.1;
+					return get.effect(target, { name: "draw" }, player, player);
 				});
-			"step 1";
-			if (result.control == "cancel2") event.finish();
-			else {
-				player.logSkill("renshe");
-				switch (result.control) {
-					case "选项一":
-						event.goto(3);
-						break;
-					case "选项二":
-						player.addMark("waishi_remover", 1, false);
-						player.addTempSkill("waishi_remover", { player: "phaseUseAfter" });
-						event.finish();
-						break;
-					case "选项三":
-						player.chooseTarget("请选择一名角色，与其各摸一张牌", lib.filter.notMe, true).set("ai", function (target) {
-							if (target.hasSkillTag("nogain")) return 0.1;
-							return get.attitude(_status.event.player, target);
-						});
+				if (result.bool) {
+					const target = result.targets[0];
+					player.line(target, "green");
+					await game.asyncDraw([player, target].sortBySeat());
 				}
 			}
-			"step 2";
-			if (result.bool) {
-				var target = result.targets[0];
-				player.line(target, "green");
-				game.asyncDraw([player, target].sortBySeat());
-			}
-			game.delayex();
-			event.finish();
-			"step 3";
-			var list = lib.group.filter(function (group) {
-				return (
-					group != player.group &&
-					game.hasPlayer(function (current) {
-						return current.group == group;
-					})
-				);
-			});
-			player
-				.chooseControl(list)
-				.set("prompt", get.prompt("chijie"))
-				.set("prompt2", "将自己的势力变更为场上存在的一个势力")
-				.set("ai", function () {
-					return list.randomGet();
-				});
-			"step 4";
-			player.changeGroup(result.control);
 		},
 	},
 	//英文版特典武将凯撒

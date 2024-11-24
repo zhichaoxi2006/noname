@@ -30,7 +30,7 @@ const characters = {
 	niufu: ["male", "qun", "4/7", ["dcxiaoxi", "xiongrao"]],
 	bianxi: ["male", "wei", 4, ["dunxi"]],
 	fengfang: ["male", "qun", 3, ["dcditing", "dcbihuo"]],
-	qinyilu: ["male", "qun", 3, ["piaoping", "tuoxian", "chuaili"]],
+	qinyilu: ["male", "qun", 3, ["piaoping", "tuoxian", "zhuili"]],
 	yanrou: ["male", "wei", 4, ["choutao", "xiangshu"]],
 	dc_zhuling: ["male", "wei", 4, ["dczhanyi"]],
 	licaiwei: ["female", "qun", 3, ["yijiao", "qibie"], ["border:wei"]],

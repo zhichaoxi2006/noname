@@ -11073,16 +11073,26 @@ const skills = {
 		},
 		logTarget: "player",
 		filter(event, player) {
-			return player.hasMark("jsrgdangyi");
+			return player.countMark("jsrgdangyi_used") < player.countMark("jsrgdangyi");
 		},
 		async content(event, trigger, player) {
-			player.removeMark("jsrgdangyi", 1, false);
+			player.addSkill(event.name + "_used");
+			player.addMark(event.name + "_used", 1, false);
 			trigger.num++;
 		},
 		audio: 2,
 		mark: true,
 		intro: {
-			content: "剩余可发动次数为$",
+			content(storage, player) {
+				return `剩余可发动次数为${player.countMark("jsrgdangyi") - player.countMark("jsrgdangyi_used")}`;
+			},
+		},
+		onremove: true,
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+			},
 		},
 	},
 	jsrgzuozhan: {

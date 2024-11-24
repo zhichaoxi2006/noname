@@ -3769,22 +3769,17 @@ const skills = {
 	},
 	tytanlong: {
 		enable: "phaseUse",
-		usable: 221,
+		usable(skill, player) {
+			return 1 + game.countPlayer(current => current.isLinked());
+		},
 		filter(event, player) {
-			if (player.countMark("tytanlong") > game.countPlayer(current => current.isLinked())) return false;
-			return game.hasPlayer(current => player.canCompare(current)) && player.countCards("h");
+			return game.hasPlayer(current => player.canCompare(current));
 		},
 		filterTarget(event, player, target) {
 			return player.canCompare(target);
 		},
 		async content(event, trigger, player) {
-			if (!player.countMark("tytanlong")) {
-				player.when({ global: ["phaseUseBegin", "phaseUseAfter"] }).then(() => {
-					player.removeMark("tytanlong", player.countMark("tytanlong"), false);
-				});
-			}
-			player.addMark("tytanlong", 1, false);
-			const target = event.target;
+			const { target } = event;
 			const next = player.chooseToCompare(target);
 			if (get.attitude(player, target) > 0) next.set("small", true);
 			const result = await next.forResult();

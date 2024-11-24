@@ -523,7 +523,9 @@ const skills = {
 	mpmiaoxi: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: 1,
+		usable(skill, player) {
+			return 1 + (player.hasSkill(skill + "_rewrite", null, null, false) ? 1 : 0);
+		},
 		filterCard: true,
 		position: "h",
 		filterTarget(card, player, target) {
@@ -558,9 +560,8 @@ const skills = {
 					if (get.owner(cardb)) await get.owner(cardb).give(cardb, player);
 					else await player.gain(cardb, "gain2");
 				}
-				if (get.number(carda) == get.number(cardb) && !player.hasSkill("mpmiaoxi_fresh")) {
-					player.addTempSkill("mpmiaoxi_fresh");
-					player.getStat("skill").mpmiaoxi--;
+				if (get.number(carda) == get.number(cardb) && !player.hasSkill("mpmiaoxi_rewrite", null, null, false)) {
+					player.addTempSkill("mpmiaoxi_rewrite");
 				}
 			}
 		},
@@ -570,11 +571,7 @@ const skills = {
 				target: -1,
 			},
 		},
-		subSkill: {
-			fresh: {
-				charlotte: true,
-			},
-		},
+		subSkill: { rewrite: { charlotte: true } },
 	},
 	mpsijiu: {
 		audio: 2,
@@ -1196,15 +1193,12 @@ const skills = {
 	yjqimei: {
 		audio: 2,
 		enable: "phaseUse",
-		filter(event, player) {
-			const count = player.getStat("skill").yjqimei;
-			if (count && count > 0 && !player.hasSkill("yjqimei_rewrite")) return false;
-			return true;
+		usable(skill, player) {
+			return 1 + (player.hasSkill(skill + "_rewrite", null, null, false) ? 1 : 0);
 		},
 		filterTarget: lib.filter.notMe,
-		usable: 2,
 		async content(event, trigger, player) {
-			const target = event.target;
+			const { target } = event;
 			await player.draw(2, "nodelay");
 			await target.draw(2);
 			const targets = [player, target].filter(current => current.countDiscardableCards(current, "he"));

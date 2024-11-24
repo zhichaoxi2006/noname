@@ -6236,7 +6236,7 @@ const skills = {
 		audioname: ["sp_jiangwei", "xiahouba", "re_jiangwei", "gz_jiangwei", "ol_jiangwei"],
 		enable: "phaseUse",
 		usable(skill, player) {
-			return 1 + player.countMark("oltiaoxin_add");
+			return 1 + (player.hasSkill(skill + "_rewrite", null, null, false) ? 1 : 0);
 		},
 		filter(event, player) {
 			return game.hasPlayer(target => lib.skill.oltiaoxin.filterTarget(null, player, target));
@@ -6244,9 +6244,9 @@ const skills = {
 		filterTarget(card, player, target) {
 			return target != player && target.inRange(player) && target.countCards("he") > 0;
 		},
-		content() {
-			"step 0";
-			target
+		async content(event, trigger, player) {
+			const { target } = event;
+			const { result } = await target
 				.chooseToUse(function (card, player, event) {
 					if (get.name(card) != "sha") return false;
 					return lib.filter.filterCard.apply(this, arguments);
@@ -6258,18 +6258,14 @@ const skills = {
 					return lib.filter.filterTarget.apply(this, arguments);
 				})
 				.set("sourcex", player);
-			"step 1";
 			if (
 				!result.bool ||
 				!player.hasHistory("damage", evt => {
 					return evt.getParent().type == "card" && evt.getParent(4) == event;
 				})
 			) {
-				if (target.countDiscardableCards(player, "he") > 0) player.discardPlayerCard(target, "he", true).boolline = true;
-				if (!player.hasMark(event.name + "_add")) {
-					player.addTempSkill(event.name + "_add", "phaseUseEnd");
-					player.addMark(event.name + "_add", 1, false);
-				}
+				if (target.countDiscardableCards(player, "he") > 0) await player.discardPlayerCard(target, "he", true).set("boolline", true);
+				player.addTempSkill(event.name + "_rewrite", "phaseUseEnd");
 			}
 		},
 		ai: {
@@ -6287,12 +6283,7 @@ const skills = {
 			},
 			threaten: 1.1,
 		},
-		subSkill: {
-			add: {
-				charlotte: true,
-				onremove: true,
-			},
-		},
+		subSkill: { rewrite: { charlotte: true } },
 	},
 	olzhiji: {
 		skillAnimation: true,
@@ -7291,14 +7282,15 @@ const skills = {
 	rehuaiyi: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: 2,
-		delay: false,
-		filter: function (event, player) {
-			return player.countCards("h") > 0 && (!player.getStat("skill").rehuaiyi || player.hasSkill("rehuaiyi2"));
+		usable(skill, player) {
+			return 1 + (player.hasSkill(skill + "_rewrite", null, null, false) ? 1 : 0);
 		},
-		content: function () {
-			"step 0";
-			player.showHandcards();
+		delay: false,
+		filter(event, player) {
+			return player.countCards("h");
+		},
+		async content(event, trigger, player) {
+			await player.showHandcards();
 			const hs = player.getCards("h"),
 				color = get.color(hs[0], player);
 			if (
@@ -7307,69 +7299,54 @@ const skills = {
 					return index > 0 && get.color(card) !== color;
 				})
 			) {
-				player.draw();
-				player.addTempSkill("rehuaiyi2", "phaseUseEnd");
-				event.finish();
-			}
-			"step 1";
-
-			const list = [],
-				bannedList = [],
-				indexs = Object.keys(lib.color);
-			player.getCards("h").forEach(card => {
-				const color = get.color(card, player);
-				list.add(color);
-				if (!lib.filter.cardDiscardable(card, player, "rehuaiyi")) bannedList.add(color);
-			});
-			list.removeArray(bannedList);
-			list.sort((a, b) => indexs.indexOf(a) - indexs.indexOf(b));
-			if (!list.length) event.finish();
-			else if (list.length === 1) event._result = { control: list[0] };
-			else
-				player
-					.chooseControl(list.map(i => `${i}2`))
-					.set("ai", function () {
-						var player = _status.event.player;
-						if (player.countCards("h", { color: "red" }) == 1 && player.countCards("h", { color: "black" }) > 1) return 1;
-						return 0;
-					})
-					.set("prompt", "请选择弃置一种颜色的所有手牌");
-			"step 2";
-			event.control = result.control.slice(0, result.control.length - 1);
-			var cards = player.getCards("h", { color: event.control });
-			player.discard(cards);
-			event.num = cards.length;
-			"step 3";
-			player
-				.chooseTarget("请选择至多" + get.cnNumber(event.num) + "名有牌的其他角色，获得这些角色的各一张牌。", [1, event.num], function (card, player, target) {
-					return target != player && target.countCards("he") > 0;
-				})
-				.set("ai", function (target) {
-					return -get.attitude(_status.event.player, target) + 0.5;
-				});
-			"step 4";
-			if (result.bool && result.targets) {
-				player.line(result.targets, "green");
-				event.targets = result.targets;
-				event.targets.sort(lib.sort.seat);
-				event.gained = 0;
+				await player.draw();
+				player.addTempSkill(event.name + "_rewrite", "phaseUseEnd");
 			} else {
-				event.finish();
+				const list = [],
+					bannedList = [],
+					indexs = Object.keys(lib.color);
+				player.getCards("h").forEach(card => {
+					const color = get.color(card, player);
+					list.add(color);
+					if (!lib.filter.cardDiscardable(card, player, "rehuaiyi")) bannedList.add(color);
+				});
+				list.removeArray(bannedList);
+				list.sort((a, b) => indexs.indexOf(a) - indexs.indexOf(b));
+				let result;
+				if (!list.length) return;
+				else if (list.length === 1) result = { control: list[0] };
+				else
+					result = await player
+						.chooseControl(list.map(i => `${i}2`))
+						.set("ai", () => {
+							const player = get.player();
+							if (player.countCards("h", { color: "red" }) == 1 && player.countCards("h", { color: "black" }) > 1) return 1;
+							return 0;
+						})
+						.set("prompt", "请选择弃置一种颜色的所有手牌")
+						.forResult();
+				const control = result.control.slice(0, -1);
+				const cards = player.getCards("h", { color: control }),
+					num = cards.length;
+				await player.discard(cards);
+				const targets = await player
+					.chooseTarget(`请选择至多${get.cnNumber(num)}名有牌的其他角色，获得这些角色的各一张牌。`, [1, num], (card, player, target) => {
+						return target != player && target.countGainableCards(player, "he");
+					})
+					.set("ai", target => {
+						return -get.attitude(get.player(), target) + 0.5;
+					})
+					.forResultTargets();
+				if (!targets || !targets.length) return;
+				player.line(targets, "green");
+				for (const target of targets.sortBySeat()) {
+					if (target.isIn() && target.countGainableCards(player, "he")) await player.gainPlayerCard(target, "he", true);
+				}
+				if (player.getHistory("gain", evt => evt.getParent(2) == event).reduce((sum, evt) => sum + evt.cards.length, 0) > 1) await player.loseHp();
 			}
-			"step 5";
-			if (player.isIn() && event.targets.length) {
-				player.gainPlayerCard(event.targets.shift(), "he", true);
-			} else event.finish();
-			"step 6";
-			if (result.bool) {
-				event.gained += result.cards.length;
-			}
-			if (event.targets.length) event.goto(5);
-			"step 7";
-			if (event.gained > 1) player.loseHp();
 		},
 		ai: {
-			order: function (item, player) {
+			order(item, player) {
 				if (player.countCards("h", { color: "red" }) == 0) return 10;
 				if (player.countCards("h", { color: "black" }) == 0) return 10;
 				return 1;
@@ -7378,8 +7355,8 @@ const skills = {
 				player: 1,
 			},
 		},
+		subSkill: { rewrite: { charlotte: true } },
 	},
-	rehuaiyi2: {},
 	rezhuikong: {
 		audio: 2,
 		audioname2: { tw_fuhuanghou: "xinzhuikong" },
