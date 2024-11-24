@@ -1709,39 +1709,57 @@ const skills = {
 		trigger: { player: "phaseUseBegin" },
 		forced: true,
 		async content(event, trigger, player) {
-			const list = [];
-			for (let i = 1; i < 6; i++) {
-				if (player.isDisabled(i)) continue;
-				list.push("equip" + i);
-			}
-			list.push("cancel2");
-			const next = player.chooseControl(list);
-			next.set("prompt", "独锋：请废除一个装备栏，或点击“取消”失去1点体力");
-			next.set("ai", () => {
-				const list = get.event().list.slice(),
-					player = get.player();
-				if (player.hp <= 2 && list.length > 1) list.remove("cancel2");
-				const listx = list.filter(subtype => !player.getEquips(subtype).length);
-				if (listx.length) return listx.randomGet();
-				return list.randomGet();
-			});
-			next.set("list", list);
-			const { result } = await next;
-			if (result.control == "cancel2") await player.loseHp();
-			else await player.disableEquip(result.control);
+			const { result } = await player
+				.chooseButton(
+					[
+						get.translation(event.name) + "：请选择你要执行的选项",
+						'<div class="text center">' + lib.translate[event.name + '_info'] + '</div>',
+						[
+							[
+								"失去体力",
+								...Array.from({ length: 5 })
+									.map((_, i) => {
+										const sub = "equip" + (i + 1).toString();
+										return [sub, get.translation(sub)];
+									})
+									.filter(sub => player.hasEnabledSlot(sub[0])),
+							],
+							"tdnodes",
+						],
+					],
+					[1, 2],
+					true
+				)
+				.set("filterButton", button => {
+					if (!ui.selected.buttons.length) return true;
+					return (button.link === "失去体力") !== (ui.selected.buttons[0].link === "失去体力");
+				})
+				.set("ai", button => {
+					const player = get.player(),
+						choice = button.link;
+					const list = Array.from({ length: 5 })
+						.map((_, i) => "equip" + (i + 1).toString())
+						.filter(sub => player.hasEnabledSlot(sub));
+					if (player.getHp() <= 2 && list.length > 1) list.remove("失去体力");
+					const listx = list.filter(subtype => subtype !== "失去体力" && !player.getEquips(subtype).length);
+					return choice === (listx.length ? listx : list).randomGet() ? 10 : 0;
+				});
+			if (!result?.links?.length) return;
+			if (result.links.includes("失去体力")) await player.loseHp();
+			if (result.links.some(sub => sub !== "失去体力")) await player.disableEquip(result.links.filter(sub => sub !== "失去体力")[0]);
 			if (!player.isIn()) return;
 			const num = Math.min(player.countDisabled() + player.getDamagedHp(), player.maxHp);
-			await player.draw(num);
-			player.addTempSkill("dcdufeng_effect");
-			player.addMark("dcdufeng_effect", num, false);
+			if (num) {
+				await player.draw(num);
+				player.addTempSkill("dcdufeng_effect");
+				player.addMark("dcdufeng_effect", num, false);
+			}
 		},
 		subSkill: {
 			effect: {
 				charlotte: true,
 				onremove: true,
-				intro: {
-					content: "本回合攻击范围与使用【杀】的次数上限均为#",
-				},
+				intro: { content: "本回合攻击范围与使用【杀】的次数上限均为#" },
 				mod: {
 					attackRangeBase(player, num) {
 						return player.countMark("dcdufeng_effect");

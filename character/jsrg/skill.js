@@ -1036,7 +1036,7 @@ const skills = {
 					.chooseToDiscard("h", true)
 					.set("ai", card => {
 						//开摆，直接随机弃牌，不考虑有的没的
-						return get.event().getRand(card.cardid);
+						return 1 + Math.random();
 					})
 					.forResult("cards");
 				if (!discarded?.length || discarded[0] === card) break;
@@ -1050,12 +1050,13 @@ const skills = {
 			const dialog = get.idDialog(videoId),
 				forced = player === source;
 			return player
-				.chooseButton([1, 2], forced)
+				.chooseButton([1, 2])
 				.set("dialog", dialog)
 				.set("ai", button => {
-					//开摆，直接随机选，不考虑有的没的
-					return get.event().getRand(button.link.cardid) + button._mbsaojian_choose?.length;
+					if (!get.event().forced) return 1 + Math.random();
+					return 1 + Math.random() + button._mbsaojian_choose?.length;
 				})
+				.set("forced", forced)
 				.set("filterButton", () => !Boolean(ui.selected.buttons.length))
 				.set("id", eventId)
 				.set("_global_waiting", true);
