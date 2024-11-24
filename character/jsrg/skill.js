@@ -9140,60 +9140,58 @@ const skills = {
 	jsrglirang: {
 		audio: "splirang",
 		trigger: { global: "phaseDrawBegin" },
-		direct: true,
-		filter: function (event, player) {
-			return event.player != player && !player.hasSkill("jsrglirang_used") && player.countCards("he") > 1;
+		filter(event, player) {
+			return event.player != player && player.countCards("he") > 1;
 		},
-		content: function () {
-			"step 0";
-			player
-				.chooseCard(get.prompt("jsrglirang", trigger.player), "你可以选择两张牌，将这些牌交给该角色。若如此做，你获得其本回合弃牌阶段弃置的所有牌。", 2, "he")
+		async cost(event, trigger, player) {
+			const { player: target } = trigger;
+			event.result = await player
+				.chooseCard(get.prompt(event.name.slice(0, -5), target), "你可以选择两张牌，将这些牌交给该角色。若如此做，你获得其本回合弃牌阶段弃置的所有牌。", 2, "he")
 				.set("ai", card => {
-					if (!_status.event.give) return 0;
-					var player = _status.event.player,
-						target = _status.event.target;
+					const { player, target, give } = get.event();
+					if (!give) return 0;
 					return target.getUseValue(card) - player.getUseValue(card) + 0.5;
 				})
-				.set("give", get.attitude(player, trigger.player) > 0)
-				.set("target", trigger.player);
-			"step 1";
-			if (result.bool) {
-				player.logSkill("jsrglirang", trigger.player);
-				var cards = result.cards;
-				player.give(cards, trigger.player);
-				player.addTempSkill("jsrglirang_used", "roundStart");
-				player.addTempSkill("jsrglirang_given");
-				player.markAuto("jsrglirang_used", [trigger.player]);
-			}
+				.set("give", get.attitude(player, target) > 0)
+				.set("target", target)
+				.forResult();
+		},
+		logTarget: "player",
+		async content(event, trigger, player) {
+			const { player: target } = trigger,
+				{ cards, name } = event;
+			player.tempBanSkill(name, "roundStart");
+			await player.give(cards, target);
+			player.addTempSkill("jsrglirang_record", "roundStart");
+			player.addTempSkill("jsrglirang_given");
+			player.markAuto("jsrglirang_record", [target]);
 		},
 		subSkill: {
-			used: {
+			record: {
 				charlotte: true,
 				onremove: true,
 				intro: { content: "本轮〖礼让〗目标：$" },
 			},
 			given: {
 				audio: "splirang",
-				trigger: { global: "phaseDiscardEnd" },
-				filter: function (event, player) {
-					return event.player.hasHistory("lose", evt => {
-						return evt.type == "discard" && evt.getParent("phaseDiscard") == event && evt.cards2.filterInD("d").length > 0;
-					});
-				},
-				charlotte: true,
-				prompt2: function (event, player) {
-					var cards = [];
+				getCards(event, player) {
+					const cards = [];
 					event.player.getHistory("lose", evt => {
 						if (evt.type == "discard" && evt.getParent("phaseDiscard") == event) cards.addArray(evt.cards2.filterInD("d"));
 					});
+					return cards;
+				},
+				trigger: { global: "phaseDiscardEnd" },
+				filter(event, player) {
+					return get.info("jsrglirang_given").getCards(event, player).length;
+				},
+				charlotte: true,
+				prompt2(event, player) {
+					const cards = get.info("jsrglirang_given").getCards(event, player);
 					return "获得" + get.translation(cards);
 				},
-				content: function () {
-					var cards = [];
-					trigger.player.getHistory("lose", evt => {
-						if (evt.type == "discard" && evt.getParent("phaseDiscard") == trigger) cards.addArray(evt.cards2.filterInD("d"));
-					});
-					player.gain(cards, "gain2");
+				content() {
+					player.gain(get.info(event.name).getCards(trigger, player), "gain2");
 				},
 			},
 		},
@@ -9201,35 +9199,46 @@ const skills = {
 	jsrgzhengyi: {
 		audio: 2,
 		trigger: { player: "damageBegin4" },
-		filter: function (event, player) {
-			var list = player.getStorage("jsrglirang_used");
-			if (!list.length || player.hasSkill("jsrgzhengyi_damage")) return false;
-			return !player.getHistory("damage").length && list[0].isIn();
+		filter(event, player) {
+			const list = player.getStorage("jsrglirang_record");
+			if (!list.length) return false;
+			return (
+				game
+					.getGlobalHistory(
+						"everything",
+						evt => {
+							return evt.name == "damage" && evt.player == player;
+						},
+						event
+					)
+					.indexOf(event) == 0 && list.some(i => i.isIn())
+			);
 		},
 		direct: true,
 		async content(event, trigger, player) {
-			player.addTempSkill("jsrgzhengyi_damage");
-			const target = player.getStorage("jsrglirang_used")[0];
-			const result = await target
-				.chooseBool("是否对" + get.translation(player) + "发动【争义】？", "将此" + (trigger.source ? "来源为" + get.translation(trigger.source) : "无来源") + "的" + trigger.num + "点伤害转移给你")
-				.set("ai", () => {
-					return _status.event.bool;
-				})
-				.set("bool", get.damageEffect(player, trigger.source, target) < get.damageEffect(target, trigger.source, target))
-				.forResult();
-			if (result.bool) {
-				target.logSkill("jsrgzhengyi", player);
-				trigger.cancel();
-				await target.damage(trigger.source, trigger.nature, trigger.num).set("card", trigger.card).set("cards", trigger.cards);
+			const targets = player.getStorage("jsrglirang_record").filter(i => i.isIn());
+			let target2;
+			while (targets.length) {
+				const target = targets.shift();
+				const bool = await target
+					.chooseBool("是否对" + get.translation(player) + "发动【争义】？", "将此" + (trigger.source ? "来源为" + get.translation(trigger.source) : "无来源") + "的" + trigger.num + "点伤害转移给你")
+					.set("ai", () => {
+						return _status.event.bool;
+					})
+					.set("bool", get.damageEffect(player, trigger.source, target) > get.damageEffect(target, trigger.source, target))
+					.forResultBool();
+				if (bool) {
+					target2 = target;
+					break;
+				}
 			}
+			if (!target2) return;
+			target2.logSkill("jsrgzhengyi", player);
+			trigger.cancel();
+			await target.damage(trigger.source, trigger.nature, trigger.num).set("card", trigger.card).set("cards", trigger.cards);
 		},
 		ai: {
 			combo: "jsrglirang",
-		},
-		subSkill: {
-			damage: {
-				charlotte: true
-			}
 		},
 	},
 	//朱儁
