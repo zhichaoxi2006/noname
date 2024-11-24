@@ -1181,7 +1181,7 @@ const skills = {
 		filter(event, player) {
 			if (event.player == player) return false;
 			if (event.name == "dying") {
-				return event.reason?.name == "damage" && event.reason?.source.group == player.group;
+				return event.reason?.name == "damage" && event.reason.source?.group == player.group;
 			}
 			return event.player?.group == player.group && player.countCards("h");
 		},
