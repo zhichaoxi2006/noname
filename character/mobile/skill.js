@@ -1008,7 +1008,7 @@ const skills = {
 		locked: false,
 		filter: function (event, player) {
 			if (get.type2(event.card) != "trick") return false;
-			if (!event.targets.some(current => current != player)) return false;
+			if (player === event.target) return false;
 			const num = lib.skill.mbchengxiong.phaseUsed(event, player);
 			return game.hasPlayer(current => current.countCards("he") >= num);
 		},
