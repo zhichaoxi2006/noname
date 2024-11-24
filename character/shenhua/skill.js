@@ -2576,7 +2576,7 @@ const skills = {
 		marktext: "☯",
 		intro: {
 			content(storage, player, skill) {
-				if (storage) return "其他角色对你造成伤害后，你可以观看该角色的手牌，然后交给其一张牌，当前角色回合结束时，若此牌仍在该角色手牌区或装备区，你将手牌摸至四张";
+				if (storage) return "其他角色对你造成伤害后，你可以观看该角色的手牌，然后交给其一张牌，当前角色回合结束时，若此牌仍在该角色的手牌区或装备区，你将手牌摸至四张";
 				return "出牌阶段限一次，你可以将一张牌交给一名手牌数最多的角色，然后对其造成1点伤害，若该角色因此死亡，则你可以令一名角色将手牌摸至四张";
 			},
 		},
@@ -2605,7 +2605,7 @@ const skills = {
 			const bool = await player
 				.chooseBool(get.prompt(event.name.slice(0, -5), source))
 				.set("choice", (source.countCards("h") <= source.getHp() && player.countCards("h") < 4 && !source.hasSkillTag("nogain")) || get.attitude(player, source) > 0)
-				.set("prompt2", "其他角色对你造成伤害后，你可以观看该角色的手牌，然后交给其一张牌，当前角色回合结束时，若此牌仍在该角色手牌区或装备区，你将手牌摸至四张")
+				.set("prompt2", "其他角色对你造成伤害后，你可以观看该角色的手牌，然后交给其一张牌，当前角色回合结束时，若此牌仍在该角色的手牌区或装备区，你将手牌摸至四张")
 				.forResultBool();
 			event.result = {
 				bool: bool,
