@@ -888,6 +888,180 @@ const skills = {
 			},
 		},
 	},
+	mbsaojian: {
+		audio: "jsrgsaojian",
+		inherit: "jsrgsaojian",
+		async content(event, trigger, player) {
+			//获取目标角色，主审查官阳球和其余审查官
+			const target = event.target,
+				targets = [player].concat(
+					(() => {
+						return get.mode() === "identity" ? [] : player.getFriends();
+					})()
+				);
+			//生成dialog
+			const videoId = (event.videoId = lib.status.videoId++),
+				eventId = get.id();
+			game.broadcastAll(
+				(id, player, target, targets, event) => {
+					if (!targets.includes(game.me)) return;
+					const dialog = ui.create.dialog("扫奸：" + (game.me === player ? "请选择" : "为" + get.translation(player) + "推荐") + "其中一张牌");
+					dialog.videoId = id;
+					dialog.add('<div class="text center">' + get.translation(target) + "的手牌</div>");
+					dialog.add(target.getCards("h"));
+				},
+				videoId,
+				player,
+				target,
+				targets,
+				event
+			);
+			//获取人类和AI，AI推荐在前，人类推荐和选牌在中，AI选牌在后
+			let humans = targets.filter(current => current === game.me || current.isOnline());
+			let locals = targets.slice(),
+				card;
+			locals.removeArray(humans);
+			const send = (current, eventId) => {
+				lib.skill.mbsaojian.chooseCard(current, eventId, videoId, player);
+				game.resume();
+			};
+			let time = 10000;
+			if (lib.configOL && lib.configOL.choose_timeout) time = parseInt(lib.configOL.choose_timeout) * 1000;
+			targets.forEach(current => current.showTimer(time));
+			event._global_waiting = true;
+			//AI推荐在前
+			if (locals.some(current => current !== player)) {
+				for (const current of locals) {
+					if (current === player) continue;
+					const result = await lib.skill.mbsaojian.chooseCard(current, eventId, videoId, player).forResult();
+					if (result?.bool && result.links?.length) {
+						game.broadcastAll(
+							(player, videoId, card) => {
+								const dialog = get.idDialog(videoId);
+								if (!dialog) return;
+								console.log(dialog);
+								const link = Array.from(dialog.content.childNodes[2].childNodes).find(but => but.link === card);
+								const choice = Array.from(dialog.content.childNodes[2].childNodes).find(but => but._mbsaojian_choose?.includes(player));
+								if (choice) {
+									choice._mbsaojian_choose.remove(player);
+									choice.querySelector(".info").innerHTML = choice._mbsaojian_choose.map(i => get.translation(i) + "推荐").join("<br>");
+									if (!choice._mbsaojian_choose.length) {
+										delete choice._mbsaojian_choose;
+										choice.classList.remove("glow2");
+									}
+								}
+								if (choice !== link) {
+									if (!link._mbsaojian_choose) link._mbsaojian_choose = [];
+									link._mbsaojian_choose.add(player);
+									link.querySelector(".info").innerHTML = link._mbsaojian_choose.map(i => get.translation(i) + "推荐").join("<br>");
+									if (!link.classList.contains("glow2")) link.classList.add("glow2");
+								}
+							},
+							current,
+							videoId,
+							result.links[0]
+						);
+					}
+				}
+			}
+			//人类推荐和选牌在中
+			if (humans.length) {
+				const solve = function (resolve, reject) {
+					return function (result, current) {
+						if (result?.bool && result.links?.length) {
+							if (current === player) {
+								card = result.links[0];
+							} else {
+								game.broadcastAll(
+									(player, videoId, card) => {
+										const dialog = get.idDialog(videoId);
+										if (!dialog) return;
+										const link = Array.from(dialog.content.childNodes[2].childNodes).find(but => but.link === card);
+										const choice = Array.from(dialog.content.childNodes[2].childNodes).find(but => but._mbsaojian_choose?.includes(player));
+										if (choice) {
+											choice._mbsaojian_choose.remove(player);
+											choice.querySelector(".info").innerHTML = choice._mbsaojian_choose.map(i => get.translation(i) + "推荐").join("<br>");
+											if (!choice._mbsaojian_choose.length) {
+												delete choice._mbsaojian_choose;
+												choice.classList.remove("glow2");
+											}
+										}
+										if (choice !== link) {
+											if (!link._mbsaojian_choose) link._mbsaojian_choose = [];
+											link._mbsaojian_choose.add(player);
+											link.querySelector(".info").innerHTML = link._mbsaojian_choose.map(i => get.translation(i) + "推荐").join("<br>");
+											if (!link.classList.contains("glow2")) link.classList.add("glow2");
+										}
+									},
+									current,
+									videoId,
+									result.links[0]
+								);
+							}
+							resolve();
+						} else reject();
+					};
+				};
+				await Promise.any(
+					humans.map(current => {
+						return new Promise(async (resolve, reject) => {
+							if (current.isOnline()) {
+								current.send(send, current, eventId, videoId, player);
+								current.wait(solve(resolve, reject));
+							} else {
+								const next = lib.skill.mbsaojian.chooseCard(current, eventId, videoId, player);
+								const solver = solve(resolve, reject);
+								if (_status.connectMode) game.me.wait(solver);
+								const result = await next.forResult();
+								if (_status.connectMode) game.me.unwait(result, current);
+								else solver(result, current);
+							}
+						});
+					})
+				).catch(() => {});
+				game.broadcastAll("cancel", eventId);
+			}
+			//AI选牌在后
+			if (locals.includes(player)) {
+				const result = await lib.skill.mbsaojian.chooseCard(player, eventId, videoId, player).forResult();
+				if (result?.bool && result.links?.length) card = result.links[0];
+			}
+			//关闭框，结算
+			game.broadcastAll("closeDialog", videoId);
+			delete event._global_waiting;
+			for (const current of targets) current.hideTimer();
+			//结算后续
+			for (let i = 0; i < 5; i++) {
+				const discarded = await target
+					.chooseToDiscard("h", true)
+					.set("ai", card => {
+						//开摆，直接随机弃牌，不考虑有的没的
+						return 1 + Math.random();
+					})
+					.forResult("cards");
+				if (!discarded?.length || discarded[0] === card) break;
+			}
+			if (target.countCards("h") > player.countCards("h")) {
+				player.logSkill("jsrgsaojian", null, null, null, [3]);
+				await player.loseHp();
+			}
+		},
+		chooseCard(player, eventId, videoId, source) {
+			const dialog = get.idDialog(videoId),
+				forced = player === source;
+			return player
+				.chooseButton([1, 2])
+				.set("dialog", dialog)
+				.set("ai", button => {
+					if (!get.event().forced) return 1 + Math.random();
+					return 1 + Math.random() + button._mbsaojian_choose?.length;
+				})
+				.set("forced", forced)
+				.set("filterButton", () => !Boolean(ui.selected.buttons.length))
+				.set("id", eventId)
+				.set("_global_waiting", true);
+		},
+	},
 	//张角
 	jsrgxiangru: {
 		trigger: { global: "damageBegin2" },

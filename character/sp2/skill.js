@@ -81,7 +81,7 @@ const skills = {
 		trigger: { global: "useCard" },
 		filter(event, player) {
 			let history = [],
-				suits = [];
+				suits = lib.suit.slice();
 			for (let i = player.actionHistory.length - 1; i >= 0; i--) {
 				history.addArray(_status.globalHistory[i].everything.filter(evt => evt.name === "useCard"));
 				if (_status.globalHistory[i].isRound) break;
@@ -94,7 +94,7 @@ const skills = {
 					} else map[suit]++;
 					return map;
 				}, {}),
-				min = Math.min(...suits.slice().map(suit => map[suit]));
+				min = Math.min(...suits.slice().map(suit => map[suit] || 0));
 			return map[get.suit(event.card)] === min;
 		},
 		forced: true,
