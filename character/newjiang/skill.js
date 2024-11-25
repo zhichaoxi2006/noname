@@ -2803,7 +2803,10 @@ const skills = {
 		init(player, skill) {
 			player.addTip(skill, get.translation(skill) + lib.skill.lkbushi.getBushi(player).reduce((str, i) => str + get.translation(i), ""));
 		},
-		onremove: true,
+		onremove(player, skill) {
+			delete player.storage[skill];
+			player.removeTip(skill);
+		},
 		trigger: { player: "phaseZhunbeiBegin" },
 		direct: true,
 		locked: false,
