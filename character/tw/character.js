@@ -1,4 +1,5 @@
 const characters = {
+	huan_liufeng: ["male", "shu", 4, ["twchenxun"]],
 	tw_sunluban: ["female", "wu", 3, ["twzenhui", "xinjiaojin"], ["die:sunluban"]],
 	tw_mazhong: ["male", "shu", 4, ["twfuman"], ["die:mazhong"]],
 	tw_jsp_guanyu: ["male", "wei", 4, ["wusheng", "twdanji"], ["die:jsp_guanyu", "tempname:jsp_guanyu"]],
