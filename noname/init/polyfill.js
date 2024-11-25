@@ -114,18 +114,15 @@ HTMLDivElement.prototype.goto = function (position, time) {
 		clearTimeout(this.timeout);
 		delete this.timeout;
 	}
-
 	if (typeof time != "number") time = 500;
 	this.classList.add("removing");
+	if (!this._selfDestroyed) {
+		position.appendChild(this);
+	}
 	// @ts-ignore
 	this.timeout = setTimeout(() => {
-		if (!this._selfDestroyed) {
-			position.appendChild(this);
-		}
 		this.classList.remove("removing");
-		delete this.destiny;
 	}, time);
-	this.destiny = position;
 	return this;
 };
 /**

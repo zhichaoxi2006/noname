@@ -2713,20 +2713,18 @@ const skills = {
 			player.removeGaintag("zhuosheng");
 		},
 		mod: {
-			targetInRange: function (card, player, target) {
-				if (!card.cards || get.type(card) != "basic") return;
-				for (var i of card.cards) {
-					if (i.hasGaintag("zhuosheng")) return game.online ? player == _status.currentPhase : player.isPhaseUsing();
-				}
+			targetInRange: function (card, player) {
+				if (get.type(card) !== "basic") return;
+				if (!(game.online ? player === _status.currentPhase : player.isPhaseUsing())) return;
+				if (get.number(card) === "unsure" || card.cards?.every(card => card.hasGaintag("zhuosheng"))) return true;
 			},
-			cardUsable: function (card, player, target) {
-				if (!card.cards || get.mode() == "guozhan" || get.type(card) != "basic" || !(game.online ? player == _status.currentPhase : player.isPhaseUsing())) return;
-				for (var i of card.cards) {
-					if (i.hasGaintag("zhuosheng")) return Infinity;
-				}
+			cardUsable: function (card, player) {
+				if (get.mode() === "guozhan" || get.type(card) !== "basic") return;
+				if (!(game.online ? player === _status.currentPhase : player.isPhaseUsing())) return;
+				if (get.number(card) === "unsure" || card.cards?.every(card => card.hasGaintag("zhuosheng"))) return Infinity;
 			},
 			aiOrder: function (player, card, num) {
-				if (get.itemtype(card) == "card" && card.hasGaintag("zhuosheng") && get.type(card) == "basic") return num - 0.1;
+				if (get.itemtype(card) === "card" && card.hasGaintag("zhuosheng") && get.type(card) === "basic") return num - 0.1;
 			},
 		},
 		trigger: { player: "useCard2" },
