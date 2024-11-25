@@ -1666,67 +1666,65 @@ const skills = {
 		},
 	},
 	nzry_juzhan: {
-		audio: "nzry_juzhan_1",
+		audio: ["nzry_juzhan_1", 2],
 		mark: true,
-		locked: false,
 		zhuanhuanji: true,
 		marktext: "☯",
 		intro: {
 			content(storage, player, skill) {
-				if (player.storage.nzry_juzhan == true) return "当你使用【杀】指定一名角色为目标后，你可以获得其一张牌，然后你本回合内不能再对其使用牌";
+				if (storage) return "当你使用【杀】指定一名角色为目标后，你可以获得其一张牌，然后你本回合内不能再对其使用牌";
 				return "当你成为其他角色【杀】的目标后，你可以与其各摸一张牌，然后其本回合内不能再对你使用牌";
 			},
 		},
-		group: ["nzry_juzhan_1", "nzry_juzhan_2"],
+		trigger: {
+			player: "useCardToPlayered",
+			target: "useCardToTargeted",
+		},
+		filter(event, player) {
+			if (event.card.name != "sha") return false;
+			if (!player.storage.nzry_juzhan) return true;
+			return event.target.countGainableCards(player, "he");
+		},
+		logTarget(event, player) {
+			return player.storage.nzry_juzhan ? event.target : event.player;
+		},
+		check(event, player) {
+			const target = get.info("nzry_juzhan").logTarget(event, player);
+			return get.attitude(player, target) < 0;
+		},
+		prompt2(event, player) {
+			const target = get.info("nzry_juzhan").logTarget(event, player);
+			return player.storage.nzry_juzhan ? `获得${get.translation(target)}一张牌，然后你本回合内不能再对其使用牌` : `与${get.translation(target)}各摸一张牌，然后其本回合内不能再对你使用牌`;
+		},
+		async content(event, trigger, player) {
+			const { name: skill } = event,
+				target = get.info(skill).logTarget(trigger, player);
+			player.changeZhuanhuanji(skill);
+			const storage = player.storage[skill];
+			const list = [player, target];
+			if (storage) {
+				await game.asyncDraw([player, target].sortBySeat());
+				await game.delayx();
+				list.reverse();
+			} else {
+				await player.gainPlayerCard(target, "he", true);
+			}
+			list[0].addTempSkill(skill + "_effect");
+			list[0].markAuto(skill + "_effect", [list[1]]);
+		},
 		subSkill: {
-			1: {
-				audio: 2,
-				trigger: {
-					target: "useCardToTargeted",
+			effect: {
+				charlotte: true,
+				onremove: true,
+				mod: {
+					playerEnabled(card, player, target) {
+						if (player.getStorage("nzry_juzhan_effect").includes(target)) return false;
+					},
 				},
-				prompt2: "当你成为其他角色【杀】的目标后，你可以与其各摸一张牌，然后其本回合内不能再对你使用牌。",
-				filter(event, player) {
-					return event.card.name == "sha" && !player.storage.nzry_juzhan;
-				},
-				logTarget: "player",
-				async content(event, trigger, player) {
-					await game.asyncDraw([player, trigger.player]);
-					trigger.player.addTempSkill("nzry_juzhany");
-					player.changeZhuanhuanji("nzry_juzhan");
-					player.addTempSkill("nzry_juzhanx");
-					await game.delayx();
-				},
-			},
-			2: {
-				audio: "nzry_juzhan_1",
-				trigger: {
-					player: "useCardToPlayered",
-				},
-				prompt2: "当你使用【杀】指定一名角色为目标后，你可以获得其一张牌，然后你本回合内不能再对其使用牌",
-				filter(event, player) {
-					return event.card.name == "sha" && player.storage.nzry_juzhan == true && event.target.countGainableCards(player, "he") > 0;
-				},
-				check(event, player) {
-					return event.player.countCards("he") > 0 && event.targets && event.targets.length == 1;
-				},
-				logTarget: "target",
-				async content(event, trigger, player) {
-					await player.gainPlayerCard(trigger.targets[0], "he", true);
-					player.changeZhuanhuanji("nzry_juzhan");
-					trigger.target.addTempSkill("nzry_juzhanx");
-					player.addTempSkill("nzry_juzhany");
-				},
+				intro: { content: "本回合不能对$使用牌" },
 			},
 		},
 	},
-	nzry_juzhanx: {
-		mod: {
-			targetEnabled(card, player, target) {
-				if (player.hasSkill("nzry_juzhany")) return false;
-			},
-		},
-	},
-	nzry_juzhany: {},
 	nzry_feijun: {
 		init: player => {
 			if (!Array.isArray(player.storage.nzry_feijun)) player.storage.nzry_feijun = [];
@@ -2185,40 +2183,59 @@ const skills = {
 		},
 	},
 	nzry_chenglve: {
+		audio: 2,
 		mark: true,
-		locked: false,
 		zhuanhuanji: true,
 		marktext: "☯",
 		intro: {
 			content(storage, player, skill) {
-				let str = player.storage.nzry_chenglve ? "出牌阶段限一次，你可以摸两张牌，然后弃置一张手牌。若如此做，直到本回合结束，你使用与弃置牌花色相同的牌无距离和次数限制" : "出牌阶段限一次，你可以摸一张牌，然后弃置两张手牌。若如此做，直到本回合结束，你使用与弃置牌花色相同的牌无距离和次数限制";
-				if (player.storage.nzry_chenglve1) {
-					str += "<br><li>当前花色：";
-					str += get.translation(player.storage.nzry_chenglve1);
-				}
-				return str;
+				const num = storage ? 2 : 1;
+				return `出牌阶段限一次，你可以摸${get.cnNumber(num)}张牌，然后弃置${get.cnNumber(3 - num)}张手牌。若如此做，直到本回合结束，你使用与弃置牌花色相同的牌无距离和次数限制`;
 			},
 		},
 		enable: "phaseUse",
 		usable: 1,
-		audio: 2,
 		async content(event, trigger, player) {
-			let result;
-			if (player.storage.nzry_chenglve == true) {
-				await player.draw(2);
-				result = await player.chooseToDiscard("h", true).forResult();
-			} else {
-				await player.draw();
-				result = await player.chooseToDiscard("h", 2, true).forResult();
-			}
 			player.changeZhuanhuanji("nzry_chenglve");
-			if (result.bool) {
-				player.storage.nzry_chenglve1 = result.cards.map(card => get.suit(card, player)).unique();
-				player.addTempSkill("nzry_chenglve1");
+			const num = player.storage.nzry_chenglve ? 1 : 2;
+			await player.draw(num);
+			if (!player.hasCard(card => lib.filter.cardDiscardable(card, player, "nzry_chenglve"), "h")) return;
+			await game.delayx();
+			const {
+				result: { bool, cards },
+			} = await player.chooseToDiscard(true, "h", 3 - num).set("ai", card => {
+				const player = get.player(),
+					effect = player.getStorage("nzry_chenglve_effect");
+				const cards = player.getCards("h").filter(i => get.tag(i, "damage") > 0.5 && player.hasValueTarget(i, true, false)),
+					map = {};
+				for (const cardx of cards) {
+					const suit = get.suit(cardx, player);
+					if (typeof map[suit] != "number") map[suit] = 0;
+					map[suit]++;
+				}
+				const list = [];
+				for (let i in map) {
+					if (map[i] > 0) list.push([i, map[i]]);
+				}
+				list.sort((a, b) => b[1] - a[1]);
+				if (effect.includes(get.suit(card, player))) return 0;
+				if (list.some(i => i[0] == get.suit(card, player)) && !player.hasUseTarget(card, false)) return 10;
+				if (player.storage.nzry_chenglve && ui.selected.cards.length && !ui.selected.cards.some(i => get.suit(i) == get.suit(card, player))) return 2;
+				return 6 - get.value(card);
+			});
+			if (bool) {
+				const effect = "nzry_chenglve_effect";
+				player.addTempSkill(effect);
+				player.markAuto(effect, cards.map(card => get.suit(card, player)).unique());
+				player.storage[effect].sort((a, b) => lib.suits.indexOf(b) - lib.suits.indexOf(a));
+				player.addTip(effect, get.translation(effect) + player.getStorage(effect).reduce((str, suit) => str + get.translation(suit), ""));
 			}
 		},
 		ai: {
-			order: 2.7,
+			order(item, player) {
+				if (player.countCards("h", card => get.tag(card, "damage") > 0.5 && player.hasValueTarget(card, true, false)) > 2) return get.order({ name: "sha" }) + 0.14;
+				return 2.7;
+			},
 			result: {
 				player(player) {
 					if (!player.storage.nzry_chenglve && player.countCards("h") < 3) return 0;
@@ -2226,18 +2243,25 @@ const skills = {
 				},
 			},
 		},
-	},
-	nzry_chenglve1: {
-		charlotte: true,
-		onremove: true,
-		mod: {
-			cardUsable(card, player) {
-				const suit = get.suit(card);
-				if (suit == "unsure" || player.getStorage("nzry_chenglve1").includes(suit)) return Infinity;
-			},
-			targetInRange(card, player) {
-				const suit = get.suit(card);
-				if (suit == "unsure" || player.getStorage("nzry_chenglve1").includes(suit)) return true;
+		subSkill: {
+			effect: {
+				charlotte: true,
+				onremove(player, skill) {
+					delete player.storage[skill];
+					player.removeTip(skill);
+				},
+				mod: {
+					cardUsable(card, player) {
+						const suit = get.suit(card);
+						if (suit == "unsure" || player.getStorage("nzry_chenglve_effect").includes(suit)) return Infinity;
+					},
+					targetInRange(card, player) {
+						const suit = get.suit(card);
+						if (suit == "unsure" || player.getStorage("nzry_chenglve_effect").includes(suit)) return true;
+					},
+				},
+				marktext: "略",
+				intro: { content: `本回合使用$花色的牌无距离和次数限制` },
 			},
 		},
 	},
@@ -2451,88 +2475,77 @@ const skills = {
 		},
 	},
 	nzry_zhenliang: {
-		audio: "nzry_zhenliang_1",
+		audio: ["nzry_zhenliang_1", 2],
+		drawNum: 1,
 		mark: true,
-		locked: false,
 		zhuanhuanji: true,
 		marktext: "☯",
 		intro: {
 			content(storage, player, skill) {
-				if (player.storage.nzry_zhenliang == true) return "当你于回合外使用或打出的牌结算完成后，若此牌与“任”颜色相同，则你可以令一名角色摸一张牌。";
+				if (storage) return "当你于回合外使用或打出的牌结算完成后，若此牌与“任”颜色相同，则你可以令一名角色摸一张牌。";
 				return "出牌阶段限一次，你可以弃置一张与“任”颜色相同的牌并对攻击范围内的一名角色造成1点伤害。";
 			},
 		},
-		group: ["nzry_zhenliang_1", "nzry_zhenliang_2"],
-		subSkill: {
-			1: {
-				prompt: "弃置一张与“任”颜色相同的牌，并对攻击范围内的一名角色造成1点伤害。",
-				audio: 2,
-				enable: "phaseUse",
-				filter(event, player) {
-					if (player.storage.nzry_zhenliang) return false;
-					const storage = player.getExpansions("nzry_mingren");
-					if (!storage.length) return false;
-					const color = get.color(storage[0]);
-					if (
-						player.countCards("he", function (card) {
-							return get.color(card) == color;
-						}) == 0
-					)
-						return false;
-					return game.hasPlayer(function (current) {
-						return player.inRange(current);
-					});
-				},
-				position: "he",
-				filterCard(card, player) {
-					return get.color(card) == get.color(player.getExpansions("nzry_mingren")[0]);
-				},
-				filterTarget(card, player, target) {
-					return player.inRange(target);
-				},
-				check(card) {
-					return 6.5 - get.value(card);
-				},
-				async content(event, trigger, player) {
-					player.changeZhuanhuanji("nzry_zhenliang");
-					await event.target.damage("nocard");
-				},
-				ai: {
-					order: 5,
-					result: {
-						player(player, target) {
-							return get.damageEffect(target, player, player);
-						},
-					},
-				},
-			},
-			2: {
-				trigger: {
-					player: ["useCardAfter", "respondAfter"],
-				},
-				filter(event, player) {
-					if (_status.currentPhase == player || !player.storage.nzry_zhenliang) return false;
-					const card = player.getExpansions("nzry_mingren")[0];
-					return card && get.color(event.card) == get.color(card);
-				},
-				async cost(event, trigger, player) {
-					const next = player.chooseTarget(get.prompt("nzry_zhenliang"), "令一名角色摸一张牌");
-					next.ai = function (target) {
-						if (target.hasSkillTag("nogain")) return 0.1;
-						const att = get.attitude(player, target);
-						return att * (Math.max(5 - target.countCards("h"), 2) + 3);
-					};
-					event.result = await next.forResult();
-				},
-				async content(event, trigger, player) {
-					player.changeZhuanhuanji("nzry_zhenliang");
-					event.targets[0].draw();
-				},
-			},
+		enable: "phaseUse",
+		trigger: {
+			player: ["useCardAfter", "respondAfter"],
+		},
+		filter(event, player) {
+			const cards = player.getExpansions("nzry_mingren");
+			if (!cards.length) return false;
+			if (event.name == "chooseToUse") {
+				if (player.storage.nzry_zhenliang || player.hasSkill("nzry_zhenliang_used", null, null, false)) return false;
+				const color = get.color(cards[0]);
+				if (!player.countCards("he", card => get.color(card) == color)) return false;
+				return game.hasPlayer(current => player.inRange(current));
+			} else {
+				if (_status.currentPhase == player || !player.storage.nzry_zhenliang) return false;
+				return get.color(event.card) == get.color(cards[0]);
+			}
+		},
+		position: "he",
+		filterCard(card, player) {
+			return get.color(card) == get.color(player.getExpansions("nzry_mingren")[0]);
+		},
+		filterTarget(card, player, target) {
+			return player.inRange(target);
+		},
+		check(card) {
+			return 6.5 - get.value(card);
+		},
+		prompt: "弃置一张与“任”颜色相同的牌，并对攻击范围内的一名角色造成1点伤害。",
+		async cost(event, trigger, player) {
+			const skillName = event.name.slice(0, -5),
+				num = get.info(skillName).drawNum;
+			event.result = await player
+				.chooseTarget(get.prompt(skillName), `令一名角色摸${get.cnNumber(num)}张牌`)
+				.set("ai", target => {
+					const player = get.player();
+					return get.effect(target, { name: "draw" }, player, player);
+				})
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			const {
+				targets: [target],
+				name: skill,
+			} = event;
+			player.changeZhuanhuanji(skill);
+			if (!trigger) {
+				player.addTempSkill(skill + "_used", "phaseUseAfter");
+				await target.damage("nocard");
+			} else await target.draw(get.info(skill).drawNum);
 		},
 		ai: {
+			order: 5,
+			result: {
+				player(player, target) {
+					return get.damageEffect(target, player, player);
+				},
+			},
 			combo: "nzry_mingren",
 		},
+		subSkill: { used: { charlotte: true } },
 	},
 	nzry_jianxiang: {
 		audio: 2,
@@ -2556,129 +2569,103 @@ const skills = {
 		},
 	},
 	nzry_shenshi: {
+		audio: ["nzry_shenshi_1", 2],
 		mark: true,
-		audio: "nzry_shenshi_1",
 		locked: false,
 		zhuanhuanji: true,
 		marktext: "☯",
 		intro: {
 			content(storage, player, skill) {
-				if (player.storage.nzry_shenshi == true) return "其他角色对你造成伤害后，你可以观看该角色的手牌，然后交给其一张牌，当前角色回合结束时，若此牌仍在该角色的区域内，你将手牌摸至四张";
+				if (storage) return "其他角色对你造成伤害后，你可以观看该角色的手牌，然后交给其一张牌，当前角色回合结束时，若此牌仍在该角色的手牌区或装备区，你将手牌摸至四张";
 				return "出牌阶段限一次，你可以将一张牌交给一名手牌数最多的角色，然后对其造成1点伤害，若该角色因此死亡，则你可以令一名角色将手牌摸至四张";
 			},
 		},
-		group: ["nzry_shenshi_1", "nzry_shenshi_2"],
-		subSkill: {
-			1: {
-				audio: 2,
-				prompt: "出牌阶段限一次，你可以将一张牌交给一名手牌数最多的角色，然后对其造成1点伤害，若该角色因此死亡，则你可以令一名角色将手牌摸至四张",
-				enable: "phaseUse",
-				usable: 1,
-				filter(event, player) {
-					return player.countCards("he") > 0 && player.storage.nzry_shenshi != true;
-				},
-				discard: false,
-				line: true,
-				lose: false,
-				delay: false,
-				position: "he",
-				filterCard: true,
-				filterTarget(card, player, target) {
-					return (
-						target != player &&
-						!game.hasPlayer(function (current) {
-							return current != player && current.countCards("h") > target.countCards("h");
-						})
-					);
-				},
-				check(card) {
-					return 5 - get.value(card);
-				},
-				async content(event, trigger, player) {
-					const target = event.target;
-					player.changeZhuanhuanji("nzry_shenshi");
-					await player.give(event.cards, target);
-					await target.damage("nocard");
-					if (
-						!game.getGlobalHistory("everything", evt => {
-							if (evt.name != "die" || evt.player != target) return false;
-							return evt.reason?.getParent() == event;
-						}).length
-					)
-						return;
-					const { result } = await player
-						.chooseTarget("令一名角色将手牌摸至四张", function (card, player, target) {
-							return target.countCards("h") < 4;
-						})
-						.set("ai", function (target) {
-							return get.attitude(player, target);
-						});
-					if (result.bool) {
-						player.line(result.targets);
-						await result.targets[0].draw(4 - result.targets[0].countCards("h"));
-					}
-				},
-				ai: {
-					order: 1,
-					result: {
-						target(player, target) {
-							return -1;
-						},
-					},
-				},
-			},
-			2: {
-				audio: "nzry_shenshi_1",
-				trigger: {
-					player: "damageEnd",
-				},
-				filter(event, player) {
-					return player.countCards("he") > 0 && event.source && event.source != player && player.storage.nzry_shenshi == true;
-				},
-				check(event, player) {
-					return event.source && event.source.countCards("h") <= 2 && player.countCards("h") < 4;
-				},
-				logTarget: "source",
-				prompt2: "其他角色对你造成伤害后，你可以观看该角色的手牌，然后交给其一张牌，当前角色回合结束时，若此牌仍在该角色的区域内，你将手牌摸至四张",
-				async content(event, trigger, player) {
-					player.changeZhuanhuanji("nzry_shenshi");
-					await player.viewHandcards(trigger.source);
-					const { result } = await player.chooseCard("he", true, "交给" + get.translation(trigger.source) + "一张牌").set("ai", function (card) {
-						return 5 - get.value(card);
-					});
-					if (result.bool) {
-						await player.give(result.cards, trigger.source);
-						trigger.source.storage.nzry_shenshi1 = result.cards[0];
-						trigger.source.storage.nzry_shenshi2 = player;
-						trigger.source.addSkill("nzry_shenshi1");
-					}
-				},
-			},
-		},
-	},
-	nzry_shenshi1: {
-		audio: 2,
-		trigger: {
-			global: "phaseJieshuBegin",
-		},
-		forced: true,
-		popup: false,
-		charlotte: true,
-		sourceSkill: "nzry_shenshi",
+		enable: "phaseUse",
+		trigger: { player: "damageEnd" },
 		filter(event, player) {
-			return player.storage.nzry_shenshi1 != undefined && player.storage.nzry_shenshi2 != undefined;
+			if (!player.countCards("he")) return false;
+			if (event.name == "chooseToUse") return !player.storage.nzry_shenshi && !player.hasSkill("nzry_shenshi_used", null, null, false) && game.hasPlayer(current => get.info("nzry_shenshi").filterTarget(null, player, current));
+			return event.source?.isIn() && event.source != player && player.storage.nzry_shenshi;
 		},
+		discard: false,
+		line: true,
+		lose: false,
+		delay: false,
+		position: "he",
+		filterCard: true,
+		filterTarget(card, player, target) {
+			return target != player && !game.hasPlayer(current => current != player && current.countCards("h") > target.countCards("h"));
+		},
+		check(card) {
+			if (get.position(card) == "h") return 1;
+			return 5 - get.value(card);
+		},
+		async cost(event, trigger, player) {
+			const { source } = trigger;
+			const bool = await player
+				.chooseBool(get.prompt(event.name.slice(0, -5), source))
+				.set("choice", (source.countCards("h") <= source.getHp() && player.countCards("h") < 4 && !source.hasSkillTag("nogain")) || get.attitude(player, source) > 0)
+				.set("prompt2", "其他角色对你造成伤害后，你可以观看该角色的手牌，然后交给其一张牌，当前角色回合结束时，若此牌仍在该角色的手牌区或装备区，你将手牌摸至四张")
+				.forResultBool();
+			event.result = {
+				bool: bool,
+				targets: [source],
+			};
+		},
+		prompt: "出牌阶段限一次，你可以将一张牌交给一名手牌数最多的角色，然后对其造成1点伤害，若该角色因此死亡，则你可以令一名角色将手牌摸至四张",
 		async content(event, trigger, player) {
-			const pl = player.storage.nzry_shenshi2;
-			const card = player.storage.nzry_shenshi1;
-			if (player.getCards("he").includes(card) && 4 - pl.countCards("h") > 0) {
-				await pl.drawTo(4);
-				pl.logSkill("nzry_shenshi");
+			const target = event.targets[0];
+			player.changeZhuanhuanji(event.name);
+			if (!trigger) {
+				player.addTempSkill(event.name + "_used", "phaseUseAfter");
+				await player.give(event.cards, target);
+				await target.damage("nocard");
+				if (
+					!game.getGlobalHistory("everything", evt => {
+						if (evt.name != "die" || evt.player != target) return false;
+						return evt.reason?.getParent() == event;
+					}).length ||
+					!game.hasPlayer(current => current.countCards("h") < 4)
+				)
+					return;
+				const { result } = await player
+					.chooseTarget("令一名角色将手牌摸至四张", (card, player, target) => {
+						return target.countCards("h") < 4;
+					})
+					.set("ai", target => {
+						return get.attitude(player, target);
+					});
+				if (result.bool) {
+					player.line(result.targets);
+					await result.targets[0].drawTo(4);
+				}
+			} else {
+				await player.viewHandcards(target);
+				const { result } = await player.chooseToGive(target, "he", true, `交给${get.translation(target)}一张牌`).set("ai", card => {
+					return 5 - get.value(card);
+				});
+				if (result.bool) {
+					const card = result.cards[0];
+					target.addGaintag(result.cards, event.name);
+					player
+						.when({ global: "phaseJieshuBegin" })
+						.filter(evt => evt.getParent() == trigger.getParent("phase", true) && target.getCards("he").includes(card) && player.countCards("h") < 4)
+						.step(async () => {
+							target.removeGaintag(event.name);
+							await player.drawTo(4);
+						});
+				}
 			}
-			player.removeSkill("nzry_shenshi1");
-			delete player.storage.nzry_shenshi1;
-			delete player.storage.nzry_shenshi2;
 		},
+		ai: {
+			order: 1,
+			result: {
+				target(player, target) {
+					return get.damageEffect(target, player, target);
+				},
+			},
+		},
+		subSkill: { used: { charlotte: true } },
 	},
 	xinjushou: {
 		audio: 2,

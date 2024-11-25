@@ -1567,10 +1567,10 @@ const skills = {
 	dcyanzuo: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: 3,
+		usable(skill, player) {
+			return 1 + player.countMark("dcyanzuo_add");
+		},
 		filter(event, player) {
-			var count = player.getStat("skill").dcyanzuo;
-			if (count && count > player.countMark("dcyanzuo_zuyin")) return false;
 			return player.countCards("he");
 		},
 		filterCard: true,
@@ -1633,18 +1633,24 @@ const skills = {
 			},
 		},
 		onremove(player, skill) {
+			player.removeSkill(skill + "_add", false);
 			const cards = player.getExpansions(skill);
 			if (cards.length) player.loseToDiscardpile(cards);
-			player.clearMark("dcyanzuo_zuyin", false);
 		},
 		intro: {
 			markcount: "expansion",
 			content: "expansion",
 			mark(dialog, storage, player) {
+				const marks = player.countMark("dcyanzuo_add");
+				if (marks > 0) dialog.addText(`〖研作〗发动次数+${marks}`);
 				const cards = player.getExpansions("dcyanzuo");
 				if (cards.length) dialog.addSmall(cards);
-				const marks = player.countMark("dcyanzuo_zuyin");
-				if (marks > 0) dialog.addText(`〖研作〗发动次数+${marks}`);
+			},
+		},
+		subSkill: {
+			add: {
+				charlotte: true,
+				onremove: true,
 			},
 		},
 	},
@@ -1666,7 +1672,10 @@ const skills = {
 				const discards = cards.filter(card => card.name == trigger.card.name);
 				if (discards.length) await player.loseToDiscardpile(discards);
 			} else {
-				if (player.countMark("dcyanzuo_zuyin") < 2 && player.hasSkill("dcyanzuo", null, null, false)) player.addMark("dcyanzuo_zuyin", 1, false);
+				if (player.countMark("dcyanzuo_add") < 2 && player.hasSkill("dcyanzuo", null, null, false)) {
+					player.addSkill("dcyanzuo_add");
+					player.addMark("dcyanzuo_add", 1, false);
+				}
 				const card = get.cardPile(card => card.name == trigger.card.name);
 				if (card) {
 					const next = player.addToExpansion(card, "gain2");

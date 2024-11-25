@@ -4635,8 +4635,8 @@ const skills = {
 		ai: { combo: "piaoping" },
 		trigger: { player: "loseAfter" },
 		marktext: "栗",
-		filter: function (event, player) {
-			return event.type == "discard" && event.getParent(3).name == "piaoping" && player.countMark("tuoxian") > 0 && event.cards.filterInD("d").length > 0;
+		filter(event, player) {
+			return event.type == "discard" && event.getParent(3).name == "piaoping" && player.countMark("tuoxian") > player.countMark("tuoxian_used") && event.cards.filterInD("d").length > 0;
 		},
 		async cost(event, trigger, player) {
 			const cards = trigger.cards.filterInD("d");
@@ -4655,8 +4655,9 @@ const skills = {
 		async content(event, trigger, player) {
 			const target = event.targets[0],
 				cards = event.cards;
-			player.removeMark("tuoxian", 1);
-			target.gain(cards, "gain2");
+			player.addSkill(event.name + "_used");
+			player.addMark(event.name + "_used", 1, false);
+			await target.gain(cards, "gain2");
 			const result = await target
 				.chooseControl()
 				.set("choiceList", ["弃置区域内的" + get.cnNumber(cards.length) + "张牌", "令" + get.translation(player) + "的〖漂萍〗于本回合内失效"])
@@ -4693,23 +4694,37 @@ const skills = {
 			player.addMark("tuoxian", 1, false);
 		},
 		onremove: true,
-		intro: { name2: "栗", content: "剩余可用#次" },
+		intro: {
+			name2: "栗",
+			markcount(storage, player) {
+				return player.countMark("tuoxian") - player.countMark("tuoxian_used");
+			},
+			content(storage, player) {
+				return `剩余可用${player.countMark("tuoxian") - player.countMark("tuoxian_used")}次`;
+			},
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+			},
+		},
 	},
-	chuaili: {
+	zhuili: {
 		audio: 2,
 		trigger: { target: "useCardToTargeted" },
 		forced: true,
-		filter: function (event, player) {
+		filter(event, player) {
 			if (player == event.player || get.color(event.card) != "black") return false;
 			if (!player.hasSkill("piaoping", null, null, false)) return false;
 			return true;
 		},
-		content: function () {
+		content() {
 			if (player.storage.piaoping == true) {
 				player.changeZhuanhuanji("piaoping");
 			} else {
 				player.addMark("tuoxian", 1, false);
-				if (player.countCards("tuoxian") > 3) player.tempBanSkill("chuaili");
+				if (player.getAllHistory("useSkill", evt => evt.skill == "tuoxian").length > 3) player.tempBanSkill("zhuili");
 			}
 			game.delayx();
 		},
