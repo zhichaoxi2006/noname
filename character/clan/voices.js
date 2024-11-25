@@ -1,4 +1,9 @@
 export default {
+	"#clankaiji1": "开济国朝之心，可曰昭昭。",
+	"#clankaiji2": "开大胜之世，匡大魏之朝。",
+	"#clanzhongliu_clan_wangchang1": "吾族以国为重，故可为之中流。",
+	"#clanzhongliu_clan_wangchang2": "柱国之重担，击水之中流。",
+	"#clan_wangchang:die": "大任未济，如何长眠九泉？",
 	"#clanyirong1": "花开彼岸，繁荣不减当年。",
 	"#clanyirong2": "移花接木，花容更胜从前。",
 	"#clanguixiang1": "女相显贵，凤仪从龙。",
