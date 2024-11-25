@@ -13,7 +13,7 @@ const characterReplaces = {
 	jsp_liubei: ["jsrg_liubei", "jsp_liubei"],
 	dongcheng: ["re_dongcheng", "dongcheng"],
 	hucheer: ["re_hucheer", "hucheer", "tw_hucheer", "dc_sb_hucheer"],
-	nanhualaoxian: ["re_nanhualaoxian", "nanhualaoxian", "jsrg_nanhualaoxian"],
+	nanhualaoxian: ["re_nanhualaoxian", "ol_nanhualaoxian", "nanhualaoxian", "jsrg_nanhualaoxian"],
 	pangdegong: ["re_pangdegong", "pangdegong", "scl_pangdegong"],
 	zhujun: ["ol_zhujun", "zhujun", "sp_zhujun", "jsrg_zhujun"],
 	tw_liuhong: ["liuhong", "tw_liuhong", "jsrg_liuhong"],
