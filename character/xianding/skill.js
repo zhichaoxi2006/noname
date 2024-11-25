@@ -1192,7 +1192,7 @@ const skills = {
 		filter(event, player) {
 			if (event.player == player) return false;
 			if (event.name == "dying") {
-				return event.reason?.name == "damage" && event.reason?.source.group == player.group;
+				return event.reason?.name == "damage" && event.reason.source?.group == player.group;
 			}
 			return event.player?.group == player.group && player.countCards("h");
 		},
@@ -8463,21 +8463,19 @@ const skills = {
 		filter: function (event, player) {
 			return player.countCards("h") > player.hp;
 		},
-		direct: true,
-		content: function () {
-			"step 0";
-			player
+		async cost(event, trigger, player) {
+			event.result = await player
 				.chooseToDiscard(get.prompt("dcshenzhi"), "弃置一张手牌，然后回复1点体力")
 				.set("logSkill", "dcshenzhi")
 				.set("ai", card => {
-					var player = _status.event.player;
-					if (!player.isDamaged()) return 0;
-					return Math.min(3, 10 - 2 * player.hp) - get.value(card);
-				});
-			"step 1";
-			if (result.bool) {
-				player.recover();
-			}
+					return get.event("recover") - get.value(card);
+				})
+				.set("recover", get.recoverEffect(player, player, player))
+				.forResult();
+			event.result.skill_popup = false;
+		},
+		async content(event, trigger, player) {
+			await player.recover();
 		},
 	},
 	//阮籍

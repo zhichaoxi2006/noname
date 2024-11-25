@@ -777,7 +777,7 @@ const skills = {
 			if (!_status.characterlist) lib.skill.pingjian.initList();
 			_status.characterlist.randomSort();
 			let characters = [];
-			for (let i = 0; i >= _status.characterlist.length; i++) {
+			for (let i = 0; i < _status.characterlist.length; i++) {
 				if (get.character(_status.characterlist[i], 3).some(skill => {
 					return lib.skill[skill] && !lib.skill[skill].charlotte;
 				})) {

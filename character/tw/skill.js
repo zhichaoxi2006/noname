@@ -7031,15 +7031,19 @@ const skills = {
 					var player = _status.event.player;
 					var list = _status.event.getParent().list,
 						list2 = _status.event.getParent().list2;
-					var eff = list
-							.map(target => {
-								if (target == player) return 0;
-								return get.effect(target, { name: "sha" }, player, player);
-							})
-							.reduce((p, c) => p + c, 0),
-						eff2 = list2.map(target => 2 * get.effect(target, { name: "draw" }, player, player)).reduce((p, c) => p + c, 0);
-					if (_status.event.controls.includes("选项二") && eff2 > eff) return "选项二";
-					if (eff > 0) return 0;
+					const eff1 = list.reduce((acc, target) => {
+							if (target === player) return acc;
+							const eff = get.effect(target, { name: "sha" }, player, player);
+							if (eff > 0) return acc + eff;
+							return acc;
+						}, 0),
+						eff2 = list2.reduce((acc, target) => {
+							const eff = get.effect(target, { name: "draw" }, player, player);
+							if (eff > 0) return acc + eff;
+							return acc;
+						}, 0);
+					if (eff2 > eff1 && _status.event.controls.includes("选项二")) return "选项二";
+					if (eff1 > 0) return 0;
 					return "cancel2";
 				});
 			"step 1";

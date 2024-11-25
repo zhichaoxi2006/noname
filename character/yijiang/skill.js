@@ -3821,21 +3821,17 @@ const skills = {
 		audio: 2,
 		enable: "chooseToUse",
 		filter: function (event, player) {
-			return (
-				player.hasCard(card =>
-					lib.inpile.some(name => {
-						if (player.getStorage("taoluan").includes(name)) return false;
-						if (get.type(name) != "basic" && get.type(name) != "trick") return false;
-						if (event.filterCard({ name: name, isCard: true, cards: [card] }, player, event)) return true;
-						if (name == "sha") {
-							for (var nature of lib.inpile_nature) {
-								if (event.filterCard({ name: name, nature: nature, isCard: true, cards: [card] }, player, event)) return true;
-							}
-						}
-						return false;
-					}, "hes")
-				) > 0
-			);
+			return player.hasCard(card => lib.inpile.some(name => {
+				if (player.getStorage("taoluan").includes(name)) return false;
+				if (get.type(name) != "basic" && get.type(name) != "trick") return false;
+				if (event.filterCard({ name: name, isCard: true, cards: [card] }, player, event)) return true;
+				if (name == "sha") {
+					for (var nature of lib.inpile_nature) {
+						if (event.filterCard({ name: name, nature: nature, isCard: true, cards: [card] }, player, event)) return true;
+					}
+				}
+				return false;
+			}), "hes");
 		},
 		onremove: true,
 		chooseButton: {

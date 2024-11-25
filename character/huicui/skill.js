@@ -11611,7 +11611,12 @@ const skills = {
 						target = _status.event.getTrigger().player,
 						att = get.attitude(player, target);
 					if (att <= 0) {
-						if (!player.hasSkill("yaopei") || !player.countCards("he") || target.needsToDiscard() - target.needsToDiscard(-target.countCards("h") / 4) > (att > -2 ? 1.6 : 1)) return "cancel2";
+						if (
+							!player.hasSkill("yaopei") ||
+							target.isDamaged() ||
+							!player.countCards("he") ||
+							target.needsToDiscard() - target.needsToDiscard(-target.countCards("h") / 4) > (att > -2 ? 1.6 : 1)
+						) return "cancel2";
 					}
 					let list = lib.suit.slice(0);
 					if (att <= 0 && target.getStorage("huguan_add"))
@@ -11683,13 +11688,7 @@ const skills = {
 		trigger: { global: "phaseDiscardEnd" },
 		direct: true,
 		filter: function (event, player) {
-			if (player == event.player || !event.player.isIn()) return false;
-			if (
-				!player.hasHistory("useSkill", function (evt) {
-					return evt.skill == "huguan" && evt.targets.includes(event.player);
-				})
-			)
-				return false;
+			if (player == event.player || !event.player.isIn() || !player.countSkill("huguan")) return false;
 			var suits = [];
 			event.player.getHistory("lose", function (evt) {
 				if (evt.type == "discard" && evt.getParent("phaseDiscard") == event) {

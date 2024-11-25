@@ -5117,8 +5117,7 @@ export class Game extends GameCompatible {
 		game.saveConfig("recentCharacter", list, true);
 	}
 	/**
-	 * @overload
-	 * @param { Card | | VCard | object | string } name
+	 * @param { Card | VCard | object | string } name
 	 * @param { string } [suit]
 	 * @param { number | string } [number]
 	 * @param { string } [nature]

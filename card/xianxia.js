@@ -9,6 +9,7 @@ game.import("card", function () {
 				derivation: "ty_shamoke",
 				type: "equip",
 				subtype: "equip1",
+				cardcolor: "spade",
 				distance: {
 					attackRange(card, player) {
 						return player.storage.tiejili_skill || 2;

@@ -2299,7 +2299,8 @@ const skills = {
 					});
 					"step 1";
 					if (result.bool) {
-						var card = game.createCard(lib.skill.chexuan.derivation.randomGet());
+						const name = lib.skill.chexuan.derivation.randomGet(),
+							card = game.createCard(name, lib.card[name].cardcolor, 5);
 						player.$gain2(card);
 						player.equip(card);
 						game.delay();
