@@ -64,7 +64,7 @@ const skills = {
 				},
 			},
 			{
-				name: "一名角色使用牌【南蛮入侵】或【万箭齐发】后",
+				name: "一名角色使用【南蛮入侵】或【万箭齐发】后",
 				effect: {
 					trigger: { global: "useCardAfter" },
 					filter(event, player) {
@@ -972,6 +972,7 @@ const skills = {
 			player: ["enterGame", "phaseZhunbeiBegin", "phaseJieshuBegin"],
 		},
 		filter(event, player) {
+			if (!(event.name !== "phase" || game.phaseNumber === 0)) return false;
 			return player.getSkills(null, false, false).filter(skill => get.info(skill)?.olhedao).length < player.countMark("olhedao");
 		},
 		forced: true,
