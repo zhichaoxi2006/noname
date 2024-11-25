@@ -798,6 +798,7 @@ const skills = {
 									return !player.getStorage("olhedao_effect").includes(target);
 								},
 								filterCard: lib.filter.cardDiscardable,
+								selectCard: 2,
 								position: "he",
 								ai1(card) {
 									return 7 - get.value(card);
