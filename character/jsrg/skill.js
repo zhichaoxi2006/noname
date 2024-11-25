@@ -7039,6 +7039,7 @@ const skills = {
 					.forResult();
 			}
 			if (!result.bool) return;
+			event.list = list;
 			const name = result.links[0][2],
 				nature = result.links[0][3];
 			const card = { name: name, nature: nature, isCard: true },
@@ -7049,7 +7050,7 @@ const skills = {
 				prompt2: str,
 				filterCard: lib.filter.cardDiscardable,
 				position: "he",
-				goon: get.attitude(player, trigger.player) > 1 && (evt.card ? get.effect(trigger.player, evt.card, evt.player, player) < 0 : get.effect(trigger.player, { name: event.list[0] }, trigger.player, player) > 0),
+				goon: get.attitude(player, trigger.player) > 1 && (evt.card ? get.effect(trigger.player, evt.card, evt.player, player) < 0 : get.effect(trigger.player, { name: event.list[0][2] }, trigger.player, player) > 0),
 				ai1(card) {
 					if (_status.event.goon) return 6 - get.value(card);
 					return 0;
