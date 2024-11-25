@@ -380,6 +380,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
+					game.log(player, "击伤了", target, '的#y天冲');
 					if (target.getHp() > 0) {
 						await target.loseHp(target.getHp());
 						if (
@@ -406,6 +407,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
+					game.log(player, "击伤了", target, '的#y力烽');
 					const cardx = target.getDiscardableCards(target, "h");
 					const num = Math.ceil(cardx.length / 2);
 					if (cardx.length) await target.discard(cardx.randomGets(num));
@@ -424,6 +426,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
+					game.log(player, "击伤了", target, '的#y地机');
 					target.addTip("new_dclieqiong_leg", "裂穹 地机");
 					target
 						.when({
@@ -448,6 +451,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
+					game.log(player, "击伤了", target, '的#y中枢');
 					target.addTip("new_dclieqiong_chest", "裂穹 中枢");
 					target
 						.when({
@@ -475,6 +479,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
+					game.log(player, "击伤了", target, '的#y气海');
 					target.addTempSkill("new_dclieqiong_abdomen", { player: "phaseEnd" });
 				},
 			},
@@ -496,13 +501,20 @@ const skills = {
 				return;
 			}
 			const switchToAuto = function () {
+				var qqq;
+				if (list.includes('head')) {
+					qqq = 'head';
+				}
+				else {
+					qqq = 'abdomen';
+				}
 				_status.imchoosing = false;
 				if (event.dialog) event.dialog.close();
 				if (event.control) event.control.close();
 				game.resume();
 				event._result = {
 					bool: true,
-					position: list.randomGet(),
+					position: qqq,
 				};
 				return Promise.resolve(event._result);
 			};
@@ -510,10 +522,17 @@ const skills = {
 				const { promise, resolve } = Promise.withResolvers();
 				const event = _status.event;
 				event.switchToAuto = function () {
+					var qqq;
+					if (list.includes('head')) {
+						qqq = 'head';
+					}
+					else {
+						qqq = 'abdomen';
+					}
 					_status.imchoosing = false;
 					event._result = {
 						bool: true,
-						position: list.randomGet(),
+						position: qqq,
 					};
 					resolve(event._result);
 					if (event.dialog) event.dialog.close();
@@ -585,7 +604,8 @@ const skills = {
 			let next;
 			if (event.isMine()) {
 				next = choosePosition(player, target, list);
-			} else if (event.isOnline()) {
+			}
+			else if (event.isOnline()) {
 				const { promise, resolve } = Promise.withResolvers();
 				event.player.send(choosePosition, player, target, list);
 				event.player.wait(async result => {
@@ -594,7 +614,8 @@ const skills = {
 				});
 				game.pause();
 				next = promise;
-			} else {
+			}
+			else {
 				next = switchToAuto();
 			}
 
@@ -1052,7 +1073,7 @@ const skills = {
 			combo: "xinjilve",
 			respondSha: true,
 			respondShan: true,
-			skillTagFilter(player){
+			skillTagFilter(player) {
 				if (player.countMark("xinrenjie_used") >= 4) return false;
 			},
 		},
@@ -1082,7 +1103,7 @@ const skills = {
 	xinlianpo: {
 		audio: "lianpo",
 		audioname: ["new_simayi"],
-		trigger: {source: "dieAfter"},
+		trigger: { source: "dieAfter" },
 		async cost(event, trigger, player) {
 			const skills = get
 				.info("xinbaiyin")
@@ -7690,9 +7711,9 @@ const skills = {
 	},
 	jilue: {
 		unique: true,
-		audio:2,
+		audio: 2,
 		group: ["jilue_guicai", "jilue_fangzhu", "jilue_wansha", "jilue_zhiheng", "jilue_jizhi"],
-		ai: {combo: "renjie"},
+		ai: { combo: "renjie" },
 	},
 	jilue_guicai: {
 		audio: 1,
