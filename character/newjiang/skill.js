@@ -174,7 +174,7 @@ const skills = {
 				charlotte: true,
 				onremove: true,
 				intro: {
-					content: `本回合结算与其他角色的距离-#`,
+					content: `本回合计算与其他角色的距离-#`,
 				},
 				mod: {
 					globalFrom(from, to, current) {
