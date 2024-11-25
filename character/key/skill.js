@@ -9356,23 +9356,20 @@ const skills = {
 				.set("goon", goon)
 				.forResult();
 		},
-		content() {
-			"step 0";
-			event.cards = trigger.cards.filterInD();
-			var target = targets[0];
-			event.target = target;
-			target.gain(event.cards, "gain2", "log");
-			"step 2";
-			target.chooseToUse({
-				cards: cards,
-				filterCard(card) {
-					if (get.itemtype(card) != "card" || !_status.event.cards || !_status.event.cards.includes(card)) return false;
-					return lib.filter.filterCard.apply(this, arguments);
-				},
-				prompt: "是否使用得到的牌中的一张？",
-			});
-			"step 3";
-			if (result.bool) player.draw();
+		async content(event, trigger, player) {
+			const target = event.targets[0], cards = trigger.cards.filterInD();
+			await target.gain(cards, "gain2", "log");
+			const result = await target
+				.chooseToUse({
+					cards: cards,
+					filterCard(card) {
+						if (get.itemtype(card) != "card" || !_status.event.cards || !_status.event.cards.includes(card)) return false;
+						return lib.filter.filterCard.apply(this, arguments);
+					},
+					prompt: "是否使用得到的牌中的一张？",
+				})
+				.forResult();
+			if (result.bool) await player.draw();
 		},
 	},
 	//三枝叶留佳&二木佳奈多
@@ -9700,16 +9697,14 @@ const skills = {
 				})
 				.forResult();
 		},
-		content() {
-			"step 0";
-			var target = targets[0];
-			event.target = target;
-			player.draw();
-			"step 1";
-			player.chooseToPSS(target);
-			"step 2";
-			if (result.tie) event.goto(1);
-			else if (result.bool) target.damage();
+		async content(event, trigger, player) {
+			const target = event.targets[0];
+			await player.draw();
+			let result;
+			do {
+				result = await player.chooseToPSS(target).forResult();
+			} while (result.tie);
+			if (result.bool) await target.damage();
 			else target.addTempSkill("yoshino_fail", "phaseUseEnd");
 		},
 	},
