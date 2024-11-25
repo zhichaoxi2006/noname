@@ -19,7 +19,7 @@ const characterReplaces = {
 	zhoubuyi: ["zhoubuyi", "yj_zhoubuyi"],
 	xianglang: ["xianglang", "mb_xianglang"],
 	miheng: ["yue_miheng", "re_miheng", "miheng", "scl_miheng"],
-	peixiu: ["ol_peixiu", "peixiu", "scl_peixiu"],
+	peixiu: ["ol_peixiu", "peixiu", "scl_peixiu", "fj_peixiu", "xj_peixiu"],
 	chendeng: ["chendeng", "re_chendeng", "ol_chendeng", "jsrg_chendeng"],
 	liuba: ["liuba", "ol_liuba", "dc_liuba"],
 	lingcao: ["lingcao", "dc_lingcao"],

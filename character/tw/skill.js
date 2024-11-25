@@ -19432,7 +19432,7 @@ const skills = {
 		filterCard: true,
 		position: "he",
 		check(card) {
-			if (!game.hasPlayer(curren => current != get.player() && current.countCards("h") > ui.selected.cards.length)) return 0;
+			if (!game.hasPlayer(current => current != get.player() && current.countCards("h") > ui.selected.cards.length)) return 0;
 			return 6 - get.value(card);
 		},
 		selectCard() {

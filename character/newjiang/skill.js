@@ -2,6 +2,188 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//修爵裴秀
+	xjzhitu: {
+		audio: 2,
+		mod: {
+			targetInRange(card, player, target) {
+				if (player.getStorage("xjzhitu").includes(get.number(card))) return true;
+			},
+		},
+		trigger: {
+			target: "useCardToTarget",
+			player: "useCard",
+		},
+		forced: true,
+		locked: false,
+		filter(event, player) {
+			const number = get.number(event.card);
+			if (typeof number !== "number") return false;
+			const storage = player.getStorage("xjzhitu"),
+				bool = !storage.includes(number);
+			if (event.name == "useCard") return bool || storage.length == 13;
+			return bool;
+		},
+		async content(event, trigger, player) {
+			const storage = player.getStorage(event.name),
+				{ card } = trigger,
+				number = get.number(card);
+			if (trigger.name == "useCard" && storage.length == 13) {
+				trigger.directHit.addArray(game.players);
+				game.log(card, "不能被响应");
+			}
+			if (!storage.includes(number)) {
+				player.markAuto(event.name, [number]);
+				await player.draw();
+			}
+		},
+		onremove: true,
+		intro: {
+			content: "已记录点数：$",
+		},
+	},
+	dcxiujue: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filter(event, player) {
+			return game.hasPlayer(current => get.info("dcxiujue").filterTarget(null, player, current));
+		},
+		filterTarget(card, player, target) {
+			return player.canCompare(target);
+		},
+		async content(event, trigger, player) {
+			const { target } = event;
+			const { result } = await player.chooseToCompare(target);
+			const { winner } = result;
+			if (winner) {
+				const cards = [result.player, result.target].filterInD("d").filter(card => winner.hasUseTarget(card));
+				while (cards.length) {
+					const card = cards.shift();
+					await game.delayx();
+					const bool = await winner
+						.chooseUseTarget(true, card, false)
+						.set("filterTarget", function (card, player, target) {
+							let evt = _status.event;
+							if (_status.event.name == "chooseTarget") evt = evt.getParent();
+							if (!evt.dcxiujue_target.includes(target)) return false;
+							return lib.filter.targetEnabledx(card, player, target);
+						})
+						.set("dcxiujue_target", [player, target])
+						.forResultBool();
+					if (!bool) break;
+				}
+			} else await game.asyncDraw([player, target]);
+		},
+		ai: {
+			order: 6.5,
+			result: {
+				target(player, target) {
+					const hs = player.getCards("h").sort((a, b) => {
+						return get.number(b) - get.number(a);
+					});
+					const ts = target.getCards("h").sort((a, b) => {
+						return get.number(b) - get.number(a);
+					});
+					if (!hs.length || !ts.length) return 0;
+					if (get.number(hs[0]) > get.number(ts[0]) || get.number(hs[0]) - ts.length >= 9 + Math.min(2, player.hp / 2)) return get.sgnAttitude(player, target);
+					return 0;
+				},
+			},
+		},
+	},
+	//复爵裴秀
+	fjzhitu: {
+		audio: 2,
+		trigger: {
+			player: "useCard2",
+		},
+		filter(event, player) {
+			const { card, targets } = event;
+			const info = get.info(card);
+			if (info.allowMultiple == false) return false;
+			const infox = lib.card[get.name(card)];
+			if (get.type(card) != "basic" && (!info || info.type != "trick" || info.notarget || (info.selectTarget && info.selectTarget != 1))) return false;
+			if (targets && !info.multitarget) {
+				return game.hasPlayer(current => !targets.includes(current) && lib.filter.targetEnabled2(card, player, current) && get.distance(player, current) == get.distance(current, player));
+			}
+			return false;
+		},
+		async cost(event, trigger, player) {
+			const { card, targets } = trigger;
+			const prompt2 = "为" + get.translation(card) + "增加任意个你与其距离相等的目标";
+			event.result = await player
+				.chooseTarget(
+					get.prompt(event.name.slice(0, -5)),
+					(card, player, target) => {
+						const { card: cardx, targets } = get.event();
+						return !targets.includes(target) && lib.filter.targetEnabled2(cardx, get.player(), target) && get.distance(player, target) == get.distance(target, player);
+					},
+					[1, Infinity]
+				)
+				.set("prompt2", prompt2)
+				.set("ai", target => {
+					const { card, player } = get.event();
+					return get.effect(target, card, player, player);
+				})
+				.set("card", card)
+				.set("targets", targets)
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			trigger.targets.addArray(event.targets);
+			game.log(event.targets, "也成为了", trigger.card, "的目标");
+		},
+	},
+	dcfujue: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filter(event, player) {
+			return player.canMoveCard();
+		},
+		async content(event, trigger, player) {
+			await player.moveCard(true);
+			const num = player.countCards("he") - 5;
+			if (num == 0) return;
+			if (num > 0) await player.chooseToDiscard("he", num, true);
+			else await player.drawTo(5);
+			const lose = player.hasHistory("lose", evt => evt.getParent(3) == event);
+			const bool1 = lose && player.hasHistory("gain", evt => evt.getParent(2) == event);
+			const bool2 = game.getGlobalHistory("everything", evt => evt.name == "equip" && evt.player == player && evt.getParent(2) == event).length && lose;
+			if (bool1 || bool2) {
+				player.addTempSkill(event.name + "_effect");
+				player.addMark(event.name + "_effect", 1, false);
+			}
+		},
+		ai: {
+			expose: 0.2,
+			order(item, player) {
+				if (player.countCards("he") > 4) return 0.5;
+				return 9;
+			},
+			result: {
+				player(player) {
+					if (player.canMoveCard(true)) return 1;
+					return 0;
+				},
+			},
+		},
+		subSkill: {
+			effect: {
+				charlotte: true,
+				onremove: true,
+				intro: {
+					content: `本回合结算与其他角色的距离-#`,
+				},
+				mod: {
+					globalFrom(from, to, current) {
+						return current - from.countMark("dcfujue_effect");
+					},
+				},
+			},
+		},
+	},
 	//传械马钧
 	chuanxie: {
 		audio: 2,

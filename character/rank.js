@@ -395,6 +395,8 @@ window.noname_character_rank = {
 		"ol_sb_dongzhuo",
 	],
 	am: [
+		"xj_peixiu",
+		"fj_peixiu",
 		"cx_majun",
 		"qq_majun",
 		"scl_pangdegong",
@@ -2445,6 +2447,8 @@ window.noname_character_rank = {
 			"niufu",
 		],
 		rare: [
+			"xj_peixiu",
+			"fj_peixiu",
 			"sp_ol_caocao",
 			"v_zhangliao",
 			"mb_ganfuren",
