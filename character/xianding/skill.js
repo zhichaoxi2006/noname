@@ -3,6 +3,100 @@ import cards from "../sp2/card.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//莫琼树
+	dcwanchan: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget: true,
+		async content(event, trigger, player) {
+			const { target } = event,
+				num = Math.min(get.distance(player, target), 3);
+			if (num > 0) await target.draw(num);
+			target
+				.when({ player: "useCard" })
+				.filter(
+					evt =>
+						evt.getParent(2) == event &&
+						game.hasPlayer(current => {
+							if (evt.targets.includes(current) || !lib.filter.targetEnabled2(evt.card, evt.player, current)) return false;
+							return evt.targets.some(target => [target.getPrevious(), target.getNext()].includes(current));
+						})
+				)
+				.step(async (event, trigger, player) => {
+					const targets = game.filterPlayer(current => {
+						if (trigger.targets.includes(current) || !lib.filter.targetEnabled2(trigger.card, trigger.player, current)) return false;
+						return trigger.targets.some(target => [target.getPrevious(), target.getNext()].includes(current));
+					});
+					if (targets.length) {
+						trigger.player.line(targets, "green");
+						trigger.targets.addArray(targets);
+						game.log(targets, "也成为了", trigger.card, "的目标");
+					}
+				});
+			await target
+				.chooseToUse(function (card, player, event) {
+					if (!["basic", "trick"].includes(get.type(card))) return false;
+					return lib.filter.filterCard.apply(this, arguments);
+				}, "宛蝉：是使用一张基本牌或普通锦囊牌？")
+				.set("targetRequired", true)
+				.set("complexSelect", true)
+				.set("filterTarget", function (card, player, target) {
+					return lib.filter.targetEnabled.apply(this, arguments);
+				})
+				.set("addCount", false);
+		},
+		ai: {
+			order(item, player) {
+				if (game.hasPlayer(current => get.distance(player, current) && get.attitude(player, current) > 0) || player.hasCard(card => ["basic", "trick"].includes(get.type(card)) && player.hasValueTarget(card, false, false), "hs")) return 10;
+				return 0.001;
+			},
+			result: {
+				target(player, target) {
+					const num = Math.min(get.distance(player, target), 3);
+					let eff = get.effect(target, { name: "draw" }, player, player) * num;
+					if (player == target && target.hasCard(card => ["basic", "trick"].includes(get.type(card)) && player.hasValueTarget(card, false, false), "hs")) return 1;
+					return Math.max(0, eff) * Math.sqrt(target.countCards("h") + 1);
+				},
+			},
+		},
+	},
+	dcrunzhi: {
+		audio: 2,
+		trigger: { target: "useCardToTargeted" },
+		filter(event, player) {
+			const { card, targets } = event;
+			if (!["basic", "trick"].includes(get.type(card))) return false;
+			return targets?.length > 1;
+		},
+		frequent: true,
+		async content(event, trigger, player) {
+			const judgeEvent = player.judge(card => {
+				if (["red", "black"].includes(get.color(card))) return 1.5;
+				return -1.5;
+			});
+			judgeEvent.judge2 = result => result.bool;
+			const {
+				result: { color, judge },
+			} = await judgeEvent;
+			if (judge < 0) return;
+			const targetsx = game.filterPlayer(current => !trigger.targets.includes(current) && current.countDiscardableCards(player, "he"));
+			if (color == "red") await player.draw(2);
+			else if (color == "black" && targetsx.length) {
+				const targets = await player
+					.chooseTarget(`选择一名角色弃置其至多两张牌`, (card, player, target) => {
+						return get.event("targetsx").includes(target);
+					})
+					.set("ai", target => {
+						const player = get.player();
+						return get.effect(target, { name: "guohe_copy2" }, player, player);
+					})
+					.set("targetsx", targetsx)
+					.forResultTargets();
+				if (targets?.length) await player.discardPlayerCard(targets[0], "he", true, [1, 2]);
+			}
+		},
+	},
 	//威张辽
 	dcyuxi: {
 		audio: 2,

@@ -395,6 +395,7 @@ window.noname_character_rank = {
 		"ol_sb_dongzhuo",
 	],
 	am: [
+		"moqiongshu",
 		"huan_liufeng",
 		"xj_peixiu",
 		"fj_peixiu",
@@ -2074,6 +2075,7 @@ window.noname_character_rank = {
 			"ol_sb_dongzhuo",
 		],
 		epic: [
+			"moqiongshu",
 			"sb_guojia",
 			"sb_zhangliao",
 			"cx_majun",
