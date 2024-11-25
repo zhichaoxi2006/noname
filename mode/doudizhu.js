@@ -3037,6 +3037,7 @@ export default () => {
 				fullskin: true,
 				type: "equip",
 				subtype: "equip2",
+				cardcolor: "club",
 				skills: ["diqi_skill"],
 				destroy: "diqi_skill",
 				ai: {

@@ -4983,6 +4983,7 @@ const skills = {
 			yuanlv: {
 				audio: 2,
 				init(player, skill) {
+					_status.changandajian_cardcolor = 0;
 					player.markAuto("yuheng_current", ["xinfu_guanchao", "drlt_jueyan", "lanjiang"]);
 				},
 				trigger: { player: "useCardToTargeted" },
@@ -5002,7 +5003,7 @@ const skills = {
 					var cards = trigger.cards.filterInD();
 					if (cards.length > 0) game.cardsDiscard(cards);
 					var type = get.subtype(trigger.card);
-					var card = game.createCard("changandajian_" + type, Math.random() < 0.5 ? "spade" : "heart", 10);
+					var card = game.createCard("changandajian_" + type, (_status.changandajian_cardcolor++ % 2) ? "spade" : "heart", 10);
 					player.useCard(card, player);
 				},
 				mark: true,
