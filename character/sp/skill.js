@@ -468,9 +468,7 @@ const skills = {
 				effect: {
 					async cost(event, trigger, player) {
 						event.result = await player
-							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)), (card, player, target) => {
-								return !target.hasSkill("fengyin");
-							})
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)))
 							.set("ai", target => {
 								const player = get.player(),
 									draw = 2;
