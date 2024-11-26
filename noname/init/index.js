@@ -738,6 +738,22 @@ function initSheet(libConfig) {
 		Reflect.get(ui, "css").border_stylesheet.sheet.insertRule('#window #arena.long:not(.fewplayer) .player>.framebg, #arena.oldlayout .player>.framebg{background-image:url("' + lib.assetURL + "theme/style/player/" + bstyle + '3.png")}', 0);
 		Reflect.get(ui, "css").border_stylesheet.sheet.insertRule(".player>.count{z-index: 3 !important;border-radius: 2px !important;text-align: center !important;}", 0);
 	}
+	game.zsOriginLineXy = game.linexy;
+	if (libConfig.zhishixian && libConfig.zhishixian != "default") {
+		var layout = libConfig.zhishixian;
+		if (layout == "next_moren") { var items = 'default'; }
+		else if (layout == "next_Shuimo") { var items = 'Shuimo'; }
+		else if (layout == "next_Jianfeng") { var items = 'Jianfeng'; }
+		else {
+			var items = layout;
+		}
+		game.saveConfig('zhishixian', layout);
+		if (items == 'default') {
+			game.linexy = game.zsOriginLineXy;
+		} else {
+			game.linexy = game['zs' + items + 'LineXy'];
+		}
+	}
 	if (libConfig.control_style && libConfig.control_style != "default" && libConfig.control_style != "custom") {
 		var str = "";
 		switch (libConfig.control_style) {
