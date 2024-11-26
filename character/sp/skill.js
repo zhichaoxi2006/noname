@@ -696,7 +696,7 @@ const skills = {
 				effect: {
 					async cost(event, trigger, player) {
 						event.result = await player
-							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)), [1, 2])
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)))
 							.set("ai", target => {
 								const player = get.player();
 								return get.effect(target, { name: "draw" }, player, player) * (1 + target.countCards("h"));
