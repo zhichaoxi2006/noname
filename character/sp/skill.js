@@ -537,7 +537,8 @@ const skills = {
 							.judge(card => {
 								return get.suit(card) === "spade" ? -4 : 0;
 							})
-							.set("judge2", result => (result.bool === false ? true : false));
+							.set("judge2", result => (result.bool === false ? true : false))
+							.forResult();
 						if (result.bool === false) await target.damage(2, "thunder");
 					},
 				},
