@@ -2510,6 +2510,47 @@ export class Library {
 					},
 					unfrequent: true,
 				},
+				zhishixian: {
+					name: "指示线",
+					intro: "设置卡牌、技能的指示特效",
+					init: 'default',
+					unfrequent: true,
+					item: {
+						next_moren: "◈经典———",
+						default: "默认",
+						Mohua: '水墨',
+						Xiangong: '先攻',
+						Zhuzhang: '竹杖',
+						next_Shuimo: "◈专属———",
+						Shuimo: "幻彩",
+						Anhei: '黑暗',
+						Mozhua: '魔爪',
+						Shenjian: '神剑',
+						Yujian: '御剑',
+						next_Jianfeng: "◈测试———",
+						Jianfeng: '剑锋',
+						Jinjian: '金箭',
+						Jinlong: '金龙',
+						Yuexian: '乐仙',
+						Xingdie: '星蝶',
+						Luoying: '落英',
+						Shezhang: '蛇杖',
+					},
+					onclick: function (layout) {
+						if (layout == "next_moren") { var items = 'default'; }
+						else if (layout == "next_Shuimo") { var items = 'Shuimo'; }
+						else if (layout == "next_Jianfeng") { var items = 'Jianfeng'; }
+						else {
+							var items = layout;
+						}
+						game.saveConfig('zhishixian', layout);
+						if (items == 'default') {
+							game.linexy = game.zsOriginLineXy;
+						} else {
+							game.linexy = game['zs' + items + 'LineXy'];
+						}
+					}
+				},
 				border_style: {
 					name: "角色边框",
 					init: "default",
