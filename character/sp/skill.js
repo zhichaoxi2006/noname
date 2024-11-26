@@ -222,7 +222,7 @@ const skills = {
 			{
 				name: "一名角色造成伤害时",
 				effect: {
-					trigger: { source: "damageBegin3" },
+					trigger: { global: "damageBegin3" },
 					filter(event, player) {
 						return event.source?.isIn();
 					},
