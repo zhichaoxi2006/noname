@@ -509,7 +509,7 @@ const skills = {
 					},
 					content() {
 						lib.skill.olhedao.tianshuClear(event.name, player);
-						trigger.getParent().excluded().add(player);
+						trigger.getParent().excluded.add(player);
 						game.log(trigger.card, "对", player, "无效");
 					},
 				},
@@ -972,8 +972,7 @@ const skills = {
 			player: ["enterGame", "phaseZhunbeiBegin", "phaseJieshuBegin"],
 		},
 		filter(event, player) {
-			if (!(event.name !== "phase" || game.phaseNumber === 0)) return false;
-			return player.getSkills(null, false, false).filter(skill => get.info(skill)?.olhedao).length < player.countMark("olhedao");
+			return event.name !== "phase" || game.phaseNumber === 0;
 		},
 		forced: true,
 		async content(event, trigger, player) {
@@ -988,7 +987,7 @@ const skills = {
 				return !item.filter || item.filter(from.name);
 			});
 			const tos = await player
-				.chooseButton(["青书：请选择“天书”效果", [ToItems.randomGets(3).map(item => [item, item.name]), "textbutton"]], true)
+				.chooseButton(['###青书：请选择“天书”效果###<div class="text center">' + from.name + "</div>", [ToItems.randomGets(3).map(item => [item, item.name]), "textbutton"]], true)
 				.set("ai", () => 1 + Math.random())
 				.forResult("links");
 			if (!tos?.length) return;
@@ -1026,9 +1025,17 @@ const skills = {
 				from,
 				to
 			);
-			game.log(player, "编写了", "#y一册天书");
 			player.addSkill(skill);
 			lib.skill.olhedao.tianshuClear(skill, player, -3);
+			const skills = player.getSkills(null, false, false).filter(skill => get.info(skill)?.olhedao);
+			const num = skills.length - Math.max(1, player.countMark("olhedao"));
+			if (num > 0) {
+				const result = await player
+					.chooseButton(["青书：选择失去" + get.cnNumber(num) + "册多余的“天书”", [skills.randomGets(3).map(item => [item, "（剩余" + player.storage[item][0] + "次）" + lib.translate[item + "_info"]]), "textbutton"]], true, num)
+					.set("ai", () => 1 + Math.random())
+					.forResult();
+				if (result?.bool && result.links?.length) player.removeSkill(result.links);
+			}
 		},
 		ai: {
 			threaten: 4,
@@ -1331,7 +1338,7 @@ const skills = {
 				.set(
 					"prompt",
 					(() => {
-						return '###鞭御###<div class="text center">令' + get.translation(target) + "至多" + get.cnNumber(num) + "张手牌为无次数限制的【杀】";
+						return '###鞭御###<div class="text center">令' + get.translation(target) + "至多" + get.cnNumber(num) + "张手牌为无次数限制的【杀】</div>";
 					})()
 				)
 				.forResult();
