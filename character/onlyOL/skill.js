@@ -1472,7 +1472,7 @@ const skills = {
 	},
 	olmieji: {
 		audio: 2,
-		inherit: "xinmieji",
+		inherit: "remieji",
 		filter(event, player) {
 			return player.countCards("h", { type: ["trick", "delay"] });
 		},
