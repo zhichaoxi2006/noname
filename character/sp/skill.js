@@ -102,7 +102,7 @@ const skills = {
 						global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
 					},
 					filter(event, player) {
-						return event.getl?.(player)?.hs?.length;
+						return event.getl?.(player)?.cards2?.some(i => get.type(i, null, player) === "equip");
 					},
 				},
 			},
