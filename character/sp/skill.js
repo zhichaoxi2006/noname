@@ -68,7 +68,7 @@ const skills = {
 				effect: {
 					trigger: { global: "useCardAfter" },
 					filter(event, player) {
-						return event.player !== player && event.targets?.includes(player);
+						return event.player !== player && ["nanman", "wanjian"].includes(event.card?.name);
 					},
 				},
 			},
@@ -1031,7 +1031,7 @@ const skills = {
 			const num = skills.length - Math.max(1, player.countMark("olhedao"));
 			if (num > 0) {
 				const result = await player
-					.chooseButton(["青书：选择失去" + get.cnNumber(num) + "册多余的“天书”", [skills.randomGets(3).map(item => [item, "（剩余" + player.storage[item][0] + "次）" + lib.translate[item + "_info"]]), "textbutton"]], true, num)
+					.chooseButton(["青书：选择失去" + get.cnNumber(num) + "册多余的“天书”", [skills.map(item => [item, "（剩余" + player.storage[item][0] + "次）" + lib.translate[item + "_info"]]), "textbutton"]], true, num)
 					.set("ai", () => 1 + Math.random())
 					.forResult();
 				if (result?.bool && result.links?.length) player.removeSkill(result.links);
