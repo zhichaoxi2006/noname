@@ -68,7 +68,7 @@ const skills = {
 				effect: {
 					trigger: { global: "useCardAfter" },
 					filter(event, player) {
-						return event.player !== player && ["nanman", "wanjian"].includes(event.card?.name);
+						return ["nanman", "wanjian"].includes(event.card?.name);
 					},
 				},
 			},
