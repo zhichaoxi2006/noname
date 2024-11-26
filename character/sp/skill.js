@@ -447,7 +447,7 @@ const skills = {
 			await player.chooseToDiscard(
 				"he",
 				true,
-				game.countPlayer2(target => target.getHistory("sourceDamage").length)
+				game.countPlayer2(target => target.hasHistory("sourceDamage"))
 			);
 		},
 		ai: {
@@ -479,7 +479,7 @@ const skills = {
 			if (source?.isIn()) {
 				player.line(source);
 				const resultx = await source
-					.chooseToGive(player, "e", "蕃算：交给" + get.translation(player) + "一张装备区的牌，或失去1点体力或将武将牌翻面")
+					.chooseToGive(player, "e", "筮算：交给" + get.translation(player) + "一张装备区的牌，或失去1点体力或将武将牌翻面")
 					.set("ai", card => {
 						const player = get.player();
 						if (get.effect(player, { name: "losehp" }, player, player) > 0 || player.isTurnedOver()) return 0;

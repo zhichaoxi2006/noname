@@ -1682,8 +1682,8 @@ const skills = {
 		},
 		filter(event, player) {
 			if (event.card.name != "sha") return false;
-			if (!player.storage.nzry_juzhan) return true;
-			return event.target.countGainableCards(player, "he");
+			if (!player.storage.nzry_juzhan) return player != event.player;
+			return player == event.player && event.target.countGainableCards(player, "he");
 		},
 		logTarget(event, player) {
 			return player.storage.nzry_juzhan ? event.target : event.player;
@@ -7203,10 +7203,11 @@ const skills = {
 			event.result = await player
 				.chooseBool(get.prompt("fenji", target), "失去1点体力，令该角色摸两张牌")
 				.set("ai", function () {
-					const evt = _status.event.getParent();
-					if (get.attitude(evt.player, evt.target) <= 0) return false;
-					return 2 * get.effect(evt.target, { name: "draw" }, evt.player, get.event("player")) + get.effect(evt.player, { name: "losehp" }, evt.player, get.event("player")) > 0;
+					const player = get.event("player"), target = get.event("target");
+					if (get.attitude(player, target) <= 0) return false;
+					return 2 * get.effect(target, { name: "draw" }, player, player) + get.effect(player, { name: "losehp" }, player, player) > 0;
 				})
+				.set("target", target)
 				.forResult();
 		},
 		async content(event, trigger, player) {

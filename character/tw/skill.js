@@ -2,6 +2,73 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//幻刘封
+	twchenxun: {
+		audio: 2,
+		trigger: { global: "roundStart" },
+		filter(event, player) {
+			return game.hasPlayer(current => player.canUse({ name: "juedou", isCard: true }, current));
+		},
+		async cost(event, trigger, player) {
+			event.result = await player
+				.chooseTarget(
+					get.prompt(event.name.slice(0, -5)),
+					(card, player, target) => {
+						return player.canUse({ name: "juedou", isCard: true }, target);
+					},
+					"视为对一名角色使用一张【决斗】"
+				)
+				.set("ai", target => {
+					const player = get.player();
+					let eff = get.effect(target, { name: "juedou" }, player, player),
+						shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count");
+					eff += shas > 0 ? get.effect(player, { name: "losehp" }, player, player) : get.effect(player, { name: "draw" }, player, player) * 2;
+					return eff;
+				})
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			const target = event.targets[0],
+				juedou = get.autoViewAs({ name: "juedou", isCard: true, storage: { twchenxun: true } });
+			if (!player.canUse(juedou, target)) return;
+			await player.useCard(target, juedou);
+			if (target.hasHistory("damage", evt => evt.getParent(3) == event)) {
+				await player.draw(2);
+				const targetsx = game.filterPlayer(current => {
+					if (!player.canUse({ name: "juedou", isCard: true }, current)) return false;
+					return !player
+						.getRoundHistory("useSkill", evt => (evt.skill = "twchenxun"))
+						.map(evt => evt.targets[0])
+						.includes(current);
+				});
+				if (!targetsx.length) return;
+				const targets = await player
+					.chooseTarget(
+						get.prompt("twchenxun"),
+						(card, player, target) => {
+							return get.event("targetsx").includes(target);
+						},
+						"视为对一名本轮未以此法选择过的角色使用一张【决斗】"
+					)
+					.set("ai", target => {
+						const player = get.player();
+						let eff = get.effect(target, { name: "juedou" }, player, player),
+							shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count");
+						if (shas > 0) {
+							const num = player.getRoundHistory("useCard", evt => evt.card?.storage?.twchenxun).length + 1;
+							eff += get.effect(player, { name: "losehp" }, player, player) * num;
+						} else eff += get.effect(player, { name: "draw" }, player, player) * 2;
+						return eff;
+					})
+					.set("targetsx", targetsx)
+					.forResultTargets();
+				if (targets?.length) await player.useSkill("twchenxun", targets);
+			} else {
+				const num = player.getRoundHistory("useCard", evt => evt.card?.storage?.twchenxun).length;
+				if (num) await player.loseHp(num);
+			}
+		},
+	},
 	//TW孙鲁班
 	twzenhui: {
 		audio: "chanhui",
@@ -19432,7 +19499,7 @@ const skills = {
 		filterCard: true,
 		position: "he",
 		check(card) {
-			if (!game.hasPlayer(curren => current != get.player() && current.countCards("h") > ui.selected.cards.length)) return 0;
+			if (!game.hasPlayer(current => current != get.player() && current.countCards("h") > ui.selected.cards.length)) return 0;
 			return 6 - get.value(card);
 		},
 		selectCard() {
