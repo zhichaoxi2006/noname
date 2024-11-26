@@ -31,15 +31,6 @@ const skills = {
 		filter(event, player, name) {
 			if (name == "phaseBefore" && game.phaseNumber != 0) return false;
 			if (name == "damageSource" && game.roundNumber > 3) return false;
-			if (
-				game
-					.filterPlayer()
-					.map(p => p.skills.filter(s => /^ns_shijian_createSkill_[0-9]+$/.test(s)).length)
-					.flat(1)
-					.reduce((p, n) => p + n, 0) >= 35
-			) {
-				return false;
-			}
 			return [player.name, player.name1, player.name2].contains("ns_shijian") || (game.ns_shijian && game.ns_shijian.players.contains(player));
 		},
 		content() {
