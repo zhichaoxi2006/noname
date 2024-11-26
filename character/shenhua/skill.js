@@ -1682,8 +1682,8 @@ const skills = {
 		},
 		filter(event, player) {
 			if (event.card.name != "sha") return false;
-			if (!player.storage.nzry_juzhan) return true;
-			return event.target.countGainableCards(player, "he");
+			if (!player.storage.nzry_juzhan) return player != event.player;
+			return player == event.player && event.target.countGainableCards(player, "he");
 		},
 		logTarget(event, player) {
 			return player.storage.nzry_juzhan ? event.target : event.player;
