@@ -1,5 +1,5 @@
 window.noname_character_rank = {
-	s: ["sp_sunce", "gjqt_bailitusu", "gjqt_beiluo", "gjqt_xieyi", "hs_malorne", "hs_medivh", "hs_sthrall", "pal_yuejinzhao", "swd_cheyun", "swd_duguningke", "swd_guyue", "swd_huanglei", "swd_murongshi", "swd_muyun", "swd_septem", "swd_tuobayuer", "swd_xuanyuanjianxian", "swd_yuxiaoxue", "swd_zhaoyun", "key_shiki", "shen_zhaoyun", "shen_ganning", "re_liuzan", "chunyuqiong", "yangbiao", "dc_zhaoxiang", "sp_xiahoushi", "ns_zhangwei", "wanglang", "caojinyu", "dc_zhangmancheng", "wu_zhugeliang", "sunlingluan", "wu_luxun", "key_mio", "key_midori", "key_yuri", "key_yui", "key_lucia", "db_key_hina", "sp_key_kanade", "key_shizuru", "key_sakuya", "boss_zhaoyun", "noname", "sb_machao", "dc_zhouxuān", "key_iriya", "dc_zhaoyun", "jd_simayan"],
+	s: ["sp_sunce", "gjqt_bailitusu", "gjqt_beiluo", "gjqt_xieyi", "hs_malorne", "hs_medivh", "hs_sthrall", "pal_yuejinzhao", "swd_cheyun", "swd_duguningke", "swd_guyue", "swd_huanglei", "swd_murongshi", "swd_muyun", "swd_septem", "swd_tuobayuer", "swd_xuanyuanjianxian", "swd_yuxiaoxue", "swd_zhaoyun", "key_shiki", "shen_zhaoyun", "shen_ganning", "re_liuzan", "chunyuqiong", "yangbiao", "dc_zhaoxiang", "sp_xiahoushi", "ns_zhangwei", "wanglang", "caojinyu", "dc_zhangmancheng", "wu_zhugeliang", "sunlingluan", "wu_luxun", "key_mio", "key_midori", "key_yuri", "key_yui", "key_lucia", "db_key_hina", "sp_key_kanade", "key_shizuru", "key_sakuya", "boss_zhaoyun", "noname", "ns_shijian", "sb_machao", "dc_zhouxuān", "key_iriya", "dc_zhaoyun", "jd_simayan"],
 	ap: [
 		"yj_jiling",
 		"scl_miheng",
@@ -2058,6 +2058,7 @@ window.noname_character_rank = {
 			"key_minagi",
 			"key_michiru",
 			"noname",
+			"ns_shijian",
 			"ol_wanglang",
 			"xin_guozhao",
 			"shichangshi",
