@@ -61,7 +61,7 @@ const skills = {
 			},
 		},
 	},
-	dcrunzhi: {
+	dcjiangzhi: {
 		audio: 2,
 		trigger: { target: "useCardToTargeted" },
 		filter(event, player) {

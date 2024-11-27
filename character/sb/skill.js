@@ -248,8 +248,10 @@ const skills = {
 		frequent: true,
 		async content(event, trigger, player) {
 			let num = trigger.name == "damage" ? 2 : 1;
-			await player.draw(num);
-			if (player.countCards("h") && game.hasPlayer(target => target != player)) {
+			const { result } = await player.draw(num);
+			if (!game.hasPlayer(target => target != player)) return;
+			if (trigger.name == "damage") {
+				if (!player.countCards("h")) return;
 				if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
 				let given_map = [];
 				while (num > 0 && player.hasCard(card => !card.hasGaintag("olsujian_given"), "h")) {
@@ -299,6 +301,24 @@ const skills = {
 						})
 						.setContent("gaincardMultiple");
 				}
+			} else {
+				if (get.itemtype(result) != "cards") return;
+				const cards = player.getCards("h").filter(card => result.includes(card));
+				if (!cards.length) return;
+				const targets = await player
+					.chooseTarget(lib.filter.notMe, `将${get.translation(cards)}交给一名其他角色`)
+					.set("ai", target => {
+						const { player, cards } = get.event();
+						const att = get.attitude(player, target);
+						if (cards[0].name == "du") {
+							if (target.hasSkillTag("nodu")) return 0;
+							return 1 - att;
+						}
+						return att - 4;
+					})
+					.set("cards", cards)
+					.forResultTargets();
+				if (targets?.length) await player.give(cards, targets[0]);
 			}
 		},
 		ai: {
@@ -901,7 +921,7 @@ const skills = {
 		updateBlocker(player) {
 			const list = [],
 				storage = player.storage.sbgongqi_block;
-			if (storage && storage.length) {
+			if (storage?.length) {
 				list.addArray(...storage.map(i => i[1]));
 			}
 			player.storage.sbgongqi_blocker = list;
@@ -959,7 +979,7 @@ const skills = {
 						}
 					}
 					if (!storage.length) player.removeSkill("sbgongqi_block");
-					else lib.skill.sbgongqi.updateBlocker(trigger.target);
+					else lib.skill.sbgongqi.updateBlocker(player);
 				},
 				mod: {
 					cardEnabled(card, player) {
@@ -8085,22 +8105,22 @@ const skills = {
 	sbliegong: {
 		audio: 2,
 		mod: {
-			cardnature: function (card, player) {
+			cardnature(card, player) {
 				if (!player.getVEquip(1) && get.name(card, player) == "sha") return false;
 			},
 		},
 		trigger: { player: "useCardToPlayered" },
-		filter: function (event, player) {
+		filter(event, player) {
 			return !event.getParent()._sbliegong_player && event.targets.length == 1 && event.card.name == "sha" && player.getStorage("sbliegong").length > 0;
 		},
-		prompt2: function (event, player) {
-			var str = "",
+		prompt2(event, player) {
+			let str = "",
 				storage = player.getStorage("sbliegong");
 			if (storage.length > 1) {
 				str += "亮出牌堆顶的" + get.cnNumber(storage.length - 1) + "张牌并增加伤害；且";
 			}
 			str += "令" + get.translation(event.target) + "不能使用花色为";
-			for (var i = 0; i < storage.length; i++) {
+			for (let i = 0; i < storage.length; i++) {
 				str += get.translation(storage[i]);
 			}
 			str += "的牌响应" + get.translation(event.card);
@@ -8108,8 +8128,8 @@ const skills = {
 		},
 		logTarget: "target",
 		locked: false,
-		check: function (event, player) {
-			var target = event.target;
+		check(event, player) {
+			const target = event.target;
 			if (get.attitude(player, target) > 0) return false;
 			if (
 				target.hasSkillTag("filterDamage", null, {
@@ -8118,22 +8138,22 @@ const skills = {
 				})
 			)
 				return false;
-			var storage = player.getStorage("sbliegong");
+			const storage = player.getStorage("sbliegong");
 			if (storage.length >= 4) return true;
 			if (storage.length < 3) return false;
 			if (target.hasShan()) return storage.includes("heart") && storage.includes("diamond");
 			return true;
 		},
-		content: function () {
-			var storage = player.getStorage("sbliegong").slice(0);
-			var num = storage.length - 1;
-			var evt = trigger.getParent();
+		content() {
+			const storage = player.getStorage("sbliegong").slice(0);
+			const num = storage.length - 1;
+			const evt = trigger.getParent();
 			if (num > 0) {
 				if (typeof evt.baseDamage != "number") evt.baseDamage = 1;
-				var cards = get.cards(num);
+				const cards = get.cards(num);
 				player.showCards(cards.slice(0), get.translation(player) + "发动了【烈弓】");
 				while (cards.length > 0) {
-					var card = cards.pop();
+					const card = cards.pop();
 					if (storage.includes(get.suit(card, false))) evt.baseDamage++;
 					//ui.cardPile.insertBefore(card,ui.cardPile.firstChild);
 				}
@@ -8141,28 +8161,28 @@ const skills = {
 			}
 			evt._sbliegong_player = player;
 			player.addTempSkill("sbliegong_clear");
-			var target = trigger.target;
+			const target = trigger.target;
 			target.addTempSkill("sbliegong_block");
 			if (!target.storage.sbliegong_block) target.storage.sbliegong_block = [];
 			target.storage.sbliegong_block.push([evt.card, storage]);
 			lib.skill.sbliegong.updateBlocker(target);
 		},
-		updateBlocker: function (player) {
-			var list = [],
+		updateBlocker(player) {
+			const list = [],
 				storage = player.storage.sbliegong_block;
-			if (storage && storage.length) {
-				for (var i of storage) list.addArray(i[1]);
+			if (storage?.length) {
+				for (const i of storage) list.addArray(i[1]);
 			}
 			player.storage.sbliegong_blocker = list;
 		},
 		ai: {
 			threaten: 3.5,
 			directHit_ai: true,
-			skillTagFilter: function (player, tag, arg) {
-				if (arg && arg.card && arg.card.name == "sha") {
-					var storage = player.getStorage("sbliegong");
+			skillTagFilter(player, tag, arg) {
+				if (arg?.card?.name == "sha") {
+					const storage = player.getStorage("sbliegong");
 					if (storage.length < 3 || !storage.includes("heart") || !storage.includes("diamond")) return false;
-					var target = arg.target;
+					const target = arg.target;
 					if (target.hasSkill("bagua_skill") || target.hasSkill("bazhen") || target.hasSkill("rw_bagua_skill")) return false;
 					return true;
 				}
@@ -8180,21 +8200,21 @@ const skills = {
 				forced: true,
 				charlotte: true,
 				popup: false,
-				filter: function (event, player) {
+				filter(event, player) {
 					return event._sbliegong_player == player;
 				},
-				content: function () {
+				content() {
 					player.unmarkSkill("sbliegong");
 					player.removeTip("sbliegong");
 				},
 			},
 			block: {
 				mod: {
-					cardEnabled: function (card, player) {
+					cardEnabled(card, player) {
 						if (!player.storage.sbliegong_blocker) return;
-						var suit = get.suit(card);
+						const suit = get.suit(card);
 						if (suit == "none") return;
-						var evt = _status.event;
+						let evt = _status.event;
 						if (evt.name != "chooseToUse") evt = evt.getParent("chooseToUse");
 						if (!evt || !evt.respondTo || evt.respondTo[1].name != "sha") return;
 						if (player.storage.sbliegong_blocker.includes(suit)) return false;
@@ -8209,28 +8229,25 @@ const skills = {
 				firstDo: true,
 				charlotte: true,
 				popup: false,
-				onremove: function (player) {
+				onremove(player) {
 					delete player.storage.sbliegong_block;
 					delete player.storage.sbliegong_blocker;
 				},
-				filter: function (event, player) {
+				filter(event, player) {
 					const evt = event.getParent("useCard", true, true);
 					if (evt && evt.effectedCount < evt.effectCount) return false;
 					if (!event.card || !player.storage.sbliegong_block) return false;
-					for (var i of player.storage.sbliegong_block) {
-						if (i[0] == event.card) return true;
-					}
-					return false;
+					return player.storage.sbliegong_block.some(i => i[0] == event.card);
 				},
-				content: function () {
-					var storage = player.storage.sbliegong_block;
-					for (var i = 0; i < storage.length; i++) {
+				content() {
+					const storage = player.storage.sbliegong_block;
+					for (let i = 0; i < storage.length; i++) {
 						if (storage[i][0] == trigger.card) {
 							storage.splice(i--, 1);
 						}
 					}
-					if (!storage.length) player.removeSkill("sbliegong_block");
-					else lib.skill.sbliegong.updateBlocker(target);
+					if (!storage.length) player.removeSkill(event.name);
+					else lib.skill.sbliegong.updateBlocker(player);
 				},
 			},
 			count: {
@@ -8241,14 +8258,14 @@ const skills = {
 				forced: true,
 				locked: false,
 				popup: false,
-				filter: function (event, player, name) {
+				filter(event, player, name) {
 					if (name != "useCard" && player == event.player) return false;
-					var suit = get.suit(event.card);
+					const suit = get.suit(event.card);
 					if (!lib.suit.includes(suit)) return false;
-					if (player.storage.sbliegong && player.storage.sbliegong.includes(suit)) return false;
+					if (player.storage.sbliegong?.includes(suit)) return false;
 					return true;
 				},
-				content: function () {
+				content() {
 					player.markAuto("sbliegong", [get.suit(trigger.card)]);
 					player.storage.sbliegong.sort((a, b) => lib.suit.indexOf(b) - lib.suit.indexOf(a));
 					player.addTip("sbliegong", get.translation("sbliegong") + player.getStorage("sbliegong").reduce((str, suit) => str + get.translation(suit), ""));
