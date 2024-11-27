@@ -999,7 +999,7 @@ const skills = {
 			}
 			game.broadcastAll(
 				(skill, from, to) => {
-					lib.skill[skill] = { nopop: true, olhedao: true, onremove: true, ...from.effect, ...to.effect };
+					lib.skill[skill] = { nopop: true, olhedao: true, charlotte: true, onremove: true, ...from.effect, ...to.effect };
 					lib.skill[skill].init = (player, skill) => (player.storage[skill] = player.storage[skill] || [0, skill]);
 					lib.skill[skill].intro = {
 						markcount: (storage = [0]) => storage[0],
