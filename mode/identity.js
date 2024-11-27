@@ -915,7 +915,7 @@ export default () => {
 						if (lib.filter.characterDisabled(i, libCharacter)) continue;
 						if (i.indexOf("lingju") != -1 || get.is.double(i)) continue;
 						var group = lib.character[i][1];
-						if (group == "shen") continue;
+						if (group == "shen" || group == "western") continue;
 						if (!map[group]) {
 							map[group] = [];
 							list.push(group);
@@ -1094,7 +1094,7 @@ export default () => {
 						if (lib.filter.characterDisabled(i)) continue;
 						if (i.indexOf("lingju") != -1 || get.is.double(i)) continue;
 						var group = lib.character[i][1];
-						if (group == "shen") continue;
+						if (group == "shen" || group == "western") continue;
 						if (!map[group]) {
 							map[group] = [];
 							list.push(group);
@@ -1351,7 +1351,7 @@ export default () => {
 						} else {
 							result[i] = result[i].links;
 						}
-						if (get.is.double(result[i][0]) || (lib.character[result[i][0]] && lib.character[result[i][0]].group == "shen" && !lib.character[result[i][0]].hasHiddenSkill)) shen.push(lib.playerOL[i]);
+						if (get.is.double(result[i][0]) || (lib.character[result[i][0]] && (lib.character[result[i][0]].group == "shen"  || lib.character[result[i][0]].group == "western") && !lib.character[result[i][0]].hasHiddenSkill)) shen.push(lib.playerOL[i]);
 					}
 					event.result2 = result;
 					if (shen.length) {
@@ -1557,7 +1557,7 @@ export default () => {
 						player._groupChosen = true;
 						player.group = get.is.double(player.name1, true).randomGet();
 						player.node.name.dataset.nature = get.groupnature(player.group);
-					} else if (get.config("choose_group") && player.group == "shen" && !player.isUnseen(0)) {
+					} else if (get.config("choose_group") && (player.group == "shen" || player.group == "western") && !player.isUnseen(0)) {
 						var list = lib.group.slice(0);
 						list.remove("shen");
 						if (list.length)
@@ -2143,10 +2143,10 @@ export default () => {
 					if (get.is.double(name)) {
 						game.me._groupChosen = true;
 						game.me.chooseControl(get.is.double(name, true)).set("prompt", "请选择你的势力");
-					} else if (lib.character[name].group == "shen" && !lib.character[name].hasHiddenSkill && get.config("choose_group")) {
+					} else if ((lib.character[name].group == "shen" || lib.character[name].group == "western") && !lib.character[name].hasHiddenSkill && get.config("choose_group")) {
 						var list = lib.group.slice(0);
 						list.remove("shen");
-						game.me.chooseControl(list).set("prompt", "请选择神武将的势力");
+						game.me.chooseControl(list).set("prompt", "请选择该武将的势力");
 					}
 					"step 2";
 					event.group = result.control || false;
@@ -2432,13 +2432,13 @@ export default () => {
 						game.players.length > 4
 					);
 
-					if (game.zhu.group == "shen" && !game.zhu.isUnseen(0)) {
+					if ((game.zhu.group == "shen" || game.zhu.group == "western") && !game.zhu.isUnseen(0)) {
 						var list = ["wei", "shu", "wu", "qun", "jin", "key"];
 						for (var i = 0; i < list.length; i++) {
 							if (!lib.group.includes(list[i])) list.splice(i--, 1);
 							else list[i] = ["", "", "group_" + list[i]];
 						}
-						game.zhu.chooseButton(["请选择神武将的势力", [list, "vcard"]], true).set("ai", function () {
+						game.zhu.chooseButton(["请选择该武将的势力", [list, "vcard"]], true).set("ai", function () {
 							return Math.random();
 						});
 					} else if (get.is.double(game.zhu.name1)) {
@@ -2517,7 +2517,7 @@ export default () => {
 						} else {
 							result[i] = result[i].links;
 						}
-						if (get.is.double(result[i][0]) || (lib.character[result[i][0]] && lib.character[result[i][0]].group == "shen" && !lib.character[result[i][0]].hasHiddenSkill)) shen.push(lib.playerOL[i]);
+						if (get.is.double(result[i][0]) || (lib.character[result[i][0]] && (lib.character[result[i][0]].group == "shen" || lib.character[result[i][0]].group == "western") && !lib.character[result[i][0]].hasHiddenSkill)) shen.push(lib.playerOL[i]);
 					}
 					event.result2 = result;
 					if (shen.length) {
