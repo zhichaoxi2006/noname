@@ -348,7 +348,10 @@ const skills = {
 			order: 4,
 			result: {
 				player(player, target) {
-					return get.effect(target, { name: "sha" }, player, player) - get.effect(player, { name: "sha" }, target, player);
+					return get.effect(player, { name: "guohe" }, target, player) + get.effect(player, { name: "sha" }, target, player);
+				},
+				target(player, target) {
+					return get.effect(target, { name: "guohe" }, player, target) + get.effect(target, { name: "sha" }, player, target);
 				},
 			},
 		},
@@ -361,7 +364,7 @@ const skills = {
 				.set("prompt", "搏决：弃置一张牌，或点击“取消”摸一张牌")
 				.set("prompt2", "若你与" + str + "的手牌数之和的变化值为：0，你与其依次弃置对方一张牌；2，你与其依次视为对对方使用一张【杀】")
 				.set("ai", card => {
-					return 10 * Math.random() - get.value(card); //插眼，PZ157
+					return 0;
 				})
 				.set("id", eventId)
 				.set("_global_waiting", true);
