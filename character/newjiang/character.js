@@ -31,8 +31,8 @@ const characters = {
 	cx_majun: ["male", "wei", 3, ["chuanxie", "yjqiaosi"], [...["character", "die"].map(i => i + ":yj_majun"), "name:马|钧"]],
 	qq_majun: ["male", "wei", 3, ["yuliao", "qiqiao", "yanxie"], [...["character", "die"].map(i => i + ":yj_majun"), "name:马|钧"]],
 	new_yj_dongzhuo: ["male", "qun", "4/5", ["xiongjin", "xiawei", "baoxi"]],
-	fj_peixiu: ["male", "qun", 3, ["fjzhitu", "dcfujue"]],
-	xj_peixiu: ["male", "qun", 3, ["xjzhitu", "dcxiujue"], [...["character", "die"].map(i => i + ":fj_peixiu")]],
+	fj_peixiu: ["male", "qun", 3, ["fjzhitu", "dcfujue"], ["name:裴|秀"]],
+	xj_peixiu: ["male", "qun", 3, ["xjzhitu", "dcxiujue"], [...["character", "die"].map(i => i + ":fj_peixiu"), "name:裴|秀"]],
 };
 
 export default characters;
