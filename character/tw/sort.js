@@ -19,7 +19,7 @@ const characterSort = {
 	tw_yijiang7: ["tw_xuezong"],
 	tw_yijiang: ["tw_caoang", "tw_caohong", "tw_zumao", "tw_dingfeng", "tw_maliang", "tw_xiahouba"],
 	tw_english: ["kaisa"],
-	tw_waitingforsort: ["huan_liufeng"],
+	tw_waitingforsort: ["huan_liufeng", "huan_caoang"],
 };
 
 const characterSortTranslate = {

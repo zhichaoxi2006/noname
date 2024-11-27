@@ -1300,6 +1300,7 @@ window.noname_character_rank = {
 		"ol_sb_huaxiong",
 	],
 	b: [
+		"huan_caoang",
 		"sp_ol_caocao",
 		"v_zhangliao",
 		"mb_ganfuren",
@@ -2450,6 +2451,7 @@ window.noname_character_rank = {
 			"niufu",
 		],
 		rare: [
+			"huan_caoang",
 			"huan_liufeng",
 			"xj_peixiu",
 			"fj_peixiu",
