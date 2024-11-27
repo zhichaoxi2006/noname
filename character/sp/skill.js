@@ -1533,7 +1533,7 @@ const skills = {
 			await player.chooseToDiscard(
 				"he",
 				true,
-				game.countPlayer2(target => target.hasHistory("sourceDamage"))
+				game.countPlayer2(target => target.hasHistory("damage"))
 			);
 		},
 		ai: {

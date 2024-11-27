@@ -14,6 +14,7 @@ import voices from "./voices.js";
 import { characterSort, characterSortTranslate } from "./sort.js";
 
 game.import("character", function () {
+	if (lib.config.characters.includes("diy")) lib.group.add("key");
 	return {
 		name: "diy",
 		connect: true,

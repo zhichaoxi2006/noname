@@ -12444,13 +12444,13 @@ const skills = {
 					function (card) {
 						if (_status.event.goon && ui.selected.cards.length < 2) return 5.6 - get.value(card);
 						return 0;
-					},
-					"chooseonly"
+					}
 				)
 				.set(
 					"goon",
 					(function () {
 						var target = trigger.player;
+						if (get.attitude(player, target) >= 0) return false;
 						if (get.damageEffect(target, player, player) > 0) return true;
 						if (
 							target.countCards("he", function (card) {
@@ -12461,6 +12461,7 @@ const skills = {
 						return false;
 					})()
 				)
+				.set("chooseonly", true)
 				.forResult();
 		},
 		logTarget: "player",
