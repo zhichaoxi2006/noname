@@ -1100,8 +1100,12 @@ const skills = {
 		ai: {
 			order: 1,
 			result: {
+				player(player, target) {
+					let num = (player.hasSkill("shangshi") ? Math.max(0, player.getDamagedHp() - player.countCards("h") / 2) : 0) - player.countDiscardableCards(player, "h") / 2;
+					return get.effect(player, { name: "juedou" }, target, player) + get.effect(player, { name: "draw" }, player, player) * num;
+				},
 				target(player, target) {
-					return get.effect(target, { name: "juedou" }, player, player) * get.sgn(get.attitude(player, target));
+					return get.effect(target, { name: "juedou" }, player, target) - get.effect(target, { name: "draw" }, target, target) * target.countDiscardableCards(target, "h") / 2;
 				},
 			},
 		},
