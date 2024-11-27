@@ -454,6 +454,9 @@ const translates = {
 	junk_guanyu_prefix: "旧谋",
 	junk_liuyan: "OL刘焉",
 	junk_liuyan_prefix: "OL",
+	ns_shijian: "诗笺",
+	nspianwu: "翩舞",
+	nspianwu_info: "<font color=red>特殊效果：你的技能不会失效或失去。</font><br>锁定技，你于以下时机创建一个随机的触发技能：游戏开始后；当你受到伤害后；当你造成伤害时（三轮内）；你的回合结束时。然后你选择一项：①将此技能赠予一名其他角色；②获得此技能。以此法创建的技能每回合限发动五次。",
 };
 
 export default translates;

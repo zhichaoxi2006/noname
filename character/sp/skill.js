@@ -2,6 +2,1092 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL南华老仙
+	olhedao: {
+		audio: 2,
+		trigger: {
+			global: "phaseBefore",
+			player: ["enterGame", "dying"],
+		},
+		filter(event, player) {
+			if (event.name === "dying") return game.getAllGlobalHistory("everything", evt => evt.name === "dying" && evt.player === player).indexOf(event) === 0;
+			return event.name !== "phase" || game.phaseNumber === 0;
+		},
+		forced: true,
+		content() {
+			player.addMark(event.name, 1 + (trigger.name !== "dying"), false);
+		},
+		intro: { content: "至多拥有#册“天书”" },
+		//时机
+		tianshuTrigger: [
+			//用牌相关
+			{
+				name: "当你使用牌后",
+				effect: {
+					trigger: { player: "useCardAfter" },
+				},
+			},
+			{
+				name: "当你使用或打出【闪】时",
+				effect: {
+					trigger: { player: "useCard" },
+					filter(event, player) {
+						return event.card.name === "shan";
+					},
+				},
+			},
+			{
+				name: "当你成为【杀】的目标时",
+				effect: {
+					trigger: { target: "useCardToTarget" },
+					filter(event, player) {
+						return event.card.name === "sha";
+					},
+				},
+			},
+			{
+				name: "当你成为普通锦囊牌的目标后",
+				effect: {
+					trigger: { target: "useCardToTargeted" },
+					filter(event, player) {
+						return get.type(event.card) === "trick";
+					},
+				},
+			},
+			{
+				name: "其他角色对你使用牌后",
+				effect: {
+					trigger: { global: "useCardAfter" },
+					filter(event, player) {
+						return event.player !== player && event.targets?.includes(player);
+					},
+				},
+			},
+			{
+				name: "一名角色使用【南蛮入侵】或【万箭齐发】后",
+				effect: {
+					trigger: { global: "useCardAfter" },
+					filter(event, player) {
+						return ["nanman", "wanjian"].includes(event.card?.name);
+					},
+				},
+			},
+			{
+				name: "当你使用牌被抵消后",
+				effect: {
+					trigger: { player: ["eventNeutralized", "shaMiss"] },
+					filter(event, player) {
+						return event.type === "card";
+					},
+				},
+			},
+			//失去牌相关
+			{
+				name: "当你失去手牌后",
+				effect: {
+					trigger: {
+						player: "loseAfter",
+						global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+					},
+					filter(event, player) {
+						return event.getl?.(player)?.hs?.length;
+					},
+				},
+			},
+			{
+				name: "当你失去装备牌后",
+				effect: {
+					trigger: {
+						player: "loseAfter",
+						global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+					},
+					filter(event, player) {
+						return event.getl?.(player)?.cards2?.some(i => get.type(i, null, player) === "equip");
+					},
+				},
+			},
+			{
+				name: "当你于回合外失去红色牌后",
+				effect: {
+					trigger: {
+						player: "loseAfter",
+						global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+					},
+					filter(event, player) {
+						return _status.currentPhase !== player && event.getl?.(player)?.cards2?.some(i => get.color(i, player) === "red");
+					},
+				},
+			},
+			{
+				name: "一名角色失去最后的手牌后",
+				effect: {
+					trigger: {
+						global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+					},
+					filter(event, player) {
+						return game.hasPlayer(target => !target.countCards("h") && event.getl?.(target)?.hs?.length);
+					},
+				},
+			},
+			//判定相关
+			{
+				name: "当一张判定牌生效前",
+				effect: {
+					trigger: { global: "judge" },
+				},
+			},
+			{
+				name: "当一张判定牌生效后",
+				effect: {
+					trigger: { global: "judgeAfter" },
+				},
+			},
+			//阶段相关
+			{
+				name: "每轮开始时",
+				effect: {
+					trigger: { global: "roundStart" },
+				},
+			},
+			{
+				name: "准备阶段",
+				effect: {
+					trigger: { player: "phaseZhunbeiBegin" },
+				},
+			},
+			{
+				name: "摸牌阶段开始时",
+				effect: {
+					trigger: { player: "phaseDrawBegin" },
+				},
+			},
+			{
+				name: "出牌阶段开始时",
+				effect: {
+					trigger: { player: "phaseUseBegin" },
+				},
+			},
+			{
+				name: "弃牌阶段开始时",
+				effect: {
+					trigger: { player: "phaseDiscardBegin" },
+				},
+			},
+			{
+				name: "结束阶段",
+				effect: {
+					trigger: { player: "phaseJieshuBegin" },
+				},
+			},
+			//伤害相关
+			{
+				name: "当你造成伤害后",
+				effect: {
+					trigger: { source: "damageSource" },
+				},
+			},
+			{
+				name: "当你受到伤害后",
+				effect: {
+					trigger: { player: "damageEnd" },
+				},
+			},
+			{
+				name: "当你的体力值变化后",
+				effect: {
+					trigger: { player: "changeHpEnd" },
+					filter(event, player) {
+						return event.num !== 0;
+					},
+				},
+			},
+			{
+				name: "当你使用【杀】造成伤害后",
+				effect: {
+					trigger: { source: "damageSource" },
+					filter(event, player) {
+						return event.card?.name === "sha";
+					},
+				},
+			},
+			{
+				name: "一名角色受到【杀】造成的伤害后",
+				effect: {
+					trigger: { global: "damageEnd" },
+					filter(event, player) {
+						return event.card?.name === "sha";
+					},
+				},
+			},
+			{
+				name: "一名角色造成伤害时",
+				effect: {
+					trigger: { global: "damageBegin3" },
+					filter(event, player) {
+						return event.source?.isIn();
+					},
+				},
+			},
+			{
+				name: "一名角色受到伤害时",
+				effect: {
+					trigger: { global: "damageBegin4" },
+				},
+			},
+			{
+				name: "一名角色受到属性伤害后",
+				effect: {
+					trigger: { global: "damageEnd" },
+					filter(event, player) {
+						return event.hasNature();
+					},
+				},
+			},
+			//其他
+			{
+				name: "一名角色进入濒死状态时",
+				effect: {
+					trigger: { global: "dying" },
+				},
+			},
+			{
+				name: "其他角色死亡后",
+				effect: {
+					trigger: { global: "dieAfter" },
+					filter(event, player) {
+						return event.player !== player;
+					},
+				},
+			},
+			{
+				name: "一名角色进入连环状态后",
+				effect: {
+					trigger: { global: "linkAfter" },
+					filter(event, player) {
+						return event.player.isLinked();
+					},
+				},
+			},
+		],
+		//执行
+		tianshuContent: [
+			{
+				name: "你可以摸一张牌",
+				effect: {
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.draw();
+					},
+				},
+			},
+			{
+				name: "你可以弃置一名角色区域内的一张牌",
+				effect: {
+					getIndex(event, player) {
+						return 0 + game.hasPlayer(target => target.countCards("hej"));
+					},
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)), (card, player, target) => {
+								return target.countCards("hej");
+							})
+							.set("ai", target => {
+								const player = get.player();
+								return get.effect(target, { name: "guohe" }, player, player);
+							})
+							.forResult();
+					},
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.discardPlayerCard(event.targets[0], "hej", true);
+					},
+				},
+			},
+			{
+				name: "你可以观看牌堆顶三张牌，然后将这些牌以任意顺序置于牌堆顶或牌堆底",
+				effect: {
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.chooseToGuanxing(3);
+					},
+				},
+			},
+			{
+				name: "你可以弃置任意张牌并摸等量张牌",
+				effect: {
+					getIndex(event, player) {
+						return (
+							0 +
+							player.hasCard(card => {
+								if (get.position(card) === "h" && _status.connectMode) return true;
+								return lib.filter.cardDiscardable(card, player);
+							}, "he")
+						);
+					},
+					async cost(event, trigger, player) {
+						const name = event.name.slice(0, -"_cost".length);
+						event.result = await player.chooseToDiscard(get.prompt2(name), "he", [1, Infinity]).set("ai", lib.skill.zhiheng.check).set("logSkill", name).forResult();
+					},
+					popup: false,
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.draw(event.cards.length);
+					},
+				},
+			},
+			{
+				name: "你可以获得造成伤害的牌",
+				filter: item => item.includes("伤害"),
+				effect: {
+					getIndex(event, player) {
+						return 0 + (get.itemtype(event.cards) === "cards" && event.cards.someInD());
+					},
+					prompt2(event, player) {
+						return "获得" + get.translation(event.cards.filterInD());
+					},
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.gain(trigger.cards.filterInD(), "gain2");
+					},
+				},
+			},
+			{
+				name: "你可以视为使用一张无距离和次数限制的【杀】",
+				effect: {
+					getIndex(event, player) {
+						const card = new lib.element.VCard({ name: "sha" });
+						return 0 + player.hasUseTarget(card, false);
+					},
+					direct: true,
+					async content(event, trigger, player) {
+						const card = new lib.element.VCard({ name: "sha" });
+						event.result = await player
+							.chooseUseTarget(get.prompt2(event.name), card, false, "nodistance")
+							.set("oncard", () => {
+								const event = _status.event.getParent(2);
+								lib.skill.olhedao.tianshuClear(event.name, event.player);
+							})
+							.set("logSkill", event.name)
+							.forResult();
+					},
+				},
+			},
+			{
+				name: "你可以获得一名角色区域内的一张牌",
+				effect: {
+					getIndex(event, player) {
+						return 0 + game.hasPlayer(target => target.countCards("hej"));
+					},
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)), (card, player, target) => {
+								return target.countCards("hej");
+							})
+							.set("ai", target => {
+								const player = get.player();
+								return get.effect(target, { name: "shunshou" }, player, player);
+							})
+							.forResult();
+					},
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.gainPlayerCard(event.targets[0], "hej", true);
+					},
+				},
+			},
+			{
+				name: "你可以回复1点体力",
+				effect: {
+					getIndex(event, player) {
+						return 0 + player.isDamaged();
+					},
+					check(event, player) {
+						return get.recoverEffect(player, player, player) > 0;
+					},
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.recover();
+					},
+				},
+			},
+			{
+				name: "你可以摸三张牌，然后弃置一张牌",
+				effect: {
+					async content(event, trigger, player) {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						await player.draw(3);
+						await player.chooseToDiscard("he", true);
+					},
+				},
+			},
+			{
+				name: "你可以将手牌摸至体力上限（至多摸五张）",
+				effect: {
+					getIndex(event, player) {
+						return 0 + (player.countCards("h") < player.maxHp);
+					},
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.drawTo(Math.min(player.maxHp, player.countCards("h") + 5));
+					},
+				},
+			},
+			{
+				name: "你可以令一名角色的非锁定技失效直到其下个回合开始",
+				effect: {
+					getIndex(event, player) {
+						return 0 + game.hasPlayer(target => !target.hasSkill("fengyin"));
+					},
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)), (card, player, target) => {
+								return !target.hasSkill("fengyin");
+							})
+							.set("ai", target => {
+								const player = get.player();
+								return (
+									-get.sgn(get.attitude(player, target)) *
+									(target.getSkills(null, false, false).filter(skill => {
+										return !get.is.locked(skill);
+									}).length +
+										1) *
+									(target === _status.currentPhase ? 10 : 1)
+								);
+							})
+							.forResult();
+					},
+					content() {
+						const target = event.targets[0];
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						target.addTempSkill("fengyin", { player: "phaseBegin" });
+					},
+				},
+			},
+			{
+				name: "你可以令一名角色摸两张牌并将武将牌翻面",
+				effect: {
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)))
+							.set("ai", target => {
+								const player = get.player(),
+									draw = 2;
+								if (target.hasSkillTag("noturn")) return 0;
+								const att = get.attitude(player, target),
+									current = _status.currentPhase;
+								const dis = current ? get.distance(current, target, "absolute") : 1;
+								if (att == 0) return target.hasJudge("lebu") ? Math.random() / 3 : Math.sqrt(get.threaten(target)) / 5 + Math.random() / 2;
+								if (att > 0) {
+									if (target.isTurnedOver()) return att + draw;
+									if (current && target.getSeatNum() > current.getSeatNum()) return att + draw / 3;
+									return (10 * Math.sqrt(Math.max(0.01, get.threaten(target)))) / (3.5 - draw) + dis / (2 * game.countPlayer());
+								} else {
+									if (target.isTurnedOver()) return att - draw;
+									if (current && target.getSeatNum() <= current.getSeatNum()) return -att + draw / 3;
+									return (4.25 - draw) * 10 * Math.sqrt(Math.max(0.01, get.threaten(target))) + (2 * game.countPlayer()) / dis;
+								}
+							})
+							.forResult();
+					},
+					content() {
+						const target = event.targets[0];
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						target.draw(2);
+						target.turnOver();
+					},
+				},
+			},
+			{
+				name: "你可以令此牌对你无效",
+				filter: item => item.includes("你成为") && (item.includes("的目标时") || item.includes("的目标后")),
+				effect: {
+					prompt2(event, player) {
+						return "令" + get.translation(event.card) + "对你无效";
+					},
+					check(event, player) {
+						return get.effect(player, event.card, event.player, player) < 0;
+					},
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						trigger.getParent().excluded.add(player);
+						game.log(trigger.card, "对", player, "无效");
+					},
+				},
+			},
+			{
+				name: "你可以令一名其他角色判定，若判定结果为黑桃，则其受到2点雷属性伤害",
+				effect: {
+					getIndex(event, player) {
+						return 0 + game.hasPlayer(target => target !== player);
+					},
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)), lib.filter.notMe)
+							.set("ai", target => {
+								const player = get.player();
+								if (target.hasSkill("hongyan")) return 0;
+								return get.damageEffect(target, player, player, "thunder");
+							})
+							.forResult();
+					},
+					async content(event, trigger, player) {
+						const target = event.targets[0];
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						const result = await target
+							.judge(card => {
+								return get.suit(card) === "spade" ? -4 : 0;
+							})
+							.set("judge2", result => (result.bool === false ? true : false))
+							.forResult();
+						if (result.bool === false) await target.damage(2, "thunder");
+					},
+				},
+			},
+			{
+				name: "你可以打出一张手牌替换此判定牌",
+				filter: item => item.includes("判定牌生效前"),
+				effect: {
+					getIndex(event, player) {
+						return 0 + Boolean(player.countCards("hs"));
+					},
+					async cost(event, trigger, player) {
+						const {
+							result: { bool, cards },
+						} = await player
+							.chooseCard(get.translation(trigger.player) + "的" + (trigger.judgestr || "") + "判定为" + get.translation(trigger.player.judging[0]) + "，" + get.prompt(event.name.slice(0, -"_cost".length)), "hs", card => {
+								const player = _status.event.player;
+								const mod2 = game.checkMod(card, player, "unchanged", "cardEnabled2", player);
+								if (mod2 != "unchanged") return mod2;
+								const mod = game.checkMod(card, player, "unchanged", "cardRespondable", player);
+								if (mod != "unchanged") return mod;
+								return true;
+							})
+							.set("ai", card => {
+								const trigger = _status.event.getTrigger();
+								const player = _status.event.player;
+								const judging = _status.event.judging;
+								const result = trigger.judge(card) - trigger.judge(judging);
+								const attitude = get.attitude(player, trigger.player);
+								if (attitude == 0 || result == 0) return 0;
+								if (attitude > 0) {
+									return result - get.value(card) / 2;
+								} else {
+									return -result - get.value(card) / 2;
+								}
+							})
+							.set("judging", trigger.player.judging[0]);
+						if (bool) event.result = { bool, cost_data: { cards } };
+					},
+					popup: false,
+					async content(event, trigger, player) {
+						const chooseCardResultCards = event.cost_data.cards;
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						await player.respond(chooseCardResultCards, event.name, "highlight", "noOrdering");
+						if (trigger.player.judging[0].clone) {
+							trigger.player.judging[0].clone.classList.remove("thrownhighlight");
+							game.broadcast(card => {
+								if (card.clone) card.clone.classList.remove("thrownhighlight");
+							}, trigger.player.judging[0]);
+							game.addVideo("deletenode", player, get.cardsInfo([trigger.player.judging[0].clone]));
+						}
+						player.$gain2(trigger.player.judging);
+						await player.gain(trigger.player.judging);
+						trigger.player.judging[0] = chooseCardResultCards[0];
+						trigger.orderingCards.addArray(chooseCardResultCards);
+						game.log(trigger.player, "的判定牌改为", chooseCardResultCards[0]);
+						await game.delay(2);
+					},
+					ai: {
+						rejudge: true,
+						tag: { rejudge: 1 },
+					},
+				},
+			},
+			{
+				name: "你可以获得此判定牌",
+				filter: item => item.includes("判定牌生效后"),
+				effect: {
+					getIndex(event, player) {
+						return 0 + (get.position(event.result.card, true) === "o");
+					},
+					check(event, player) {
+						return get.value(event.result.card) > 0;
+					},
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.gain(trigger.result.card, "gain2");
+					},
+				},
+			},
+			{
+				name: "若你不是体力上限最高的角色，则你可以增加1点体力上限",
+				filter: item => item.includes("判定牌生效后"),
+				effect: {
+					getIndex(event, player) {
+						return 0 + game.hasPlayer(t => t.maxHp > player.maxHp);
+					},
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.gainMaxHp();
+					},
+				},
+			},
+			{
+				name: "你可以与一名已受伤角色拼点，若你赢，你获得其两张牌",
+				effect: {
+					getIndex(event, player) {
+						return 0 + game.hasPlayer(target => target.isDamaged() && player.canCompare(target));
+					},
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)), (card, player, target) => {
+								return target.isDamaged() && player.canCompare(target);
+							})
+							.set("ai", target => {
+								if (!get.event().goon) return 0;
+								const player = get.player();
+								return -get.attitude(player, target) * (1 + target.countCards("he"));
+							})
+							.set(
+								"goon",
+								player.hasCard(card => {
+									const val = get.value(card);
+									if (val < 0) return true;
+									if (val <= 5) return card.number >= 12;
+									if (val <= 6) return card.number >= 13;
+									return false;
+								}, "h")
+							)
+							.forResult();
+					},
+					async content(event, trigger, player) {
+						const target = event.targets[0];
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						const result = await player.chooseToCompare(target).forResult();
+						if (result.bool) await player.gainPlayerCard(target, 2, "he", true);
+					},
+				},
+			},
+			{
+				name: "你可以令至多两名角色各摸一张牌",
+				effect: {
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)), [1, 2])
+							.set("ai", target => {
+								const player = get.player();
+								return get.effect(target, { name: "draw" }, player, player);
+							})
+							.forResult();
+					},
+					async content(event, trigger, player) {
+						const { targets } = event;
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						if (targets.length === 1) await targets[0].draw();
+						else {
+							await game.asyncDraw(targets);
+							await game.delayx();
+						}
+					},
+				},
+			},
+			{
+				name: "你可以令一名角色的手牌上限+2直到其回合结束",
+				effect: {
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)))
+							.set("ai", target => {
+								const player = get.player();
+								return get.effect(target, { name: "draw" }, player, player) * (1 + target.countCards("h"));
+							})
+							.forResult();
+					},
+					async content(event, trigger, player) {
+						const target = event.targets[0];
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						target.addTempSkill("olhedao_hand", { player: "phaseEnd" });
+						target.addMark("olhedao_hand", 2, false);
+					},
+				},
+			},
+			{
+				name: "你可以获得两张非基本牌",
+				effect: {
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						let list = [];
+						while (list.length < 2) {
+							const card = get.cardPile(card => get.type(card) !== "basic" && !list.includes(card));
+							if (card) list.push(card);
+							else break;
+						}
+						if (list.length) player.gain(list, "gain2");
+					},
+				},
+			},
+			{
+				name: "你可以获得两张锦囊牌",
+				effect: {
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						let list = [];
+						while (list.length < 2) {
+							const card = get.cardPile(card => get.type2(card) === "trick" && !list.includes(card));
+							if (card) list.push(card);
+							else break;
+						}
+						if (list.length) player.gain(list, "gain2");
+					},
+				},
+			},
+			{
+				name: "你可以摸四张牌并将武将牌翻面",
+				effect: {
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.draw(4);
+						player.turnOver();
+					},
+				},
+			},
+			{
+				name: "你可令你对一名角色使用牌无距离和次数限制直到回合结束",
+				effect: {
+					getIndex(event, player) {
+						return 0 + game.hasPlayer(target => !player.getStorage("olhedao_effect").includes(target));
+					},
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(get.prompt2(event.name.slice(0, -"_cost".length)), (card, player, target) => {
+								return !player.getStorage("olhedao_effect").includes(target);
+							})
+							.set("ai", target => {
+								const player = get.player();
+								return 1145141919810 - get.attitude(player, target);
+							})
+							.forResult();
+					},
+					async content(event, trigger, player) {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.addTempSkill("olhedao_effect", { player: "phaseEnd" });
+						player.markAuto("olhedao_effect", event.targets);
+					},
+				},
+			},
+			{
+				name: "你可以弃置两张牌，令你与一名其他角色各回复1点体力",
+				effect: {
+					getIndex(event, player) {
+						return (
+							0 +
+							(player.countCards("he", card => {
+								if (get.position(card) === "h" && _status.connectMode) return true;
+								return lib.filter.cardDiscardable(card, player);
+							}) >= 2 &&
+								player.isDamaged() &&
+								game.hasPlayer(target => target !== player && target.isDamaged()))
+						);
+					},
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseCardTarget({
+								prompt: get.prompt2(event.name.slice(0, -"_cost".length)),
+								filterTarget(card, player, target) {
+									return !player.getStorage("olhedao_effect").includes(target);
+								},
+								filterCard: lib.filter.cardDiscardable,
+								selectCard: 2,
+								position: "he",
+								ai1(card) {
+									return 7 - get.value(card);
+								},
+								ai2(target) {
+									const player = get.player();
+									return get.recoverEffect(target, player, player);
+								},
+							})
+							.forResult();
+					},
+					async content(event, trigger, player) {
+						const { targets, cards } = event,
+							[target] = targets;
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						await player.discard(cards);
+						await player.recover();
+						await target.recover();
+					},
+				},
+			},
+			{
+				name: "你可令此伤害+1",
+				filter: item => item.includes("伤害时"),
+				effect: {
+					logTarget: "player",
+					check(event, player) {
+						const target = event.player;
+						return get.damageEffect(target, event.source, player) > 0 && !target.hasSkillTag("filterDamage", null, { player: event.source, card: event.card });
+					},
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						trigger.num++;
+						game.log(trigger.player, "受到的伤害", "#y+1");
+					},
+				},
+			},
+			{
+				name: "你可以失去1点体力并摸三张牌",
+				effect: {
+					check(event, player) {
+						return player.countCards("hs", card => player.canSaveCard(card, player)) + player.getHp() - 1 > 0;
+					},
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						player.loseHp();
+						player.draw(3);
+					},
+				},
+			},
+			{
+				name: "你可以交换两名角色的手牌",
+				effect: {
+					getIndex(event, player) {
+						return 0 + game.hasPlayer(target => target.countCards("h"));
+					},
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(
+								get.prompt2(event.name.slice(0, -"_cost".length)),
+								(card, player, target) => {
+									if (!ui.selected.targets.length) return true;
+									return target.countCards("h") + ui.selected.targets[0].countCards("h") > 0;
+								},
+								2
+							)
+							.set("complexTarget", true)
+							.set("ai", target => {
+								const player = get.player();
+								return get.effect(target, "dimeng", player, player);
+							})
+							.forResult();
+					},
+					content() {
+						const { targets } = event;
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						targets[0].swapHandcards(targets[1]);
+					},
+				},
+			},
+			{
+				name: "你可以交换两名角色装备区的牌",
+				effect: {
+					getIndex(event, player) {
+						return 0 + game.hasPlayer(target => target.countVCards("e"));
+					},
+					async cost(event, trigger, player) {
+						event.result = await player
+							.chooseTarget(
+								get.prompt2(event.name.slice(0, -"_cost".length)),
+								(card, player, target) => {
+									if (!ui.selected.targets.length) return true;
+									return target.countVCards("e") + ui.selected.targets[0].countVCards("e") > 0;
+								},
+								2
+							)
+							.set("complexTarget", true)
+							.set("ai", target => {
+								const player = get.player();
+								return get.effect(target, "ganlu", player, player);
+							})
+							.forResult();
+					},
+					content() {
+						const { targets } = event;
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						targets[0].swapEquip(targets[1]);
+					},
+				},
+			},
+			{
+				name: "你可以防止此伤害，令伤害来源摸三张牌",
+				filter: item => item.includes("伤害时"),
+				effect: {
+					getIndex(event, player) {
+						return 0 + event.source?.isIn();
+					},
+					check(event, player) {
+						if (get.attitude(player, event.player) > 0) return true;
+						if (get.effect(event.source, { name: "draw" }, player, player) * 3 + event.num * get.damageEffect(player, event.source, player, event.nature) > 0) return true;
+						return event.source.hasSkillTag("nogain");
+					},
+					logTarget: "source",
+					content() {
+						lib.skill.olhedao.tianshuClear(event.name, player);
+						trigger.cancel();
+						trigger.source.draw(3);
+					},
+				},
+			},
+		],
+		//清理
+		tianshuClear(skill, player, num = 1) {
+			if (num > 0 && get.info(skill)?.nopop) {
+				game.broadcastAll(skill => delete lib.skill[skill].nopop, skill);
+				player.update();
+			}
+			player.storage[skill][0] -= num;
+			player[player.storage[skill][0] <= 0 ? "removeSkill" : "markSkill"](skill);
+		},
+		subSkill: {
+			hand: {
+				charlotte: true,
+				onremove: true,
+				markimage: "image/card/handcard.png",
+				mod: { maxHandcard: (player, num) => num + player.countMark("olhedao_hand") },
+				intro: { content: "手牌上限+#" },
+			},
+			effect: {
+				charlotte: true,
+				onremove: true,
+				mod: {
+					targetInRange(card, player, target) {
+						if (player.getStorage("olhedao_effect").includes(target)) return true;
+					},
+					cardUsableTarget(card, player, target) {
+						if (player.getStorage("olhedao_effect").includes(target)) return Infinity;
+					},
+				},
+				intro: { content: "对$使用牌无距离和次数限制" },
+			},
+		},
+		ai: {
+			threaten: 4,
+			combo: "olqingshu",
+		},
+	},
+	olqingshu: {
+		audio: 2,
+		trigger: {
+			global: "phaseBefore",
+			player: ["enterGame", "phaseZhunbeiBegin", "phaseJieshuBegin"],
+		},
+		filter(event, player) {
+			return event.name !== "phase" || game.phaseNumber === 0;
+		},
+		forced: true,
+		async content(event, trigger, player) {
+			const FromItems = lib.skill.olhedao.tianshuTrigger.slice();
+			const froms = await player
+				.chooseButton(["青书：请选择“天书”时机", [FromItems.randomGets(3).map(item => [item, item.name]), "textbutton"]], true)
+				.set("ai", () => 1 + Math.random())
+				.forResult("links");
+			if (!froms?.length) return;
+			const [from] = froms;
+			const ToItems = lib.skill.olhedao.tianshuContent.filter(item => {
+				return !item.filter || item.filter(from.name);
+			});
+			const tos = await player
+				.chooseButton(['###青书：请选择“天书”效果###<div class="text center">' + from.name + "</div>", [ToItems.randomGets(3).map(item => [item, item.name]), "textbutton"]], true)
+				.set("ai", () => 1 + Math.random())
+				.forResult("links");
+			if (!tos?.length) return;
+			const [to] = tos;
+			let skill;
+			while (true) {
+				skill = "olhedao_tianshu_" + Math.random().toString(36).slice(-8);
+				if (!lib.skill[skill]) break;
+			}
+			game.broadcastAll(
+				(skill, from, to) => {
+					lib.skill[skill] = { nopop: true, olhedao: true, onremove: true, ...from.effect, ...to.effect };
+					lib.skill[skill].init = (player, skill) => (player.storage[skill] = player.storage[skill] || [0, skill]);
+					lib.skill[skill].intro = {
+						markcount: (storage = [0]) => storage[0],
+						content(storage, player) {
+							const book = storage?.[1];
+							if (!book) return "查无此书";
+							return [
+								"此书还可使用" + storage[0] + "次",
+								(() => {
+									if (!player.isUnderControl(true) && get.info(book)?.nopop) return "此书仍是个秘密";
+									return lib.translate[book + "_info"];
+								})(),
+							]
+								.map(str => "<li>" + str)
+								.join("<br>");
+						},
+					};
+					lib.translate[skill] = "天书";
+					lib.translate[skill + "_info"] = from.name + "，" + to.name + "。";
+					game.finishSkill(skill);
+				},
+				skill,
+				from,
+				to
+			);
+			player.addSkill(skill);
+			lib.skill.olhedao.tianshuClear(skill, player, -3);
+			const skills = player.getSkills(null, false, false).filter(skill => get.info(skill)?.olhedao);
+			const num = skills.length - Math.max(1, player.countMark("olhedao"));
+			if (num > 0) {
+				const result = await player
+					.chooseButton(["青书：选择失去" + get.cnNumber(num) + "册多余的“天书”", [skills.map(item => [item, "（剩余" + player.storage[item][0] + "次）" + lib.translate[item + "_info"]]), "textbutton"]], true, num)
+					.set("ai", () => 1 + Math.random())
+					.forResult();
+				if (result?.bool && result.links?.length) player.removeSkill(result.links);
+			}
+		},
+		ai: {
+			threaten: 4,
+			combo: "olhedao",
+		},
+		derivation: "olhedao_faq",
+	},
+	olshoushu: {
+		audio: 2,
+		enable: "phaseUse",
+		filter(event, player) {
+			return (
+				player.getSkills(null, false, false).some(skill => {
+					return get.info(skill)?.olhedao && get.info(skill).nopop;
+				}) && game.hasPlayer(target => target !== player)
+			);
+		},
+		usable: 1,
+		filterTarget: lib.filter.notMe,
+		async content(event, trigger, player) {
+			const { target } = event;
+			const result = await player
+				.chooseButton(
+					[
+						"授术：请选择你要授予" + get.translation(target) + "的天书",
+						[
+							player
+								.getSkills(null, false, false)
+								.filter(skill => {
+									return get.info(skill)?.olhedao && get.info(skill).nopop;
+								})
+								.map(item => [item, get.translation(item + "_info")]),
+							"textbutton",
+						],
+					],
+					true
+				)
+				.set("ai", () => 1 + Math.random())
+				.forResult();
+			if (result?.bool && result.links?.length) {
+				const [skill] = result.links;
+				player.removeSkill(skill);
+				target.addSkill(skill);
+				lib.skill.olhedao.tianshuClear(skill, target, -1);
+			}
+		},
+		ai: {
+			order: 1,
+			result: { target: 1 },
+			combo: "olhedao",
+		},
+	},
 	// SP曹操
 	spolxixiang: {
 		audio: 2,
@@ -252,7 +1338,7 @@ const skills = {
 				.set(
 					"prompt",
 					(() => {
-						return '###鞭御###<div class="text center">令' + get.translation(target) + "至多" + get.cnNumber(num) + "张手牌为无次数限制的【杀】";
+						return '###鞭御###<div class="text center">令' + get.translation(target) + "至多" + get.cnNumber(num) + "张手牌为无次数限制的【杀】</div>";
 					})()
 				)
 				.forResult();
@@ -7322,7 +8408,8 @@ const skills = {
 						return _status.event.targetsx.includes(target);
 					})
 					.set("ai", target => {
-						const evt = _status.event.getTrigger(), player = _status.event.player;
+						const evt = _status.event.getTrigger(),
+							player = _status.event.player;
 						return -get.effect(target, evt.card, evt.player, player);
 					})
 					.set("targetsx", trigger.targets);

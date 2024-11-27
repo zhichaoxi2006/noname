@@ -1,5 +1,6 @@
 const characters = {
 	noname: ["female", "key", 3, ["noname_zhuyuan", "noname_duocai"], ["name:null|无"]],
+	ns_shijian: ["female", "key", 4, ["nspianwu"]],
 
 	ns_huangchengyan: ["male", "shu", 3, ["nslongyue", "nszhenyin"]],
 	ns_sunchensunjun: ["male", "wu", 5, ["nsxianhai", "nsxingchu"], ["name:孙|綝-孙|峻"]],
