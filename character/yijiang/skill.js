@@ -12144,8 +12144,8 @@ const skills = {
 			}
 			"step 2";
 			if (get.type(event.card) != "basic") {
-				trigger.player.recover();
 				trigger.player.discard(event.card);
+				trigger.player.recover();
 			}
 		},
 		ai: {

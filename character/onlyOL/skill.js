@@ -1379,8 +1379,8 @@ const skills = {
 			const target = trigger.player;
 			await player.showCards(event.cards, get.translation(player) + "对" + (player == target ? "自己" : get.translation(target)) + "发动了【补益】");
 			if (get.type(event.cards[0]) != "basic") {
-				await target.recover();
 				await target.discard(event.cards[0]);
+				await target.recover();
 			}
 		},
 	},
