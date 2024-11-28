@@ -95,7 +95,7 @@ const translates = {
 	ol_liru: "OL界李儒",
 	ol_liru_prefix: "OL界",
 	oljuece: "绝策",
-	oljuece_info: "结束阶段，你可以对一名手牌数不大于你的其他角色造成1点伤害",
+	oljuece_info: "结束阶段，你可以对一名手牌数不大于你的其他角色造成1点伤害。",
 	olmieji: "灭计",
 	olmieji_info: "出牌阶段限一次，你可以将一张锦囊牌置于牌堆顶，然后令一名其他角色弃置一张锦囊牌或依次弃置两张牌。",
 	ol_liubiao: "OL界刘表",
