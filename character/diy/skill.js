@@ -1832,7 +1832,7 @@ const skills = {
 						translate: "该数值+1",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return -1;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return -1;
 								return 1;
 							},
 						},
@@ -1844,7 +1844,7 @@ const skills = {
 						translate: "该数值+2",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return -2;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return -2;
 								return 2;
 							},
 						},
@@ -1856,7 +1856,7 @@ const skills = {
 						translate: "该数值-1",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return 1;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return 1;
 								return -1;
 							},
 						},
@@ -1868,7 +1868,7 @@ const skills = {
 						translate: "该数值-2",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return 2;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return 2;
 								return -2;
 							},
 						},
@@ -1880,7 +1880,7 @@ const skills = {
 						translate: "该数值乘2",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return -2;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return -2;
 								return 2;
 							},
 						},
@@ -1897,7 +1897,7 @@ const skills = {
 						translate: "取消该效果",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp", "addJudge"].contains(triggerName)) return 1;
+								if (["damage", "loseHp", "loseMaxHp", "addJudge"].includes(triggerName)) return 1;
 								return -2;
 							},
 						},
