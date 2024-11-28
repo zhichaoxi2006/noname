@@ -742,11 +742,11 @@ const skills = {
 				},
 			},
 			{
-				name: "你可以摸四张牌并将武将牌翻面",
+				name: "你可以摸三张牌并将武将牌翻面",
 				effect: {
 					content() {
 						lib.skill.olhedao.tianshuClear(event.name, player);
-						player.draw(4);
+						player.draw(3);
 						player.turnOver();
 					},
 				},
