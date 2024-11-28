@@ -1902,10 +1902,10 @@ export default () => {
 			player: {
 				getTopCards: function (num) {
 					if (typeof num != "number") num = 1;
-					if (num <= 0) num = 1;
 					var cards;
 					var player = this;
-					if (player.storage.doudizhu_cardPile && player.storage.doudizhu_cardPile.length) {
+					if (num <= 0) cards = [];
+					else if (player.storage.doudizhu_cardPile?.length) {
 						cards = player.storage.doudizhu_cardPile.randomRemove(num);
 						if (player.storage.doudizhu_cardPile.length) player.markSkill("doudizhu_cardPile");
 						else player.unmarkSkill("doudizhu_cardPile");

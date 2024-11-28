@@ -745,6 +745,7 @@ window.noname_character_rank = {
 		"clan_wangchang",
 		"sb_guojia",
 		"sb_zhangliao",
+		"yue_zhouyu",
 	],
 	bp: [
 		"dongxie",
@@ -2454,6 +2455,7 @@ window.noname_character_rank = {
 			"niufu",
 		],
 		rare: [
+			"yue_zhouyu",
 			"huan_caoang",
 			"huan_liufeng",
 			"xj_peixiu",

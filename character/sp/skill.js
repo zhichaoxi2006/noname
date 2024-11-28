@@ -1650,6 +1650,7 @@ const skills = {
 		subSkill: {
 			wusheng: {
 				enable: "phaseUse",
+				usable: 1,
 				filter(event, player) {
 					return player.countCards("hes") > 0;
 				},
