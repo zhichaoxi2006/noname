@@ -627,7 +627,7 @@ const skills = {
 						translate: "你横置",
 						result: {
 							player: player => {
-								if (player.hasSkill("nzry_jieying") || player.hasSkill("drlt_qianjie")) return 0;
+								if (player.hasSkillTag("noLink")) return 0;
 								if (player.hasSkillTag("nofire") && player.hasSkillTag("nothunder")) return 0;
 								return player.isLinked() ? 1 : -1;
 							},
@@ -862,7 +862,7 @@ const skills = {
 						noSource: true,
 						result: {
 							evtPlayer: player => {
-								if (player.hasSkill("nzry_jieying") || player.hasSkill("drlt_qianjie")) return 0;
+								if (player.hasSkillTag("noLink")) return 0;
 								if (player.hasSkillTag("nofire") && player.hasSkillTag("nothunder")) return 0;
 								return player.isLinked() ? 1 : -1;
 							},
@@ -1457,7 +1457,7 @@ const skills = {
 						translate: "你横置/重置",
 						result: {
 							player: player => {
-								if (player.hasSkill("nzry_jieying") || player.hasSkill("drlt_qianjie")) return 0;
+								if (player.hasSkillTag("noLink")) return 0;
 								if (player.hasSkillTag("nofire") && player.hasSkillTag("nothunder")) return 0;
 								return player.isLinked() ? 1 : -1;
 							},
@@ -1713,7 +1713,7 @@ const skills = {
 						translate: "其横置/重置",
 						result: {
 							evtPlayer: player => {
-								if (player.hasSkill("nzry_jieying") || player.hasSkill("drlt_qianjie")) return 0;
+								if (player.hasSkillTag("noLink")) return 0;
 								if (player.hasSkillTag("nofire") && player.hasSkillTag("nothunder")) return 0;
 								return player.isLinked() ? 1 : -1;
 							},
