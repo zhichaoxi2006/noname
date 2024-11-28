@@ -29,14 +29,9 @@ const skills = {
 			if (trigger.name == "gameDraw") {
 				const me = player;
 				const numx = trigger.num;
-				trigger.num =
-					typeof numx == "function"
-						? function (player) {
-								return player == me ? 0 : 1 + numx(player);
-						  }
-						: function (player) {
-								return player == me ? 0 : 1 + numx;
-						  };
+				trigger.num = function (player) {
+					return player == me ? 0 : 1 + (typeof numx == "function" ? numx(player) : numx);
+				};
 			} else await player.draw();
 		},
 	},
@@ -973,7 +968,6 @@ const skills = {
 	//李丰
 	dctunchu: {
 		audio: 2,
-		/*
 		trigger: { global: "gameDrawBegin" },
 		forced: true,
 		content() {
@@ -984,8 +978,7 @@ const skills = {
 				return player == me ? sum : typeof numx == "function" ? numx(player) : numx;
 			};
 		},
-		*/
-		trigger: {
+		/* trigger: {
 			global: "phaseBefore",
 			player: "enterGame",
 		},
@@ -996,7 +989,7 @@ const skills = {
 		forced: true,
 		content() {
 			player.drawTo(game.players.slice().concat(game.dead).length * 4);
-		},
+		}, */
 		mod: {
 			cardDiscardable(card, player) {
 				if (get.position(card) == "h") return false;
