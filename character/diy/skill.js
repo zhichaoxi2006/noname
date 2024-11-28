@@ -418,6 +418,9 @@ const skills = {
 							if (!newSkill.usable && !newSkill.round) {
 								newSkill.usable = 5;
 							}
+							if (!newSkillTran.endsWith("。")) {
+								newSkillTran += "。";
+							}
 							game.broadcastAll(
 								(skill, info, newSkillTranslate, newSkillTran) => {
 									lib.skill[skill] = info;
