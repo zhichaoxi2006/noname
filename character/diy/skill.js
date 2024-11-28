@@ -8,7 +8,7 @@ const skills = {
 			var next = game.createEvent(triggerName, false);
 			next.player = player;
 			next.skill = skill;
-			next.setContent(() => {
+			next.setContent(async (event, trigger, player) => {
 				event.trigger(event.name);
 			});
 		},
@@ -31,9 +31,9 @@ const skills = {
 		filter(event, player, name) {
 			if (name == "phaseBefore" && game.phaseNumber != 0) return false;
 			if (name == "damageSource" && game.roundNumber > 3) return false;
-			return [player.name, player.name1, player.name2].contains("ns_shijian") || (game.ns_shijian && game.ns_shijian.players.contains(player));
+			return get.is.playerNames(player, "ns_shijian") || (game.ns_shijian && game.ns_shijian.players.includes(player));
 		},
-		content() {
+		async content(event, trigger, player) {
 			lib.skill[event.name].skillTrigger("shijian_addSkill", player, event.name);
 			player.chat(["获得技能是随机生成的，请仔细看看。", "是欧皇技能还是非酋技能呢？"].randomGet());
 		},
@@ -48,12 +48,11 @@ const skills = {
 					player: ["shijian_init", "shijian_removeSkill", "shijian_addSkill"],
 				},
 				filter(event, player) {
-					return (event.skill == "nspianwu" && [player.name, player.name1, player.name2].contains("ns_shijian")) || (game.ns_shijian && game.ns_shijian.players.contains(player));
+					return (event.skill == "nspianwu" && get.is.playerNames(player, "ns_shijian")) || (game.ns_shijian && game.ns_shijian.players.includes(player));
 				},
 				forced: true,
 				popup: false,
-				content() {
-					"step 0";
+				async content(event, trigger, player) {
 					switch (event.triggername) {
 						case "shijian_init":
 							game.ns_shijian = game.ns_shijian || {
@@ -63,7 +62,7 @@ const skills = {
 							game.ns_shijian.players.add(player);
 							break;
 						case "shijian_removeSkill":
-							setTimeout(() => player.addSkillLog(skill), 0);
+							player.addSkills(event.skill);
 							break;
 						case "shijian_addSkill":
 							/** @type ExSkillData 新技能内容 */
@@ -431,7 +430,6 @@ const skills = {
 								skillNameList.randomGet(),
 								newSkillTran
 							);
-							event.skillName = skillName;
 
 							const next = player.chooseTarget();
 							next.set("filterTarget", lib.filter.notMe);
@@ -545,14 +543,12 @@ const skills = {
 									return 0;
 								} else return 0 - att;
 							});
-					}
-					"step 1";
-					if (event.skillName) {
-						if (result && result.bool) {
-							result.targets[0].addSkillLog(event.skillName);
-						} else {
-							player.addSkillLog(event.skillName);
-						}
+							const result = await next.forResult();
+							if (result.bool) {
+								await result.targets[0].addSkills(skillName);
+							} else {
+								await player.addSkills(skillName);
+							}
 					}
 				},
 				/**
