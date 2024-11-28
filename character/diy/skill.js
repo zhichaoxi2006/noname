@@ -1315,16 +1315,16 @@ const skills = {
 				 */
 				skillContentList_onlyPlayer: [
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.insertPhase();
 						},
-						translate: "你额外进行一个回合(每轮限一次)",
+						translate: "你在此回合结束后执行一个额外回合(每轮限一次)",
 						result: {
 							player: 2,
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.chat("草，怎么是空技能");
 						},
 						translate: "undefined",
@@ -1333,7 +1333,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.draw();
 						},
 						translate: "你摸一张牌",
@@ -1342,7 +1342,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.draw(2);
 						},
 						translate: "你摸两张牌",
@@ -1351,7 +1351,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.draw(3);
 						},
 						translate: "你摸三张牌",
@@ -1360,7 +1360,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.recover();
 						},
 						translate: "你回复一点体力",
@@ -1370,7 +1370,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.recover(player.maxHp - player.hp);
 						},
 						translate: "你回复体力至体力上限",
@@ -1380,7 +1380,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.damage("nocard", "nosource");
 						},
 						translate: "你受到一点无来源的伤害",
@@ -1389,7 +1389,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.loseHp();
 						},
 						translate: "你失去一点体力",
@@ -1398,7 +1398,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.chooseToDiscard("he", true);
 						},
 						filter: (event, player) => player.countCards("he") > 0,
@@ -1412,7 +1412,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.gainMaxHp();
 						},
 						translate: "你增加一点体力上限",
@@ -1421,7 +1421,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.loseMaxHp();
 						},
 						translate: "你减少一点体力上限",
@@ -1430,7 +1430,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.die();
 						},
 						translate: "你立即阵亡",
@@ -1439,7 +1439,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.turnOver();
 						},
 						translate: "你翻面",
@@ -1451,7 +1451,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.link();
 						},
 						translate: "你横置/重置",
@@ -1464,8 +1464,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
-							"step 0";
+						async content(event, trigger, player) {
 							const next = player.judge(card => {
 								if (get.color(card) == "red") return 2;
 								return -0.5;
@@ -1473,18 +1472,18 @@ const skills = {
 							next.judge2 = result => {
 								return result.bool;
 							};
-							"step 1";
+							const result = await next.forResult();
 							if (result.bool) {
-								const next = player.chooseTarget(lib.filter.notMe);
+								const nextx = player.chooseTarget(lib.filter.notMe);
 								next.ai = function (target) {
 									const player = _status.event.player;
 									return get.damageEffect(target, player, player);
 								};
-							}
-							"step 2";
-							if (result.bool && result.targets && result.targets.length) {
-								player.line(result.targets);
-								result.targets[0].damage(1);
+								const resultx = await nextx.forResult();
+								if (resultx.bool) {
+									player.line(resultx.targets);
+									resultx.targets[0].damage(1);
+								}
 							}
 						},
 						translate: "你进行一次判定, 若结果为红色，你可以对一名其他角色造成一点伤害",
@@ -1493,7 +1492,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.getBuff();
 						},
 						translate: "你随机获得一个正面效果",
@@ -1502,7 +1501,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.tempHide();
 						},
 						translate: "你获得【潜行】到你的回合开始",
@@ -1512,9 +1511,11 @@ const skills = {
 						filter: (event, player) => !player.hasSkill("qianxing"),
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "equip");
-							if (card) player.equip(card);
+							if (card) {
+								await player.equip(card);
+							}
 						},
 						translate: "你随机从牌堆中装备一张装备牌",
 						result: {
@@ -1522,9 +1523,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "basic");
-							if (card) player.gain(card, "gain2", "log");
+							if (card) {
+								await player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "你随机从牌堆中获得一张基本牌",
 						result: {
@@ -1532,9 +1535,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "trick");
-							if (card) player.gain(card, "gain2", "log");
+							if (card){
+								await player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "你随机从牌堆中获得一张普通锦囊牌",
 						result: {
@@ -1542,9 +1547,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "delay");
-							if (card) player.gain(card, "gain2", "log");
+							if (card) {
+								await player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "你随机从牌堆中获得一张延时锦囊牌",
 						result: {
@@ -1552,26 +1559,22 @@ const skills = {
 						},
 					},
 					{
-						content() {
-							"step 0";
-							event.cards = get.cards(3);
-							game.cardsGotoOrdering(event.cards);
-							player.showCards(event.cards);
-							"step 1";
+						async content(event, trigger, player) {
+							let cards = get.cards(3);
+							await game.cardsGotoOrdering(cards);
+							await player.showCards(cards);
 							var num = 0;
-							for (var i = 0; i < event.cards.length; i++) {
-								if (get.suit(event.cards[i]) == "heart") {
+							for (var i = 0; i < cards.length; i++) {
+								if (get.suit(cards[i]) == "heart") {
 									num++;
-									event.cards.splice(i--, 1);
+									cards.splice(i--, 1);
 								}
 							}
 							if (num) {
-								player.recover(num);
+								await player.recover(num);
 							}
-							"step 2";
-							if (event.cards.length) {
-								player.gain(event.cards);
-								player.$gain2(event.cards);
+							if (cards.length) {
+								await player.gain(event.cards, "gain2");
 								game.delay();
 							}
 						},
@@ -1581,8 +1584,8 @@ const skills = {
 						},
 					},
 					{
-						content() {
-							player.chooseToUse();
+						async content(event, trigger, player) {
+							await player.chooseToUse();
 						},
 						translate: "你可以立即使用一张牌",
 						filter(event, player) {
@@ -1593,7 +1596,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.addTempSkill("fengyin");
 						},
 						translate: "本回合你的非锁定技失效",
@@ -1608,7 +1611,7 @@ const skills = {
 				 */
 				skillContentList_onlyTarget: [
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.draw();
 						},
 						translate: "其摸一张牌",
@@ -1617,7 +1620,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.draw(2);
 						},
 						translate: "其摸两张牌",
@@ -1626,7 +1629,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.recover();
 						},
 						translate: "其回复一点体力",
@@ -1636,7 +1639,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.damage("nocard", player);
 						},
 						translate: "其受到一点来自于你的伤害",
@@ -1645,7 +1648,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.damage(2, "nocard", player);
 						},
 						translate: "其受到两点来自于你的伤害",
@@ -1654,7 +1657,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.loseHp();
 						},
 						translate: "其失去一点体力",
@@ -1663,7 +1666,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.chooseToDiscard("he", true);
 						},
 						filter: (event, player) => event.player.countCards("he") > 0,
@@ -1677,7 +1680,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.gainMaxHp();
 						},
 						translate: "其增加一点体力上限",
@@ -1686,7 +1689,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.loseMaxHp();
 						},
 						translate: "其失去一点体力上限",
@@ -1695,7 +1698,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.turnOver();
 						},
 						translate: "其翻面",
@@ -1707,7 +1710,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.link();
 						},
 						translate: "其横置/重置",
@@ -1720,8 +1723,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
-							"step 0";
+						async content(event, trigger, player) {
 							const next = trigger.player.judge(card => {
 								if (get.color(card) == "black") return 2;
 								return -0.5;
@@ -1729,7 +1731,7 @@ const skills = {
 							next.judge2 = result => {
 								return result.bool;
 							};
-							"step 1";
+							const result = next.forResult();
 							if (result.bool) {
 								trigger.player.chooseDrawRecover();
 							}
@@ -1740,7 +1742,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.die();
 						},
 						translate: "其立即阵亡",
@@ -1749,7 +1751,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.getBuff();
 						},
 						translate: "其随机获得一个正面效果",
@@ -1758,9 +1760,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "equip");
-							if (card) trigger.player.equip(card);
+							if (card) {
+								await trigger.player.equip(card);
+							}
 						},
 						translate: "其随机从牌堆中装备一张装备牌",
 						result: {
@@ -1768,9 +1772,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "basic");
-							if (card) trigger.player.gain(card, "gain2", "log");
+							if (card) {
+								await trigger.player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "其随机从牌堆中获得一张基本牌",
 						result: {
@@ -1778,9 +1784,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "trick");
-							if (card) trigger.player.gain(card, "gain2", "log");
+							if (card) {
+								await trigger.player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "其随机从牌堆中获得一张普通锦囊牌",
 						result: {
@@ -1788,9 +1796,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "delay");
-							if (card) trigger.player.gain(card, "gain2", "log");
+							if (card) {
+								await trigger.player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "其随机从牌堆中获得一张延时锦囊牌",
 						result: {
@@ -1798,7 +1808,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.chooseToUse();
 						},
 						translate: "其可以立即使用一张牌",
@@ -1810,10 +1820,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
-							if (!trigger.player.hasSkill("fengyin")) {
-								trigger.player.addTempSkill("fengyin");
-							}
+						async content(event, trigger, player) {
+							trigger.player.addTempSkill("fengyin");
+						},
+						filter(event, player) {
+							return !event.player.hasSkill("fengyin");
 						},
 						translate: "本回合其的非锁定技失效",
 						result: {
@@ -1826,7 +1837,7 @@ const skills = {
 				 */
 				skillContentList_hasNum: [
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.num++;
 						},
 						translate: "该数值+1",
@@ -1838,7 +1849,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.num += 2;
 						},
 						translate: "该数值+2",
@@ -1850,7 +1861,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.num--;
 						},
 						translate: "该数值-1",
@@ -1862,7 +1873,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.num -= 2;
 						},
 						translate: "该数值-2",
@@ -1874,7 +1885,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.num *= 2;
 						},
 						translate: "该数值乘2",
@@ -1891,7 +1902,7 @@ const skills = {
 				 */
 				skillContentList_onlyCancel: [
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.cancel();
 						},
 						translate: "取消该效果",
