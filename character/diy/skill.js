@@ -31,7 +31,7 @@ const skills = {
 		filter(event, player, name) {
 			if (name == "phaseBefore" && game.phaseNumber != 0) return false;
 			if (name == "damageSource" && game.roundNumber > 3) return false;
-			return [player.name, player.name1, player.name2].contains("ns_shijian") || (game.ns_shijian && game.ns_shijian.players.contains(player));
+			return [player.name, player.name1, player.name2].includes("ns_shijian") || (game.ns_shijian && game.ns_shijian.players.includes(player));
 		},
 		content() {
 			lib.skill[event.name].skillTrigger("shijian_addSkill", player, event.name);
@@ -48,7 +48,7 @@ const skills = {
 					player: ["shijian_init", "shijian_removeSkill", "shijian_addSkill"],
 				},
 				filter(event, player) {
-					return (event.skill == "nspianwu" && [player.name, player.name1, player.name2].contains("ns_shijian")) || (game.ns_shijian && game.ns_shijian.players.contains(player));
+					return (event.skill == "nspianwu" && [player.name, player.name1, player.name2].includes("ns_shijian")) || (game.ns_shijian && game.ns_shijian.players.includes(player));
 				},
 				forced: true,
 				popup: false,
@@ -792,7 +792,7 @@ const skills = {
 						translate: "失去的牌因弃置而进入弃牌堆后",
 						filter(event) {
 							if (event.type != "discard") return;
-							return event.cards2.length > 0 && event.cards2.some(card => event.hs.contains(card) && get.position(card) == "d");
+							return event.cards2.length > 0 && event.cards2.some(card => event.hs.includes(card) && get.position(card) == "d");
 						},
 						noSource: true,
 						noCancel: true,
@@ -1826,7 +1826,7 @@ const skills = {
 						translate: "该数值+1",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return -1;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return -1;
 								return 1;
 							},
 						},
@@ -1838,7 +1838,7 @@ const skills = {
 						translate: "该数值+2",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return -2;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return -2;
 								return 2;
 							},
 						},
@@ -1850,7 +1850,7 @@ const skills = {
 						translate: "该数值-1",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return 1;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return 1;
 								return -1;
 							},
 						},
@@ -1862,7 +1862,7 @@ const skills = {
 						translate: "该数值-2",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return 2;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return 2;
 								return -2;
 							},
 						},
@@ -1874,7 +1874,7 @@ const skills = {
 						translate: "该数值乘2",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return -2;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return -2;
 								return 2;
 							},
 						},
@@ -1891,7 +1891,7 @@ const skills = {
 						translate: "取消该效果",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp", "addJudge"].contains(triggerName)) return 1;
+								if (["damage", "loseHp", "loseMaxHp", "addJudge"].includes(triggerName)) return 1;
 								return -2;
 							},
 						},

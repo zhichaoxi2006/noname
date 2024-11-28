@@ -8010,7 +8010,7 @@ const skills = {
 								str = get.prompt(event.skill, trigger[info.logTarget], player);
 							} else if (typeof info.logTarget == "function") {
 								var logTarget = info.logTarget(trigger, player, trigger.triggername, trigger.indexedData);
-								if (get.itemtype(logTarget).indexOf("player") == 0) str = get.prompt(event.skill, logTarget, player);
+								if (get.itemtype(logTarget)?.indexOf("player") == 0) str = get.prompt(event.skill, logTarget, player);
 							} else {
 								str = get.prompt(event.skill, null, player);
 							}
