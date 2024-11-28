@@ -1026,7 +1026,7 @@ const skills = {
 				to
 			);
 			player.addSkill(skill);
-			lib.skill.olhedao.tianshuClear(skill, player, -3);
+			lib.skill.olhedao.tianshuClear(skill, player, -2);
 			const skills = player.getSkills(null, false, false).filter(skill => get.info(skill)?.olhedao);
 			const num = skills.length - Math.max(1, player.countMark("olhedao"));
 			if (num > 0) {
