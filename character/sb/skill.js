@@ -127,9 +127,7 @@ const skills = {
 			},
 		},
 		audio: 2,
-		trigger: {
-			player: "phaseUseBegin",
-		},
+		trigger: { player: "phaseUseBegin" },
 		filter(event, player, name) {
 			const storage = player.storage.sbtiandu;
 			if (storage) return true;
@@ -230,9 +228,7 @@ const skills = {
 	},
 	sbyiji: {
 		audio: 2,
-		trigger: {
-			player: ["damageEnd", "dying"],
-		},
+		trigger: { player: ["damageEnd", "dying"] },
 		filter(event, player, name) {
 			if (event.name == "damage") return event.num > 0;
 			const history = game.getAllGlobalHistory();
@@ -249,33 +245,37 @@ const skills = {
 		async content(event, trigger, player) {
 			let num = trigger.name == "damage" ? 2 : 1;
 			const { result } = await player.draw(num);
-			if (!game.hasPlayer(target => target != player)) return;
+			if (!game.hasPlayer(target => target != player) || get.itemtype(result) != "cards") return;
+			const togive = player.getCards("h").filter(card => result.includes(card));
+			if (!togive.length) return;
 			if (trigger.name == "damage") {
-				if (!player.countCards("h")) return;
 				if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
 				let given_map = [];
-				while (num > 0 && player.hasCard(card => !card.hasGaintag("olsujian_given"), "h")) {
+				while (num > 0 && togive.length) {
 					const {
 						result: { bool, cards, targets },
-					} = await player.chooseCardTarget({
-						filterCard(card, player) {
-							return !card.hasGaintag("olsujian_given");
-						},
-						selectCard: [1, num],
-						filterTarget: lib.filter.notMe,
-						prompt: "遗计：请选择要分配的卡牌和目标",
-						prompt2: "（还可分配" + num + "张）",
-						ai1(card) {
-							return !ui.selected.cards.length && card.name == "du" ? 1 : 0;
-						},
-						ai2(target) {
-							const player = get.event("player");
-							const card = ui.selected.cards[0];
-							if (card) return get.value(card, target) * get.attitude(player, target);
-							return 0;
-						},
-					});
+					} = await player
+						.chooseCardTarget({
+							filterCard(card, player) {
+								return !card.hasGaintag("olsujian_given") && get.event("togive").includes(card);
+							},
+							selectCard: [1, num],
+							filterTarget: lib.filter.notMe,
+							prompt: "遗计：请选择要分配的卡牌和目标",
+							prompt2: "（还可分配" + num + "张）",
+							ai1(card) {
+								return ui.selected.cards.length ? 0 : 1;
+							},
+							ai2(target) {
+								const player = get.event("player");
+								const card = ui.selected.cards[0];
+								if (card) return get.value(card, target) * get.attitude(player, target);
+								return 0;
+							},
+						})
+						.set("togive", togive);
 					if (bool) {
+						togive.removeArray(cards);
 						num -= cards.length;
 						const target = targets[0];
 						if (given_map.some(i => i[0] == target)) {
@@ -302,11 +302,8 @@ const skills = {
 						.setContent("gaincardMultiple");
 				}
 			} else {
-				if (get.itemtype(result) != "cards") return;
-				const cards = player.getCards("h").filter(card => result.includes(card));
-				if (!cards.length) return;
 				const targets = await player
-					.chooseTarget(lib.filter.notMe, `将${get.translation(cards)}交给一名其他角色`)
+					.chooseTarget(lib.filter.notMe, `将${get.translation(togive)}交给一名其他角色`)
 					.set("ai", target => {
 						const { player, cards } = get.event();
 						const att = get.attitude(player, target);
@@ -316,9 +313,9 @@ const skills = {
 						}
 						return att - 4;
 					})
-					.set("cards", cards)
+					.set("cards", togive)
 					.forResultTargets();
-				if (targets?.length) await player.give(cards, targets[0]);
+				if (targets?.length) await player.give(togive, targets[0]);
 			}
 		},
 		ai: {
