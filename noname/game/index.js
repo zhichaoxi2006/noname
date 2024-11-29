@@ -1527,9 +1527,9 @@ export class Game extends GameCompatible {
 			args.length === 1 && get.objtype(args[0]) === "object"
 				? args[0]
 				: {
-					path: args.filter(arg => typeof arg === "string" || typeof arg === "number").join("/"),
-					onError: args.find(arg => typeof arg === "function"),
-				};
+						path: args.filter(arg => typeof arg === "string" || typeof arg === "number").join("/"),
+						onError: args.find(arg => typeof arg === "function"),
+				  };
 
 		const {
 			path = "",
@@ -2218,8 +2218,8 @@ export class Game extends GameCompatible {
 				);
 			}
 			const blob = zip.generate({
-				type: "blob",
-			}),
+					type: "blob",
+				}),
 				fileNameToSaveAs = `${exportExtension.replace(/\\|\/|:|\?|"|\*|<|>|\|/g, "-")}.zip`;
 
 			if (lib.device) {
@@ -4217,7 +4217,7 @@ export class Game extends GameCompatible {
 			}
 		}
 		if (!callback) {
-			callback = function () { };
+			callback = function () {};
 		}
 		//try{
 		//	if(noinput){
@@ -4620,26 +4620,26 @@ export class Game extends GameCompatible {
 		return node;
 	}
 	jianqiLineAnim = {
-		"time": 1200,
-		"position": "screen",
-		"width": "256px",
-		"height": "128px",
-		"backgroundSize": "100% 100%",
-		"opacity": 1,
-		"show": "none",
-		"fade": true,
-		"pause": false,
-		"rate_zhen": 18,
-		"jump_zhen": false,
-		"qianzhui": "",
-		"liang": false,
-		"isLine": true,
-		"cycle": true,
-		"style": {},
-		"skills": [],
-		"cards": [],
-		"forbid": false,
-		"image": "jianqilinexy"
+		time: 1200,
+		position: "screen",
+		width: "256px",
+		height: "128px",
+		backgroundSize: "100% 100%",
+		opacity: 1,
+		show: "none",
+		fade: true,
+		pause: false,
+		rate_zhen: 18,
+		jump_zhen: false,
+		qianzhui: "",
+		liang: false,
+		isLine: true,
+		cycle: true,
+		style: {},
+		skills: [],
+		cards: [],
+		forbid: false,
+		image: "jianqilinexy",
 	};
 	zsPlayLineAnimation(name, node, fake, points) {
 		var animation = game.jianqiLineAnim;
@@ -4652,12 +4652,12 @@ export class Game extends GameCompatible {
 			if (animation.pause != false && !_status.paused2 && !_status.nopause) {
 				_status.zhx_onAnimationPause = true;
 				game.pause2();
-			};
+			}
 			if (_status.zhx_onAnimation == undefined) _status.zhx_onAnimation = 0;
 			_status.zhx_onAnimation++;
-		};
+		}
 		var src;
-		if (animation.image != undefined) src = 'image/pointer/' + animation.image + '?' + new Date().getTime();
+		if (animation.image != undefined) src = "image/pointer/" + animation.image + "?" + new Date().getTime();
 		var finish = function () {
 			var animationID;
 			var timeoutID;
@@ -4670,43 +4670,43 @@ export class Game extends GameCompatible {
 					ui.window.appendChild(div);
 				} else {
 					node.appendChild(div);
-				};
-			};
+				}
+			}
 			if (animation.style != undefined) {
 				for (var i in animation.style) {
-					if (i == 'innerHTML') continue;
+					if (i == "innerHTML") continue;
 					div.style[i] = animation.style[i];
-				};
-			};
+				}
+			}
 			var judgeStyle = function (style) {
 				if (animation.style == undefined) return false;
 				if (animation.style != undefined && animation.style[style] != undefined) return true;
 				return false;
 			};
-			if (judgeStyle('innerHTML')) div.innerHTML = animation.style.innerHTML;
-			if (judgeStyle('width') == false) div.style.width = animation.width;
-			if (judgeStyle('height') == false) div.style.height = animation.height;
-			if (judgeStyle('backgroundSize') == false && judgeStyle('background-size') == false) div.style.backgroundSize = animation.backgroundSize;
-			if (judgeStyle('opacity') == false) div.style.opacity = animation.opacity;
-			if (judgeStyle('zIndex') == false && judgeStyle('z-index') == false) div.style.zIndex = 1001;
-			if (judgeStyle('borderRadius') == false && judgeStyle('border-radius') == false) div.style.borderRadius = '5px';
-			if (judgeStyle('pointer-events') == false && judgeStyle('pointerEvents') == false) div.style['pointer-events'] = 'none';
+			if (judgeStyle("innerHTML")) div.innerHTML = animation.style.innerHTML;
+			if (judgeStyle("width") == false) div.style.width = animation.width;
+			if (judgeStyle("height") == false) div.style.height = animation.height;
+			if (judgeStyle("backgroundSize") == false && judgeStyle("background-size") == false) div.style.backgroundSize = animation.backgroundSize;
+			if (judgeStyle("opacity") == false) div.style.opacity = animation.opacity;
+			if (judgeStyle("zIndex") == false && judgeStyle("z-index") == false) div.style.zIndex = 1001;
+			if (judgeStyle("borderRadius") == false && judgeStyle("border-radius") == false) div.style.borderRadius = "5px";
+			if (judgeStyle("pointer-events") == false && judgeStyle("pointerEvents") == false) div.style["pointer-events"] = "none";
 			if (src != undefined) {
-				if (animation.image.indexOf('.') != -1) {
+				if (animation.image.indexOf(".") != -1) {
 					div.setBackgroundImage(src);
 				} else {
 					var type_frame1 = 0;
-					var type_frame = '.jpg';
+					var type_frame = ".jpg";
 					var num_frame = 1;
-					type_frame = '.png';
+					type_frame = ".png";
 					num_frame = 8;
-					var folder_frame = lib.assetURL + 'image/pointer/' + animation.image + '/';
+					var folder_frame = lib.assetURL + "image/pointer/" + animation.image + "/";
 					var div1 = ui.create.div();
-					div1.style.height = '100%';
-					div1.style.width = '100%';
-					div1.style.top = '0px';
-					div1.style.left = '0px';
-					div1.style.opacity = '0.7';
+					div1.style.height = "100%";
+					div1.style.width = "100%";
+					div1.style.top = "0px";
+					div1.style.left = "0px";
+					div1.style.opacity = "0.7";
 					div.appendChild(div1);
 					var canvas = document.createElement("canvas");
 					canvas.width = div1.offsetWidth;
@@ -4718,8 +4718,7 @@ export class Game extends GameCompatible {
 					var imgs_num = 0;
 					for (var i = 0; i < num_frame; i++) {
 						var img = new Image();
-						img.src = folder_frame + (animation.qianzhui == undefined ? '' : animation.qianzhui) +
-							(animation.liang == true ? (i < 10 ? '0' + i : i) : i) + type_frame;
+						img.src = folder_frame + (animation.qianzhui == undefined ? "" : animation.qianzhui) + (animation.liang == true ? (i < 10 ? "0" + i : i) : i) + type_frame;
 						if (i >= num_frame - 1) img.zhx_final = true;
 						img.onload = function () {
 							imgs.push(this);
@@ -4728,7 +4727,7 @@ export class Game extends GameCompatible {
 						img.onerror = function () {
 							if (this.zhx_final == true) start();
 						};
-					};
+					}
 					start = function () {
 						var play = function () {
 							if (imgs_num >= imgs.length) return;
@@ -4744,29 +4743,27 @@ export class Game extends GameCompatible {
 									if (interval != undefined) clearInterval(interval);
 									if (timeoutID != undefined) clearTimeout(timeoutID);
 									if (animationID != undefined) cancelAnimationFrame(animationID);
-								};
-							};
+								}
+							}
 						};
-						interval = setInterval(play, animation.rate_zhen == undefined ? 45 : (1000 / animation.rate_zhen));
+						interval = setInterval(play, animation.rate_zhen == undefined ? 45 : 1000 / animation.rate_zhen);
 					};
-
-
-				};
-			};
+				}
+			}
 			if (points == undefined) {
 				if (fake == true) {
-					div.style.top = (top - div.offsetHeight / 2) + 'px';
-					div.style.left = (left - div.offsetWidth / 2) + 'px';
+					div.style.top = top - div.offsetHeight / 2 + "px";
+					div.style.left = left - div.offsetWidth / 2 + "px";
 				} else {
-					if (judgeStyle('top') == false) div.style.top = 'calc(50% - ' + (div.offsetHeight / 2) + 'px)';
-					if (judgeStyle('left') == false) div.style.left = 'calc(50% - ' + (div.offsetWidth / 2) + 'px)';
-				};
+					if (judgeStyle("top") == false) div.style.top = "calc(50% - " + div.offsetHeight / 2 + "px)";
+					if (judgeStyle("left") == false) div.style.left = "calc(50% - " + div.offsetWidth / 2 + "px)";
+				}
 			} else {
-				div.style.top = (points[0][1] - div.offsetHeight / 2) + 'px';
-				div.style.left = (points[0][0]) + 'px';
-			};
+				div.style.top = points[0][1] - div.offsetHeight / 2 + "px";
+				div.style.left = points[0][0] + "px";
+			}
 			if (points != undefined) {
-				var timeS = ((animation.fade == true ? animation.time - 450 : animation.time - 100) / 1000) / 2;
+				var timeS = (animation.fade == true ? animation.time - 450 : animation.time - 100) / 1000 / 2;
 				var getAngle = function (x1, y1, x2, y2, bool) {
 					var x = x1 - x2;
 					var y = y1 - y2;
@@ -4791,39 +4788,37 @@ export class Game extends GameCompatible {
 				var y0 = p1[1];
 				var x1 = p2[0];
 				var y1 = p2[1];
-				div.style.transition = 'all 0s';
-				div.style.transform = 'rotate(' + getAngle(x0, y0, x1, y1, true) + 'deg)' + (x0 > x1 ? '' : ' rotateY(180deg)');
-				div.style['transform-origin'] = '0 50%';
+				div.style.transition = "all 0s";
+				div.style.transform = "rotate(" + getAngle(x0, y0, x1, y1, true) + "deg)" + (x0 > x1 ? "" : " rotateY(180deg)");
+				div.style["transform-origin"] = "0 50%";
 				var div2 = ui.create.div();
 				div2.style.zIndex = 1000;
-				div2.style['pointer-events'] = 'none';
-				div2.style.height = '20px';
-				div2.style.width = (Math.pow(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2), 0.5) + 2) + 'px';
-				div2.style.left = (x0) + 'px';
-				div2.style.top = (y0 - 10) + 'px';
-				div2.style.transform = 'rotate(' + getAngle(x0, y0, x1, y1) + 'deg) scaleX(0)';
-				div2.style['transform-origin'] = '0 50%';
-				div2.style.transition = 'all ' + (timeS * 4 / 3) + 's';
-				if (src != undefined && animation.image.indexOf('.') == -1) {
-					div2.style.backgroundSize = '100% 100%';
-					div2.style.opacity = '0.7';
-					div2.setBackgroundImage('image/pointer/' + animation.image + '/line.png');
+				div2.style["pointer-events"] = "none";
+				div2.style.height = "20px";
+				div2.style.width = Math.pow(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2), 0.5) + 2 + "px";
+				div2.style.left = x0 + "px";
+				div2.style.top = y0 - 10 + "px";
+				div2.style.transform = "rotate(" + getAngle(x0, y0, x1, y1) + "deg) scaleX(0)";
+				div2.style["transform-origin"] = "0 50%";
+				div2.style.transition = "all " + (timeS * 4) / 3 + "s";
+				if (src != undefined && animation.image.indexOf(".") == -1) {
+					div2.style.backgroundSize = "100% 100%";
+					div2.style.opacity = "0.7";
+					div2.setBackgroundImage("image/pointer/" + animation.image + "/line.png");
 				} else {
-					div2.style.background = '#ffffff';
-				};
+					div2.style.background = "#ffffff";
+				}
 				setTimeout(function () {
-					div.style.transition = 'all ' + (timeS * 4 / 3) + 's';
-					div.style.transform += ' translateX(' + (-(Math.pow(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2), 0.5) + 2)) + 'px)';
-					div2.style.transform = 'rotate(' + getAngle(x0, y0, x1, y1) + 'deg) scaleX(1)';
+					div.style.transition = "all " + (timeS * 4) / 3 + "s";
+					div.style.transform += " translateX(" + -(Math.pow(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2), 0.5) + 2) + "px)";
+					div2.style.transform = "rotate(" + getAngle(x0, y0, x1, y1) + "deg) scaleX(1)";
 				}, 50);
 				setTimeout(function () {
-					div2.style.transition = 'all ' + (timeS * 2 / 3) + 's';
-					div2.style.transform = 'rotate(' + getAngle(x0, y0, x1, y1) + 'deg) translateX(' +
-						(Math.pow(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2), 0.5) + 2 -
-							Math.pow(Math.pow(div.offsetHeight / 2, 2) + Math.pow(div.offsetWidth / 2, 2), 0.5)) + 'px) scaleX(0.01)';
-				}, 50 + timeS * 4 / 3 * 1000);
+					div2.style.transition = "all " + (timeS * 2) / 3 + "s";
+					div2.style.transform = "rotate(" + getAngle(x0, y0, x1, y1) + "deg) translateX(" + (Math.pow(Math.pow(x1 - x0, 2) + Math.pow(y1 - y0, 2), 0.5) + 2 - Math.pow(Math.pow(div.offsetHeight / 2, 2) + Math.pow(div.offsetWidth / 2, 2), 0.5)) + "px) scaleX(0.01)";
+				}, 50 + ((timeS * 4) / 3) * 1000);
 				node.appendChild(div2);
-			};
+			}
 			if (animation.time <= 100000) {
 				if (animation.fade == true) {
 					if (div2 != undefined) {
@@ -4837,8 +4832,8 @@ export class Game extends GameCompatible {
 						setTimeout(function () {
 							div.hide();
 						}, animation.time - 350);
-					};
-				};
+					}
+				}
 				setTimeout(function () {
 					if (interval != undefined) clearInterval(interval);
 					if (timeoutID != undefined) clearTimeout(timeoutID);
@@ -4850,23 +4845,23 @@ export class Game extends GameCompatible {
 							ui.window.removeChild(div);
 						} else {
 							node.removeChild(div);
-						};
-					};
+						}
+					}
 					if (div2 != undefined) node.removeChild(div2);
 					_status.zhx_onAnimation--;
 					if (_status.zhx_onAnimationPause == true && _status.zhx_onAnimation == 0) {
 						delete _status.zhx_onAnimationPause;
 						game.resume2();
-					};
+					}
 				}, animation.time);
-			};
+			}
 		};
 		if (animation.delay != undefined) {
 			setTimeout(finish, animation.delay);
 		} else {
 			finish();
-		};
-	};
+		}
+	}
 	zsPlayLineAnimationByName(name, path) {
 		var from = [path[0], path[1]];
 		var to = [path[2], path[3]];
@@ -4877,77 +4872,77 @@ export class Game extends GameCompatible {
 		}
 	}
 	zsJinlongLineXy(path) {
-		game.zsPlayLineAnimationByName('jinlonglinexy', path);
-	};
+		game.zsPlayLineAnimationByName("jinlonglinexy", path);
+	}
 	// 先攻指示线
 	zsXiangongLineXy(path) {
-		game.zsPlayLineAnimationByName('jianqilinexy', path);
-	};
+		game.zsPlayLineAnimationByName("jianqilinexy", path);
+	}
 
 	// 竹杖指示线
 	zsZhuzhangLineXy(path) {
-		game.zsPlayLineAnimationByName('zhuzhanglinexy', path);
-	};
+		game.zsPlayLineAnimationByName("zhuzhanglinexy", path);
+	}
 
 	// 水墨指示线
 	zsMohuaLineXy(path) {
-		game.zsPlayLineAnimationByName('mohualinexy', path);
-	};
+		game.zsPlayLineAnimationByName("mohualinexy", path);
+	}
 
 	// 神剑指示线
 	zsShenjianLineXy(path) {
-		game.zsPlayLineAnimationByName('shenjianlinexy', path);
-	};
+		game.zsPlayLineAnimationByName("shenjianlinexy", path);
+	}
 
 	// 御剑指示线
 	zsYujianLineXy(path) {
-		game.zsPlayLineAnimationByName('yujianlinexy', path);
-	};
+		game.zsPlayLineAnimationByName("yujianlinexy", path);
+	}
 
 	// 暗黑指示线
 	zsAnheiLineXy(path) {
-		game.zsPlayLineAnimationByName('anheilinexy', path);
-	};
+		game.zsPlayLineAnimationByName("anheilinexy", path);
+	}
 
 	// 魔爪指示线
 	zsMozhuaLineXy(path) {
-		game.zsPlayLineAnimationByName('mozhualinexy', path);
-	};
+		game.zsPlayLineAnimationByName("mozhualinexy", path);
+	}
 
 	// 剑锋指示线
 	zsJianfengLineXy(path) {
-		game.zsPlayLineAnimationByName('jianfenglinexy', path);
-	};
+		game.zsPlayLineAnimationByName("jianfenglinexy", path);
+	}
 
 	// 金箭指示线
 	zsJinjianLineXy(path) {
-		game.zsPlayLineAnimationByName('jinjianlinexy', path);
-	};
+		game.zsPlayLineAnimationByName("jinjianlinexy", path);
+	}
 
 	// 金龙指示线
 	zsJinlongLineXy(path) {
-		game.zsPlayLineAnimationByName('jinlonglinexy', path);
-	};
+		game.zsPlayLineAnimationByName("jinlonglinexy", path);
+	}
 
 	// 落英指示线
 	zsLuoyingLineXy(path) {
-		game.zsPlayLineAnimationByName('luoyinglinexy', path);
-	};
+		game.zsPlayLineAnimationByName("luoyinglinexy", path);
+	}
 
 	// 星蝶指示线
 	zsXingdieLineXy(path) {
-		game.zsPlayLineAnimationByName('xingdielinexy', path);
-	};
+		game.zsPlayLineAnimationByName("xingdielinexy", path);
+	}
 
 	// 月仙指示线
 	zsYuexianLineXy(path) {
-		game.zsPlayLineAnimationByName('yuexianlinexy', path);
-	};
+		game.zsPlayLineAnimationByName("yuexianlinexy", path);
+	}
 
 	// 蛇杖指示线
 	zsShezhangLineXy(path) {
-		game.zsPlayLineAnimationByName('shezhanglinexy', path);
-	};
+		game.zsPlayLineAnimationByName("shezhanglinexy", path);
+	}
 	/**
 	 * @param { [number, number | {opacity:any, color:any, dashed:any, duration:any} | string, number, number] } path
 	 */
@@ -7192,7 +7187,7 @@ export class Game extends GameCompatible {
 			for (let i = 0; i < event.config.size; i++) {
 				ui.window.appendChild(event.nodes[i]);
 			}
-			("step 1");
+			"step 1";
 			let rand1 = event.config.first;
 			if (rand1 == "rand") {
 				rand1 = Math.random() < 0.5;
@@ -7229,7 +7224,7 @@ export class Game extends GameCompatible {
 			}
 			game.delay();
 			lib.init.onfree();
-			("step 2");
+			"step 2";
 			if (event.checkredo()) return;
 			if (event._skiprest) return;
 			if (event.side < 2) {
@@ -7245,7 +7240,7 @@ export class Game extends GameCompatible {
 				event.aiMove();
 				game.delay();
 			}
-			("step 3");
+			"step 3";
 			if (typeof event.fast == "number" && get.time() - event.fast <= 1000) {
 				event.fast = true;
 			} else {
@@ -7280,7 +7275,7 @@ export class Game extends GameCompatible {
 					game.delay();
 				}
 			}
-			("step 4");
+			"step 4";
 			if (event.checkredo()) return;
 			if (event.skipnode) event.skipnode.delete();
 			if (event.replacenode) event.replacenode.delete();
@@ -7299,7 +7294,7 @@ export class Game extends GameCompatible {
 				}
 			}
 			game.delay();
-			("step 5");
+			"step 5";
 			event.prompt("选择" + get.cnNumber(event.config.num) + "名出场武将");
 			event.enemylist = [];
 			for (let i = 0; i < event.avatars.length; i++) {
@@ -7329,7 +7324,7 @@ export class Game extends GameCompatible {
 				event.nodes[i].hide();
 			}
 			game.pause();
-			("step 6");
+			"step 6";
 			event.promptbar.delete();
 			if (ui.cardPileButton) ui.cardPileButton.style.display = "";
 			lib.onresize.remove(event.resize);
@@ -8015,59 +8010,59 @@ export class Game extends GameCompatible {
 		return new Promise(
 			query
 				? (resolve, reject) => {
-					lib.status.reload++;
-					const idbRequest = lib.db.transaction([storeName], "readwrite").objectStore(storeName).get(query);
-					idbRequest.onerror = event => {
-						if (typeof onError == "function") {
-							onError(event);
+						lib.status.reload++;
+						const idbRequest = lib.db.transaction([storeName], "readwrite").objectStore(storeName).get(query);
+						idbRequest.onerror = event => {
+							if (typeof onError == "function") {
+								onError(event);
+								game.reload2();
+								resolve();
+							} else {
+								game.reload2();
+								reject(event);
+							}
+						};
+						idbRequest.onsuccess = event => {
+							const result = event.target.result;
+							if (typeof onSuccess == "function") {
+								_status.dburgent = true;
+								onSuccess(result);
+								delete _status.dburgent;
+							}
 							game.reload2();
-							resolve();
-						} else {
-							game.reload2();
-							reject(event);
-						}
-					};
-					idbRequest.onsuccess = event => {
-						const result = event.target.result;
-						if (typeof onSuccess == "function") {
-							_status.dburgent = true;
-							onSuccess(result);
-							delete _status.dburgent;
-						}
-						game.reload2();
-						resolve(result);
-					};
-				}
+							resolve(result);
+						};
+				  }
 				: (resolve, reject) => {
-					lib.status.reload++;
-					const idbRequest = lib.db.transaction([storeName], "readwrite").objectStore(storeName).openCursor(),
-						object = {};
-					idbRequest.onerror = event => {
-						if (typeof onError == "function") {
-							onError(event);
+						lib.status.reload++;
+						const idbRequest = lib.db.transaction([storeName], "readwrite").objectStore(storeName).openCursor(),
+							object = {};
+						idbRequest.onerror = event => {
+							if (typeof onError == "function") {
+								onError(event);
+								game.reload2();
+								resolve();
+							} else {
+								game.reload2();
+								reject(event);
+							}
+						};
+						idbRequest.onsuccess = event => {
+							const result = event.target.result;
+							if (result) {
+								object[result.key] = result.value;
+								result.continue();
+								return;
+							}
+							if (typeof onSuccess == "function") {
+								_status.dburgent = true;
+								onSuccess(object);
+								delete _status.dburgent;
+							}
 							game.reload2();
-							resolve();
-						} else {
-							game.reload2();
-							reject(event);
-						}
-					};
-					idbRequest.onsuccess = event => {
-						const result = event.target.result;
-						if (result) {
-							object[result.key] = result.value;
-							result.continue();
-							return;
-						}
-						if (typeof onSuccess == "function") {
-							_status.dburgent = true;
-							onSuccess(object);
-							delete _status.dburgent;
-						}
-						game.reload2();
-						resolve(object);
-					};
-				}
+							resolve(object);
+						};
+				  }
 		);
 	}
 	/**
@@ -8104,45 +8099,45 @@ export class Game extends GameCompatible {
 			);
 		return query
 			? new Promise((resolve, reject) => {
-				lib.status.reload++;
-				const record = lib.db.transaction([storeName], "readwrite").objectStore(storeName).delete(query);
-				record.onerror = event => {
-					if (typeof onError == "function") {
-						onError(event);
+					lib.status.reload++;
+					const record = lib.db.transaction([storeName], "readwrite").objectStore(storeName).delete(query);
+					record.onerror = event => {
+						if (typeof onError == "function") {
+							onError(event);
+							game.reload2();
+							resolve();
+						} else {
+							game.reload2();
+							reject(event);
+						}
+					};
+					record.onsuccess = event => {
+						if (typeof onSuccess == "function") onSuccess(event);
 						game.reload2();
-						resolve();
-					} else {
-						game.reload2();
-						reject(event);
-					}
-				};
-				record.onsuccess = event => {
-					if (typeof onSuccess == "function") onSuccess(event);
-					game.reload2();
-					resolve(event);
-				};
-			})
+						resolve(event);
+					};
+			  })
 			: game.getDB(storeName).then(object => {
-				const keys = Object.keys(object);
-				lib.status.reload += keys.length;
-				const store = lib.db.transaction([storeName], "readwrite").objectStore(storeName);
-				return Promise.allSettled(
-					keys.map(
-						key =>
-							new Promise((resolve, reject) => {
-								const request = store.delete(key);
-								request.onerror = event => {
-									game.reload2();
-									reject(event);
-								};
-								request.onsuccess = event => {
-									game.reload2();
-									resolve(event);
-								};
-							})
-					)
-				);
-			});
+					const keys = Object.keys(object);
+					lib.status.reload += keys.length;
+					const store = lib.db.transaction([storeName], "readwrite").objectStore(storeName);
+					return Promise.allSettled(
+						keys.map(
+							key =>
+								new Promise((resolve, reject) => {
+									const request = store.delete(key);
+									request.onerror = event => {
+										game.reload2();
+										reject(event);
+									};
+									request.onsuccess = event => {
+										game.reload2();
+										resolve(event);
+									};
+								})
+						)
+					);
+			  });
 	}
 	/**
 	 * @param { string } key

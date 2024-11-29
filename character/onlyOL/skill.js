@@ -265,20 +265,22 @@ const skills = {
 	olfengshang: {
 		audio: 2,
 		getCards(player) {
-			const cards = [], suits = player.getStorage("olfengshang_clear");
+			const cards = [],
+				suits = player.getStorage("olfengshang_clear");
 			game.checkGlobalHistory("cardMove", evt => {
 				if (evt.name != "cardsDiscard" && (evt.name != "lose" || evt.position != ui.discardPile)) return;
-				cards.addArray(evt.cards.filterInD("d").filter(card => {
-					return !suits.includes(get.suit(card));
-				}));
+				cards.addArray(
+					evt.cards.filterInD("d").filter(card => {
+						return !suits.includes(get.suit(card));
+					})
+				);
 			});
 			return cards;
 		},
 		enable: "phaseUse",
-		trigger: {
-			global: "dying",
-		},
+		trigger: { global: "dying" },
 		filter(event, player) {
+			if (event.name === "dying" && game.getGlobalHistory("everything", evt => evt.name === "dying").indexOf(event) !== 0) return false;
 			const cards = event.name == "chooseToUse" ? event.olfengshang_cards || [] : get.info("olfengshang").getCards(player);
 			if (!lib.suit.some(suit => cards.filter(card => get.suit(card) == suit).length > 1)) return false;
 			return event.name != "chooseToUse" || !player.hasSkill("olfengshang_used", null, null, false);
@@ -355,7 +357,7 @@ const skills = {
 					animate: "gain2",
 				})
 				.setContent("gaincardMultiple");
-			const suit  = get.suit(Object.values(given_map).flat()[0]);
+			const suit = get.suit(Object.values(given_map).flat()[0]);
 			player.addTempSkill("olfengshang_clear", "roundStart");
 			player.markAuto("olfengshang_clear", suit);
 			await game.delayx();
@@ -375,10 +377,10 @@ const skills = {
 				intro: {
 					content(storage, player) {
 						return "本轮已赏赐过" + get.translation(storage) + "花色的牌";
-					}
+					},
 				},
 				charlotte: true,
-				onremove: true
+				onremove: true,
 			},
 		},
 	},
@@ -634,8 +636,8 @@ const skills = {
 					effect: {
 						player(card, player, target) {
 							if (get.tag(card, "damage")) return [1, 0, 2, 0];
-						}
-					}
+						},
+					},
 				},
 			},
 			defend: {
@@ -657,8 +659,8 @@ const skills = {
 					effect: {
 						target(card, player, target) {
 							if (get.tag(card, "damage")) return 2;
-						}
-					}
+						},
+					},
 				},
 			},
 		},
@@ -1291,7 +1293,7 @@ const skills = {
 					return get.effect(player, { name: "juedou" }, target, player) + get.effect(player, { name: "draw" }, player, player) * num;
 				},
 				target(player, target) {
-					return get.effect(target, { name: "juedou" }, player, target) - get.effect(target, { name: "draw" }, target, target) * target.countDiscardableCards(target, "h") / 2;
+					return get.effect(target, { name: "juedou" }, player, target) - (get.effect(target, { name: "draw" }, target, target) * target.countDiscardableCards(target, "h")) / 2;
 				},
 			},
 		},
@@ -1565,8 +1567,8 @@ const skills = {
 			const target = trigger.player;
 			await player.showCards(event.cards, get.translation(player) + "对" + (player == target ? "自己" : get.translation(target)) + "发动了【补益】");
 			if (get.type(event.cards[0]) != "basic") {
-				await target.recover();
 				await target.discard(event.cards[0]);
+				await target.recover();
 			}
 		},
 	},

@@ -380,14 +380,14 @@ export class Library {
 										typeof yingbianZhuzhanAI == "function"
 											? yingbianZhuzhanAI(player, card, source, targets)
 											: cardx => {
-												var info = get.info(card);
-												if (info && info.ai && info.ai.yingbian) {
-													var ai = info.ai.yingbian(card, source, targets, player);
-													if (!ai) return 0;
-													return ai - get.value(cardx);
-												} else if (get.attitude(player, source) <= 0) return 0;
-												return 5 - get.value(cardx);
-											},
+													var info = get.info(card);
+													if (info && info.ai && info.ai.yingbian) {
+														var ai = info.ai.yingbian(card, source, targets, player);
+														if (!ai) return 0;
+														return ai - get.value(cardx);
+													} else if (get.attitude(player, source) <= 0) return 0;
+													return 5 - get.value(cardx);
+											  },
 								});
 								if (!game.online) return;
 								_status.event._resultid = id;
@@ -2513,43 +2513,34 @@ export class Library {
 				zhishixian: {
 					name: "指示线",
 					intro: "设置卡牌、技能的指示特效",
-					init: 'default',
+					init: "default",
 					unfrequent: true,
 					item: {
-						next_moren: "◈经典———",
 						default: "默认",
-						Mohua: '水墨',
-						Xiangong: '先攻',
-						Zhuzhang: '竹杖',
-						next_Shuimo: "◈专属———",
+						Mohua: "水墨",
+						Xiangong: "先攻",
+						Zhuzhang: "竹杖",
 						Shuimo: "幻彩",
-						Anhei: '黑暗',
-						Mozhua: '魔爪',
-						Shenjian: '神剑',
-						Yujian: '御剑',
-						next_Jianfeng: "◈测试———",
-						Jianfeng: '剑锋',
-						Jinjian: '金箭',
-						Jinlong: '金龙',
-						Yuexian: '乐仙',
-						Xingdie: '星蝶',
-						Luoying: '落英',
-						Shezhang: '蛇杖',
+						Anhei: "黑暗",
+						Mozhua: "魔爪",
+						Shenjian: "神剑",
+						Yujian: "御剑",
+						Jianfeng: "剑锋",
+						Jinjian: "金箭",
+						Jinlong: "金龙",
+						Yuexian: "乐仙",
+						Xingdie: "星蝶",
+						Luoying: "落英",
+						Shezhang: "蛇杖",
 					},
-					onclick: function (layout) {
-						if (layout == "next_moren") { var items = 'default'; }
-						else if (layout == "next_Shuimo") { var items = 'Shuimo'; }
-						else if (layout == "next_Jianfeng") { var items = 'Jianfeng'; }
-						else {
-							var items = layout;
-						}
-						game.saveConfig('zhishixian', layout);
-						if (items == 'default') {
+					onclick(items) {
+						game.saveConfig("zhishixian", items);
+						if (items == "default") {
 							game.linexy = game.zsOriginLineXy;
 						} else {
-							game.linexy = game['zs' + items + 'LineXy'];
+							game.linexy = game["zs" + items + "LineXy"];
 						}
-					}
+					},
 				},
 				border_style: {
 					name: "角色边框",
@@ -4215,7 +4206,7 @@ export class Library {
 					unfrequent: true,
 					onclick(bool) {
 						if (_status.connectMode) {
-							if(confirm('当前为联机模式，修改此设置需重启，是否重启？')){
+							if (confirm("当前为联机模式，修改此设置需重启，是否重启？")) {
 								game.saveConfig("show_deckMonitor", bool);
 								game.reload();
 							} else this.classList.toggle("on");
@@ -4236,7 +4227,7 @@ export class Library {
 					unfrequent: true,
 					onclick(bool) {
 						if (_status.connectMode) {
-							if(confirm('当前为联机模式，修改此设置须重启，是否重启？')){
+							if (confirm("当前为联机模式，修改此设置须重启，是否重启？")) {
 								game.saveConfig("show_deckMonitor_online", bool);
 								game.reload();
 							} else this.classList.toggle("on");
@@ -8313,10 +8304,10 @@ export class Library {
 	genAwait(item) {
 		return gnc.is.generator(item)
 			? gnc.of(function* () {
-				for (const content of item) {
-					yield content;
-				}
-			})()
+					for (const content of item) {
+						yield content;
+					}
+			  })()
 			: Promise.resolve(item);
 	}
 	gnc = {
@@ -10166,7 +10157,7 @@ export class Library {
 			if (info.usable !== undefined && player.hasSkill("counttrigger") && player.storage.counttrigger) {
 				let num = info.usable;
 				if (typeof num === "function") num = info.usable(skill, player);
-				if (typeof num === "number" && player.storage.counttrigger[skill] >=num) return false;
+				if (typeof num === "number" && player.storage.counttrigger[skill] >= num) return false;
 			}
 			if (info.round && info.round - (game.roundNumber - player.storage[skill + "_roundcount"]) > 0) return false;
 			for (const item in player.storage) {
@@ -10217,7 +10208,7 @@ export class Library {
 			if (info.usable !== undefined) {
 				let num = info.usable;
 				if (typeof num === "function") num = info.usable(skill, player);
-				if (typeof num === "number" && get.skillCount(skill, player) >=num) return false;
+				if (typeof num === "number" && get.skillCount(skill, player) >= num) return false;
 			}
 			if (info.chooseButton && _status.event.noButton) return false;
 			if (info.round && info.round - (game.roundNumber - player.storage[skill + "_roundcount"]) > 0) return false;
@@ -10929,16 +10920,16 @@ export class Library {
 					const cardName = get.name(cards[0], player);
 					return cardName
 						? new lib.element.VCard({
-							name: cardName,
-							nature: get.nature(cards[0], player),
-							suit: get.suit(cards[0], player),
-							number: get.number(cards[0], player),
-							isCard: true,
-							cards: [cards[0]],
-							storage: {
-								stratagem_buffed: 1,
-							},
-						})
+								name: cardName,
+								nature: get.nature(cards[0], player),
+								suit: get.suit(cards[0], player),
+								number: get.number(cards[0], player),
+								isCard: true,
+								cards: [cards[0]],
+								storage: {
+									stratagem_buffed: 1,
+								},
+						  })
 						: new lib.element.VCard();
 				}
 				return null;
@@ -12364,13 +12355,15 @@ export class Library {
 	message = {
 		server: {
 			cardPile() {
-				this.send(JSON.stringify({
-					type: "cardPile",
-					data: {
-						drawPile: Array.from(ui.cardPile.children),
-						discardPile: Array.from(ui.discardPile.children)
-					}
-				}));
+				this.send(
+					JSON.stringify({
+						type: "cardPile",
+						data: {
+							drawPile: Array.from(ui.cardPile.children),
+							discardPile: Array.from(ui.discardPile.children),
+						},
+					})
+				);
 			},
 			/**
 			 * @this {import("./element/client.js").Client}
@@ -12968,7 +12961,7 @@ export class Library {
 								navigator.clipboard
 									.readText()
 									.then(read)
-									.catch(_ => { });
+									.catch(_ => {});
 							} else {
 								var input = ui.create.node("textarea", ui.window, { opacity: "0" });
 								input.select();
@@ -13464,15 +13457,15 @@ export class Library {
 						}
 						break;
 					case "extension":
-						if(confirm('加入失败：房间禁止使用扩展！是否关闭所有扩展？')){
+						if (confirm("加入失败：房间禁止使用扩展！是否关闭所有扩展？")) {
 							let libexts = lib.config.extensions;
-							for(let i=0;i<libexts.length;i++){
-								game.saveConfig("extension_" + libexts[i] + "_enable",false);
+							for (let i = 0; i < libexts.length; i++) {
+								game.saveConfig("extension_" + libexts[i] + "_enable", false);
 							}
 						}
 						break;
-					default: 
-						alert(reason);	//其它原因直接弹窗显示
+					default:
+						alert(reason); //其它原因直接弹窗显示
 				}
 				game.ws.close();
 				if (_status.connectDenied) {

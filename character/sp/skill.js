@@ -742,11 +742,11 @@ const skills = {
 				},
 			},
 			{
-				name: "你可以摸四张牌并将武将牌翻面",
+				name: "你可以摸三张牌并将武将牌翻面",
 				effect: {
 					content() {
 						lib.skill.olhedao.tianshuClear(event.name, player);
-						player.draw(4);
+						player.draw(3);
 						player.turnOver();
 					},
 				},
@@ -999,7 +999,7 @@ const skills = {
 			}
 			game.broadcastAll(
 				(skill, from, to) => {
-					lib.skill[skill] = { nopop: true, olhedao: true, onremove: true, ...from.effect, ...to.effect };
+					lib.skill[skill] = { nopop: true, olhedao: true, charlotte: true, onremove: true, ...from.effect, ...to.effect };
 					lib.skill[skill].init = (player, skill) => (player.storage[skill] = player.storage[skill] || [0, skill]);
 					lib.skill[skill].intro = {
 						markcount: (storage = [0]) => storage[0],
@@ -1026,7 +1026,7 @@ const skills = {
 				to
 			);
 			player.addSkill(skill);
-			lib.skill.olhedao.tianshuClear(skill, player, -3);
+			lib.skill.olhedao.tianshuClear(skill, player, -2);
 			const skills = player.getSkills(null, false, false).filter(skill => get.info(skill)?.olhedao);
 			const num = skills.length - Math.max(1, player.countMark("olhedao"));
 			if (num > 0) {
