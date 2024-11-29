@@ -791,8 +791,15 @@ const skills = {
 						trigger: "loseAfter",
 						translate: "失去的牌因弃置而进入弃牌堆后",
 						filter(event) {
-							if (event.type != "discard") return;
-							return event.cards2.length > 0 && event.cards2.some(card => event.hs.includes(card) && get.position(card) == "d");
+							if (event.type != "discard") return false;
+							var evt = event.getl(player);
+							if (!evt || !evt.cards2) return false;
+							for (var i = 0; i < evt.cards2.length; i++) {
+								if (get.position(evt.cards2[i]) == "d") {
+									return true;
+								}
+							}
+							return false;
 						},
 						noSource: true,
 						noCancel: true,
