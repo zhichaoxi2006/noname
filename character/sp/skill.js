@@ -12736,6 +12736,7 @@ const skills = {
 		group: "dzkanpo_sha",
 		subSkill: {
 			sha: {
+				audio: "dzkanpo",
 				enable: "chooseToUse",
 				usable: 1,
 				viewAs: { name: "sha" },
