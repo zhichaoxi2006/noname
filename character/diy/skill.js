@@ -48,7 +48,7 @@ const skills = {
 					player: ["shijian_init", "shijian_removeSkill", "shijian_addSkill"],
 				},
 				filter(event, player) {
-					return (event.skill == "nspianwu" && [player.name, player.name1, player.name2].includes("ns_shijian")) || (game.ns_shijian && game.ns_shijian.players.includes(player));
+					return (event.skill == "nspianwu" && get.is.playerNames(player, "ns_shijian")) || (game.ns_shijian && game.ns_shijian.players.includes(player));
 				},
 				forced: true,
 				popup: false,
