@@ -17249,6 +17249,7 @@ const skills = {
 		audio: 5,
 		enable: "phaseUse",
 		usable: 1,
+		prompt: "点击确定来选择要擦拭的宝物",
 		chooseButton: {
 			dialog: function () {
 				var list = ["wolong", "fengchu", "xuanjian", "shuijing"];
