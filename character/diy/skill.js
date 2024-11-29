@@ -31,7 +31,7 @@ const skills = {
 		filter(event, player, name) {
 			if (name == "phaseBefore" && game.phaseNumber != 0) return false;
 			if (name == "damageSource" && game.roundNumber > 3) return false;
-			return [player.name, player.name1, player.name2].includes("ns_shijian") || (game.ns_shijian && game.ns_shijian.players.includes(player));
+			return get.is.playerNames(player, "ns_shijian") || (game.ns_shijian && game.ns_shijian.players.includes(player));
 		},
 		content() {
 			lib.skill[event.name].skillTrigger("shijian_addSkill", player, event.name);
