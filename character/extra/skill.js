@@ -9264,6 +9264,9 @@ const skills = {
 					if (trigger.name != "link") player.link(true);
 					else trigger.cancel();
 				},
+				ai: {
+					noLink: true,
+				}
 			},
 			2: {
 				audio: "nzry_jieying",

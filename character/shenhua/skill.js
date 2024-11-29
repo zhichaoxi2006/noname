@@ -997,6 +997,9 @@ const skills = {
 				async content(event, trigger, player) {
 					trigger.cancel();
 				},
+				ai: {
+					noLink:true,
+				}
 			},
 			2: {
 				mod: {

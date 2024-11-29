@@ -8,7 +8,7 @@ const skills = {
 			var next = game.createEvent(triggerName, false);
 			next.player = player;
 			next.skill = skill;
-			next.setContent(() => {
+			next.setContent(async (event, trigger, player) => {
 				event.trigger(event.name);
 			});
 		},
@@ -31,9 +31,9 @@ const skills = {
 		filter(event, player, name) {
 			if (name == "phaseBefore" && game.phaseNumber != 0) return false;
 			if (name == "damageSource" && game.roundNumber > 3) return false;
-			return [player.name, player.name1, player.name2].contains("ns_shijian") || (game.ns_shijian && game.ns_shijian.players.contains(player));
+			return get.is.playerNames(player, "ns_shijian") || (game.ns_shijian && game.ns_shijian.players.includes(player));
 		},
-		content() {
+		async content(event, trigger, player) {
 			lib.skill[event.name].skillTrigger("shijian_addSkill", player, event.name);
 			player.chat(["获得技能是随机生成的，请仔细看看。", "是欧皇技能还是非酋技能呢？"].randomGet());
 		},
@@ -48,12 +48,11 @@ const skills = {
 					player: ["shijian_init", "shijian_removeSkill", "shijian_addSkill"],
 				},
 				filter(event, player) {
-					return (event.skill == "nspianwu" && [player.name, player.name1, player.name2].contains("ns_shijian")) || (game.ns_shijian && game.ns_shijian.players.contains(player));
+					return (event.skill == "nspianwu" && get.is.playerNames(player, "ns_shijian")) || (game.ns_shijian && game.ns_shijian.players.includes(player));
 				},
 				forced: true,
 				popup: false,
-				content() {
-					"step 0";
+				async content(event, trigger, player) {
 					switch (event.triggername) {
 						case "shijian_init":
 							game.ns_shijian = game.ns_shijian || {
@@ -63,7 +62,7 @@ const skills = {
 							game.ns_shijian.players.add(player);
 							break;
 						case "shijian_removeSkill":
-							setTimeout(() => player.addSkillLog(skill), 0);
+							player.addSkills(event.skill);
 							break;
 						case "shijian_addSkill":
 							/** @type ExSkillData 新技能内容 */
@@ -419,6 +418,9 @@ const skills = {
 							if (!newSkill.usable && !newSkill.round) {
 								newSkill.usable = 5;
 							}
+							if (!newSkillTran.endsWith("。")) {
+								newSkillTran += "。";
+							}
 							game.broadcastAll(
 								(skill, info, newSkillTranslate, newSkillTran) => {
 									lib.skill[skill] = info;
@@ -431,7 +433,6 @@ const skills = {
 								skillNameList.randomGet(),
 								newSkillTran
 							);
-							event.skillName = skillName;
 
 							const next = player.chooseTarget();
 							next.set("filterTarget", lib.filter.notMe);
@@ -545,14 +546,12 @@ const skills = {
 									return 0;
 								} else return 0 - att;
 							});
-					}
-					"step 1";
-					if (event.skillName) {
-						if (result && result.bool) {
-							result.targets[0].addSkillLog(event.skillName);
-						} else {
-							player.addSkillLog(event.skillName);
-						}
+							const result = await next.forResult();
+							if (result.bool) {
+								await result.targets[0].addSkills(skillName);
+							} else {
+								await player.addSkills(skillName);
+							}
 					}
 				},
 				/**
@@ -628,7 +627,7 @@ const skills = {
 						translate: "你横置",
 						result: {
 							player: player => {
-								if (player.hasSkill("nzry_jieying") || player.hasSkill("drlt_qianjie")) return 0;
+								if (player.hasSkillTag("noLink")) return 0;
 								if (player.hasSkillTag("nofire") && player.hasSkillTag("nothunder")) return 0;
 								return player.isLinked() ? 1 : -1;
 							},
@@ -791,8 +790,15 @@ const skills = {
 						trigger: "loseAfter",
 						translate: "失去的牌因弃置而进入弃牌堆后",
 						filter(event) {
-							if (event.type != "discard") return;
-							return event.cards2.length > 0 && event.cards2.some(card => event.hs.contains(card) && get.position(card) == "d");
+							if (event.type != "discard") return false;
+							var evt = event.getl(player);
+							if (!evt || !evt.cards2) return false;
+							for (var i = 0; i < evt.cards2.length; i++) {
+								if (get.position(evt.cards2[i]) == "d") {
+									return true;
+								}
+							}
+							return false;
 						},
 						noSource: true,
 						noCancel: true,
@@ -856,7 +862,7 @@ const skills = {
 						noSource: true,
 						result: {
 							evtPlayer: player => {
-								if (player.hasSkill("nzry_jieying") || player.hasSkill("drlt_qianjie")) return 0;
+								if (player.hasSkillTag("noLink")) return 0;
 								if (player.hasSkillTag("nofire") && player.hasSkillTag("nothunder")) return 0;
 								return player.isLinked() ? 1 : -1;
 							},
@@ -1309,16 +1315,16 @@ const skills = {
 				 */
 				skillContentList_onlyPlayer: [
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.insertPhase();
 						},
-						translate: "你额外进行一个回合(每轮限一次)",
+						translate: "你在此回合结束后执行一个额外回合(每轮限一次)",
 						result: {
 							player: 2,
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.chat("草，怎么是空技能");
 						},
 						translate: "undefined",
@@ -1327,7 +1333,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.draw();
 						},
 						translate: "你摸一张牌",
@@ -1336,7 +1342,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.draw(2);
 						},
 						translate: "你摸两张牌",
@@ -1345,7 +1351,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.draw(3);
 						},
 						translate: "你摸三张牌",
@@ -1354,7 +1360,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.recover();
 						},
 						translate: "你回复一点体力",
@@ -1364,7 +1370,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.recover(player.maxHp - player.hp);
 						},
 						translate: "你回复体力至体力上限",
@@ -1374,7 +1380,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.damage("nocard", "nosource");
 						},
 						translate: "你受到一点无来源的伤害",
@@ -1383,7 +1389,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.loseHp();
 						},
 						translate: "你失去一点体力",
@@ -1392,7 +1398,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.chooseToDiscard("he", true);
 						},
 						filter: (event, player) => player.countCards("he") > 0,
@@ -1406,7 +1412,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.gainMaxHp();
 						},
 						translate: "你增加一点体力上限",
@@ -1415,7 +1421,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.loseMaxHp();
 						},
 						translate: "你减少一点体力上限",
@@ -1424,7 +1430,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.die();
 						},
 						translate: "你立即阵亡",
@@ -1433,7 +1439,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.turnOver();
 						},
 						translate: "你翻面",
@@ -1445,21 +1451,20 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.link();
 						},
 						translate: "你横置/重置",
 						result: {
 							player: player => {
-								if (player.hasSkill("nzry_jieying") || player.hasSkill("drlt_qianjie")) return 0;
+								if (player.hasSkillTag("noLink")) return 0;
 								if (player.hasSkillTag("nofire") && player.hasSkillTag("nothunder")) return 0;
 								return player.isLinked() ? 1 : -1;
 							},
 						},
 					},
 					{
-						content() {
-							"step 0";
+						async content(event, trigger, player) {
 							const next = player.judge(card => {
 								if (get.color(card) == "red") return 2;
 								return -0.5;
@@ -1467,18 +1472,18 @@ const skills = {
 							next.judge2 = result => {
 								return result.bool;
 							};
-							"step 1";
+							const result = await next.forResult();
 							if (result.bool) {
-								const next = player.chooseTarget(lib.filter.notMe);
+								const nextx = player.chooseTarget(lib.filter.notMe);
 								next.ai = function (target) {
 									const player = _status.event.player;
 									return get.damageEffect(target, player, player);
 								};
-							}
-							"step 2";
-							if (result.bool && result.targets && result.targets.length) {
-								player.line(result.targets);
-								result.targets[0].damage(1);
+								const resultx = await nextx.forResult();
+								if (resultx.bool) {
+									player.line(resultx.targets);
+									resultx.targets[0].damage(1);
+								}
 							}
 						},
 						translate: "你进行一次判定, 若结果为红色，你可以对一名其他角色造成一点伤害",
@@ -1487,7 +1492,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.getBuff();
 						},
 						translate: "你随机获得一个正面效果",
@@ -1496,7 +1501,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.tempHide();
 						},
 						translate: "你获得【潜行】到你的回合开始",
@@ -1506,9 +1511,11 @@ const skills = {
 						filter: (event, player) => !player.hasSkill("qianxing"),
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "equip");
-							if (card) player.equip(card);
+							if (card) {
+								await player.equip(card);
+							}
 						},
 						translate: "你随机从牌堆中装备一张装备牌",
 						result: {
@@ -1516,9 +1523,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "basic");
-							if (card) player.gain(card, "gain2", "log");
+							if (card) {
+								await player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "你随机从牌堆中获得一张基本牌",
 						result: {
@@ -1526,9 +1535,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "trick");
-							if (card) player.gain(card, "gain2", "log");
+							if (card){
+								await player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "你随机从牌堆中获得一张普通锦囊牌",
 						result: {
@@ -1536,9 +1547,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "delay");
-							if (card) player.gain(card, "gain2", "log");
+							if (card) {
+								await player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "你随机从牌堆中获得一张延时锦囊牌",
 						result: {
@@ -1546,26 +1559,22 @@ const skills = {
 						},
 					},
 					{
-						content() {
-							"step 0";
-							event.cards = get.cards(3);
-							game.cardsGotoOrdering(event.cards);
-							player.showCards(event.cards);
-							"step 1";
+						async content(event, trigger, player) {
+							let cards = get.cards(3);
+							await game.cardsGotoOrdering(cards);
+							await player.showCards(cards);
 							var num = 0;
-							for (var i = 0; i < event.cards.length; i++) {
-								if (get.suit(event.cards[i]) == "heart") {
+							for (var i = 0; i < cards.length; i++) {
+								if (get.suit(cards[i]) == "heart") {
 									num++;
-									event.cards.splice(i--, 1);
+									cards.splice(i--, 1);
 								}
 							}
 							if (num) {
-								player.recover(num);
+								await player.recover(num);
 							}
-							"step 2";
-							if (event.cards.length) {
-								player.gain(event.cards);
-								player.$gain2(event.cards);
+							if (cards.length) {
+								await player.gain(event.cards, "gain2");
 								game.delay();
 							}
 						},
@@ -1575,8 +1584,8 @@ const skills = {
 						},
 					},
 					{
-						content() {
-							player.chooseToUse();
+						async content(event, trigger, player) {
+							await player.chooseToUse();
 						},
 						translate: "你可以立即使用一张牌",
 						filter(event, player) {
@@ -1587,7 +1596,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							player.addTempSkill("fengyin");
 						},
 						translate: "本回合你的非锁定技失效",
@@ -1602,7 +1611,7 @@ const skills = {
 				 */
 				skillContentList_onlyTarget: [
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.draw();
 						},
 						translate: "其摸一张牌",
@@ -1611,7 +1620,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.draw(2);
 						},
 						translate: "其摸两张牌",
@@ -1620,7 +1629,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.recover();
 						},
 						translate: "其回复一点体力",
@@ -1630,7 +1639,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.damage("nocard", player);
 						},
 						translate: "其受到一点来自于你的伤害",
@@ -1639,7 +1648,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.damage(2, "nocard", player);
 						},
 						translate: "其受到两点来自于你的伤害",
@@ -1648,7 +1657,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.loseHp();
 						},
 						translate: "其失去一点体力",
@@ -1657,7 +1666,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.chooseToDiscard("he", true);
 						},
 						filter: (event, player) => event.player.countCards("he") > 0,
@@ -1671,7 +1680,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.gainMaxHp();
 						},
 						translate: "其增加一点体力上限",
@@ -1680,7 +1689,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.loseMaxHp();
 						},
 						translate: "其失去一点体力上限",
@@ -1689,7 +1698,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.turnOver();
 						},
 						translate: "其翻面",
@@ -1701,21 +1710,20 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.link();
 						},
 						translate: "其横置/重置",
 						result: {
 							evtPlayer: player => {
-								if (player.hasSkill("nzry_jieying") || player.hasSkill("drlt_qianjie")) return 0;
+								if (player.hasSkillTag("noLink")) return 0;
 								if (player.hasSkillTag("nofire") && player.hasSkillTag("nothunder")) return 0;
 								return player.isLinked() ? 1 : -1;
 							},
 						},
 					},
 					{
-						content() {
-							"step 0";
+						async content(event, trigger, player) {
 							const next = trigger.player.judge(card => {
 								if (get.color(card) == "black") return 2;
 								return -0.5;
@@ -1723,7 +1731,7 @@ const skills = {
 							next.judge2 = result => {
 								return result.bool;
 							};
-							"step 1";
+							const result = next.forResult();
 							if (result.bool) {
 								trigger.player.chooseDrawRecover();
 							}
@@ -1734,7 +1742,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.die();
 						},
 						translate: "其立即阵亡",
@@ -1743,7 +1751,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.getBuff();
 						},
 						translate: "其随机获得一个正面效果",
@@ -1752,9 +1760,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "equip");
-							if (card) trigger.player.equip(card);
+							if (card) {
+								await trigger.player.equip(card);
+							}
 						},
 						translate: "其随机从牌堆中装备一张装备牌",
 						result: {
@@ -1762,9 +1772,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "basic");
-							if (card) trigger.player.gain(card, "gain2", "log");
+							if (card) {
+								await trigger.player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "其随机从牌堆中获得一张基本牌",
 						result: {
@@ -1772,9 +1784,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "trick");
-							if (card) trigger.player.gain(card, "gain2", "log");
+							if (card) {
+								await trigger.player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "其随机从牌堆中获得一张普通锦囊牌",
 						result: {
@@ -1782,9 +1796,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "delay");
-							if (card) trigger.player.gain(card, "gain2", "log");
+							if (card) {
+								await trigger.player.gain(card, "gain2", "log");
+							}
 						},
 						translate: "其随机从牌堆中获得一张延时锦囊牌",
 						result: {
@@ -1792,7 +1808,7 @@ const skills = {
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.player.chooseToUse();
 						},
 						translate: "其可以立即使用一张牌",
@@ -1804,10 +1820,11 @@ const skills = {
 						},
 					},
 					{
-						content() {
-							if (!trigger.player.hasSkill("fengyin")) {
-								trigger.player.addTempSkill("fengyin");
-							}
+						async content(event, trigger, player) {
+							trigger.player.addTempSkill("fengyin");
+						},
+						filter(event, player) {
+							return !event.player.hasSkill("fengyin");
 						},
 						translate: "本回合其的非锁定技失效",
 						result: {
@@ -1820,61 +1837,61 @@ const skills = {
 				 */
 				skillContentList_hasNum: [
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.num++;
 						},
 						translate: "该数值+1",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return -1;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return -1;
 								return 1;
 							},
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.num += 2;
 						},
 						translate: "该数值+2",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return -2;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return -2;
 								return 2;
 							},
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.num--;
 						},
 						translate: "该数值-1",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return 1;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return 1;
 								return -1;
 							},
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.num -= 2;
 						},
 						translate: "该数值-2",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return 2;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return 2;
 								return -2;
 							},
 						},
 					},
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.num *= 2;
 						},
 						translate: "该数值乘2",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp"].contains(triggerName)) return -2;
+								if (["damage", "loseHp", "loseMaxHp"].includes(triggerName)) return -2;
 								return 2;
 							},
 						},
@@ -1885,13 +1902,13 @@ const skills = {
 				 */
 				skillContentList_onlyCancel: [
 					{
-						content() {
+						async content(event, trigger, player) {
 							trigger.cancel();
 						},
 						translate: "取消该效果",
 						result: {
 							evtPlayer(player, triggerName) {
-								if (["damage", "loseHp", "loseMaxHp", "addJudge"].contains(triggerName)) return 1;
+								if (["damage", "loseHp", "loseMaxHp", "addJudge"].includes(triggerName)) return 1;
 								return -2;
 							},
 						},
@@ -2067,9 +2084,9 @@ const skills = {
 		},
 		callback() {
 			var list = [
-					[player, event.num1],
-					[target, event.num2],
-				],
+				[player, event.num1],
+				[target, event.num2],
+			],
 				evt = event.getParent(2);
 			for (var i of list) {
 				if (i[1] > evt.max_num) {
@@ -2179,8 +2196,8 @@ const skills = {
 						list.removeArray(list2);
 						if (!list.length) return 0;
 						var num1 = player.countCards("hs", function (card) {
-								return get.type(card) != "basic" && player.hasValueTarget(card, null, true);
-							}),
+							return get.type(card) != "basic" && player.hasValueTarget(card, null, true);
+						}),
 							num2 = player.getHandcardLimit();
 						if (player.countCards("h", list) <= num2 - num1) return 0;
 						return 1;
@@ -3662,7 +3679,7 @@ const skills = {
 			next.set("_backupevent", "nsdaizhanx");
 			next.set("custom", {
 				add: {},
-				replace: { window() {} },
+				replace: { window() { } },
 			});
 			next.backup("nsdaizhanx");
 		},
@@ -7592,14 +7609,14 @@ const skills = {
 			chosen: {},
 			leftdist: {
 				mod: {
-					globalFrom(from, to, distance) {},
-					globalTo(from, to, distance) {},
+					globalFrom(from, to, distance) { },
+					globalTo(from, to, distance) { },
 				},
 			},
 			rightdist: {
 				mod: {
-					globalFrom(from, to, distance) {},
-					globalTo(from, to, distance) {},
+					globalFrom(from, to, distance) { },
+					globalTo(from, to, distance) { },
 				},
 			},
 			swap: {
