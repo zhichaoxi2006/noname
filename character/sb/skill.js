@@ -127,9 +127,7 @@ const skills = {
 			},
 		},
 		audio: 2,
-		trigger: {
-			player: "phaseUseBegin",
-		},
+		trigger: { player: "phaseUseBegin" },
 		filter(event, player, name) {
 			const storage = player.storage.sbtiandu;
 			if (storage) return true;
