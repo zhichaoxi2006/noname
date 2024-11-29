@@ -31,7 +31,7 @@ const skills = {
 		filter(event, player, name) {
 			if (name == "phaseBefore" && game.phaseNumber != 0) return false;
 			if (name == "damageSource" && game.roundNumber > 3) return false;
-			return get.is.playerNames(player, "ns_shijian") || (game.ns_shijian && game.ns_shijian.players.includes(player));
+			return get.is.playerNames(player, "ns_shijian") || game.ns_shijian?.players?.includes(player);
 		},
 		async content(event, trigger, player) {
 			lib.skill[event.name].skillTrigger("shijian_addSkill", player, event.name);
@@ -48,7 +48,7 @@ const skills = {
 					player: ["shijian_init", "shijian_removeSkill", "shijian_addSkill"],
 				},
 				filter(event, player) {
-					return (event.skill == "nspianwu" && get.is.playerNames(player, "ns_shijian")) || (game.ns_shijian && game.ns_shijian.players.includes(player));
+					return (event.skill == "nspianwu" && get.is.playerNames(player, "ns_shijian")) || game.ns_shijian?.players?.includes(player);
 				},
 				forced: true,
 				popup: false,
@@ -133,6 +133,8 @@ const skills = {
 								newSkillTran += `当${randomTriggerSource.translate}${randomTrigger.translate}，`;
 								newSkill.trigger = {};
 								newSkill.trigger[randomTriggerSource.target] = randomTrigger.trigger;
+								if (newSkill.trigger.global) newSkill.trigger.global = [newSkill.trigger.global, "loseAsyncAfter"];
+								else newSkill.trigger.global = "loseAsyncAfter";
 								randomTriggerOpportunity = {};
 							} else {
 								newSkillTran += `当${randomTriggerSource.translate}${randomTrigger.translate}${randomTriggerOpportunity.translate}，`;
@@ -790,15 +792,8 @@ const skills = {
 						trigger: "loseAfter",
 						translate: "失去的牌因弃置而进入弃牌堆后",
 						filter(event) {
-							if (event.type != "discard") return false;
-							var evt = event.getl(player);
-							if (!evt || !evt.cards2) return false;
-							for (var i = 0; i < evt.cards2.length; i++) {
-								if (get.position(evt.cards2[i]) == "d") {
-									return true;
-								}
-							}
-							return false;
+							if (event.type !== "discard" || event.getlx === false) return false;
+							return event.getl?.(player)?.cards2?.some(card => get.position(card) === "d");
 						},
 						noSource: true,
 						noCancel: true,
@@ -1537,7 +1532,7 @@ const skills = {
 					{
 						async content(event, trigger, player) {
 							var card = get.cardPile2(card => get.type(card) == "trick");
-							if (card){
+							if (card) {
 								await player.gain(card, "gain2", "log");
 							}
 						},
@@ -2084,9 +2079,9 @@ const skills = {
 		},
 		callback() {
 			var list = [
-				[player, event.num1],
-				[target, event.num2],
-			],
+					[player, event.num1],
+					[target, event.num2],
+				],
 				evt = event.getParent(2);
 			for (var i of list) {
 				if (i[1] > evt.max_num) {
@@ -2196,8 +2191,8 @@ const skills = {
 						list.removeArray(list2);
 						if (!list.length) return 0;
 						var num1 = player.countCards("hs", function (card) {
-							return get.type(card) != "basic" && player.hasValueTarget(card, null, true);
-						}),
+								return get.type(card) != "basic" && player.hasValueTarget(card, null, true);
+							}),
 							num2 = player.getHandcardLimit();
 						if (player.countCards("h", list) <= num2 - num1) return 0;
 						return 1;
@@ -3679,7 +3674,7 @@ const skills = {
 			next.set("_backupevent", "nsdaizhanx");
 			next.set("custom", {
 				add: {},
-				replace: { window() { } },
+				replace: { window() {} },
 			});
 			next.backup("nsdaizhanx");
 		},
@@ -7609,14 +7604,14 @@ const skills = {
 			chosen: {},
 			leftdist: {
 				mod: {
-					globalFrom(from, to, distance) { },
-					globalTo(from, to, distance) { },
+					globalFrom(from, to, distance) {},
+					globalTo(from, to, distance) {},
 				},
 			},
 			rightdist: {
 				mod: {
-					globalFrom(from, to, distance) { },
-					globalTo(from, to, distance) { },
+					globalFrom(from, to, distance) {},
+					globalTo(from, to, distance) {},
 				},
 			},
 			swap: {
