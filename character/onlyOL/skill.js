@@ -1667,7 +1667,7 @@ const skills = {
 	},
 	olmieji: {
 		audio: 2,
-		inherit: "remieji",
+		inherit: "xinmieji",
 		filter(event, player) {
 			return player.countCards("h", { type: ["trick", "delay"] });
 		},
@@ -1682,33 +1682,6 @@ const skills = {
 			if ((!result.cards || get.type(result.cards[0], "trick", result.cards[0].original == "h" ? target : false) != "trick") && target.countCards("he", card => lib.filter.cardDiscardable(card, target))) {
 				await target.chooseToDiscard("he", true).set("prompt", "请弃置第二张牌");
 			}
-			/*
-			const cards = game
-				.getGlobalHistory("everything", evt => {
-					return evt.name == "lose" && evt.getParent(3) == event;
-				})
-				.reduce((list, evt) => {
-					return list.add(evt.cards[0]);
-				}, [])
-				.filterInD("d");
-			if (cards.some(card => player.hasUseTarget(card, true, false))) {
-				const result = await player
-					.chooseButton(["灭计：是否使用其中的一张牌？", cards])
-					.set("filterButton", button => {
-						return get.event().player.hasUseTarget(button.link, true, false);
-					})
-					.set("ai", button => {
-						return get.event().player.getUseValue(button.link);
-					})
-					.forResult();
-				if (result.bool) {
-					const card = result.links[0];
-					player.$gain2(card, false);
-					await game.delayx();
-					await player.chooseUseTarget(true, card, false);
-				}
-			}
-			*/
 		},
 	},
 	//OL界蔡夫人
