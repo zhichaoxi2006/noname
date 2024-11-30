@@ -62,11 +62,7 @@ export function loadCard(cardConfig) {
 						pile = [...pile, ...lib.config.addedpile[cardConfigName]];
 					}
 
-					for (var j of pile) {
-						if (lib.card[j[2]] && (!lib.card[j[2]].mode || lib.card[j[2]].mode.includes(lib.config.mode))) {
-							lib.card.list.push(j);
-						}
-					}//QQQ
+					lib.card.list.addArray(pile);
 				}
 				break;
 			default:

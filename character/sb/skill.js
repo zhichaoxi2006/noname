@@ -228,9 +228,7 @@ const skills = {
 	},
 	sbyiji: {
 		audio: 2,
-		trigger: {
-			player: ["damageEnd", "dying"],
-		},
+		trigger: { player: ["damageEnd", "dying"] },
 		filter(event, player, name) {
 			if (event.name == "damage") return event.num > 0;
 			const history = game.getAllGlobalHistory();
@@ -248,7 +246,12 @@ const skills = {
 			let num = trigger.name == "damage" ? 2 : 1;
 			const { result } = await player.draw(num);
 			if (!game.hasPlayer(target => target != player)) return;
-			if (trigger.name == "damage") {
+			if (
+				!(() => {
+					const mode = get.mode();
+					return mode === "identity" || (mode === "doudizhu" && trigger.name === "dying");
+				})()
+			) {
 				if (!player.countCards("h")) return;
 				if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
 				let given_map = [];
@@ -513,7 +516,7 @@ const skills = {
 			},
 		},
 		ai: {
-			combo: "sbmingzhe"
+			combo: "sbmingzhe",
 		},
 	},
 	sbmingzhe: {
@@ -558,7 +561,7 @@ const skills = {
 					if (target === _status.currentPhase || target.countMark("sbmingzhe_used") >= 2) return;
 					if (get.tag(card, "lose") || get.tag(card, "discard")) return [1, 1];
 				},
-			}
+			},
 		},
 		subSkill: {
 			used: {
@@ -589,25 +592,26 @@ const skills = {
 			let cards = await player.choosePlayerCard(target, position, [0, num], true, prompt).set("visible", true).forResultCards();
 			let result = await target
 				.chooseControl()
-				.set("choiceList", [
-					`令${get.translation(player)}将${player === target ? get.translation(cards) : "其选择的牌"}分配给其他角色`, 
-					`弃置所有未被${get.translation(player)}选择的牌`
-				])
+				.set("choiceList", [`令${get.translation(player)}将${player === target ? get.translation(cards) : "其选择的牌"}分配给其他角色`, `弃置所有未被${get.translation(player)}选择的牌`])
 				.set("ai", () => {
 					return get.event("goon") ? 0 : 1;
 				})
-				.set("goon", function () {
-					const att = get.sgnAttitude(target, player), hs = target.countCards(position);
-					if (att > 0 || hs > 5) return true;
-					if (hs < 2) return false;
-					let num;
-					if (att === 0) {
-						num = Math.min(hs, 2);
-						return hs > 2 * num;
-					}
-					num = Math.min(hs, 0.5 + 1.2 * Math.random());
-					return hs > 3 * num;
-				}())
+				.set(
+					"goon",
+					(function () {
+						const att = get.sgnAttitude(target, player),
+							hs = target.countCards(position);
+						if (att > 0 || hs > 5) return true;
+						if (hs < 2) return false;
+						let num;
+						if (att === 0) {
+							num = Math.min(hs, 2);
+							return hs > 2 * num;
+						}
+						num = Math.min(hs, 0.5 + 1.2 * Math.random());
+						return hs > 3 * num;
+					})()
+				)
 				.forResult();
 			if (result.index === 0 && cards.length) {
 				if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
@@ -7944,13 +7948,12 @@ const skills = {
 		},
 		check: function (event, player) {
 			return (
-				get.attitude(player, event.target) <= 0 &&
-				event.target.countGainableCards(player, "h") > 0 ||
-				player.getCardUsable("sha") === 0 &&
-				player.countCards("hs", card => {
-					if (get.name(card) !== "sha") return false;
-					return player.hasValueTarget(card, true, true);
-				}) > 0
+				(get.attitude(player, event.target) <= 0 && event.target.countGainableCards(player, "h") > 0) ||
+				(player.getCardUsable("sha") === 0 &&
+					player.countCards("hs", card => {
+						if (get.name(card) !== "sha") return false;
+						return player.hasValueTarget(card, true, true);
+					}) > 0)
 			);
 		},
 		logTarget: "target",
