@@ -412,7 +412,7 @@ const skills = {
 				const targetsx = game.filterPlayer(current => {
 					if (!player.canUse({ name: "juedou", isCard: true }, current)) return false;
 					return !player
-						.getRoundHistory("useSkill", evt => (evt.skill = "twchenxun"))
+						.getRoundHistory("useSkill", evt => evt.skill == "twchenxun")
 						.map(evt => evt.targets[0])
 						.includes(current);
 				});
