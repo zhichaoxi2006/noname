@@ -505,7 +505,8 @@ const skills = {
 				if (event.dialog) event.dialog.close();
 				if (event.control) event.control.close();
 				game.resume();
-				event._result = {
+				if (get.attitude(player, target) > 0) event._result = { bool: false };
+				else event._result = {
 					bool: true,
 					position: list.includes("head") ? "head" : "abdomen",
 				};
@@ -516,7 +517,8 @@ const skills = {
 				const event = _status.event;
 				event.switchToAuto = function () {
 					_status.imchoosing = false;
-					event._result = {
+					if (get.attitude(player, target) > 0) event._result = { bool: false };
+					else event._result = {
 						bool: true,
 						position: list.includes("head") ? "head" : "abdomen",
 					};
