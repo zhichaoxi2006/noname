@@ -2630,6 +2630,7 @@ const skills = {
 		},
 		subSkill: {
 			effect: {
+				audio: "clanlianhe",
 				trigger: { global: ["phaseUseEnd", "die"] },
 				charlotte: true,
 				forced: true,

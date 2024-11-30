@@ -390,7 +390,7 @@ const skills = {
 					const card = game.createCard(equips[0], equips[1], get.numString(equips[2]));
 					if (!card.storage) card.storage = {};
 					if (typeof card.storage.mbquchong != "number") {
-						card.storage.mbquchong = card.name == "dagongche_attack" ? 2 : 4;
+						card.storage.mbquchong = card.name == "dagongche_attack" ? 2 : 3;
 					}
 					lib.skill.mbquchong.broadcast(card);
 					const resultx = await player
@@ -17249,6 +17249,7 @@ const skills = {
 		audio: 5,
 		enable: "phaseUse",
 		usable: 1,
+		prompt: "点击确定来选择要擦拭的宝物",
 		chooseButton: {
 			dialog: function () {
 				var list = ["wolong", "fengchu", "xuanjian", "shuijing"];

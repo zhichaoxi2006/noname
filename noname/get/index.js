@@ -2438,13 +2438,8 @@ export class Get extends GetCompatible {
 			delete _status.waitingForCards;
 		}
 		var list = [];
-		var card = false;
 		if (typeof num != "number") num = 1;
-		if (num == 0) {
-			card = true;
-			num = 1;
-		}
-		if (num < 0) num = 1;
+		if (num <= 0) return [];
 		while (num--) {
 			if (ui.cardPile.hasChildNodes() == false) {
 				game.washCard();
@@ -2463,7 +2458,6 @@ export class Get extends GetCompatible {
 			}
 		}
 		game.updateRoundNumber();
-		if (card) return list[0];
 		return list;
 	}
 	judge(card) {

@@ -282,7 +282,7 @@ export class Is {
 	 * @param { string } str
 	 */
 	banWords(str) {
-		return get.is.emoji(str) || window.bannedKeyWords.some(item => str.includes(item));
+		return get.is.emoji(str) || window.bannedKeyWords?.some(item => str.includes(item));
 	}
 	/**
 	 * @param { GameEventPromise } event

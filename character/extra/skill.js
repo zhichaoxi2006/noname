@@ -1088,6 +1088,9 @@ const skills = {
 		audio: "lianpo",
 		audioname: ["new_simayi"],
 		trigger: { source: "dieAfter" },
+		filter(event, player) {
+			return !player.hasSkill("xinlianpo_mark") || get.info("xinbaiyin").derivation.some(skill => !["xinjilve", "reguicai"].includes(skill) && !player.hasSkill(skill, null, null, false));
+		},
 		async cost(event, trigger, player) {
 			const skills = get
 				.info("xinbaiyin")
@@ -9264,6 +9267,9 @@ const skills = {
 					if (trigger.name != "link") player.link(true);
 					else trigger.cancel();
 				},
+				ai: {
+					noLink: true,
+				}
 			},
 			2: {
 				audio: "nzry_jieying",

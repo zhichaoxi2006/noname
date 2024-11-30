@@ -94,7 +94,7 @@ export function sendUpdate() {
 				fs.writeFileSync(path.join(__dirname, "Home", "saveProtocol.txt"), "");
 				// 启动http
 				const cp = require("child_process");
-				cp.exec(`start /min ${__dirname}\\noname-server.exe -platform=electron`, (err, stdout, stderr) => { });
+				cp.exec(`start /min ${__dirname}\\noname-server.exe -platform=electron`, (err, stdout, stderr) => {});
 				return `http://localhost:8089/app.html?sendUpdate=true`;
 			}
 		}
@@ -741,17 +741,11 @@ function initSheet(libConfig) {
 	game.zsOriginLineXy = game.linexy;
 	if (libConfig.zhishixian && libConfig.zhishixian != "default") {
 		var layout = libConfig.zhishixian;
-		if (layout == "next_moren") { var items = 'default'; }
-		else if (layout == "next_Shuimo") { var items = 'Shuimo'; }
-		else if (layout == "next_Jianfeng") { var items = 'Jianfeng'; }
-		else {
-			var items = layout;
-		}
-		game.saveConfig('zhishixian', layout);
-		if (items == 'default') {
+		game.saveConfig("zhishixian", layout);
+		if (layout == "default") {
 			game.linexy = game.zsOriginLineXy;
 		} else {
-			game.linexy = game['zs' + items + 'LineXy'];
+			game.linexy = game["zs" + layout + "LineXy"];
 		}
 	}
 	if (libConfig.control_style && libConfig.control_style != "default" && libConfig.control_style != "custom") {
@@ -876,7 +870,7 @@ async function loadCss() {
  * @deprecated
  * @return {Promise<void>}
  */
-async function onWindowReady() { }
+async function onWindowReady() {}
 
 function setBackground() {
 	let htmlbg = localStorage.getItem(lib.configprefix + "background");

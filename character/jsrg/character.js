@@ -251,6 +251,7 @@ const characters = {
 		hp: 4,
 		names: "夏侯|恩",
 		skills: ["jsrghujian", "jsrgshili"],
+		trashBin: ["character:tw_xiahouen"],
 		dieAudios: ["tw_xiahouen"],
 	},
 	jsrg_fanjiangzhangda: {

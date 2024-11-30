@@ -6,7 +6,8 @@ const characterSort = {
 	tw_yunchouyong: ["tw_zongyu", "tw_chendong", "tw_sunyi"],
 	tw_yunchouyan: ["tw_jiangqing"],
 	tw_swordsman: ["xia_yuzhenzi", "xia_shie", "xia_shitao", "xia_guanyu", "xia_liubei", "xia_xiahousone", "xia_xiahoudun", "xia_zhangwei", "xia_xushu", "xia_wangyue", "xia_liyàn", "xia_tongyuan", "xia_lusu", "xia_dianwei", "xia_zhaoe", "xia_xiahouzie"],
-	tw_beidingzhongyuan: ["huan_luxun", "huan_liushan", "huan_zhugeliang", "huan_jiangwei", "huan_zhanghe", "huan_zhugeguo", "huan_weiyan", "huan_simayi", "huan_zhaoyun"],
+	tw_beiding: ["huan_luxun", "huan_liushan", "huan_zhugeliang", "huan_jiangwei", "huan_zhanghe", "huan_zhugeguo", "huan_weiyan", "huan_simayi", "huan_zhaoyun"],
+	tw_weiang: ["huan_liufeng", "huan_caoang"],
 	tw_mobile: ["nashime", "tw_gexuan", "tw_zhugeguo", "tw_yj_zhanghe"],
 	tw_standard: ["tw_zhangfei"],
 	tw_shenhua_yin: ['tw_yl_luzhi'],
@@ -19,7 +20,7 @@ const characterSort = {
 	tw_yijiang7: ["tw_xuezong"],
 	tw_yijiang: ["tw_caoang", "tw_caohong", "tw_zumao", "tw_dingfeng", "tw_maliang", "tw_xiahouba"],
 	tw_english: ["kaisa"],
-	tw_waitingforsort: ["huan_liufeng", "huan_caoang"],
+	tw_waitingforsort: [],
 };
 
 const characterSortTranslate = {
@@ -31,7 +32,8 @@ const characterSortTranslate = {
 	tw_yunchouyong: "运筹帷幄·勇",
 	tw_yunchouyan: "运筹帷幄·严",
 	tw_swordsman: "海外服·武侠篇",
-	tw_beidingzhongyuan: "海外服·北定中原",
+	tw_beiding: "海外服·北定中原",
+	tw_weiang: "海外服·魏昂龙兴",
 	tw_standard: "海外服异构·标准包",
 	tw_shenhua_yin: "海外服异构·难知如阴",
 	tw_shenhua_lei: "海外服异构·动如雷霆",
