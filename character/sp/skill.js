@@ -10835,7 +10835,7 @@ const skills = {
 		lose: false,
 		delay: 0.5,
 		check: function (card) {
-			if (get.type(card) == "equip") return 15 - get.value(card);
+			if (get.type(card) == "equip") return 10 - get.value(card);
 			return 7 - get.value(card);
 		},
 		content: function () {
@@ -10873,16 +10873,26 @@ const skills = {
 			threaten: 2.4,
 			expose: 0.1,
 			result: {
+				player: 1,
 				target: function (player, target) {
-					var cards = ui.selected.cards,
-						type = get.type2(cards[0]);
-					if (
-						target.countCards("he", card => {
-							return get.type(card) == type && get.value(card) <= 5;
-						}) >= cards.length
-					)
-						return 1;
-					return -1;
+					const cards = ui.selected.cards,
+						type = get.type2(cards[0]),
+						damage = get.damageEffect(target, player, target, "thunder");
+					if (player === target) {
+						if (target.countCards("he", card => {
+							return !cards.includes(card) && get.type(card) === type && get.value(card) < 6;
+						}) >= cards.length) return Math.max(2, damage);
+						return damage;
+					}
+					const he = target.getCards("he"), known = target.getKnownCards(player);
+					let num = 0;
+					if (type === "basic") num = 0.42;
+					else if (type === "equip") num = 0.1;
+					else if (type === "trick") num = 0.25;
+					if (known.filter(card => {
+						return get.type(card) === type && get.value(card) < 6;
+					}).length + (he - known.length) * num >= cards.length) return Math.max(3, damage);
+					return damage;
 				},
 			},
 		},

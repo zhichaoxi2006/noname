@@ -5233,7 +5233,7 @@ const skills = {
 				target: function (player, target) {
 					var num = target.countCards("h");
 					if (num <= 1) return -num;
-					if (get.attitude(player, target) > 0) return 1;
+					if (get.attitude(player, target) > 0 && !target.hasMark("dcjizhong")) return 1;
 					return -1 / (num / 2 + 1);
 				},
 			},
