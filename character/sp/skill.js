@@ -785,8 +785,7 @@ const skills = {
 								if (get.position(card) === "h" && _status.connectMode) return true;
 								return lib.filter.cardDiscardable(card, player);
 							}) >= 2 &&
-								player.isDamaged() &&
-								game.hasPlayer(target => target !== player && target.isDamaged()))
+								game.hasPlayer(target => target !== player))
 						);
 					},
 					async cost(event, trigger, player) {
@@ -804,7 +803,7 @@ const skills = {
 								},
 								ai2(target) {
 									const player = get.player();
-									return get.recoverEffect(target, player, player);
+									return get.recoverEffect(target, player, player) + get.recoverEffect(player, player, player);
 								},
 							})
 							.forResult();
