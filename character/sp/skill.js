@@ -7922,7 +7922,8 @@ const skills = {
 										if (card.name == "sha" && player.hasValueTarget(card)) return 10;
 										return -get.value(card);
 									})
-									.set("list", list);
+									.set("list", list)
+									.set("complexCard", true);
 							} else event.finish();
 						}
 					} else event.finish();
