@@ -396,8 +396,10 @@ const skills = {
 				.set("ai", target => {
 					const player = get.player();
 					let eff = get.effect(target, { name: "juedou" }, player, player),
-						shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count");
-					eff += shas > 0 ? get.effect(player, { name: "losehp" }, player, player) : get.effect(player, { name: "draw" }, player, player) * 2;
+						shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count"),
+						att = get.attitude(player, target);
+					if (shas > 0) eff += get.effect(player, { name: "losehp" }, player, player);
+					else if (att <= 0) eff += get.effect(player, { name: "draw" }, player, player) * 2;
 					return eff;
 				})
 				.forResult();
@@ -428,11 +430,11 @@ const skills = {
 					.set("ai", target => {
 						const player = get.player();
 						let eff = get.effect(target, { name: "juedou" }, player, player),
-							shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count");
-						if (shas > 0) {
-							const num = player.getRoundHistory("useCard", evt => evt.card?.storage?.twchenxun).length + 1;
-							eff += get.effect(player, { name: "losehp" }, player, player) * num;
-						} else eff += get.effect(player, { name: "draw" }, player, player) * 2;
+							shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count"),
+							att = get.attitude(player, target);
+						const num = player.getRoundHistory("useCard", evt => evt.card?.storage?.twchenxun).length + 1;
+						if (shas > 0) eff += get.effect(player, { name: "losehp" }, player, player) * num;
+						else if (att <= 0) eff += get.effect(player, { name: "draw" }, player, player) * 2;
 						return eff;
 					})
 					.set("targetsx", targetsx)

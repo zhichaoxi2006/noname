@@ -5,9 +5,7 @@ const skills = {
 	//乐周瑜
 	dcguyin: {
 		audio: 2,
-		trigger: {
-			global: ["loseAfter", "cardsDiscardAfter", "loseAsyncAfter", "gameDrawBegin"],
-		},
+		trigger: { global: ["loseAfter", "cardsDiscardAfter", "loseAsyncAfter", "gameDrawBegin"] },
 		filter(event, player) {
 			if (event.name == "gameDraw") return true;
 			else if (event.name.indexOf("lose") === 0) {
@@ -16,12 +14,12 @@ const skills = {
 				const evtx = event.getParent();
 				if (evtx.name !== "orderingDiscard") return true;
 				const evt2 = evtx.relatedEvent || evtx.getParent();
-				if (evt2.name != "useCard" || evt2.player == player) return false;
+				if (evt2.name != "useCard") return false;
 			}
+			const list = game.filterPlayer2(current => player != current).reduce((listx, i) => listx.addArray(i._start_cards), []);
 			return game.hasPlayer(current => {
-				if (player == current) return false;
 				const cards = event.name == "cardsDiscard" ? event.cards.filterInD("d") : event.getl(current)?.cards2 || [];
-				return cards.some(card => current._start_cards.includes(card));
+				return cards.some(card => list.includes(card));
 			});
 		},
 		forced: true,
