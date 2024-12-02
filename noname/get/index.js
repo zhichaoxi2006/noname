@@ -2715,10 +2715,17 @@ export class Get extends GetCompatible {
 		return get.translation(str);
 	}
 	skillInfoTranslation(name, player) {
-		if (player && lib.dynamicTranslate[name]) return lib.dynamicTranslate[name](player, name);
-		var str = lib.translate[name + "_info"];
-		if (!str) return "";
-		return str;
+		let str = (() => {
+			if (player && lib.dynamicTranslate[name]) return lib.dynamicTranslate[name](player, name);
+			const str = lib.translate[name + "_info"];
+			if (!str) return "";
+			return str;
+		})();
+		if (typeof str === "string") return str;
+		else {
+			console.warn(`孩子，你${name}的翻译传的是什么？！`);
+			return "";
+		}
 		// return str.replace(/锁定技/g,'<span class="yellowtext">锁定技</span>').
 		// 	replace(/限定技/g,'<span class="yellowtext">限定技</span>').
 		// 	replace(/觉醒技/g,'<span class="greentext">觉醒技</span>').

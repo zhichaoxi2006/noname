@@ -5307,7 +5307,7 @@ const skills = {
 						}
 					}
 					if (info.shaRelated === false) return false;
-					if (get.skillInfoTranslation(list[i], player).includes("【杀】")) return true;
+					if (get.plainText(get.skillInfoTranslation(list[i], player)).includes("【杀】")) return true;
 				}
 				return false;
 			};
