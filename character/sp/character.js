@@ -1,4 +1,5 @@
 const characters = {
+	ol_wuanguo: ["male", "qun", 4, ["olliyong"]],
 	ol_nanhualaoxian: ["male", "qun", 3, ["olqingshu", "olshoushu", "olhedao"]],
 	sp_ol_caocao: ["male", "qun", 4, ["spolxixiang", "spolaige"]],
 	ol_dongxie: ["female", "qun", "3/5", ["oljiaowei", "olbianyu", "olfengyao"]],
@@ -7,7 +8,7 @@ const characters = {
 	chenggongying: ["male", "qun", 4, ["olkuangxiang"], ["name:成公|英"]],
 	wangkuang: ["male", "qun", 4, ["olrenxia"]],
 	kongshu: ["female", "qun", 3, ["olleiluan", "olfuchao"]],
-	ol_kebineng: ["male", "qun", 4, ["olpingduan"], ["name:null|null"]],
+	ol_kebineng: ["male", "qun", 4, ["olpingduan"], ["name:科比|罐头"]],
 	ol_yuanji: ["female", "wu", 3, ["oljieyan", "oljinghua", "olshuiyue"], ["name:袁|null"]],
 	ol_sunru: ["female", "wu", 3, ["olchishi", "olweimian"]],
 	caoteng: ["male", "qun", 3, ["olyongzu", "olqingliu"]],

@@ -1850,6 +1850,7 @@ window.noname_character_rank = {
 		"hanlong",
 		"oldre_liubiao",
 		"wuanguo",
+		"ol_wuanguo",
 		"qiaorui",
 		"clan_wukuang",
 		"yeshiwen",
