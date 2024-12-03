@@ -16,8 +16,10 @@ const skills = {
 			result: { player: player => 1 - (player.hasSkill("dcbeijin_buff") && player.hasCard(card => card.hasGaintag("dcbeijin_effect"), "h")) },
 		},
 		locked: false,
-		aiValue(player, card, num) {
-			if (card.name === "zhangba") return num + 1145141919810;
+		mod: {
+			aiValue(player, card, num) {
+				if (card.name === "zhangba") return num + 1145141919810;
+			},
 		},
 		subSkill: {
 			effect: {
