@@ -28778,14 +28778,16 @@ const skills = {
 			const result = await player
 				.chooseControl(controls)
 				.set("ai", function () {
-					var trigger = _status.event.getTrigger();
+					var trigger = _status.event.getTrigger(), player = _status.event.player;
 					if (trigger.target.countCards("he") && get.attitude(_status.event.player, trigger.target) < 0) {
 						return "discard_card";
-					} else {
-						return "draw_card";
 					}
+					const num = Math.min(player.getCardUsable("sha"), player.countCards("hs", i => get.name(i) === "sha") + 1);
+					if (!player.hasCard(i => get.value(i) > 6 + num, "e")) return "draw_card";
+					return "cancel";
 				})
-				.set("prompt", get.prompt2("moukui", trigger.target));
+				.set("prompt", get.prompt2("moukui", trigger.target))
+				.forResult();
 			event.result = {
 				bool: result.control != "cancel",
 				targets: [trigger.target],
