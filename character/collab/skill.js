@@ -32,7 +32,7 @@ const skills = {
 				num = target.getHp();
 			player.markAuto(event.name, [target]);
 			await player.draw(num);
-			const [surname, name] = get.characterSurname(target.name)[0];
+			const [surname] = get.characterSurname(target.name)[0];
 			if (surname) {
 				game.broadcastAll(
 					(player, surname) => {
@@ -255,7 +255,7 @@ const skills = {
 						await target.changeSkills(["lijian"], [skill]);
 						game.broadcastAll(
 							(target, skill) => {
-								for (const name of [target.name, target.name1, target.name2]) {
+								for (const name of get.nameList(target)) {
 									if (get.character(name, 3).includes(skill)) {
 										get.character(name, 3).add("lijian");
 										get.character(name, 3).remove(skill);
