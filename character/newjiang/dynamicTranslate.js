@@ -34,7 +34,7 @@ const dynamicTranslates = {
 		if (storage) str += '<span class="bluetext">';
 		str += "阴，观看一名角色手牌并弃置其中至多X张牌，若弃置X张牌则你进行一次【闪电】判定。";
 		if (storage) str += "</span>";
-		return (str += "（X为你本回合失去牌数）");
+		return str + "（X为你本回合失去牌数）";
 	},
 	xiongjin(player) {
 		const storage = player.storage.xiongjin;
@@ -46,20 +46,7 @@ const dynamicTranslates = {
 		if (storage) str += '<span class="bluetext">';
 		str += "阴，其他角色的出牌阶段开始时，你可以令其摸X张牌，然后本回合的弃牌阶段开始时，其弃置所有基本牌";
 		if (storage) str += "</span>";
-		return (str += "（X为你已损失的体力值，至少为1，至多为3）。");
-	},
-	olliyong(player) {
-		const storage = player.storage.olliyong;
-		let str = "转换技，出牌阶段。";
-		if (!storage) str += '<span class="bluetext">';
-		str += "阳：你可以将一张你本回合未使用过的花色的牌当作【决斗】使用";
-		if (!storage) str += "</span>";
-		str += "；";
-		if (storage) str += '<span class="bluetext">';
-		str += "阴：你可以弃置一张你本回合已使用过的花色的牌，令一名角色视为对你使用【决斗】";
-		if (storage) str += "</span>";
-		str += "。";
-		return str;
+		return str + "（X为你已损失的体力值，至少为1，至多为3）。";
 	},
 };
 
