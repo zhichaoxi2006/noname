@@ -1301,6 +1301,7 @@ window.noname_character_rank = {
 		"re_lvmeng",
 		"re_huaxiong",
 		"ol_sb_huaxiong",
+		"ol_jsrg_lvbu",
 	],
 	b: [
 		"huan_caoang",
@@ -2081,6 +2082,7 @@ window.noname_character_rank = {
 			"ol_sb_dongzhuo",
 		],
 		epic: [
+			"ol_jsrg_lvbu",
 			"moqiongshu",
 			"sb_guojia",
 			"sb_zhangliao",
