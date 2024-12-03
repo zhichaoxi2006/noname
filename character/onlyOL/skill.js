@@ -280,10 +280,9 @@ const skills = {
 		enable: "phaseUse",
 		trigger: { global: "dying" },
 		filter(event, player) {
-			if (event.name === "dying" && game.getGlobalHistory("everything", evt => evt.name === "dying").indexOf(event) !== 0) return false;
 			const cards = event.name == "chooseToUse" ? event.olfengshang_cards || [] : get.info("olfengshang").getCards(player);
 			if (!lib.suit.some(suit => cards.filter(card => get.suit(card) == suit).length > 1)) return false;
-			return event.name != "chooseToUse" || !player.hasSkill("olfengshang_used", null, null, false);
+			return !player.hasSkill("olfengshang_" + (event.name === "chooseToUse" ? "used" : "round"), null, null, false);
 		},
 		onChooseToUse(event) {
 			if (!game.online && !event.olfengshang_cards) {
@@ -291,7 +290,7 @@ const skills = {
 			}
 		},
 		async content(event, trigger, player) {
-			if (!trigger) player.addTempSkill(event.name + "_used", "phaseUseAfter");
+			player.addTempSkill(event.name + (trigger ? "_round" : "_used"), trigger ? "phaseAfter" : "phaseUseAfter");
 			if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
 			const given_map = {};
 			event.given_map = given_map;
@@ -373,6 +372,7 @@ const skills = {
 		},
 		subSkill: {
 			used: { charlotte: true },
+			round: { charlotte: true },
 			clear: {
 				intro: {
 					content(storage, player) {
