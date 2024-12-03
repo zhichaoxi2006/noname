@@ -139,7 +139,7 @@ const skills = {
 						if (get.type(card) == "equip" && !player.hasSkill("shenji")) await player.addSkills("shenji");
 						if (["sha", "judou"].includes(get.name(card))) {
 							if (!player.hasSkill("wushuang")) await player.addSkills("wushuang");
-							if (get.position(event.card, true) == "o") await player.gain(event.card, "gain2");
+							if (get.position(card, true) == "o") await player.gain(card, "gain2");
 						}
 					});
 					await judgeEvent;
