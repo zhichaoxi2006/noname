@@ -1,4 +1,5 @@
 const characters = {
+	weiqing: ["male", "qun", 3, ["dcbeijin"]],
 	liuxiecaojie: ["male", "qun", 2, ["dcjuanlv", "dcqixin"], ["name:刘|协-曹|节"]],
 	dc_zhaoyun: ["male", "shen", 1, ["boss_juejing", "dclonghun", "dczhanjiang"], ["shu", "InitFilter:noZhuHp:noZhuSkill"]],
 	dc_sunce: ["male", "wu", 4, ["dcshuangbi"]],

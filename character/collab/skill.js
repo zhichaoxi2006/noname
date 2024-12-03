@@ -2,6 +2,70 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//卫青
+	dcbeijin: {
+		audio: 2,
+		enable: "phaseUse",
+		content() {
+			player.addSkill("dcbeijin_effect");
+			player.addTempSkill("dcbeijin_buff");
+			player.draw().gaintag = ["dcbeijin_effect"];
+		},
+		ai: {
+			order: 20,
+			result: { player: player => 1 - (player.hasSkill("dcbeijin_buff") && player.hasCard(card => card.hasGaintag("dcbeijin_effect"), "h")) },
+		},
+		locked: false,
+		aiValue(player, card, num) {
+			if (card.name === "zhangba") return num + 1145141919810;
+		},
+		subSkill: {
+			effect: {
+				charlotte: true,
+				mod: {
+					cardUsable(card) {
+						if (get.number(card) === "unsure" || card.cards?.some(card => card.hasGaintag("dcbeijin_buff"))) return Infinity;
+					},
+					aiOrder(player, card, num) {
+						if (player.hasSkill("dcbeijin_buff") && typeof card === "object") {
+							if (get.itemtype(card) === "card" || card.cards?.some(card => card.hasGaintag("dcbeijin_buff"))) return num + 100;
+							return num / (get.tag(card, "recover") ? 1 : 1145141919810);
+						}
+					},
+				},
+				trigger: { player: "useCard1" },
+				filter(event, player) {
+					return (
+						event.addCount !== false &&
+						player.hasHistory("lose", evt => {
+							if (evt.getParent() !== event) return false;
+							return Object.values(evt.gaintag_map).flat().includes("dcbeijin_effect");
+						})
+					);
+				},
+				forced: true,
+				popup: false,
+				firstDo: true,
+				content() {
+					trigger.addCount = false;
+					const stat = player.getStat().card,
+						name = trigger.card.name;
+					if (typeof stat[name] === "number") stat[name]--;
+				},
+			},
+			buff: {
+				charlotte: true,
+				trigger: { player: ["useCard", "dcbeijinBegin"] },
+				forced: true,
+				content() {
+					player.removeSkill(event.name);
+					if (player.hasCard(card => card.hasGaintag("dcbeijin_effect"))) player.loseHp();
+				},
+				mark: true,
+				intro: { content: "本回合下次使用牌时或发动【北进】时，若手牌中有因【北进】得到的牌，你失去1点体力" },
+			},
+		},
+	},
 	//姜子牙
 	xingzhou: {
 		audio: 2,
@@ -109,14 +173,12 @@ const skills = {
 						num2 = target.countCards("h") - map[2];
 					if (num1 > 0) {
 						eff += get.effect(target, { name: "losehp" }, target, target) * num1;
-					}
-					else if (num1 < 0) {
+					} else if (num1 < 0) {
 						eff -= get.recoverEffect(target, target, target) * num1;
 					}
 					if (num2 > 0) {
 						eff += get.effect(target, { name: "guohe_copy2" }, target, target) * num2;
-					}
-					else if (num2 < 0) {
+					} else if (num2 < 0) {
 						eff -= get.effect(target, { name: "draw" }, target, target) * num2;
 					}
 					if (Math.abs(eff) <= 5) return 0;
@@ -264,7 +326,7 @@ const skills = {
 					selectCard: -1,
 					position: "h",
 					suit: result.control,
-					filterTarget:lib.filter.notMe,
+					filterTarget: lib.filter.notMe,
 					discard: false,
 					lose: false,
 					async content(event, trigger, player) {
@@ -282,8 +344,8 @@ const skills = {
 							target(player, target) {
 								if (target.hasSkillTag("nogain")) return 0;
 								if (!ui.selected.cards?.length) return 0;
-								return ui.selected.cards.reduce((sum, card) => sum += get.value(card, target), 0);
-							}
+								return ui.selected.cards.reduce((sum, card) => (sum += get.value(card, target)), 0);
+							},
 						},
 					},
 				};
@@ -435,7 +497,7 @@ const skills = {
 		audio: 2,
 		trigger: { player: "phaseUseBegin" },
 		filter(event, player) {
-			return player.countExpansions("oldingxi") > (game.players.length + game.dead.length);
+			return player.countExpansions("oldingxi") > game.players.length + game.dead.length;
 		},
 		forced: true,
 		async content(event, trigger, player) {
@@ -446,7 +508,7 @@ const skills = {
 				await next;
 				if (player.hasHistory("damage", evt => evt.getParent(2) == next)) {
 					const cards = player.getExpansions("oldingxi");
-					if(cards.length) await player.gain(cards, player, "give");
+					if (cards.length) await player.gain(cards, player, "give");
 					break;
 				}
 			}
@@ -778,9 +840,11 @@ const skills = {
 			_status.characterlist.randomSort();
 			let characters = [];
 			for (let i = 0; i < _status.characterlist.length; i++) {
-				if (get.character(_status.characterlist[i], 3).some(skill => {
-					return lib.skill[skill] && !lib.skill[skill].charlotte;
-				})) {
+				if (
+					get.character(_status.characterlist[i], 3).some(skill => {
+						return lib.skill[skill] && !lib.skill[skill].charlotte;
+					})
+				) {
 					characters.push(_status.characterlist[i]);
 					if (characters.length >= 6) break;
 				}
@@ -790,12 +854,24 @@ const skills = {
 				last = characters.slice(characters.length / 2, 6);
 			const skills1 = [],
 				skills2 = [];
-			for (let i of first) skills1.push(get.character(i, 3).filter(skill => {
-				return lib.skill[skill] && !lib.skill[skill].charlotte;
-			}).randomGet());
-			for (let i of last) skills2.push(get.character(i, 3).filter(skill => {
-				return lib.skill[skill] && !lib.skill[skill].charlotte;
-			}).randomGet());
+			for (let i of first)
+				skills1.push(
+					get
+						.character(i, 3)
+						.filter(skill => {
+							return lib.skill[skill] && !lib.skill[skill].charlotte;
+						})
+						.randomGet()
+				);
+			for (let i of last)
+				skills2.push(
+					get
+						.character(i, 3)
+						.filter(skill => {
+							return lib.skill[skill] && !lib.skill[skill].charlotte;
+						})
+						.randomGet()
+				);
 			const result1 = await player
 				.chooseControl(skills1)
 				.set("dialog", ["无名：请选择姓氏", [first, "character"]])
@@ -3181,7 +3257,7 @@ const skills = {
 		animationColor: "fire",
 		unique: true,
 		limited: true,
-		audio: 2,
+		audio: "fenxin",
 		mark: true,
 		filter(event, player) {
 			if (player.storage.fenxin) return false;
