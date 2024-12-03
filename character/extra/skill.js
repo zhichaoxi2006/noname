@@ -5543,6 +5543,24 @@ const skills = {
 				}
 			}
 		},
+		ai: {
+			maixie_defend: true,
+			effect: {
+				target(card, player, target) {
+					if (player !== target && target.maxHp > 1 && target.countCards("h") > 0) {
+						if (get.tag(card, "damage") && target.hasSkill("yingba")) {
+							let damage = 1.6;
+							if (target.isHealthy()) damage += 1.6;
+							if (game.hasPlayer(cur => {
+								return cur !== target && get.attitude(target, cur) > 0;
+							})) damage -= 0.9;
+							return [0, -damage, 0, -0.4];
+						}
+						if (card.name === "tiesuo") return 0.4;
+					}
+				}
+			}
+		},
 	},
 	tianzuo: {
 		audio: 2,
