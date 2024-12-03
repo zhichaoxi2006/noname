@@ -6469,7 +6469,7 @@ const skills = {
 					target
 						.chooseTarget("达命：选择另一名其他角色", "若该角色有" + str + "牌，其将一张该类型的牌交给" + user + "，你获得1点“达命”值；否则你将" + get.translation(cards) + "交给" + user, (card, player, target) => {
 							return target != player && target != _status.event.getParent().player;
-						})
+						}, true)
 						.set("ai", target => 1 - get.attitude(_status.event.player, target));
 					"step 2";
 					if (result.bool) {
