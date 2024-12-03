@@ -11200,29 +11200,12 @@ const skills = {
 			}
 		},
 		init: function (player, skill) {
-			if (!player.storage[skill])
+			if (!player.storage[skill]) {
 				player.storage[skill] = {
 					character: [],
 					map: {},
 				};
-			player.when("dieBegin").then(() => {
-				const name = player.name ? player.name : player.name1;
-				if (name) {
-					const sex = get.character(name).sex;
-					const group = get.character(name).group;
-					if (player.sex != sex) {
-						game.broadcastAll(
-							(player, sex) => {
-								player.sex = sex;
-							},
-							player,
-							sex
-						);
-						game.log(player, "将性别变为了", "#y" + get.translation(sex) + "性");
-					}
-					if (player.group != group) player.changeGroup(group);
-				}
-			});
+			}
 		},
 		banned: ["lisu", "sp_xiahoudun", "xushao", "jsrg_xushao", "zhoutai", "old_zhoutai", "shixie", "xin_zhoutai", "dc_shixie", "old_shixie"],
 		bannedType: ["Charlotte", "主公技", "觉醒技", "限定技", "隐匿技", "使命技"],
@@ -11373,6 +11356,32 @@ const skills = {
 			onunmark: function (storage, player) {
 				_status.characterlist.addArray(storage.character);
 				storage.character = [];
+				const name = player.name ? player.name : player.name1;
+				if (name) {
+					const sex = get.character(name).sex;
+					const group = get.character(name).group;
+					if (player.sex !== sex) {
+						game.broadcastAll(
+							(player, sex) => {
+								player.sex = sex;
+							},
+							player,
+							sex
+						);
+						game.log(player, "将性别变为了", "#y" + get.translation(sex) + "性");
+					}
+					if (player.group !== group) {
+						game.broadcastAll(
+							(player, group) => {
+								player.group = group;
+								player.node.name.dataset.nature = get.groupnature(group);
+							},
+							player,
+							group
+						);
+						game.log(player, "将势力变为了", "#y" + get.translation(group + 2));
+					}
+				}
 			},
 			mark: function (dialog, storage, player) {
 				if (storage && storage.current) dialog.addSmall([[storage.current], (item, type, position, noclick, node) => lib.skill.rehuashen.$createButton(item, type, position, noclick, node)]);

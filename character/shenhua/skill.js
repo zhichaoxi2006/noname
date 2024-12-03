@@ -998,8 +998,8 @@ const skills = {
 					trigger.cancel();
 				},
 				ai: {
-					noLink:true,
-				}
+					noLink: true,
+				},
 			},
 			2: {
 				mod: {
@@ -4175,24 +4175,6 @@ const skills = {
 					owned: {},
 				};
 			}
-			player.when("dieBegin").then(() => {
-				const name = player.name ? player.name : player.name1;
-				if (name) {
-					const sex = get.character(name, 0);
-					const group = get.character(name, 1);
-					if (player.sex != sex) {
-						game.broadcastAll(
-							(player, sex) => {
-								player.sex = sex;
-							},
-							player,
-							sex
-						);
-						game.log(player, "将性别变为了", "#y" + get.translation(sex) + "性");
-					}
-					if (player.group != group) player.changeGroup(group);
-				}
-			});
 		},
 		intro: {
 			content(storage, player) {
@@ -4213,6 +4195,32 @@ const skills = {
 			onunmark(storage, player) {
 				_status.characterlist.addArray(Object.keys(storage.owned));
 				storage.owned = [];
+				const name = player.name ? player.name : player.name1;
+				if (name) {
+					const sex = get.character(name).sex;
+					const group = get.character(name).group;
+					if (player.sex !== sex) {
+						game.broadcastAll(
+							(player, sex) => {
+								player.sex = sex;
+							},
+							player,
+							sex
+						);
+						game.log(player, "将性别变为了", "#y" + get.translation(sex) + "性");
+					}
+					if (player.group !== group) {
+						game.broadcastAll(
+							(player, group) => {
+								player.group = group;
+								player.node.name.dataset.nature = get.groupnature(group);
+							},
+							player,
+							group
+						);
+						game.log(player, "将势力变为了", "#y" + get.translation(group + 2));
+					}
+				}
 			},
 			mark(dialog, content, player) {
 				const list = Object.keys(content.owned);
@@ -7206,7 +7214,8 @@ const skills = {
 			event.result = await player
 				.chooseBool(get.prompt("fenji", target), "失去1点体力，令该角色摸两张牌")
 				.set("ai", function () {
-					const player = get.event("player"), target = get.event("target");
+					const player = get.event("player"),
+						target = get.event("target");
 					if (get.attitude(player, target) <= 0) return false;
 					return 2 * get.effect(target, { name: "draw" }, player, player) + get.effect(player, { name: "losehp" }, player, player) > 0;
 				})
