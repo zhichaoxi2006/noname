@@ -15,7 +15,7 @@ const skills = {
 			const { target } = trigger,
 				num = target.getAttackRange() - player.getAttackRange();
 			if (num <= 0) {
-				trigger.num++;
+				trigger.getParent().baseDamage++;
 				await player.gainPlayerCard(target, "h", true);
 			}
 			if (num >= 0) {
