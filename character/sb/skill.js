@@ -281,6 +281,7 @@ const skills = {
 						return 0;
 					},
 					yiji: yiji,
+					position: "eh".slice(-1 + (!["identity", "doudizhu"].includes(mode) && name === "dying")),//三若为，怎么若都为构思
 				});
 				if (bool) {
 					num -= cards.length;
@@ -3483,6 +3484,7 @@ const skills = {
 				return "出牌阶段限一次，你可以弃置一张与“任”颜色相同的牌并对攻击范围内的一名角色造成1点伤害。";
 			},
 		},
+		trigger: { global: ["useCardAfter", "respondAfter"] },
 		filter(event, player) {
 			const cards = player.getExpansions("nzry_mingren");
 			if (!cards.length) return false;
