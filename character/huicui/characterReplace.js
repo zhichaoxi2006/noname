@@ -7,6 +7,7 @@ const characterReplaces = {
 	mamidi: ["mamidi", "xin_mamidi"],
 	re_chunyuqiong: ["re_chunyuqiong", "chunyuqiong", "jsrg_chunyuqiong"],
 	chengui: ["chengui", "mb_chengui"],
+	qinlang: ["qinlang", "ol_qinlang"],
 };
 
 export default characterReplaces;

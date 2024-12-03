@@ -43,7 +43,7 @@ const skills = {
 					player,
 					surname
 				);
-			} else player.chat("不是，连姓也没有？");
+			} else player.chat("不是，连姓也没有？什么罐头我说！");
 		},
 		intro: { content: "当前的义父有：$" },
 	},

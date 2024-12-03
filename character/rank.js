@@ -396,6 +396,7 @@ window.noname_character_rank = {
 		"new_simayi",
 		"ol_sb_dongzhuo",
 		"ol_sb_dengai",
+		"ol_qinlang",
 	],
 	am: [
 		"moqiongshu",
@@ -2458,6 +2459,7 @@ window.noname_character_rank = {
 			"niufu",
 		],
 		rare: [
+			"ol_qinlang",
 			"ol_sb_dengai",
 			"yue_zhouyu",
 			"huan_caoang",

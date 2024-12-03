@@ -1418,6 +1418,10 @@ const translates = {
 	olqingshu_info: "锁定技，游戏开始时/准备阶段/结束阶段，你书写一册“天书”。",
 	olshoushu: "授术",
 	olshoushu_info: "出牌阶段限一次，你可以将一册未发动过的“天书”交给一名其他角色（此“天书”其仅可发动一次）。",
+	ol_qinlang: "OL秦朗",
+	ol_qinlang_prefix: "OL",
+	olxianying: "贤膺",
+	olxianying_info: "准备阶段或当你受到伤害后，你可以摸两张牌并弃置任意张牌（不能为本轮以此法弃置过的张数）。然后若你以此法弃置的牌名相同，你可以于本回合结束时视为使用之。",
 };
 
 export default translates;
