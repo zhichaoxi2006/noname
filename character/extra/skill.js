@@ -5485,21 +5485,6 @@ const skills = {
 				return player.getDamagedHp();
 			},
 		},
-		ai: {
-			effect: {
-				target(card, player, target) {
-					if (get.tag(card, "recover") && _status.event.type == "phase" && !player.needsToDiscard()) return 0;
-					if (card.name === "tiesuo" && target.maxHp > 1) return 0.1;
-					if (get.tag(card, "damage") && target.maxHp > 1 && player !== target && target.countCards("h") > 0) {
-						let fs = game.findPlayer(cur => {
-							return cur !== target && get.attitude(target, cur) > 0;
-						});
-						if (fs) return [0, -player.hp / player.maxHp, 0, 0];
-						return [0, -1 - player.hp / player.maxHp, 0, 1];
-					}
-				},
-			},
-		},
 		trigger: { player: "damageBegin2" },
 		forced: true,
 		filter(event, player) {
@@ -5558,6 +5543,7 @@ const skills = {
 						}
 						if (card.name === "tiesuo") return 0.4;
 					}
+					if (get.tag(card, "recover") && _status.event.type == "phase" && !player.needsToDiscard()) return 0;
 				}
 			}
 		},
