@@ -5447,22 +5447,35 @@ const skills = {
 		audio: 2,
 		trigger: { target: "useCardToTargeted" },
 		filter(event, player) {
-			return get.color(event.card) == "black";
+			return get.color(event.card) == "black" && player.maxHp > player.countMark("dcmoshou");
 		},
 		frequent: true,
 		prompt2(event, player) {
 			const num = player.maxHp - player.countMark("dcmoshou");
-			return num <= 0 ? "重置【墨守】摸牌数" : "摸" + get.cnNumber(num) + "张牌";
+			let info = "摸" + get.cnNumber(num) + "张牌";
+			if (num === 1) info += "，然后重置【墨守】摸牌数";
+			else if (num > 1) info += "，然后令你下次以此法摸的牌数-1";
+			return info;
 		},
 		async content(event, trigger, player) {
 			const { name: mark } = event;
 			let num = player.maxHp - player.countMark(mark);
 			if (num > 1) {
 				player.addMark(mark, 1, false);
-			} else {
+			} else if (num > 1) {
 				player.clearMark(mark, false);
 			}
 			if (num > 0) await player.draw(num);
+		},
+		ai: {
+			effect: {
+				target_use(card, player, target) {
+					if (typeof card === "object" && get.color(card) === "black") {
+						const num = target.maxHp - target.countMark("dcmoshou");
+						return [1, 0.6 * num];
+					}
+				}
+			}
 		},
 		onremove: true,
 		intro: {
