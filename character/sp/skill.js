@@ -11671,7 +11671,7 @@ const skills = {
 			)
 				event.draw = true;
 			else {
-				target.chooseToDiscard("h", true, "效死：弃置一张基本牌", { type: "basic" });
+				target.chooseToDiscard("h", true, "效死：弃置一张基本牌", i => get.type(i, null, player) === "basic");
 			}
 			"step 1";
 			var cards2 = cards.slice(0);
@@ -24134,11 +24134,13 @@ const skills = {
 	},
 	zhanyi_basic_tao: {
 		enable: "chooseToUse",
-		filterCard: { type: "basic" },
+		filterCard(card, player) {
+			return get.type(card, null, player) === "basic";
+		},
 		viewAs: { name: "tao" },
 		sourceSkill: "zhanyi",
 		viewAsFilter: function (player) {
-			if (!player.countCards("h", { type: "basic" })) return false;
+			if (!player.countCards("h", i => get.type(i, null, player) === "basic")) return false;
 		},
 		prompt: "将一张基本牌当桃使用",
 		check: function (card) {
@@ -24146,18 +24148,20 @@ const skills = {
 		},
 		ai: {
 			skillTagFilter: function (player) {
-				if (!player.countCards("h", { type: "basic" })) return false;
+				if (!player.countCards("h", i => get.type(i, null, player) === "basic")) return false;
 			},
 			save: true,
 		},
 	},
 	zhanyi_basic_sha: {
 		enable: "chooseToUse",
-		filterCard: { type: "basic" },
+		filterCard(card, player) {
+			return get.type(card, null, player) === "basic";
+		},
 		viewAs: { name: "sha" },
 		sourceSkill: "zhanyi",
 		viewAsFilter: function (player) {
-			if (!player.countCards("h", { type: "basic" })) return false;
+			if (!player.countCards("h", i => get.type(i, null, player) === "basic")) return false;
 		},
 		prompt: "将一张基本牌当杀使用",
 		check: function (card) {
@@ -24165,18 +24169,20 @@ const skills = {
 		},
 		ai: {
 			skillTagFilter: function (player) {
-				if (!player.countCards("h", { type: "basic" })) return false;
+				if (!player.countCards("h", i => get.type(i, null, player) === "basic")) return false;
 			},
 			respondSha: true,
 		},
 	},
 	zhanyi_basic_jiu: {
 		enable: "chooseToUse",
-		filterCard: { type: "basic" },
+		filterCard(card, player) {
+			return get.type(card, null, player) === "basic";
+		},
 		viewAs: { name: "jiu" },
 		sourceSkill: "zhanyi",
 		viewAsFilter: function (player) {
-			if (!player.countCards("h", { type: "basic" })) return false;
+			if (!player.countCards("h", i => get.type(i, null, player) === "basic")) return false;
 		},
 		prompt: "将一张基本牌当酒使用",
 		check: function (card) {
@@ -24185,7 +24191,7 @@ const skills = {
 		},
 		ai: {
 			skillTagFilter: function (player) {
-				return player.countCards("h", { type: "basic" }) > 0 && player.hp <= 0;
+				return player.countCards("h", i => get.type(i, null, player) === "basic") > 0 && player.hp <= 0;
 			},
 			save: true,
 		},
@@ -25988,13 +25994,13 @@ const skills = {
 		audio: 2,
 		preHidden: true,
 		filter: function (event, player) {
-			return player.countCards("he", { type: "basic" }) < player.countCards("he");
+			return player.countCards("he", i => get.type(i) === "basic") < player.countCards("he");
 		},
 		marktext: "兵",
 		content: function () {
 			"step 0";
 			player
-				.chooseCard([1, player.countCards("he") - player.countCards("he", { type: "basic" })], "he", get.prompt("yinbing"), function (card) {
+				.chooseCard([1, player.countCards("he") - player.countCards("he", i => get.type(i) === "basic")], "he", get.prompt("yinbing"), function (card) {
 					return get.type(card) != "basic";
 				})
 				.set("ai", function (card) {
@@ -33729,7 +33735,7 @@ const skills = {
 		mod: {
 			aiOrder(player, card, num) {
 				if (get.tag(card, "multitarget")) {
-					if (player.countCards("h", { type: "basic" })) return num / 10;
+					if (player.countCards("h", i => get.type(i, null, player) === "basic")) return num / 10;
 					return num * 10;
 				}
 				if (get.type(card) === "basic") return num + 10;
@@ -33764,7 +33770,7 @@ const skills = {
 		filter: function (event, player) {
 			if (get.type(event.card) == "equip") return false;
 			if (event.getParent().triggeredTargets3.length > 1) return false;
-			return event.targets.length > 0 && !player.countCards("h", { type: "basic" });
+			return event.targets.length > 0 && !player.countCards("h", i => get.type(i, null, player) === "basic");
 		},
 		content: function () {
 			player.draw(trigger.targets.length);
@@ -33858,7 +33864,7 @@ const skills = {
 		ai: {
 			result: {
 				target(player, target) {
-					if (player.countCards("hes", "zhangba")) return player.countCards("h", { type: "basic" });
+					if (player.countCards("hes", "zhangba")) return player.countCards("h", i => get.type(i, null, player) === "basic");
 					let res = lib.card.lebu.ai.result.target(player, target);
 					if (player.countCards("hs", "sha") >= player.hp) res++;
 					if (target.isDamaged()) return res + 2 * Math.abs(get.recoverEffect(target, player, target));

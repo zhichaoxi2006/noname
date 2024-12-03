@@ -9808,7 +9808,7 @@ const skills = {
 		mod: {
 			aiOrder(player, card, num) {
 				if (get.tag(card, "multitarget")) {
-					if (player.countCards("h", { type: "basic" })) return num / 10;
+					if (player.countCards("h", i => get.type2(i, player) === "basic")) return num / 10;
 					return num * 10;
 				}
 				if (get.type(card) === "basic") return num + 10;
@@ -9844,7 +9844,7 @@ const skills = {
 			return event.targets.length > 0;
 		},
 		check: function (event, player) {
-			return !player.countCards("h", { type: "basic" });
+			return !player.countCards("h", i => get.type2(i, player) === "basic");
 		},
 		locked: false,
 		frequent: true,
@@ -9852,7 +9852,7 @@ const skills = {
 			"step 0";
 			player.showHandcards();
 			"step 1";
-			if (player.countCards("h", { type: "basic" })) event.finish();
+			if (player.countCards("h", i => get.type2(i, player) === "basic")) event.finish();
 			else player.chooseBool("图射：是否摸" + get.cnNumber(trigger.targets.length) + "张牌？").set("ai", () => 1);
 			"step 2";
 			if (result.bool) {
