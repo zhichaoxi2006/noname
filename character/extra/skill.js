@@ -5373,7 +5373,10 @@ const skills = {
 		locked: false,
 		//global:'yingba_mark',
 		ai: {
-			threaten: 3,
+			threaten(player, target) {
+				if (player === target || player.isDamaged() || get.attitude(player, target) > 0) return 1;
+				return 8 / player.maxHp;
+			},
 			order: 11,
 			result: {
 				player(player, target) {
