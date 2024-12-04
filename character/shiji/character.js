@@ -23,7 +23,7 @@ const characters = {
 	sp_xujing: ["male", "shu", 3, ["boming", "ejian"]],
 	sp_huaxin: ["male", "wei", 3, ["yuanqing", "shuchen"]],
 	xiangchong: ["male", "shu", 4, ["guying", "muzhen"]],
-	caizhenji: ["female", "wei", 3, ["sheyi", "tianyin"]],
+	caizhenji: ["female", "wei", 3, ["sheyi", "tianyin"], ["name:蔡|null"]],
 	sp_kongrong: ["male", "qun", 3, ["xinlirang", "xinmingshi"]],
 	zhouchu: ["male", "wu", 4, ["xianghai", "rechuhai"]],
 	wangfuzhaolei: ["male", "shu", 4, ["xunyi"], ["name:王|甫-赵|累"]],

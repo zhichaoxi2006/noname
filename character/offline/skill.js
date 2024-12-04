@@ -6439,20 +6439,15 @@ const skills = {
 				audio: "jdsbxuanhuo",
 				inherit: "sbxuanhuo_rob",
 				filter(event, player, name, target) {
-					const evt = event.getParent("phaseDraw");
-					if (evt && evt.name == "phaseDraw") return false;
-					if (!event.getg(target).length || !target.hasMark("jdsbxuanhuo_mark")) return false;
-					if (evt && evt.player == target) return false;
-					if (lib.skill.sbxuanhuo.getNum(target, "jdsbxuanhuo_rob", "jdsbxuanhuo_mark") >= 5) return false;
-					return target.hasCard(card => lib.filter.canBeGained(card, target, player), "he");
+					return target?.isIn();
 				},
 				getIndex(event, player) {
 					const evt = event.getParent("phaseDraw");
-					if (evt && evt.name == "phaseDraw") return false;
+					if (evt?.name == "phaseDraw") return false;
 					return game
 						.filterPlayer(current => {
 							if (!event.getg(current).length || !current.hasMark("jdsbxuanhuo_mark")) return false;
-							if (evt && evt.player == current) return false;
+							if (evt?.player == current) return false;
 							if (lib.skill.sbxuanhuo.getNum(current, "jdsbxuanhuo_rob", "jdsbxuanhuo_mark") >= 5) return false;
 							return current.hasCard(card => lib.filter.canBeGained(card, current, player), "he");
 						})
@@ -6475,7 +6470,7 @@ const skills = {
 		audio: "sbenyuan",
 		inherit: "sbenyuan",
 		filter(event, player, name, target) {
-			return target?.isIn() && target.hasMark("jdsbxuanhuo_mark");
+			return target?.isIn();
 		},
 		getIndex(event, player) {
 			return game.filterPlayer(target => target.hasMark("jdsbxuanhuo_mark")).sortBySeat();
@@ -6491,7 +6486,9 @@ const skills = {
 					current.unmarkSkill("jdsbxuanhuo");
 				}
 			}
-			if (target.countCards("h") < player.countCards("h")) {
+			const bool = target.countCards("h") < player.countCards("h");
+			player.logSkill("jdsbenyuan", target, null, null, [bool ? 1 : 2]);
+			if (bool) {
 				const num = Math.min(player.countCards("he"), 2);
 				if (num) await player.chooseToGive(target, `恩怨：交给${get.translation(target)}${get.cnNumber(num)}张牌`, true, num, "he");
 			} else {
