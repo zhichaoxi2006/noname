@@ -830,9 +830,7 @@ const skills = {
 	},
 	twniwo: {
 		audio: 2,
-		trigger: {
-			player: "phaseUseBegin",
-		},
+		trigger: { player: "phaseUseBegin" },
 		filter(event, player) {
 			return (
 				player.countCards("h") &&
@@ -843,11 +841,9 @@ const skills = {
 		},
 		async cost(event, trigger, player) {
 			event.result = await player
-				.chooseTarget(
-					get.prompt2(event.name.slice(0, -5), (card, player, current) => {
-						return current != player && current.countCards("h");
-					})
-				)
+				.chooseTarget(get.prompt2(event.name.slice(0, -5)), (card, player, current) => {
+					return current != player && current.countCards("h");
+				})
 				.set("ai", target => {
 					return -get.attitude(get.player(), target) / (target.countCards("h") + 1);
 				})
