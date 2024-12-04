@@ -13,67 +13,72 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			await player.draw(2);
-			if (!player.hasCard(card => lib.filter.cardDiscardable(card, player, "olxianying"), "he")) return;
+			const hs = player.getCards("he", card => lib.filter.cardDiscardable(card, player, "olxianying"));
+			if (!hs.length) return;
 			const record = event.name + "_record",
 				effect = event.name + "_effect",
 				storage = player.getStorage(record),
-				forced = storage.includes(0);
-			player.addTempSkill(record, "roundStart");
-			const {
-				result: { bool, cards },
-			} = await player
-				.chooseToDiscard("he", [1, Infinity], get.prompt(event.name), `你可以弃置任意张牌，若这些牌同名，则本回合结束时你可以视为使用之${storage.length ? `（本轮已弃置过的牌数：${storage}）` : ``}`)
-				.set("filterOk", () => {
-					return !get.event("storage").includes(ui.selected.cards.length);
-				})
-				.set("storage", storage)
-				.set("forced", forced)
-				.set("ai", card => {
-					const { player, storage, names } = get.event();
-					let choices = Array.from({ length: 4 })
-						.map((_, i) => i)
-						.filter(i => !storage.includes(i));
-					const list = names.filter(i => i[1] > choices.remove(0)[0]).map(i => i[0]);
-					if (list.length) {
-						let num = choices.remove(0)[0];
-						if (ui.selected.cards.length >= num) return 0;
-						if (!list.includes(get.name(card, player))) return 0;
-						return 15 - get.value(card);
-					} else {
-						let num = choices[0];
-						if (ui.selected.cards.length >= num) return 0;
-						return 6 - get.value(card);
-					}
-				})
-				.set(
-					"names",
-					(function () {
-						const hs = player.getCards("he", card => {
-							if (!lib.filter.cardDiscardable(card, player)) return false;
-							return player.hasValueTarget(card) && ["basic", "trick"].includes(get.type(card));
-						});
-						return hs
-							.map(i => get.name(i, player))
-							.reduce((arr, name) => {
-								const index = arr.find(item => item[0] == name);
-								if (!index) arr.push([name, 1]);
-								else index[1]++;
-								return arr;
-							}, [])
-							.sort((a, b) => b[1] - a[1]);
-					})()
-				);
-			if (bool) {
-				player.markAuto(record, [cards.length]);
-				player.storage[record].sort((a, b) => a - b);
-				const names = cards.map(card => get.name(card, player)).toUniqued();
-				if (names.length != 1 || !["basic", "trick"].includes(get.type(names[0]))) return;
-				player.addTempSkill(effect);
-				player.storage[effect].push(names[0]);
-				player.markSkill(effect);
-			} else {
-				if (!forced) player.markAuto(record, [0]);
-				player.storage[record].sort((a, b) => a - b);
+				forced = storage.includes(0),
+				choices = Array.from({ length: hs.length + 1 })
+					.map((_, i) => i)
+					.filter(i => !storage.includes(i));
+			if (hs.length < choices[0]) await player.discard(hs);
+			else {
+				player.addTempSkill(record, "roundStart");
+				const {
+					result: { bool, cards },
+				} = await player
+					.chooseToDiscard("he", [1, Infinity], get.prompt(event.name), `你可以弃置任意张牌，若这些牌同名，则本回合结束时你可以视为使用之${storage.length ? `（本轮已弃置过的牌数：${storage}）` : ``}`)
+					.set("filterOk", () => {
+						return !get.event("storage").includes(ui.selected.cards.length);
+					})
+					.set("storage", storage)
+					.set("choices", choices)
+					.set("forced", forced)
+					.set("ai", card => {
+						const { player, storage, names, choices } = get.event();
+						const list = names.filter(i => i[1] > choices.remove(0)[0]).map(i => i[0]);
+						if (list.length) {
+							let num = choices.remove(0)[0];
+							if (ui.selected.cards.length >= num) return 0;
+							if (!list.includes(get.name(card, player))) return 0;
+							return 15 - get.value(card);
+						} else {
+							let num = choices[0];
+							if (ui.selected.cards.length >= num) return 0;
+							return 6 - get.value(card);
+						}
+					})
+					.set(
+						"names",
+						(function () {
+							const hs = player.getCards("he", card => {
+								if (!lib.filter.cardDiscardable(card, player)) return false;
+								return player.hasValueTarget(card) && ["basic", "trick"].includes(get.type(card));
+							});
+							return hs
+								.map(i => get.name(i, player))
+								.reduce((arr, name) => {
+									const index = arr.find(item => item[0] == name);
+									if (!index) arr.push([name, 1]);
+									else index[1]++;
+									return arr;
+								}, [])
+								.sort((a, b) => b[1] - a[1]);
+						})()
+					);
+				if (bool) {
+					player.markAuto(record, [cards.length]);
+					player.storage[record].sort((a, b) => a - b);
+					const names = cards.map(card => get.name(card, player)).toUniqued();
+					if (names.length != 1 || !["basic", "trick"].includes(get.type(names[0]))) return;
+					player.addTempSkill(effect);
+					player.storage[effect].push(names[0]);
+					player.markSkill(effect);
+				} else {
+					if (!forced) player.markAuto(record, [0]);
+					player.storage[record].sort((a, b) => a - b);
+				}
 			}
 		},
 		ai: {
