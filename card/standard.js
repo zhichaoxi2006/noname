@@ -3428,7 +3428,7 @@ game.import("card", function () {
 					map.id2 = trigger.getParent().id;
 					event._global_waiting = true;
 					//发送函数
-					event.send = function (player, map, skillState) {
+					event.send = function (player, map, skillState, eventData) {
 						//获取技能数据
 						if (skillState) {
 							player.applySkills(skillState);
@@ -3552,6 +3552,11 @@ game.import("card", function () {
 						} else {
 							next.nouse = true;
 						}
+						if (eventData) {
+							for (let key in eventData) {
+								if (next[key] === undefined) next[key] = eventData[key];
+							}
+						}
 					};
 					"step 1";
 					//判断谁有无懈
@@ -3626,8 +3631,20 @@ game.import("card", function () {
 					for (var i = 0; i < list.length; i++) {
 						if (list[i].isOnline()) {
 							withol = true;
+							const onchooseToUse_data = list[i].chooseToUse();
+							onchooseToUse_data.setContent(async function () {});
+							event.next.remove(onchooseToUse_data);
+							var skills = list[i].getSkills("invisible").concat(lib.skill.global);
+							game.expandSkills(skills);
+							for (let skill of skills) {
+								var info = lib.skill[skill];
+								if (info?.onChooseToUse) {
+									info.onChooseToUse(onchooseToUse_data);
+								}
+							}
+							onchooseToUse_data.cancel();
 							list[i].wait(sendback);
-							list[i].send(event.send, list[i], event._info_map, get.skillState(list[i]));
+							list[i].send(event.send, list[i], event._info_map, get.skillState(list[i]), onchooseToUse_data);
 							list.splice(i--, 1);
 						} else if (list[i] == game.me) {
 							withme = true;
