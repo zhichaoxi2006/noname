@@ -5460,12 +5460,12 @@ const skills = {
 		async content(event, trigger, player) {
 			const { name: mark } = event;
 			let num = player.maxHp - player.countMark(mark);
+			if (num > 0) await player.draw(num);
 			if (num > 1) {
 				player.addMark(mark, 1, false);
-			} else if (num > 1) {
+			} else if (num === 1) {
 				player.clearMark(mark, false);
 			}
-			if (num > 0) await player.draw(num);
 		},
 		ai: {
 			effect: {
@@ -5478,6 +5478,7 @@ const skills = {
 			}
 		},
 		onremove: true,
+		mark: true,
 		intro: {
 			markcount: (storage, player) => player.maxHp - player.countMark("dcmoshou"),
 			content: (storage, player) => `下次【墨守】摸牌数：${player.maxHp - player.countMark("dcmoshou")}`,
