@@ -1587,7 +1587,7 @@ const skills = {
 				charlotte: true,
 				silent: true,
 				filter(event, player) {
-					return event.source.hasSkill("hm_zongfu_lose");
+					return event.source?.hasSkill("hm_zongfu_lose");
 				},
 				async content(event, trigger, player) {
 					await player.useSkill("hm_fudao");
