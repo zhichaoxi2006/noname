@@ -4,7 +4,7 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 const skills = {
 	//OL南华老仙
 	olhedao: {
-		audio: 2,
+		audio: 3,
 		trigger: {
 			global: "phaseBefore",
 			player: ["enterGame", "dying"],
@@ -966,7 +966,7 @@ const skills = {
 		},
 	},
 	olqingshu: {
-		audio: 2,
+		audio: 3,
 		trigger: {
 			global: "phaseBefore",
 			player: ["enterGame", "phaseZhunbeiBegin", "phaseJieshuBegin"],
@@ -1044,7 +1044,7 @@ const skills = {
 		derivation: "olhedao_faq",
 	},
 	olshoushu: {
-		audio: 2,
+		audio: 3,
 		enable: "phaseUse",
 		filter(event, player) {
 			return (
@@ -1383,6 +1383,7 @@ const skills = {
 		},
 	},
 	olfengyao: {
+		audio: 2,
 		trigger: {
 			source: "damageBegin1",
 			global: ["loseAfter", "loseAsyncAfter", "gainAfter", "equipAfter", "addJudgeAfter", "addToExpansionAfter"],

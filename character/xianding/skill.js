@@ -214,6 +214,7 @@ const skills = {
 	},
 	//庞凤衣
 	dcyitong: {
+		audio: 2,
 		trigger: {
 			global: ["phaseBefore", "loseAfter", "loseAsyncAfter", "cardsDiscardAfter"],
 			player: "enterGame",
@@ -286,6 +287,7 @@ const skills = {
 		intro: { content: "已记录$花色" },
 	},
 	dcpeiniang: {
+		audio: 2,
 		mod: {
 			cardUsable(card) {
 				if (card?.storage?.dcpeiniang) return Infinity;
@@ -594,6 +596,7 @@ const skills = {
 		},
 		subSkill: {
 			effect: {
+				audio: "dcsbyaozuo",
 				onremove: true,
 				charlotte: true,
 				mark: true,

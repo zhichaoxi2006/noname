@@ -2177,7 +2177,8 @@ const skills = {
 	},
 	dcfencheng: {
 		audio: 2,
-		audioname: ["ol_liru", "ol_sb_dongzhuo"],
+		audioname: ["ol_liru"],
+		audioname2: { ol_sb_dongzhuo: "dcfencheng_ol_sb_dongzhuo" },
 		enable: "phaseUse",
 		filterTarget: lib.filter.notMe,
 		limited: true,
@@ -2215,6 +2216,7 @@ const skills = {
 				}
 			}
 		},
+		subSkill: { ol_sb_dongzhuo: { audio: 1 } },
 		ai: {
 			order: 1,
 			result: {

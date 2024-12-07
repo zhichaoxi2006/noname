@@ -5232,7 +5232,7 @@ const skills = {
 	},
 	benghuai: {
 		audio: 2,
-		audioname: ["re_dongzhuo", "ol_dongzhuo", "re_zhugedan", "ol_sb_dongzhuo"],
+		audioname: ["re_dongzhuo", "ol_dongzhuo", "re_zhugedan"],
 		audioname2: { zhugedan: "benghuai_zhugedan" },
 		trigger: { player: "phaseJieshuBegin" },
 		forced: true,
