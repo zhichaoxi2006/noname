@@ -2,6 +2,274 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//战神吕布
+	olfengzhu: {
+		audio: 1,
+		trigger: { player: "phaseZhunbeiBegin" },
+		filter(event, player) {
+			return game.hasPlayer(current => player != current && current.hasSex("male") && !player.getStorage("olfengzhu").includes(current));
+		},
+		async cost(event, trigger, player) {
+			event.result = await player
+				.chooseTarget(
+					(card, player, target) => {
+						return player != target && target.hasSex("male") && !player.getStorage("olfengzhu").includes(target);
+					},
+					"逢主：义父你在哪儿？",
+					lib.translate.olfengzhu_info,
+					true
+				)
+				.set("ai", target => {
+					const player = get.player();
+					const att = get.attitude(player, target),
+						num = target.getHp();
+					return (-att + 0.1) * get.effect(player, { name: "draw" }, player, player) * num;
+				})
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			const target = event.targets[0],
+				num = target.getHp();
+			player.markAuto(event.name, [target]);
+			await player.draw(num);
+			const [surname] = get.characterSurname(target.name)[0];
+			if (surname) {
+				game.broadcastAll(
+					(player, surname) => {
+						if (player.name == "ol_jsrg_lvbu" || player.name1 == "ol_jsrg_lvbu") player.node.name.innerHTML = `战神${surname}布`;
+						if (player.name2 == "ol_jsrg_lvbu") player.node.name2.innerHTML = `战神${surname}布`;
+						lib.character.ol_jsrg_lvbu.names = lib.character.ol_jsrg_lvbu.names + `-${surname}|布`;
+					},
+					player,
+					surname
+				);
+			} else player.chat("不是，连姓也没有？什么罐头我说！");
+		},
+		intro: { content: "当前的义父有：$" },
+	},
+	olyuyu: {
+		audio: 1,
+		trigger: { player: "phaseEnd" },
+		filter(event, player) {
+			return game.hasPlayer(current => player.getStorage("olfengzhu").includes(current));
+		},
+		locked: true,
+		async cost(event, trigger, player) {
+			event.result = await player
+				.chooseTarget(
+					get.prompt(event.name.slice(0, -5)),
+					(card, player, target) => {
+						return player.getStorage("olfengzhu").includes(target);
+					},
+					"选择一名义父，令其饮恨",
+					true
+				)
+				.set("ai", target => {
+					const player = get.player();
+					return -get.attitude(player, target);
+				})
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			const {
+				targets: [target],
+				name,
+			} = event;
+			target.addMark(name);
+			player.addSkill(name + "_effect");
+			player.markAuto(name + "_effect", [target]);
+		},
+		marktext: "恨",
+		intro: {
+			name: "恨(玉玉)",
+			name2: "恨",
+			content: "mark",
+		},
+		ai: { combo: "olfengzhu" },
+		subSkill: {
+			effect: {
+				charlotte: true,
+				onremove: true,
+				intro: { content: "于$回合内受到1点伤害或失去一张牌后，其获得1枚“恨“标记" },
+				trigger: {
+					player: ["loseAfter", "damageEnd"],
+					global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+				},
+				filter(event, player) {
+					const target = _status.currentPhase;
+					if (!target || !player.getStorage("olfengzhu").includes(target) || !target.isIn()) return false;
+					if (event.name == "damage") return event.num > 0;
+					const evt = event.getl(player);
+					return evt?.cards2?.length;
+				},
+				forced: true,
+				logTarget: () => _status.currentPhase,
+				async content(event, trigger, player) {
+					const num = trigger.name == "damage" ? trigger.num : trigger.getl(player).cards2.length;
+					_status.currentPhase.addMark("olyuyu", num);
+				},
+			},
+		},
+	},
+	ollbzhiji: {
+		audio: 2,
+		trigger: { player: "useCardToPlayer" },
+		filter(event, player) {
+			return player.getStorage("olfengzhu").includes(event.target) && event.target.hasMark("olyuyu");
+		},
+		forced: true,
+		logTarget: "target",
+		async content(event, trigger, player) {
+			const { card, target } = trigger;
+			let num = target.countMark("olyuyu");
+			if (get.tag(card, "damage")) {
+				const evt = trigger.getParent();
+				if (typeof evt.baseDamage != "number") evt.baseDamage = 1;
+				evt.baseDamage += num;
+				game.log(card, "伤害", `#g+${num}`);
+				target.clearMark("olyuyu");
+			} else {
+				while (num--) {
+					const judgeEvent = player.judge(card => {
+						return get.type(card) == "equip" || ["sha", "judou"].includes(get.name(card)) ? 1.5 : -1.5;
+					});
+					judgeEvent.judge2 = result => result.bool;
+					judgeEvent.set("callback", async event => {
+						const { card } = event;
+						if (get.type(card) == "equip" && !player.hasSkill("shenji")) await player.addSkills("shenji");
+						if (["sha", "judou"].includes(get.name(card))) {
+							if (!player.hasSkill("wushuang")) await player.addSkills("wushuang");
+							if (get.position(card, true) == "o") await player.gain(card, "gain2");
+						}
+					});
+					await judgeEvent;
+				}
+			}
+		},
+		derivation: ["shenji", "wushuang"],
+		ai: { combo: "olfengzhu" },
+	},
+	oljiejiu: {
+		audio: 1,
+		mod: {
+			cardEnabled(card, player) {
+				if (card.name == "jiu") return false;
+			},
+			cardSavable(card, player) {
+				if (card.name == "jiu") return false;
+			},
+		},
+		enable: "chooseToUse",
+		filter(event, player) {
+			if (event.type == "wuxie") return false;
+			if (
+				!player.hasCard(card => {
+					return _status.connectMode || get.name(card) == "jiu";
+				}, "hes")
+			)
+				return false;
+			return get.inpileVCardList(info => {
+				if (info[0] != "basic") return false;
+				return event.filterCard(get.autoViewAs({ name: info[2], nature: info[3] }, "unsure"), player, event);
+			}).length;
+		},
+		chooseButton: {
+			dialog(event, player) {
+				const vcards = get.inpileVCardList(info => {
+					if (info[0] != "basic") return false;
+					return event.filterCard(get.autoViewAs({ name: info[2], nature: info[3] }, "unsure"), player, event);
+				});
+				return ui.create.dialog("戒酒", [vcards, "vcard"]);
+			},
+			check(button) {
+				if (get.event().getParent().type != "phase") return 1;
+				return get.player().getUseValue({ name: button.link[2], nature: button.link[3] });
+			},
+			backup(links, player) {
+				return {
+					audio: "oljiejiu",
+					popname: true,
+					viewAs: { name: links[0][2], nature: links[0][3] },
+					filterCard(card, player) {
+						return get.name(card) == "jiu";
+					},
+					check(card) {
+						return 7 - get.value(card);
+					},
+					position: "hes",
+				};
+			},
+			prompt(links, player) {
+				return "将一张【酒】当" + (get.translation(links[0][3]) || "") + get.translation(links[0][2]) + "使用";
+			},
+		},
+		hiddenCard(player, name) {
+			return (
+				lib.inpile.includes(name) &&
+				player.hasCard(card => {
+					return _status.connectMode || get.name(card) == "jiu";
+				}, "hes")
+			);
+		},
+		ai: {
+			respondSha: true,
+			respondShan: true,
+			skillTagFilter(player) {
+				if (
+					!player.hasCard(card => {
+						return _status.connectMode || get.name(card) == "jiu";
+					}, "hes")
+				)
+					return false;
+			},
+			order: 3,
+			result: {
+				player(player) {
+					return get.event().dying ? get.attitude(player, get.event().dying) : 1;
+				},
+			},
+		},
+		group: "oljiejiu_jiese",
+		subSkill: {
+			backup: {},
+			jiese: {
+				trigger: {
+					global: "phaseBefore",
+					player: "enterGame",
+				},
+				filter(event, player) {
+					if (!get.info("oljiejiu_jiese").logTarget(event, player).length) return false;
+					return event.name != "phase" || game.phaseNumber == 0;
+				},
+				forced: true,
+				logTarget: (event, player) =>
+					game.filterPlayer(current => {
+						if (!current.hasSex("female") || player == current) return false;
+						return current.getStockSkills(true, true).length;
+					}),
+				async content(event, trigger, player) {
+					for (const target of event.targets.sortBySeat()) {
+						const skills = target.getStockSkills(true, true);
+						if (!skills.length) continue;
+						const skill = skills.randomRemove();
+						await target.changeSkills(["lijian"], [skill]);
+						game.broadcastAll(
+							(target, skill) => {
+								for (const name of get.nameList(target)) {
+									if (get.character(name, 3).includes(skill)) {
+										get.character(name, 3).add("lijian");
+										get.character(name, 3).remove(skill);
+									}
+								}
+							},
+							target,
+							skill
+						);
+					}
+				},
+			},
+		},
+	},
 	//卫青
 	dcbeijin: {
 		audio: 2,

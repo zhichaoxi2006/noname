@@ -1422,6 +1422,10 @@ const translates = {
 	ol_wuanguo_prefix: "OL",
 	olliyong: "历勇",
 	olliyong_info: "转换技，出牌阶段。阳：你可以将一张你本回合未使用过的花色的牌当作【决斗】使用；阴：你可以弃置一张你本回合已使用过的花色的牌，令一名角色视为对你使用【决斗】。",
+	ol_qinlang: "OL秦朗",
+	ol_qinlang_prefix: "OL",
+	olxianying: "贤膺",
+	olxianying_info: "准备阶段或当你受到伤害后，你可以摸两张牌并弃置任意张牌（不能为本轮以此法弃置过的张数）。然后若你以此法弃置的牌名相同，你可以于本回合结束时视为使用之。",
 };
 
 export default translates;

@@ -2,6 +2,142 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL秦朗
+	olxianying: {
+		audio: 2,
+		trigger: { player: ["damageEnd", "phaseZhunbeiBegin"] },
+		check(event, player) {
+			const num = player.getRoundHistory("useSkill", evt => evt.skill == "olxianying").length;
+			if (num <= 3) return true;
+			return player.countCards("he") > num + 1;
+		},
+		async content(event, trigger, player) {
+			await player.draw(2);
+			const hs = player.getCards("he", card => lib.filter.cardDiscardable(card, player, "olxianying"));
+			if (!hs.length) return;
+			const record = event.name + "_record",
+				effect = event.name + "_effect",
+				storage = player.getStorage(record),
+				forced = storage.includes(0),
+				choices = Array.from({ length: hs.length + 1 })
+					.map((_, i) => i)
+					.filter(i => !storage.includes(i));
+			if (hs.length < choices[0]) await player.discard(hs);
+			else {
+				player.addTempSkill(record, "roundStart");
+				const {
+					result: { bool, cards },
+				} = await player
+					.chooseToDiscard("he", [1, Infinity], get.prompt(event.name), `你可以弃置任意张牌，若这些牌同名，则本回合结束时你可以视为使用之${storage.length ? `（本轮已弃置过的牌数：${storage}）` : ``}`)
+					.set("filterOk", () => {
+						return !get.event("storage").includes(ui.selected.cards.length);
+					})
+					.set("storage", storage)
+					.set("choices", choices)
+					.set("forced", forced)
+					.set("ai", card => {
+						const { player, storage, names, choices } = get.event();
+						const list = names.filter(i => i[1] > choices.remove(0)[0]).map(i => i[0]);
+						if (list.length) {
+							let num = choices.remove(0)[0];
+							if (ui.selected.cards.length >= num) return 0;
+							if (!list.includes(get.name(card, player))) return 0;
+							return 15 - get.value(card);
+						} else {
+							let num = choices[0];
+							if (ui.selected.cards.length >= num) return 0;
+							return 6 - get.value(card);
+						}
+					})
+					.set(
+						"names",
+						(function () {
+							const hs = player.getCards("he", card => {
+								if (!lib.filter.cardDiscardable(card, player)) return false;
+								return player.hasValueTarget(card) && ["basic", "trick"].includes(get.type(card));
+							});
+							return hs
+								.map(i => get.name(i, player))
+								.reduce((arr, name) => {
+									const index = arr.find(item => item[0] == name);
+									if (!index) arr.push([name, 1]);
+									else index[1]++;
+									return arr;
+								}, [])
+								.sort((a, b) => b[1] - a[1]);
+						})()
+					);
+				if (bool) {
+					player.markAuto(record, [cards.length]);
+					player.storage[record].sort((a, b) => a - b);
+					const names = cards.map(card => get.name(card, player)).toUniqued();
+					if (names.length != 1 || !["basic", "trick"].includes(get.type(names[0]))) return;
+					player.addTempSkill(effect);
+					player.storage[effect].push(names[0]);
+					player.markSkill(effect);
+				} else {
+					if (!forced) player.markAuto(record, [0]);
+					player.storage[record].sort((a, b) => a - b);
+				}
+			}
+		},
+		ai: {
+			maixie: true,
+			maixie_hp: true,
+			effect: {
+				target(card, player, target) {
+					if (get.tag(card, "damage")) {
+						if (player.hasSkillTag("jueqing", false, target)) return [1, -2];
+						if (!target.hasFriend() || target.getStorage("olxianying_record").length > 3) return;
+						if (target.hp >= 4) return [1, 2];
+						if (target.hp == 3) return [1, 1.5];
+						if (target.hp == 2) return [1, 0.5];
+					}
+				},
+			},
+		},
+		subSkill: {
+			record: {
+				charlotte: true,
+				onremove: true,
+				intro: { content: "本轮因【贤膺】已经弃置牌数：$" },
+			},
+			effect: {
+				charlotte: true,
+				onremove: true,
+				init(player, skill) {
+					if (!player.storage[skill]) player.storage[skill] = [];
+				},
+				trigger: { global: "phaseEnd" },
+				forced: true,
+				popup: false,
+				async content(event, trigger, player) {
+					let cards = player.getStorage(event.name).filter(name => player.hasUseTarget(get.autoViewAs({ name: name, isCard: true })));
+					while (cards.length) {
+						const {
+							result: { bool, links },
+						} = await player
+							.chooseButton(["贤膺：是否使用视为其中一张牌？", [cards, "vcard"]])
+							.set("filterButton", button => {
+								return get.player().hasUseTarget(button.link[2]);
+							})
+							.set("ai", button => {
+								return get.player().getUseValue(button.link[2]);
+							});
+						if (bool) {
+							const name = links[0][2],
+								card = get.autoViewAs({ name: name, isCard: true });
+							cards.remove(name);
+							await game.delayx();
+							await player.chooseUseTarget(true, card, false);
+						} else break;
+					}
+					player.removeSkill(event.name);
+				},
+				intro: { content: (storage, player) => `本回合结束时可以视为使用牌名：${storage.map(i => get.translation(i)).join("、")}` },
+			},
+		},
+	},
 	//OL武庙第一人
 	olliyong: {
 		audio: 2,
