@@ -13871,6 +13871,17 @@ export class Library {
 			},
 		],
 		[
+			"风云",
+			{
+				getSpan: () => {
+					const span = document.createElement("span");
+					span.style.fontFamily = "NonameSuits";
+					span.textContent = "☁";
+					return span.outerHTML;
+				},
+			},
+		],
+		[
 			"SP",
 			{
 				getSpan: () => {
@@ -13977,6 +13988,15 @@ export class Library {
 				 * @returns {string}
 				 */
 				getSpan: () => `${get.prefixSpan("OL")}${get.prefixSpan("神")}`,
+			},
+		],
+		[
+			"风云神",
+			{
+				/**
+				 * @returns {string}
+				 */
+				getSpan: () => `${get.prefixSpan("风云")}${get.prefixSpan("神")}`,
 			},
 		],
 		[

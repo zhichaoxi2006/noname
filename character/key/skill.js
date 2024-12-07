@@ -4417,7 +4417,7 @@ const skills = {
 				.set("ai", function (target) {
 					return -get.attitude(_status.event.player, target);
 				});
-			("step 10");
+			"step 10";
 			if (result.bool) {
 				var target = result.targets[0];
 				player.line(target, "green");
