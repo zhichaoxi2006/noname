@@ -12,7 +12,7 @@ const translates = {
 	hm_shen_zhangliang: "风云神张梁",
 	hm_shen_zhangliang_prefix: "风云神",
 	hm_nianhualaoxian: "风云南华老仙",
-	hm_nianhualaoxian_prefix: "风云南华老仙",
+	hm_nianhualaoxian_prefix: "风云",
 	hm_guigu: "珪固",
 	hm_bosi: "卜巳",
 	hm_yudu: "于毒",
