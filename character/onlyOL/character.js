@@ -1,4 +1,5 @@
 const characters = {
+	ol_sb_gongsunzan: ["male", "qun", 4, ["olsbjiaodi", "olsbbaojing"]],
 	ol_sb_dengai: ["male", "wei", "4/5", ["olsbjigu", "olsbjiewan"]],
 	ol_sb_dongzhuo: ["male", "qun", 4, ["olguanbian", "olxiongni", "olfengshang", "olzhibin"], ["zhu"]],
 	ol_sb_huaxiong: ["male", "qun", 6, ["olsbbojue", "olsbyangwei"]],
