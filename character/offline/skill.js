@@ -1562,7 +1562,7 @@ const skills = {
 			const suit = cost_data[0][2];
 			game.log(player, "声明了", `#y${get.translation(suit)}`);
 			player.storage.hm_zongfu = suit.replace("lukai_", "");
-			const targets = game.filterPlayer(p => p.isMinCard());
+			const targets = game.filterPlayer(p => p.isMinHandcard());
 			for (const i of targets) {
 				const next = i.chooseCard("将一张牌置于牌堆顶，否则按“取消”从牌堆底摸一张牌", "he");
 				const { result } = await next;
