@@ -78,6 +78,13 @@ const skills = {
 				}
 			}
 		},
+		ai: {
+			order: 1,
+			result: {
+				target: 1,
+			},
+			threaten: 1.5,
+		},
 	},
 	hm_wenchen: {
 		limited: true,
@@ -251,6 +258,9 @@ const skills = {
 		},
 		filter: function (event, player) {
 			return get.tag(event.card, "damage");
+		},
+		check(event, player){
+			return get.attitude(player, event.target) < 0;
 		},
 		async content(event, trigger, player) {
 			await trigger.target.draw();
@@ -564,6 +574,14 @@ const skills = {
 			await player.recover();
 			await player.addSkills("olluanji");
 		},
+		ai: {
+			order: 13,
+			result: {
+				player: 1,
+				target: 2,
+			},
+			threaten: 1.5,
+		},
 	},
 	//神朱儁
 	hm_cheji: {
@@ -601,6 +619,13 @@ const skills = {
 					await game.asyncDraw([player, target], 2);
 				}
 			}
+		},
+		ai: {
+			order: 1,
+			result: {
+				player: 1,
+			},
+			threaten: 1.5,
 		},
 	},
 	hm_daicui: {
