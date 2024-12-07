@@ -30,7 +30,6 @@ const characters = {
 	jiangziya: ["male", "qun", 3, ["xingzhou", "lieshen"], ["name:姜|尚"]],
 	shengongbao: ["male", "qun", 3, ["zhuzhou", "yaoxian"]],
 	nanjixianweng: ["male", "qun", 3, ["xwshoufa", "fuzhao"], ["name:null|null"]],
-	ol_jsrg_lvbu: ["male", "qun", 5, ["olfengzhu", "olyuyu", "ollbzhiji", "oljiejiu"], ["character:jsrg_lvbu", "name:吕|布"]],
 };
 
 export default characters;
