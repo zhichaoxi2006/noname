@@ -13875,6 +13875,17 @@ export class Library {
 			},
 		],
 		[
+			"蛇",
+			{
+				getSpan: () => {
+					const span = document.createElement("span");
+					span.style.fontFamily = "NonameSuits";
+					span.textContent = "🐍";
+					return span.outerHTML;
+				},
+			},
+		],
+		[
 			"SP",
 			{
 				getSpan: () => {

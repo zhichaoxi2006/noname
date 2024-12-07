@@ -1274,18 +1274,13 @@ const skills = {
 			player: "phaseUseBegin",
 		},
 		filter(event, player) {
-			return player.isDamaged();
+			return true;
 		},
 		direct: true,
 		async content(event, trigger, player) {
 			const next = player.chooseToUse();
-			next.set("openskilldialog", get.prompt2("hm_didao"));
-			next.set("norestore", true);
+			next.set("openskilldialog", "【地道】:将所有手牌当一张【杀】使用");
 			next.set("_backupevent", "hm_didao_backup");
-			next.set("custom", {
-				add: {},
-				replace: { window: function () {} },
-			});
 			next.set("oncard", () => {
 				const evt = get.event();
 				evt.baseDamage = evt.cards.length;
@@ -1298,6 +1293,7 @@ const skills = {
 				filterCard: true,
 				selectCard: -1,
 				position: "hs",
+				filterTarget: lib.filter.targetEnabledx,
 				viewAs: {
 					name: "sha",
 					nature: "thunder",
