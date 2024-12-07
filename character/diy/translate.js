@@ -419,7 +419,7 @@ const translates = {
 
 	diy_zhujun: "蛇朱儁",
 	diy_zhujun_prefix: "蛇",
-	diy_juxiang: "蛇拒降",
+	diy_juxiang: "拒降",
 	diy_juxiang_info: "锁定技，一名其他角色脱离濒死状态时，你可以对其造成1点伤害。",
 	diy_liaohua: "蛇廖化",
 	diy_liaohua_prefix: "蛇",
