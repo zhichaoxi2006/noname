@@ -1765,7 +1765,7 @@ const skills = {
 			if (result.bool) {
 				//双将适配有时间再写，摆了
 				await player.changeCharacter(result.links);
-				player.when({ player: ["phaseJieshuAfter", "phaseZhunbeiAfter"] }).then(function () {
+				player.when({ player: ["phaseUseAfter"] }).then(function () {
 					player.changeCharacter(["hm_shen_zhangjiao"]);
 				});
 			}
