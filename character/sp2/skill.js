@@ -4966,6 +4966,7 @@ const skills = {
 		},
 		subSkill: {
 			basic: {
+				audio: "dczhanyi",
 				charlotte: true,
 				marktext: "基",
 				mark: true,
@@ -4992,6 +4993,7 @@ const skills = {
 				},
 			},
 			trick: {
+				audio: "dczhanyi",
 				charlotte: true,
 				marktext: "锦",
 				mark: true,
@@ -5016,6 +5018,7 @@ const skills = {
 				},
 			},
 			equip: {
+				audio: "dczhanyi",
 				charlotte: true,
 				marktext: "装",
 				mark: true,
