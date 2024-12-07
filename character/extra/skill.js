@@ -5375,7 +5375,10 @@ const skills = {
 		locked: false,
 		//global:'yingba_mark',
 		ai: {
-			threaten: 3,
+			threaten(player, target) {
+				if (player === target || player.isDamaged() || get.attitude(player, target) > 0) return 1;
+				return 8 / player.maxHp;
+			},
 			order: 11,
 			result: {
 				player(player, target) {
@@ -5484,21 +5487,6 @@ const skills = {
 				return player.getDamagedHp();
 			},
 		},
-		ai: {
-			effect: {
-				target(card, player, target) {
-					if (get.tag(card, "recover") && _status.event.type == "phase" && !player.needsToDiscard()) return 0;
-					if (card.name === "tiesuo" && target.maxHp > 1) return 0.1;
-					if (get.tag(card, "damage") && target.maxHp > 1 && player !== target && target.countCards("h") > 0) {
-						let fs = game.findPlayer(cur => {
-							return cur !== target && get.attitude(target, cur) > 0;
-						});
-						if (fs) return [0, -player.hp / player.maxHp, 0, 0];
-						return [0, -1 - player.hp / player.maxHp, 0, 1];
-					}
-				},
-			},
-		},
 		trigger: { player: "damageBegin2" },
 		forced: true,
 		filter(event, player) {
@@ -5539,6 +5527,25 @@ const skills = {
 				player.loseMaxHp();
 				if (player.hasSkill("yingba")) {
 					trigger.source.addMark("yingba_mark", 1);
+				}
+			}
+		},
+		ai: {
+			maixie_defend: true,
+			effect: {
+				target(card, player, target) {
+					if (player !== target && target.maxHp > 1 && target.countCards("h") > 0) {
+						if (get.tag(card, "damage") && target.hasSkill("yingba")) {
+							let damage = 1.6;
+							if (target.isHealthy()) damage += 1.6;
+							if (game.hasPlayer(cur => {
+								return cur !== target && get.attitude(target, cur) > 0;
+							})) damage -= 0.9;
+							return [0, -damage, 0, -0.4];
+						}
+						if (card.name === "tiesuo") return 0.4;
+					}
+					if (get.tag(card, "recover") && _status.event.type == "phase" && !player.needsToDiscard()) return 0;
 				}
 			}
 		},

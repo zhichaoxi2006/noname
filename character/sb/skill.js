@@ -6106,7 +6106,7 @@ const skills = {
 							}
 							if (current.hasJudge("bingliang")) eff2 += get.attitude(player, current) / Math.sqrt(Math.max(0.1, 2 * current.hp + current.countCards("h")));
 						});
-						if (eff > 0 && eff2 > 0) return "cancel2";
+						if (eff >= 0 && eff2 >= 0) return "cancel2";
 						return eff < eff2 ? "选项一" : "选项二";
 					})()
 				);
