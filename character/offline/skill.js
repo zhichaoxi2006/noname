@@ -10,7 +10,7 @@ const skills = {
 			player: "damageEnd",
 		},
 		async content(event, trigger, player) {
-			await player.draw(2);
+			await player.draw(2 * player.countCards("e", {name: "hm_zhong"}));
 		},
 	},
 	//唐周
@@ -1522,7 +1522,7 @@ const skills = {
 			return event.name != "phase" || game.phaseNumber == 0;
 		},
 		content: function () {
-			const card = game.createCard2("hm_zhong", lib.suit.randomGet(), 1);
+			const card = game.createCard("hm_zhong", lib.suit.randomGet(), 1);
 			player.chooseUseTarget(card, true);
 		},
 	},
@@ -1588,6 +1588,9 @@ const skills = {
 		},
 		async cost(event, trigger, player) {
 			const next = player.chooseTarget("令一名角色进行一次判定");
+			next.set("ai", function(target){
+				return get.damageEffect(target, player, player, "thunder");
+			});
 			const { result } = await next;
 			event.result = result;
 		},
@@ -1687,6 +1690,13 @@ const skills = {
 					},
 				},
 			},
+		},
+		ai: {
+			order: 7,
+			result: {
+				target: -1,
+			},
+			threaten: 1.5,
 		},
 	},
 	hm_zhaobing: {
