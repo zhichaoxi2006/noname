@@ -26,7 +26,7 @@ const skills = {
 		async content(event, trigger, player) {
 			const { cards, name } = event,
 				{ player: target } = trigger;
-			player.tempBanSkill(name);
+			player.tempBanSkill(name, "roundStart");
 			await player.showCards(cards, get.translation(player) + "对" + get.translation(target) + "发动了【智诫】");
 			target.addTempSkill(name + "_effect", "phaseUseAfter");
 			target.markAuto(name + "_effect", [[player, get.type2(cards[0])]]);
