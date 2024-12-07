@@ -1274,7 +1274,7 @@ const skills = {
 			player: "phaseUseBegin",
 		},
 		filter(event, player) {
-			return true;
+			return player.isDamaged();
 		},
 		direct: true,
 		async content(event, trigger, player) {
