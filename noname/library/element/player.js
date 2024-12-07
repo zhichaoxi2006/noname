@@ -8,6 +8,7 @@ import { CacheContext } from "../cache/cacheContext.js";
 import { ChildNodesWatcher } from "../cache/childNodesWatcher.js";
 import security from "../../util/security.js";
 import { ContentCompiler } from "./gameEvent.js";
+import dedent from "../../../game/dedent.js";
 
 export class Player extends HTMLDivElement {
 	/**
@@ -574,7 +575,7 @@ export class Player extends HTMLDivElement {
 				const topVars = ["_status", "lib", "game", "ui", "get", "ai"];
 
 				const params = ["topVars", "event", "trigger", "player"];
-				const body = `
+				const body = dedent`
 					var { ${deconstructs.join(", ")} } = event;
 					var { ${topVars.join(", ")} } = topVars;
 					${varstr}
@@ -1722,7 +1723,7 @@ export class Player extends HTMLDivElement {
 		next.setContent(function () {
 			"step 0";
 			player.lose(cards, ui.special).set("getlx", false);
-			"step 1";
+			("step 1");
 			var cards = event.cards.slice(0);
 			cards.removeArray(player.getCards("hejsx"));
 			if (cards.length) target.directgains(cards, null, event.tag);
@@ -3876,7 +3877,7 @@ export class Player extends HTMLDivElement {
 		if (this.playerid) return prefix + this.playerid + "]";
 		return (
 			prefix +
-			`
+			dedent`
 			${this.name}+${this.sex}+${this.group}+${this.hp}+${this.maxHp}+${this.hujia}+${"[" + this.skills.join(",") + "]"}+${this.name1}+${this.name2}]
 		`
 		);
@@ -5950,19 +5951,19 @@ export class Player extends HTMLDivElement {
 	}
 	/**
 	 * 令玩家弃置其区域内一些能被弃置的牌
-	 * 
+	 *
 	 * cards: Card[] | Card;
 	 * 要弃置的牌
-	 * 
+	 *
 	 * source?: Player;
 	 * 来源，令Player弃牌的角色。默认目标角色
-	 * 
+	 *
 	 * position?: div | fragment;
 	 * 经Mod筛选后的牌要置入的区域，默认ui.discardPile
-	 * 
+	 *
 	 * log?: 'popup' | 'logSkill' | false | string;
 	 * 因对应Mod技能导致部分牌未被弃置时，是否为Mod技能执行对应函数。默认'popup'
-	 * 
+	 *
 	 * @returns { GameEventPromise }
 	 */
 	modedDiscard() {
@@ -6005,40 +6006,43 @@ export class Player extends HTMLDivElement {
 			});
 			skills.sort((a, b) => get.priority(a) - get.priority(b));
 		}
-		for(let skill of skills) {
+		for (let skill of skills) {
 			let mod = get.info(skill).mod.canBeDiscarded;
-			if (mod) for (let i = 0; i < next.cards.length; i++) {
-				let arg = [next.cards[i], next.source, this, event, "unchanged"],
-					result = mod.call(game, ...arg);
-				if (result !== undefined && typeof arg[arg.length - 1] !== "object") arg[arg.length - 1] = result;
-				if (!arg[arg.length - 1]) {
-					next.skills.add(skill);
-					next.protected_cards.push(next.cards.splice(i--, 1)[0]);
+			if (mod)
+				for (let i = 0; i < next.cards.length; i++) {
+					let arg = [next.cards[i], next.source, this, event, "unchanged"],
+						result = mod.call(game, ...arg);
+					if (result !== undefined && typeof arg[arg.length - 1] !== "object") arg[arg.length - 1] = result;
+					if (!arg[arg.length - 1]) {
+						next.skills.add(skill);
+						next.protected_cards.push(next.cards.splice(i--, 1)[0]);
+					}
 				}
-			}
 			mod = get.info(skill).mod.cardDiscardable;
-			if (mod) for (let i = 0; i < next.cards.length; i++) {
-				let arg = [next.cards[i], this, event, "unchanged"],
-					result = mod.call(game, ...arg);
-				if (result !== undefined && typeof arg[arg.length - 1] !== "object") arg[arg.length - 1] = result;
-				if (!arg[arg.length - 1]) {
-					next.skills.add(skill);
-					next.protected_cards.push(next.cards.splice(i--, 1)[0]);
+			if (mod)
+				for (let i = 0; i < next.cards.length; i++) {
+					let arg = [next.cards[i], this, event, "unchanged"],
+						result = mod.call(game, ...arg);
+					if (result !== undefined && typeof arg[arg.length - 1] !== "object") arg[arg.length - 1] = result;
+					if (!arg[arg.length - 1]) {
+						next.skills.add(skill);
+						next.protected_cards.push(next.cards.splice(i--, 1)[0]);
+					}
 				}
-			}
 		}
 		next.setContent(function () {
 			"step 0";
-			if (event.skills.length && event.log) for (let i of event.skills) {
-				if (typeof player[event.log] === "function") player[event.log](i);
-			}
+			if (event.skills.length && event.log)
+				for (let i of event.skills) {
+					if (typeof player[event.log] === "function") player[event.log](i);
+				}
 			if (!cards.length) event.finish();
-			"step 1";
+			("step 1");
 			game.log(player, "弃置了", cards);
 			event.done = player.lose(cards, event.position, "visible");
 			event.done.type = "discard";
 			if (event.discarder) event.done.discarder = event.discarder;
-			"step 2";
+			("step 2");
 			event.trigger("discard");
 		});
 		return next;
