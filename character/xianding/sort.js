@@ -19,7 +19,8 @@ const characterSort = {
 	sp2_dushi: ["dc_sb_caoang", "dc_sb_zhangxiu", "dc_sb_dianwei", "dc_sb_hucheer"],
 	sp2_zhoulang: ["dc_sb_chengyu", "dc_sb_huanggai"],
 	sp2_qizuo: ["dc_sb_jushou", "dc_sb_chenlin"],
-	sp2_waitingforsort: ["v_zhangliao"],
+	sp2_weizhen_shu: ["v_zhangliao"],
+	sp2_waitingforsort: [],
 };
 
 const characterSortTranslate = {
@@ -43,6 +44,7 @@ const characterSortTranslate = {
 	sp2_dushi: "毒士鸩计",
 	sp2_zhoulang: "周郎将计",
 	sp2_qizuo: "奇佐论胜",
+	sp2_weizhen_shu: "威震天下·戍",
 	sp2_waitingforsort: "等待分包",
 };
 

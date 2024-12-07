@@ -220,7 +220,7 @@ const skills = {
 		},
 	},
 	olxiongni: {
-		audio: 2,
+		audio: 6,
 		trigger: {
 			player: "phaseUseBegin",
 		},
@@ -263,7 +263,7 @@ const skills = {
 		},
 	},
 	olfengshang: {
-		audio: 2,
+		audio: 6,
 		getCards(player) {
 			const cards = [],
 				suits = player.getStorage("olfengshang_clear");
@@ -293,6 +293,7 @@ const skills = {
 		async content(event, trigger, player) {
 			if (!trigger) player.addTempSkill(event.name + "_used", "phaseUseAfter");
 			if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
+			player.changeSkin({ characterName: "ol_sb_dongzhuo" }, "ol_sb_dongzhuo_shadow2");
 			const given_map = {};
 			event.given_map = given_map;
 			const cards = !trigger ? event.getParent(2).olfengshang_cards : get.info(event.name).getCards(player);
@@ -385,7 +386,7 @@ const skills = {
 		},
 	},
 	olzhibin: {
-		audio: 2,
+		audio: 6,
 		getNum(player) {
 			let num = 0;
 			game.countPlayer2(current => {
@@ -414,6 +415,7 @@ const skills = {
 		zhuSkill: true,
 		forced: true,
 		async content(event, trigger, player) {
+			player.changeSkin({ characterName: "ol_sb_dongzhuo" }, "ol_sb_dongzhuo_shadow1");
 			const skillName = event.name,
 				num = get.info(skillName).getNum(player);
 			if (get.info(skillName).filterx(player, num)) {

@@ -14,7 +14,7 @@ const characters = {
 	dc_liuli: ["male", "shu", 3, ["dcfuli", "dcdehua"]],
 	yue_daqiao: ["female", "wu", 3, ["dcqiqin", "dczixi"], ["name:桥|null"]],
 	dc_kongrong: ["male", "qun", 3, ["dckrmingshi", "lirang"], ["die:kongrong"]],
-	dc_sp_menghuo: ["male", "qun", 4, ["dcmanwang"]],
+	dc_sp_menghuo: ["male", "qun", 4, ["dcmanwang"], ["die:sp_menghuo"]],
 	yue_xiaoqiao: ["female", "wu", 3, ["dcqiqin", "dcweiwan"], ["name:桥|null"]],
 	dc_dongzhao: ["male", "wei", 3, ["dcyijia", "dcdingji"]],
 	kuaiqi: ["male", "wei", 3, ["dcliangxiu", "dcxunjie"]],

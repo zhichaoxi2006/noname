@@ -111,7 +111,7 @@ export default {
 	"#clanbaozu_clan_zhonghui4": "诸位同门，随我钟会赌一遭如何？",
 	"#clanbaozu_clan_zhonghui5": "不为刀下脍，且做俎上刀。",
 	"#clanbaozu_clan_zhonghui6": "吾族恒大，谁敢欺之？",
-	"#clan_zhonghui:die": "兵来似欲作恶，当云何？",
+	"#clan_zhonghui1:die": "兵来似欲作恶，当云何？",
 	"#clan_zhonghui2:die": "伯约误我！",
 	"#clan_zhonghui3:die": "谋事在人，成事在天……",
 	"#clanjiejian1": "庙胜之策，不临矢石。",
