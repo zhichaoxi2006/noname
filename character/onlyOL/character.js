@@ -1,7 +1,7 @@
 const characters = {
 	ol_sb_gongsunzan: ["male", "qun", 4, ["olsbjiaodi", "olsbbaojing"]],
-	ol_sb_dengai: ["male", "wei", "4/5", ["olsbjigu", "olsbjiewan"]],
-	ol_sb_dongzhuo: ["male", "qun", 4, ["olguanbian", "olxiongni", "olfengshang", "olzhibin"], ["zhu"]],
+	ol_sb_dengai: ["male", "wei", 4, ["olsbjigu", "olsbjiewan"]],
+	ol_sb_dongzhuo: ["male", "qun", 4, ["olguanbian", "olxiongni", "olfengshang", "olzhibin"], ["zhu", "die:3"]],
 	ol_sb_huaxiong: ["male", "qun", 6, ["olsbbojue", "olsbyangwei"]],
 	ol_sb_yuanshu: ["male", "qun", 4, ["olsbjinming", "olsbxiaoshi", "olsbyanliang"], ["zhu"]],
 	ol_sb_sunjian: ["male", "wu", "4/5", ["olsbhulie", "olsbyipo"]],
