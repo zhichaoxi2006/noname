@@ -1725,6 +1725,10 @@ const skills = {
 			if (!event.isFirstTarget) return false;
 			return event.player == player;
 		},
+		onremove: function (player, skill) {
+			var cards = player.getExpansions(skill);
+			if (cards.length) player.loseToDiscardpile(cards);
+		},
 		intro: {
 			markcount: "expansion",
 			mark: function (dialog, storage, player) {
