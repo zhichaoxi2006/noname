@@ -147,7 +147,7 @@ const skills = {
 			const num = player.countCards("he") - 5;
 			if (num == 0) return;
 			if (num > 0) await player.chooseToDiscard("he", num, true);
-			else await player.drawTo(5);
+			else await player.draw(5 - player.countCards("e"));
 			const lose = player.hasHistory("lose", evt => evt.getParent(3) == event);
 			const bool1 = lose && player.hasHistory("gain", evt => evt.getParent(2) == event);
 			const bool2 = game.getGlobalHistory("everything", evt => evt.name == "equip" && evt.player == player && evt.getParent(2) == event).length && lose;
@@ -2774,11 +2774,11 @@ const skills = {
 				},
 			},
 			viewas: {
+				hiddenCard: function (player, name) {
+					var storage = player.getStorage("sangu_effect");
+					if (storage.length) return name == storage[0];
+				},
 				mod: {
-					hiddenCard: function (player, name) {
-						var storage = player.getStorage("sangu_effect");
-						if (storage.length) return name == storage[0];
-					},
 					cardname: function (card, player) {
 						if (_status.event.name != "chooseToUse" || _status.event.skill) return;
 						var storage = player.getStorage("sangu_effect");

@@ -18,7 +18,7 @@ const characterReplaces = {
 	zhugeliang: ["zhugeliang", "re_zhugeliang", "ps2066_zhugeliang", "ps_zhugeliang", "huan_zhugeliang", "jsrg_zhugeliang"],
 	huangyueying: ["huangyueying", "re_huangyueying", "junk_huangyueying", "sb_huangyueying", "jd_sb_huangyueying"],
 	sunquan: ["sunquan", "re_sunquan", "sb_sunquan", "dc_sunquan", "xin_sunquan", "jd_sb_sunquan", "ty_sunquan"],
-	zhouyu: ["zhouyu", "re_zhouyu", "dc_sb_zhouyu", "sb_zhouyu", "ps1062_zhouyu", "ps2080_zhouyu", "jx_zhouyu"],
+	zhouyu: ["zhouyu", "re_zhouyu", "dc_sb_zhouyu", "yue_zhouyu", "sb_zhouyu", "ps1062_zhouyu", "ps2080_zhouyu", "jx_zhouyu"],
 	luxun: ["luxun", "re_luxun", "jsrg_luxun", "sb_luxun", "ty_luxun", "huan_luxun"],
 	lvmeng: ["lvmeng", "re_lvmeng", "sb_lvmeng", "sp_lvmeng"],
 	huanggai: ["huanggai", "re_huanggai", "sb_huanggai", "dc_sb_huanggai"],
@@ -31,7 +31,7 @@ const characterReplaces = {
 	huatuo: ["huatuo", "re_huatuo", "old_huatuo"],
 	huaxiong: ["huaxiong", "re_huaxiong", "old_huaxiong", "sb_huaxiong", "ol_huaxiong", "ol_sb_huaxiong"],
 	yuanshu: ["yuanshu", "re_yuanshu", "yl_yuanshu", "old_yuanshu", "ol_yuanshu", "star_yuanshu"],
-	gongsunzan: ["gongsunzan", "re_gongsunzan", "dc_gongsunzan", "xin_gongsunzan", "sb_gongsunzan", "sp_gongsunzan", "yy_gongsunzan"],
+	gongsunzan: ["gongsunzan", "re_gongsunzan", "dc_gongsunzan", "xin_gongsunzan", "sb_gongsunzan", "sp_gongsunzan", "yy_gongsunzan", "ol_sb_gongsunzan"],
 	re_lidian: ["re_lidian", "old_re_lidian", "junk_lidian"],
 };
 

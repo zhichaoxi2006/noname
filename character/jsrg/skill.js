@@ -891,6 +891,7 @@ const skills = {
 	mbsaojian: {
 		audio: "jsrgsaojian",
 		inherit: "jsrgsaojian",
+		logAudio: index => (typeof index === "number" ? "jsrgsaojian" + index + ".mp3" : "jsrgsaojian" + get.rand(1, 2) + ".mp3"),
 		async content(event, trigger, player) {
 			//获取目标角色，主审查官阳球和其余审查官
 			const target = event.target,
@@ -1042,7 +1043,7 @@ const skills = {
 				if (!discarded?.length || discarded[0] === card) break;
 			}
 			if (target.countCards("h") > player.countCards("h")) {
-				player.logSkill("jsrgsaojian", null, null, null, [3]);
+				player.logSkill("mbsaojian", null, null, null, [3]);
 				await player.loseHp();
 			}
 		},
@@ -8010,7 +8011,7 @@ const skills = {
 								str = get.prompt(event.skill, trigger[info.logTarget], player);
 							} else if (typeof info.logTarget == "function") {
 								var logTarget = info.logTarget(trigger, player, trigger.triggername, trigger.indexedData);
-								if (get.itemtype(logTarget).indexOf("player") == 0) str = get.prompt(event.skill, logTarget, player);
+								if (get.itemtype(logTarget)?.indexOf("player") == 0) str = get.prompt(event.skill, logTarget, player);
 							} else {
 								str = get.prompt(event.skill, null, player);
 							}

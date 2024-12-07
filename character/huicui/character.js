@@ -1,4 +1,5 @@
 const characters = {
+	yue_zhouyu: ["male", "wu", 3, ["dcguyin", "dcpinglu"]],
 	yue_diaochan: ["female", "qun", 3, ["dctanban", "dcdiou"], ["name:null|null"]],
 	dc_huangwudie: ["female", "shu", 4, ["dcshuangrui", "dcfuxie"]],
 	dc_mateng: ["male", "qun", 4, ["mashu", "dcxiongyi"], ["die:mateng"]],
@@ -13,7 +14,7 @@ const characters = {
 	dc_liuli: ["male", "shu", 3, ["dcfuli", "dcdehua"]],
 	yue_daqiao: ["female", "wu", 3, ["dcqiqin", "dczixi"], ["name:桥|null"]],
 	dc_kongrong: ["male", "qun", 3, ["dckrmingshi", "lirang"], ["die:kongrong"]],
-	dc_sp_menghuo: ["male", "qun", 4, ["dcmanwang"]],
+	dc_sp_menghuo: ["male", "qun", 4, ["dcmanwang"], ["die:sp_menghuo"]],
 	yue_xiaoqiao: ["female", "wu", 3, ["dcqiqin", "dcweiwan"], ["name:桥|null"]],
 	dc_dongzhao: ["male", "wei", 3, ["dcyijia", "dcdingji"]],
 	kuaiqi: ["male", "wei", 3, ["dcliangxiu", "dcxunjie"]],

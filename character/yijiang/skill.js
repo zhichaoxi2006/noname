@@ -7978,9 +7978,10 @@ const skills = {
 			return player.countCards("he") > 0 && event.source && event.card && event.card.name == "sha";
 		},
 		async cost(event, trigger, player) {
-			let prompt = "弃置一张牌，然后", cards = trigger.source.getEquips(1).filter(card => {
-				return lib.filter.canBeGained(card, player, trigger.source);
-			});
+			let prompt = "弃置一张牌，然后",
+				cards = trigger.source.getEquips(1).filter(card => {
+					return lib.filter.canBeGained(card, player, trigger.source);
+				});
 			if (cards.length) prompt += "获得" + get.translation(trigger.source) + "装备区中的" + get.translation(cards);
 			else prompt += "无事发生";
 			event.result = await player
@@ -7990,18 +7991,26 @@ const skills = {
 					if (typeof eff === "number") return eff - get.value(card);
 					return 0;
 				})
-				.set("eff", function () {
-					let es = trigger.source.getEquips(1).filter(card => {
-						return lib.filter.canBeGained(card, player, trigger.source);
-					});
-					if (!es.length) return false;
-					if (get.attitude(player, trigger.source) > 0) return -2 * es.reduce((acc, card) => {
-						return acc + get.value(card, trigger.source);
-					}, 0);
-					return es.reduce((acc, card) => {
-						return acc + get.value(card, player);
-					}, 0);
-				}());
+				.set(
+					"eff",
+					(function () {
+						let es = trigger.source.getEquips(1).filter(card => {
+							return lib.filter.canBeGained(card, player, trigger.source);
+						});
+						if (!es.length) return false;
+						if (get.attitude(player, trigger.source) > 0)
+							return (
+								-2 *
+								es.reduce((acc, card) => {
+									return acc + get.value(card, trigger.source);
+								}, 0)
+							);
+						return es.reduce((acc, card) => {
+							return acc + get.value(card, player);
+						}, 0);
+					})()
+				)
+				.forResult();
 		},
 		logTarget: "source",
 		async content(event, trigger, player) {
@@ -12144,8 +12153,8 @@ const skills = {
 			}
 			"step 2";
 			if (get.type(event.card) != "basic") {
-				trigger.player.recover();
 				trigger.player.discard(event.card);
+				trigger.player.recover();
 			}
 		},
 		ai: {

@@ -11,7 +11,7 @@ const characters = {
 	yj_sufei: ["male", "wu", 4, ["shuojian"]],
 	liwan: ["female", "wei", 3, ["liandui", "biejun"]],
 	zhugeshang: ["male", "shu", 3, ["sangu", "yizu"], ["name:诸葛|尚"]],
-	kebineng: ["male", "qun", 4, ["kousheng"], ["name:null|null"]],
+	kebineng: ["male", "qun", 4, ["kousheng"], ["name:科比|罐头"]],
 	lukai: ["male", "wu", 4, ["lkbushi", "lkzhongzhuang"]],
 	linghuyu: ["male", "wei", 4, ["xvzhi"], ["name:令狐|愚"]],
 	yj_simafu: ["male", "wei", 4, ["beiyu", "duchi"], ["name:司马|孚", "border:jin"]],
@@ -31,8 +31,8 @@ const characters = {
 	cx_majun: ["male", "wei", 3, ["chuanxie", "yjqiaosi"], [...["character", "die"].map(i => i + ":yj_majun"), "name:马|钧"]],
 	qq_majun: ["male", "wei", 3, ["yuliao", "qiqiao", "yanxie"], [...["character", "die"].map(i => i + ":yj_majun"), "name:马|钧"]],
 	new_yj_dongzhuo: ["male", "qun", "4/5", ["xiongjin", "xiawei", "baoxi"]],
-	fj_peixiu: ["male", "qun", 3, ["fjzhitu", "dcfujue"]],
-	xj_peixiu: ["male", "qun", 3, ["xjzhitu", "dcxiujue"], [...["character", "die"].map(i => i + ":fj_peixiu")]],
+	fj_peixiu: ["male", "qun", 3, ["fjzhitu", "dcfujue"], ["name:裴|秀"]],
+	xj_peixiu: ["male", "qun", 3, ["xjzhitu", "dcxiujue"], [...["character", "die"].map(i => i + ":fj_peixiu"), "name:裴|秀"]],
 };
 
 export default characters;

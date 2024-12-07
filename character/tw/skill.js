@@ -6412,6 +6412,7 @@ const skills = {
 				enable: "phaseUse",
 				usable: 1,
 				charlotte: true,
+				prompt: "点击“确定”来寻求施舍",
 				filter: function (event, player) {
 					if (player.hasSkill("twkaizeng_used")) return false;
 					return game.hasPlayer(current => {

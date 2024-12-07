@@ -2,6 +2,90 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//乐周瑜
+	dcguyin: {
+		audio: 2,
+		trigger: {
+			global: ["loseAfter", "cardsDiscardAfter", "loseAsyncAfter", "gameDrawBegin"],
+		},
+		filter(event, player) {
+			if (event.name == "gameDraw") return true;
+			else if (event.name.indexOf("lose") === 0) {
+				if (event.type != "discard" || event.getlx === false || event.position !== ui.discardPile) return false;
+			} else {
+				const evtx = event.getParent();
+				if (evtx.name !== "orderingDiscard") return true;
+				const evt2 = evtx.relatedEvent || evtx.getParent();
+				if (evt2.name != "useCard" || evt2.player == player) return false;
+			}
+			return game.hasPlayer(current => {
+				if (player == current) return false;
+				const cards = event.name == "cardsDiscard" ? event.cards.filterInD("d") : event.getl(current)?.cards2 || [];
+				return cards.some(card => current._start_cards.includes(card));
+			});
+		},
+		forced: true,
+		async content(event, trigger, player) {
+			if (trigger.name == "gameDraw") {
+				const me = player;
+				const numx = trigger.num;
+				trigger.num = function (player) {
+					return player == me ? 0 : 1 + (typeof numx == "function" ? numx(player) : numx);
+				};
+			} else await player.draw();
+		},
+	},
+	dcpinglu: {
+		audio: 2,
+		enable: "phaseUse",
+		filter(event, player) {
+			if (player.hasCard(card => card.hasGaintag("dcpinglu_mark"), "h")) return false;
+			return game.hasPlayer(current => get.info("dcpinglu").filterTarget(null, player, current));
+		},
+		filterTarget(card, player, target) {
+			return player.inRange(target) && target.countGainableCards(player, "h");
+		},
+		selectTarget: -1,
+		multitarget: true,
+		multiline: true,
+		async content(event, trigger, player) {
+			const gains = [];
+			for (const target of event.targets.sortBySeat()) {
+				const cards = target.getCards("h", card => lib.filter.canBeGained(card, target, player));
+				if (cards.length) gains.push(cards.randomGet());
+			}
+			if (!gains.length) return;
+			player.addTempSkill(event.name + "_mark", "phaseUseAfter");
+			const next = player.gain(gains, "giveAuto");
+			next.gaintag.add(event.name + "_mark");
+			await next;
+		},
+		ai: {
+			order: 10,
+			result: {
+				player: 1,
+			},
+		},
+		subSkill: {
+			mark: {
+				mod: {
+					aiOrder(player, card, num) {
+						if (
+							get.itemtype(card) == "card" &&
+							card.hasGaintag("dcpinglu_mark") &&
+							game.hasPlayer(current => {
+								return player.inRange(current) && current.countGainableCards(player, "h") && get.attitude(player, current) < 0;
+							})
+						)
+							return num + 0.1;
+					},
+				},
+				locked: false,
+				charlotte: true,
+				onremove: (player, skill) => player.removeGaintag(skill),
+			},
+		},
+	},
 	//乐貂蝉
 	dctanban: {
 		audio: 2,
@@ -884,7 +968,6 @@ const skills = {
 	//李丰
 	dctunchu: {
 		audio: 2,
-		/*
 		trigger: { global: "gameDrawBegin" },
 		forced: true,
 		content() {
@@ -895,8 +978,7 @@ const skills = {
 				return player == me ? sum : typeof numx == "function" ? numx(player) : numx;
 			};
 		},
-		*/
-		trigger: {
+		/* trigger: {
 			global: "phaseBefore",
 			player: "enterGame",
 		},
@@ -907,7 +989,7 @@ const skills = {
 		forced: true,
 		content() {
 			player.drawTo(game.players.slice().concat(game.dead).length * 4);
-		},
+		}, */
 		mod: {
 			cardDiscardable(card, player) {
 				if (get.position(card) == "h") return false;
@@ -5151,7 +5233,7 @@ const skills = {
 				target: function (player, target) {
 					var num = target.countCards("h");
 					if (num <= 1) return -num;
-					if (get.attitude(player, target) > 0) return 1;
+					if (get.attitude(player, target) > 0 && !target.hasMark("dcjizhong")) return 1;
 					return -1 / (num / 2 + 1);
 				},
 			},
@@ -5365,24 +5447,38 @@ const skills = {
 		audio: 2,
 		trigger: { target: "useCardToTargeted" },
 		filter(event, player) {
-			return get.color(event.card) == "black";
+			return get.color(event.card) == "black" && player.maxHp > player.countMark("dcmoshou");
 		},
 		frequent: true,
 		prompt2(event, player) {
 			const num = player.maxHp - player.countMark("dcmoshou");
-			return num <= 0 ? "重置【墨守】摸牌数" : "摸" + get.cnNumber(num) + "张牌";
+			let info = "摸" + get.cnNumber(num) + "张牌";
+			if (num === 1) info += "，然后重置【墨守】摸牌数";
+			else if (num > 1) info += "，然后令你下次以此法摸的牌数-1";
+			return info;
 		},
 		async content(event, trigger, player) {
 			const { name: mark } = event;
 			let num = player.maxHp - player.countMark(mark);
+			if (num > 0) await player.draw(num);
 			if (num > 1) {
 				player.addMark(mark, 1, false);
-			} else {
+			} else if (num === 1) {
 				player.clearMark(mark, false);
 			}
-			if (num > 0) await player.draw(num);
+		},
+		ai: {
+			effect: {
+				target_use(card, player, target) {
+					if (typeof card === "object" && get.color(card) === "black") {
+						const num = target.maxHp - target.countMark("dcmoshou");
+						return [1, 0.6 * num];
+					}
+				}
+			}
 		},
 		onremove: true,
+		mark: true,
 		intro: {
 			markcount: (storage, player) => player.maxHp - player.countMark("dcmoshou"),
 			content: (storage, player) => `下次【墨守】摸牌数：${player.maxHp - player.countMark("dcmoshou")}`,

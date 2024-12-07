@@ -28,6 +28,10 @@ game.import("character", function () {
 			ol_sb_yuanshao: [
 				["ol_sb_yuanshao_shadow", ["die:ol_sb_yuanshao"]],
 			],
+			ol_sb_dongzhuo: [
+				["ol_sb_dongzhuo_shadow1", ["die:ol_sb_dongzhuo"]],
+				["ol_sb_dongzhuo_shadow2", ["die:ol_sb_dongzhuo"]],
+			],
 		},
 		card: { ...cards },
 		skill: { ...skills },

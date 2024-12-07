@@ -87,7 +87,7 @@ const translates = {
 	dcfaqi_info: "当你于出牌阶段使用装备牌结算结束后，你视为使用一张本回合未以此法使用过的普通锦囊牌。",
 	dc_sunce: "经典孙策",
 	dc_sunce_prefix: "经典",
-	dcshuangbi: "双壁",
+	dcshuangbi: "双璧",
 	dcshuangbi_info: "出牌阶段限一次，你可以选择一项：①摸X张牌，本回合手牌上限+X；②弃置至多X张牌，随机对其他角色造成等量火焰伤害；③视为使用X张火【杀】或【火攻】。（X为场上存活角色数）",
 	dc_zhaoyun: "经典神赵云",
 	dc_zhaoyun_prefix: "经典神",
@@ -148,6 +148,9 @@ const translates = {
 	xwshoufa_info: "出牌阶段，你可以展示并将所有♠/♥/♣/♦花色的手牌交给一名其他角色，令其获得〖天妒〗/〖天香〗/〖倾国〗/〖武圣〗直到你的下个回合开始。",
 	fuzhao: "福照",
 	fuzhao_info: "一名角色进入濒死状态时，你可以令其进行一次判定，若结果为♥，其回复1点体力。",
+	weiqing: "卫青",
+	dcbeijin: "北进",
+	dcbeijin_info: "出牌阶段，你可以摸一张牌。若如此做，本回合你下次使用牌或发动此技能时，若你的手牌中有以此法得到的牌，则你失去1点体力。",
 };
 
 export default translates;

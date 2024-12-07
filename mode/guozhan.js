@@ -311,7 +311,7 @@ export default () => {
 				guozhan_mobile: ["gz_sp_duyu"],
 				guozhan_qunxiong: ["gz_xf_huangquan", "gz_guohuai", "gz_guanqiujian", "gz_zhujun", "gz_chengong", "gz_re_xugong"],
 				guozhan_tw: ["gz_tw_tianyu", "gz_tw_liufuren"],
-				guozhan_others: ["gz_ol_lisu", "gz_mazhong", "gz_bulianshi", "gz_caoang", "gz_caozhen", "gz_maliang", "gz_re_panshu", "gz_tengyin", "gz_xurong", "gz_xianglang", "gz_zumao", "gz_zhugejin", "gz_zhouyi", "gz_lingcao", "gz_yangxiu", "gz_tw_xiahoushang", "gz_beimihu", "gz_fuwan", "gz_old_huaxiong", "gz_lvlingqi", "gz_yangwan", "gz_chendao", "gz_lifeng", "gz_liaohua", "gz_jianggan", "gz_wangyi", "gz_key_ushio", "gz_re_nanhualaoxian", "gz_re_xusheng"],
+				guozhan_others: ["gz_ol_lisu", "gz_mazhong", "gz_bulianshi", "gz_caoang", "gz_caozhen", "gz_maliang", "gz_re_panshu", "gz_tengyin", "gz_xurong", "gz_xianglang", "gz_zumao", "gz_zhugejin", "gz_zhouyi", "gz_lingcao", "gz_yangxiu", "gz_tw_xiahoushang", "gz_beimihu", "gz_fuwan", "gz_old_huaxiong", "gz_lvlingqi", "gz_yangwan", "gz_chendao", "gz_lifeng", "gz_liaohua", "gz_jianggan", "gz_wangyi", "gz_key_ushio", "gz_re_nanhualaoxian", "gz_re_xusheng", "gz_ol_sb_sunjian"],
 			},
 		},
 		characterPack: {
@@ -440,6 +440,7 @@ export default () => {
 				gz_xusheng: ["male", "wu", 4, ["gzyicheng_new"], ["gzskin"]],
 				//沟槽线上就使劲薅你的(A+C)/2大宝吧，我没意见（有也没用）
 				gz_re_xusheng: ["male", "wu", 4, ["repojun"]],
+				gz_ol_sb_sunjian: ["male", "wu", "4/5", ["olsbhulie", "olsbyipo"]],
 				gz_jiangqing: ["male", "wu", 4, ["gzshangyi", "niaoxiang"]],
 				gz_hetaihou: ["female", "qun", 3, ["zhendu", "qiluan"], ["gzskin"]],
 
@@ -21283,6 +21284,8 @@ export default () => {
 			fakekeshou_info: "①当你受到伤害时，你可以弃置两张颜色相同的牌并令此伤害-1。②当你因弃置而一次性失去至少两张牌后，若你的势力已确定且场上没有与你势力相同的其他角色，则你可以进行判定，若结果判定为红色，你摸一张牌。",
 			gz_re_xusheng: "界徐盛",
 			gz_re_xusheng_prefix: "界",
+			gz_ol_sb_sunjia: "OL谋孙坚",
+			gz_ol_sb_sunjia_prefix: "OL谋",
 			gzguishu: "鬼术",
 			gzguishu_info: "出牌阶段，你可以将一张黑桃手牌当作【知己知彼】或【远交近攻】使用（不能与本回合上次以此法使用的牌名相同）。",
 			gzyuanyu: "远域",
