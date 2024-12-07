@@ -12,6 +12,22 @@ const skills = {
 		async content(event, trigger, player) {
 			await player.draw(2 * player.countCards("e", {name: "hm_zhong"}));
 		},
+		ai: {
+			maixie: true,
+			maixie_hp: true,
+			effect: {
+				target(card, player, target) {
+					if (get.tag(card, "damage")) {
+						if (player.hasSkillTag("jueqing", false, target)) return [1, -2];
+						if (!target.hasFriend()) return;
+						let num = target.countCards("e", {name: "hm_zhong"});
+						if (target.hp >= 4) return [1, num * 2];
+						if (target.hp == 3) return [1, num * 1.5];
+						if (target.hp == 2) return [1, num * 0.5];
+					}
+				},
+			},
+		},
 	},
 	//唐周
 	hm_jukou: {
