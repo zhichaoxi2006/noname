@@ -2,6 +2,133 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL谋公孙
+	olsbjiaodi: {
+		audio: 2,
+		trigger: { player: "useCardToPlayer" },
+		filter(event, player) {
+			return event.name === "sha" && event.isFirstTarget && event.targets.length === 1;
+		},
+		forced: true,
+		logTarget: "target",
+		async content(event, trigger, player) {
+			const { target } = trigger,
+				num = target.getAttackRange() - player.getAttackRange();
+			if (num <= 0) {
+				trigger.getParent().baseDamage++;
+				await player.gainPlayerCard(target, "h", true);
+			}
+			if (num >= 0) {
+				await player.discardPlayerCard(target, "hej", true);
+				const evt = trigger.getParent();
+				if (
+					game.hasPlayer(target => {
+						return !evt.targets.includes(target) && lib.filter.targetEnabled2(evt.card, player, target) && lib.filter.targetInRange(evt.card, player, target);
+					})
+				) {
+					const { result } = await player
+						.chooseTarget(
+							(card, player, target) => {
+								const evt = get.event().getTrigger().getParent();
+								return !evt.targets.includes(target) && lib.filter.targetEnabled2(evt.card, player, target) && lib.filter.targetInRange(evt.card, player, target);
+							},
+							get.translation(event.name) + "：为" + get.translation(trigger.card) + "额外指定一个目标",
+							true
+						)
+						.set("ai", target => {
+							const player = get.player(),
+								evt = get.event().getTrigger().getParent();
+							return get.effect(target, evt.card, evt.player, player);
+						});
+					if (result?.bool && result.targets?.length) {
+						trigger.targets.addArray(result.targets);
+						trigger.getParent().triggeredTargets1.addArray(result.targets);
+						game.log(result.targets, "成为了", trigger.card, "的额外目标");
+					}
+				}
+			}
+		},
+		mod: { attackRange: player => player.getHp() },
+	},
+	olsbbaojing: {
+		audio: 2,
+		enable: "phaseUse",
+		filter(event, player) {
+			return game.hasPlayer(target => target !== player);
+		},
+		usable: 1,
+		filterTarget: lib.filter.notMe,
+		async content(event, trigger, player) {
+			const { target } = event;
+			let index = await player
+				.chooseControl(" +1 ", "-1")
+				.set("ai", () => {
+					const player = get.player(),
+						{ target } = get.event().getParent();
+					return get.attitude(player, target) > 0 ? 0 : 1;
+				})
+				.set("prompt", "令" + get.translation(target) + "的攻击范围+1或-1")
+				.forResult("index");
+			if (typeof index === "number") {
+				index = Math.sign(0.5 - index);
+				player.popup((index > 0 ? "+" : "") + index);
+				target.addSkill("olsbbaojing_effect");
+				if (!target.storage["olsbbaojing_effect"][player.playerid]) {
+					target.storage["olsbbaojing_effect"][player.playerid] = 0;
+				}
+				target.storage["olsbbaojing_effect"][player.playerid] += index;
+				target.markSkill("olsbbaojing_effect");
+			}
+		},
+		ai: {
+			order: 10,
+			result: {
+				player(player, target) {
+					if (get.attitude(player, target) < 0) return 1 / (target.getAttackRange() + 1);
+					return target.getAttackRange();
+				},
+			},
+		},
+		subSkill: {
+			effect: {
+				charlotte: true,
+				init: (player, skill) => (player.storage[skill] = player.storage[skill] || {}),
+				onremove: true,
+				intro: {
+					markcount(storage = {}) {
+						const num = Object.keys(storage).reduce((sum, i) => sum + storage[i], 0);
+						if (!num) return num;
+						return (num > 0 ? "+" : "") + num.toString();
+					},
+					content(storage = {}) {
+						const num = Object.keys(storage).reduce((sum, i) => sum + storage[i], 0);
+						if (!num) return "攻击范围无变化";
+						return "攻击范围" + (num > 0 ? "+" : "") + num;
+					},
+				},
+				mod: {
+					attackRange(player, num) {
+						const storage = player.storage["olsbbaojing_effect"] || {};
+						const numx = Object.keys(storage).reduce((sum, i) => sum + storage[i], 0);
+						if (!numx) return;
+						const sum = num + numx;
+						if (numx > 0 || sum > 1) return sum;
+					},
+				},
+				trigger: { global: "phaseUseBegin" },
+				filter(event, player) {
+					return player.storage?.["olsbbaojing_effect"]?.[event.player.playerid];
+				},
+				forced: true,
+				popup: false,
+				content() {
+					const target = trigger.player;
+					delete player.storage[event.name][target.playerid];
+					player[Object.keys(player.storage[event.name]).length ? "markSkill" : "removeSkill"](event.name);
+				},
+			},
+		},
+	},
 	//谋邓艾
 	olsbjigu: {
 		audio: 2,
@@ -280,10 +407,9 @@ const skills = {
 		enable: "phaseUse",
 		trigger: { global: "dying" },
 		filter(event, player) {
-			if (event.name === "dying" && game.getGlobalHistory("everything", evt => evt.name === "dying").indexOf(event) !== 0) return false;
 			const cards = event.name == "chooseToUse" ? event.olfengshang_cards || [] : get.info("olfengshang").getCards(player);
 			if (!lib.suit.some(suit => cards.filter(card => get.suit(card) == suit).length > 1)) return false;
-			return event.name != "chooseToUse" || !player.hasSkill("olfengshang_used", null, null, false);
+			return !player.hasSkill("olfengshang_" + (event.name === "chooseToUse" ? "used" : "round"), null, null, false);
 		},
 		onChooseToUse(event) {
 			if (!game.online && !event.olfengshang_cards) {
@@ -291,7 +417,7 @@ const skills = {
 			}
 		},
 		async content(event, trigger, player) {
-			if (!trigger) player.addTempSkill(event.name + "_used", "phaseUseAfter");
+			player.addTempSkill(event.name + (trigger ? "_round" : "_used"), trigger ? "phaseAfter" : "phaseUseAfter");
 			if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
 			player.changeSkin({ characterName: "ol_sb_dongzhuo" }, "ol_sb_dongzhuo_shadow2");
 			const given_map = {};
@@ -374,6 +500,7 @@ const skills = {
 		},
 		subSkill: {
 			used: { charlotte: true },
+			round: { charlotte: true },
 			clear: {
 				intro: {
 					content(storage, player) {
@@ -3688,11 +3815,7 @@ const skills = {
 	//界凌统
 	olxuanfeng: {
 		audio: "xuanfeng",
-		audioname: ["boss_lvbu3"],
-		audioname2: {
-			lingtong: "xuanfeng",
-			ol_lingtong: "xuanfeng_re_lingtong",
-		},
+		audioname: ["boss_lvbu3", "re_lingtong"],
 		trigger: {
 			player: ["loseAfter"],
 			global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
@@ -3728,7 +3851,6 @@ const skills = {
 			},
 		},
 	},
-	xuanfeng_re_lingtong: { audio: 2 },
 };
 
 export default skills;

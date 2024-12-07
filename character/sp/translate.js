@@ -1418,6 +1418,10 @@ const translates = {
 	olqingshu_info: "锁定技，游戏开始时/准备阶段/结束阶段，你书写一册“天书”。",
 	olshoushu: "授术",
 	olshoushu_info: "出牌阶段限一次，你可以将一册未发动过的“天书”交给一名其他角色（此“天书”其仅可发动一次）。",
+	ol_wuanguo: "OL武安国",
+	ol_wuanguo_prefix: "OL",
+	olliyong: "历勇",
+	olliyong_info: "转换技，出牌阶段。阳：你可以将一张你本回合未使用过的花色的牌当作【决斗】使用；阴：你可以弃置一张你本回合已使用过的花色的牌，令一名角色视为对你使用【决斗】。",
 };
 
 export default translates;

@@ -2774,11 +2774,11 @@ const skills = {
 				},
 			},
 			viewas: {
+				hiddenCard: function (player, name) {
+					var storage = player.getStorage("sangu_effect");
+					if (storage.length) return name == storage[0];
+				},
 				mod: {
-					hiddenCard: function (player, name) {
-						var storage = player.getStorage("sangu_effect");
-						if (storage.length) return name == storage[0];
-					},
 					cardname: function (card, player) {
 						if (_status.event.name != "chooseToUse" || _status.event.skill) return;
 						var storage = player.getStorage("sangu_effect");

@@ -80,8 +80,8 @@ const skills = {
 				result: { color, judge },
 			} = await judgeEvent;
 			if (judge < 0) return;
-			const targetsx = game.filterPlayer(current => !trigger.targets.includes(current) && current.countDiscardableCards(player, "he"));
-			if (color == "red") await player.draw(2);
+			const targetsx = game.filterPlayer(current => current != player && current.countDiscardableCards(player, "he"));
+			if (color == "red") await player.draw(3);
 			else if (color == "black" && targetsx.length) {
 				const targets = await player
 					.chooseTarget(`选择一名角色弃置其至多两张牌`, (card, player, target) => {
