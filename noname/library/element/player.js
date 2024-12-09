@@ -8539,7 +8539,7 @@ export class Player extends HTMLDivElement {
 		if (!nounmark) this.unmarkSkill(skill);
 		this.disableSkill(skill + "_awake", skill);
 		this.awakenedSkills.add(skill);
-		if (!this.storage[skill]) this.storage[skill] = true;
+		if (this.storage[skill] === undefined || this.storage[skill] === false) this.storage[skill] = true;
 		_status.event.clearStepCache();
 		return this;
 	}
