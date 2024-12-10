@@ -18,6 +18,7 @@ const characters = {
 	hm_zhangkai: ["male", "qun", "4/4", ["hm_xiangshu"], []],
 	hm_yanzheng: ["male", "qun", "4/4", ["hm_didao", "hm_xianxiang"], []],
 	hm_bocai: ["male", "qun", "5/5", ["hm_kunjun", "hm_yingzhan", "hm_cuiji"], []],
+	hm_bairao: ["male", "qun", "5/5", ["hm_huoyin"], []],
 	hm_dengmao: ["male", "qun", "5/5", ["hm_paoxi", "hm_houying"], []],
 	xk_luoli: ["male", "qun", 4, ["xkjuluan", "xkxianxing"]],
 	xk_cuilian: ["male", "qun", 3, ["xktanlu", "xkjubian"]],

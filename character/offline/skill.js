@@ -29,6 +29,33 @@ const skills = {
 			},
 		},
 	},
+	//白绕
+	hm_huoyin: {
+		mod: {
+			cardUsableTarget(card, player, target, result) {
+				if (player.inRange(target) && target.inRange(player)) {
+					if (card.name == "sha") return true;
+				}
+			},
+		},
+		group: "hm_huoyin_damageSource",
+		subSkill: {
+			damageSource: {
+				trigger: {
+					source: "damageSource",
+				},
+				filter(event){
+					const { source, player } = event;
+					return player.inRange(source) && source.inRange(player);
+				},
+				forced:true,
+				async content(event, trigger, player){
+					await player.draw();
+					await trigger.player.chooseToUse("【祸引】：是否使用一张牌？");
+				}
+			},
+		},
+	},
 	//唐周
 	hm_jukou: {
 		enable: "phaseUse",
