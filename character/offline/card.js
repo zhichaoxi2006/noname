@@ -107,7 +107,7 @@ const cards = {
 			} else {
 				event.directButton = event.dialog.buttons[0];
 			}
-			("step 1");
+			"step 1";
 			var dialog = event.dialog;
 			var card;
 			if (event.directButton) {
@@ -193,7 +193,7 @@ const cards = {
 				}
 			}, event.preResult);
 			game.addVideo("cardDialog", null, event.preResult);
-			("step 1");
+			"step 1";
 			if (event.remained.length) player.gain(event.remained, "gain2");
 		},
 		//ai简略，待补充
