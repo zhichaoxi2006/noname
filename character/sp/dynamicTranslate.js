@@ -112,5 +112,18 @@ const dynamicTranslates = {
         if (!storage) str += "当你令其他角色进入濒死状态后，你可以将此技能描述中的“摸”改为“弃置”。";
         return str;
     },
+	olliyong(player) {
+		const storage = player.storage.olliyong;
+		let str = "转换技，出牌阶段。";
+		if (!storage) str += '<span class="bluetext">';
+		str += "阳：你可以将一张你本回合未使用过的花色的牌当作【决斗】使用";
+		if (!storage) str += "</span>";
+		str += "；";
+		if (storage) str += '<span class="bluetext">';
+		str += "阴：你可以弃置一张你本回合已使用过的花色的牌，令一名角色视为对你使用【决斗】";
+		if (storage) str += "</span>";
+		str += "。";
+		return str;
+	},
 };
 export default dynamicTranslates;

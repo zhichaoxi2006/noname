@@ -243,83 +243,72 @@ const skills = {
 		},
 		frequent: true,
 		async content(event, trigger, player) {
-			let num = trigger.name == "damage" ? 2 : 1;
-			const { result } = await player.draw(num);
-			if (!game.hasPlayer(target => target != player)) return;
-			if (
-				!(() => {
-					const mode = get.mode();
-					return mode === "identity" || (mode === "doudizhu" && trigger.name === "dying");
-				})()
+			const mode = get.mode(),
+				name = trigger.name,
+				yiji = mode === "identity" || (mode === "doudizhu" && name === "dying");
+			let num = name === "damage" || !["identity", "doudizhu"].includes(mode) ? 2 : 1;
+			const next = player.draw(num);
+			if (yiji) next.gaintag = ["sbyiji"];
+			await next;
+			if (!game.hasPlayer(target => target != player) || !player.hasCard(card => !yiji || card.hasGaintag("sbyiji"), "h")) return;
+			if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
+			let given_map = [];
+			while (
+				num > 0 &&
+				player.hasCard(card => {
+					if (card.hasGaintag("olsujian_given")) return false;
+					return !yiji || card.hasGaintag("sbyiji");
+				}, "h")
 			) {
-				if (!player.countCards("h")) return;
-				if (_status.connectMode) game.broadcastAll(() => (_status.noclearcountdown = true));
-				let given_map = [];
-				while (num > 0 && player.hasCard(card => !card.hasGaintag("olsujian_given"), "h")) {
-					const {
-						result: { bool, cards, targets },
-					} = await player.chooseCardTarget({
-						filterCard(card, player) {
-							return !card.hasGaintag("olsujian_given");
-						},
-						selectCard: [1, num],
-						filterTarget: lib.filter.notMe,
-						prompt: "遗计：请选择要分配的卡牌和目标",
-						prompt2: "（还可分配" + num + "张）",
-						ai1(card) {
-							return !ui.selected.cards.length && card.name == "du" ? 1 : 0;
-						},
-						ai2(target) {
-							const player = get.event("player");
-							const card = ui.selected.cards[0];
-							if (card) return get.value(card, target) * get.attitude(player, target);
-							return 0;
-						},
-					});
-					if (bool) {
-						num -= cards.length;
-						const target = targets[0];
-						if (given_map.some(i => i[0] == target)) {
-							given_map[given_map.indexOf(given_map.find(i => i[0] == target))][1].addArray(cards);
-						} else given_map.push([target, cards]);
-						player.addGaintag(cards, "olsujian_given");
-					} else break;
-				}
-				if (_status.connectMode) {
-					game.broadcastAll(() => {
-						delete _status.noclearcountdown;
-						game.stopCountChoose();
-					});
-				}
-				if (given_map.length) {
-					await game
-						.loseAsync({
-							gain_list: given_map,
-							player: player,
-							cards: given_map.slice().map(list => list[1]),
-							giver: player,
-							animate: "giveAuto",
-						})
-						.setContent("gaincardMultiple");
-				}
-			} else {
-				if (get.itemtype(result) != "cards") return;
-				const cards = player.getCards("h").filter(card => result.includes(card));
-				if (!cards.length) return;
-				const targets = await player
-					.chooseTarget(lib.filter.notMe, `将${get.translation(cards)}交给一名其他角色`)
-					.set("ai", target => {
-						const { player, cards } = get.event();
-						const att = get.attitude(player, target);
-						if (cards[0].name == "du") {
-							if (target.hasSkillTag("nodu")) return 0;
-							return 1 - att;
-						}
-						return att - 4;
+				const {
+					result: { bool, cards, targets },
+				} = await player.chooseCardTarget({
+					filterCard(card, player) {
+						if (card.hasGaintag("olsujian_given")) return false;
+						return !get.event().yiji || card.hasGaintag("sbyiji");
+					},
+					selectCard: [1, num],
+					filterTarget: lib.filter.notMe,
+					prompt: "遗计：请选择要分配的卡牌和目标",
+					prompt2: "（还可分配" + num + "张）",
+					ai1(card) {
+						return !ui.selected.cards.length && card.name == "du" ? 1 : 0;
+					},
+					ai2(target) {
+						const player = get.event("player");
+						const card = ui.selected.cards[0];
+						if (card) return get.value(card, target) * get.attitude(player, target);
+						return 0;
+					},
+					yiji: yiji,
+					position: "eh".slice(-1 + (!["identity", "doudizhu"].includes(mode) && name === "dying")),//三若为，怎么若都为构思
+				});
+				if (bool) {
+					num -= cards.length;
+					const target = targets[0];
+					if (given_map.some(i => i[0] == target)) {
+						given_map[given_map.indexOf(given_map.find(i => i[0] == target))][1].addArray(cards);
+					} else given_map.push([target, cards]);
+					player.addGaintag(cards, "olsujian_given");
+				} else break;
+			}
+			if (_status.connectMode) {
+				game.broadcastAll(() => {
+					delete _status.noclearcountdown;
+					game.stopCountChoose();
+				});
+			}
+			if (yiji) player.removeGaintag("sbyiji");
+			if (given_map.length) {
+				await game
+					.loseAsync({
+						gain_list: given_map,
+						player: player,
+						cards: given_map.slice().map(list => list[1]),
+						giver: player,
+						animate: "giveAuto",
 					})
-					.set("cards", cards)
-					.forResultTargets();
-				if (targets?.length) await player.give(cards, targets[0]);
+					.setContent("gaincardMultiple");
 			}
 		},
 		ai: {
@@ -3495,6 +3484,7 @@ const skills = {
 				return "出牌阶段限一次，你可以弃置一张与“任”颜色相同的牌并对攻击范围内的一名角色造成1点伤害。";
 			},
 		},
+		trigger: { global: ["useCardAfter", "respondAfter"] },
 		filter(event, player) {
 			const cards = player.getExpansions("nzry_mingren");
 			if (!cards.length) return false;
@@ -6116,7 +6106,7 @@ const skills = {
 							}
 							if (current.hasJudge("bingliang")) eff2 += get.attitude(player, current) / Math.sqrt(Math.max(0.1, 2 * current.hp + current.countCards("h")));
 						});
-						if (eff > 0 && eff2 > 0) return "cancel2";
+						if (eff >= 0 && eff2 >= 0) return "cancel2";
 						return eff < eff2 ? "选项一" : "选项二";
 					})()
 				);

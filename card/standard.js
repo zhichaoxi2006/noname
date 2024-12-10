@@ -2571,7 +2571,7 @@ game.import("card", function () {
 								if (evt && evt.phaseList.indexOf("phaseJudge") <= evt.num) return 0;
 							}
 							let num = target.needsToDiscard(3),
-								cf = Math.pow(get.threaten(target, player), 2);
+								cf = Math.pow(get.threaten(target, player) + 0.6, 2);
 							if (!num) return -0.01 * cf;
 							if (target.hp > 2) num--;
 							let dist = Math.sqrt(1 + get.distance(player, target, "absolute"));
