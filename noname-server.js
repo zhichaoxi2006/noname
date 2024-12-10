@@ -226,7 +226,7 @@ app.use(function (err, req, res, next) {
 console.log(argv);
 const callback = () => {
 	console.log(`应用正在使用 ${argv.port} 端口以提供无名杀本地服务器功能!`);
-	if (argv.platform == "unknow") require("child_process").exec(`start ${argv.https ? "https" : "http"}://localhost:${argv.port}/`);
+	// if (argv.platform == "unknow") require("child_process").exec(`start ${argv.https ? "https" : "http"}://localhost:${argv.port}/`);
 };
 // if (argv.https) {
 // 	const SSLOptions = {
