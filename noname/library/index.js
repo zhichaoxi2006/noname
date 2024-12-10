@@ -13864,17 +13864,6 @@ export class Library {
 			},
 		],
 		[
-			"风云",
-			{
-				getSpan: () => {
-					const span = document.createElement("span");
-					span.style.fontFamily = "NonameSuits";
-					span.textContent = "☁";
-					return span.outerHTML;
-				},
-			},
-		],
-		[
 			"蛇",
 			{
 				getSpan: () => {
@@ -13968,6 +13957,23 @@ export class Library {
 			},
 		],
 		[
+			"汉末", 	
+			{
+				showName: "汉",
+				color: "#fefedc",
+				nature: "shenmm",
+			}
+		],
+		[
+			"汉末神",
+			{
+				/**
+				 * @returns {string}
+				 */
+				getSpan: () => `${get.prefixSpan("汉末")}${get.prefixSpan("神")}`,
+			},
+		],
+		[
 			"TW神",
 			{
 				/**
@@ -13992,15 +13998,6 @@ export class Library {
 				 * @returns {string}
 				 */
 				getSpan: () => `${get.prefixSpan("OL")}${get.prefixSpan("神")}`,
-			},
-		],
-		[
-			"风云神",
-			{
-				/**
-				 * @returns {string}
-				 */
-				getSpan: () => `${get.prefixSpan("风云")}${get.prefixSpan("神")}`,
 			},
 		],
 		[
