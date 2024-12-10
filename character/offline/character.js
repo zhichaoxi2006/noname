@@ -3,6 +3,7 @@ const characters = {
 	hm_shen_zhangbao: ["male", "shen", "4/4", ["hm_zhouyuan", "hm_zhaobing", "hm_sanshou"], []],
 	hm_shen_zhangliang: ["male", "shen", "4/4", ["hm_jijun", "hm_fengtong", "hm_sanshou"], []],
 	hm_shen_huangfusong: ["male", "shen", "4/4", ["hm_shice", "hm_podai"], []],
+	hm_shen_luzhi: ["male", "shen", "4/4", ["hm_jigan", "hm_weizhu", "hm_guiquan"], []],
 	hm_shen_zhujun: ["male", "shen", "4/4", ["hm_cheji", "hm_daicui", "hm_kuixiang"], []],
 	hm_guigu: ["male", "qun", "5/5", ["hm_tuntian", "hm_qianjun"], []],
 	hm_bosi: ["male", "qun", "4/6", ["hm_weiluan", "hm_tianpan", "hm_gaiming"], []],

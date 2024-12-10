@@ -927,6 +927,286 @@ const skills = {
 			},
 		},
 	},
+	//神卢植
+	hm_jigan: {
+		trigger: {
+			global: "phaseAfter",
+		},
+		setDistanceObj(player){
+			const obj = {};
+			for(const i of game.players){
+				if(!obj[i.playerid]){
+					obj[i.playerid] = {};
+				}
+				for(const j of game.players){
+					//i到j的距离
+					obj[i.playerid][j.playerid] = get.distance(i, j);
+				}
+			}
+			player.storage["hm_jigan"] = obj;
+		},
+		filter(event, player){
+			const storage = player.storage["hm_jigan"];
+			let bool = false;
+			if (game.getGlobalHistory("everything", event => {
+				if (event.name != "gain") return false;
+				return event.giver;
+			}).length) {
+				bool = true;
+			}
+			for(const i of game.players){
+				for(const j of game.players){
+					if(storage[i.playerid][j.playerid] != get.distance(i, j)){
+						bool = true;
+					}
+				}
+			}
+			return bool;
+		},
+		async cost(event, trigger, player){
+			const giver = [];
+			game.getGlobalHistory("everything", event => {
+				if (event.name != "gain") return false;
+				return event.giver;
+			}).forEach(evt => {
+				giver.add(evt.giver);
+			});
+			const storage = player.storage["hm_jigan"];
+			const distanceChanged = [];
+			for(const i of game.players){
+				for(const j of game.players){
+					if(storage[i.playerid][j.playerid] != get.distance(i, j)){
+						distanceChanged.add(i);
+					}
+				}
+			}
+			const targetsx = []
+				.concat(giver)
+				.concat(distanceChanged);
+			const next = player.chooseTarget("令其中两名角色分别视为使用一张基本牌");
+			next.set("selectTarget", [2, 2]);
+			next.set("targetsx", targetsx);
+			next.set("filterTarget", (card, player, target) => {
+				const evt = get.event();
+				return evt.targetsx.includes(target);
+			});
+			const { result } = await next;
+			lib.skill["hm_jigan"].setDistanceObj(player);
+			event.result = result;
+		},
+		async content(event, trigger, player){
+			const { targets } = event;
+			for(const target of targets){
+				const list = [];
+				for (const i of lib.inpile.filter(c=>get.type(c)=="basic")){
+					if (i == "sha") {
+						for (const j of lib.inpile_nature) {
+							if (
+								lib.filter.cardUsable({ name: "sha", nature: j }, target) && target.hasUseTarget({ name: "sha", nature: j }, true)
+							) {
+								list.push(["基本", "", "sha", j]);
+							}
+						};
+					}
+					if (
+						lib.filter.cardUsable({ name: i }, target) && target.hasUseTarget({ name: i }, true)
+					) {
+						list.push(["基本", "", i]);
+					}
+				};
+                if (list.length) {
+                    const next = target.chooseButton(["是否视为使用一张基本牌？", [list, "vcard"]]);
+					next.set("ai", function (button) {
+                        const player = _status.event.player;
+                        const card = {
+                            name: button.link[2],
+                            nature: button.link[3],
+                            isCard: true,
+                        };
+                        if (card.name == "tao") {
+                            if (player.hp == 1 || (player.hp == 2 && !player.hasShan()) || player.needsToDiscard()) {
+                                return 5;
+                            }
+                            return 1;
+                        }
+                        if (card.name == "sha") {
+                            if (
+                                player.hasValueTarget(card, true)
+                            ) {
+                                if (card.nature == "fire") return 2.95;
+                                if (card.nature == "thunder" || card.nature == "ice") return 2.92;
+                                return 2.9;
+                            }
+                            return 0;
+                        }
+                        if (card.name == "jiu") {
+                            return 0.5;
+                        }
+                        return 0;
+                    });
+					const { result } = await next;
+					const card = { name: result.links[0][2], nature: result.links[0][3] };
+					await target.chooseUseTarget(card, true);
+				}
+			}
+		},
+		group: "hm_jigan_gameStart",
+		subSkill: {
+			gameStart: {
+				charlotte:true,
+				trigger: {
+					global: "phaseBefore",
+					player: "enterGame",
+				},
+				silent:true,
+				filter(event, player) {
+					return event.name != "phase" || game.phaseNumber == 0;
+				},
+				async content(event, trigger, player){
+					lib.skill["hm_jigan"].setDistanceObj(player);
+				},
+			}
+		}
+	},
+	hm_weizhu: {
+		enable: "phaseUse",
+		usable: 1,
+		filterCard: true,
+		selectCard: [1, Infinity],
+		discard:false,
+		lose:false,
+		async content(event, trigger, player){
+			const { cards } = event
+			await player.recast(cards);
+			const equip = Array.from(ui.discardPile.childNodes).filter(c=>get.type(c)==="equip");
+			if (cards.length >= equip.length) {
+				await player.gain(equip);
+			} else {
+				const next = player.chooseCardButton(equip, true);
+				next.set("selectButton", cards.length);
+				const { result } = await next;
+				if (result.bool) {
+					await player.gain(result.links);
+				}
+			}
+			const playerMap = new Map();
+			while(true){
+				const next = player.chooseCardTarget(
+					{
+						filterTarget(card, player, target){
+							if (player == target) {
+								return false;
+							}
+							return !playerMap.has(target);
+						},
+						filterCard(card){
+							let bool = true;
+							playerMap.forEach((cards) => {
+								if (cards[0] == card) {
+									bool = false;
+								}
+							});
+							return bool;
+						},
+						prompt: "交给一名其他角色一张牌",
+					}
+				);
+				const { result } = await next;
+				playerMap.set(result.targets[0], result.cards);
+				if(playerMap.size >= cards.length || playerMap.size >= game.countPlayer(target => target != player)){
+					break;
+				}
+			}
+			for(const target of playerMap.keys()){
+				await player.give(playerMap.get(target), target);
+				target.addTempSkill("hm_weizhu_buff", {global: "roundStart"});
+			}
+		},
+		subSkill: {
+			buff: {
+				charlotte:true,
+				mod: {
+					globalFrom(from, to, distance) {
+						return distance - 1;
+					},
+				},
+			}
+		},
+	},
+	hm_guiquan: {
+		enable: "chooseToUse",
+		init: function(player, skill){
+			player.storage[skill] = [];
+		},
+		filter: function (event, player) {
+			const cards = player.getCards("hes", {type: "equip"});
+			if (!cards.length) return false;
+			return lib.inpile.some(name => {
+				if (player.getStorage("hm_guiquan").includes(name)) return false;
+				if (get.type(name) != "trick") return false;
+				let bool = false;
+				for(const card of cards){
+					const vcard = get.autoViewAs({ name }, card);
+					if (event.filterCard(vcard, player, event)) {
+						bool = true;
+					}
+				}
+				return bool;
+			});
+		},
+		chooseButton: {
+			dialog: function (event, player) {
+				const list = [];
+				for (const name of lib.inpile) {
+					if (player.getStorage("hm_guiquan").includes(name)) continue; 
+					if (get.type(name) == "trick") list.push(["锦囊", "", name]);
+				}
+				return ui.create.dialog(get.translation("hm_guiquan"), [list, "vcard"]);
+			},
+			filter: function (button, player) {
+				const event = _status.event.getParent(),
+					card = get.autoViewAs(
+						{
+							name: button.link[2],
+						},
+					);
+				return event.filterCard(card, player, event);
+			},
+			backup: function (links, player) {
+				return {
+					filterCard: function(card){
+						return get.type(card) == "equip";
+					},
+					filterTarget: function(card, player, target){
+						if (target.hp > player.hp) return false;
+						return lib.filter.filterTarget.apply(this, arguments);
+					},
+					selectCard: 1,
+					position: "hes",
+					popname: true,
+					viewAs: { name: links[0][2] },
+					onuse(result, player){
+						const { card } = result;
+						player.getStorage("hm_guiquan").add(card.name);
+					},
+				};
+			},
+			prompt: function (links, player) {
+				return "将一张装备牌当作" + get.translation(links[0][2]) + "使用";
+			},
+		},
+		ai: {
+			order: 1,
+			result: {
+				//Waiting For 157
+				player: function (player) {
+					var num = 0;
+					return 12 - num;
+				},
+			},
+			threaten: 1.6,
+		},
+	},
 	//程远志
 	hm_wuxiao: {
 		trigger: {
@@ -1793,7 +2073,11 @@ const skills = {
 			const { result } = await next;
 			if (result.bool) {
 				await player.loseToDiscardpile(result.links);
-				const next2 = player.chooseTarget(lib.filter.notMe, true);
+				const next2 = player.chooseTarget("【方统】：对一名其他角色造成3点雷电伤害",lib.filter.notMe, true);
+				next2.set("ai", function(target){
+					const evt = get.event();
+					return get.damageEffect(evt.player, target, evt.player, "thunder");
+				});
 				const result2 = await next2.forResult();
 				await result2.targets[0].damage("thunder", 3, player);
 			}
