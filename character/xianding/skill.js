@@ -4775,7 +4775,7 @@ const skills = {
 				target = event.target;
 			const num = get.cardNameLength(card);
 			await player.showCards([card], get.translation(player) + "发动了【寄春】");
-			player.addTempSkill("dcjichun_used");
+			player.addTempSkill("dcjichun_used", "phaseUseAfter");
 			if (target.countCards("h") < player.countCards("h")) {
 				player.markAuto("dcjichun_used", "draw");
 				await player.give(card, target);
