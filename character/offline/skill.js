@@ -95,6 +95,9 @@ const skills = {
 				],
 			];
 			const next = player.chooseButton(dialog, true);
+			next.set("ai", function(button){
+				return Math.random();
+			});
 			next.set("targetx", target);
 			next.set("filterButton", function (button) {
 				const evt = _status.event;
@@ -396,7 +399,10 @@ const skills = {
 		usable: 1,
 		enable: "phaseUse",
 		async content(event, trigger, player) {
-			const next = player.judge();
+			const next = player.judge(function (card) {
+				if (["diamond", "club"].includes(get.suit(card))) return 2;
+				return 0;
+			});
 			const { suit } = await next.forResult();
 			switch (suit) {
 				case "spade":
@@ -1011,6 +1017,9 @@ const skills = {
 				.concat(giver)
 				.concat(distanceChanged);
 			const next = player.chooseTarget("令其中两名角色分别视为使用一张基本牌");
+			next.set("ai", function(target){
+				return get.attitude(player, target);
+			});
 			next.set("selectTarget", [2, 2]);
 			next.set("targetsx", targetsx);
 			next.set("filterTarget", (card, player, target) => {
@@ -2072,6 +2081,37 @@ const skills = {
 		trigger: {
 			player: "phaseUseEnd",
 		},
+		getAuto: function (player) {
+			var hs = player.getCards("h");
+			var ss = player.getExpansions("xinfu_jijun");
+			var bool = false,
+				max = Math.pow(2, ss.length),
+				index,
+				i;
+			for (i = 0; i < hs.length; i++) {
+				for (var j = 1; j < max; j++) {
+					var num = get.number(hs[i]);
+					index = j.toString(2);
+					while (index.length < ss.length) {
+						index = "0" + index;
+					}
+					for (var k = 0; k < ss.length; k++) {
+						if (index[k] == "1") num += get.number(ss[k]);
+					}
+					if (num == 36) {
+						bool = true;
+						break;
+					}
+				}
+				if (bool) break;
+			}
+			if (!bool) return [];
+			var list = [hs[i]];
+			for (var k = 0; k < ss.length; k++) {
+				if (index[k] == "1") list.push(ss[k]);
+			}
+			return list;
+		},
 		filter(event, player) {
 			return player.getExpansions("hm_jijun").length > 0;
 		},
@@ -2097,6 +2137,17 @@ const skills = {
 				});
 				return sum === 36;
 			});
+			next.set("autolist", lib.skill.xinfu_fangtong.getAuto(player));
+			next.set("processAI", function () {
+				if (_status.event.autolist && _status.event.autolist.length > 0) {
+					return {
+						bool: true,
+						links: _status.event.autolist,
+					};
+				}
+				return { bool: false };
+			});
+			next.set("complexSelect", true);
 			const { result } = await next;
 			if (result.bool) {
 				await player.loseToDiscardpile(result.links);
@@ -2123,6 +2174,9 @@ const skills = {
 		async content(event, trigger, player) {
 			trigger.phaseList[trigger.num] = "phaseUse|hm_sanshou";
 			const next = player.chooseButton(["请选择变身对象", [["hm_shen_zhangbao", "hm_shen_zhangliang"], "character"]], true);
+			next.set("ai", function(button){
+				return Math.random() - 1;
+			})
 			const { result } = await next;
 			if (result.bool) {
 				//双将适配有时间再写，摆了
