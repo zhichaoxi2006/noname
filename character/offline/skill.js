@@ -726,7 +726,7 @@ const skills = {
 				game.getGlobalHistory("everything", evt => {
 					if (evt.name != "die" || evt.player != target) return false;
 					return evt.reason?.getParent() == event;
-				}).length > 0
+				}).length > 0 && target.isDead()
 			) {
 				const next = player.chooseBool("〖溃降〗：是否摸三张牌？");
 				const bool = await next.forResultBool();
