@@ -1819,7 +1819,7 @@ const skills = {
 				.chooseButton(
 					[
 						get.translation(event.name) + "：请选择你要执行的选项",
-						'<div class="text center">' + lib.translate[event.name + '_info'] + '</div>',
+						'<div class="text center">' + lib.translate[event.name + "_info"] + "</div>",
 						[
 							[
 								"失去体力",
@@ -6193,18 +6193,19 @@ const skills = {
 					.set(
 						"aiTargets",
 						(() => {
-							var targets = game.filterPlayer(i => i != player).sortBySeat(player);
-							var maxEff = -Infinity,
+							const targets = game.filterPlayer(i => i != player).sortBySeat(player),
+								values = targets.map(cur => {
+									const eff = get.damageEffect(cur, cur, player, "fire");
+									if (eff > 0) return Math.min(eff, -get.attitude(player, cur));
+									return eff;
+								});
+							let maxEff = -Infinity,
 								aiTargets = [];
-							for (var i = 0; i < targets.length; i++) {
-								for (var j = 0; j < blackOnes.length; j++) {
-									if (targets.length < i + j) break;
-									var targetsx = targets.slice(i, j);
-									var tmpEff = targetsx
-										.map(current => {
-											return get.damageEffect(current, current, player, "fire");
-										})
-										.reduce((p, c) => {
+							for (let i = 0; i < targets.length; i++) {
+								for (let j = 1; j < blackOnes.length; j++) {
+									if (targets.length < j) break;
+									let targetsx = targets.slice(i, i + j),
+										tmpEff = values.slice(i, i + j).reduce((p, c) => {
 											return p + c;
 										}, 0);
 									if (tmpEff > maxEff) {
