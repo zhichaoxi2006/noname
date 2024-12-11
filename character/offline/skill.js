@@ -854,7 +854,11 @@ const skills = {
 		getSkills: function (player) {
 			return player.getSkills(null, false, true).filter(function (skill) {
 				var info = get.info(skill);
-				const list = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"].concat(["零", "一", "二", "两", "三", "四", "五", "六", "七", "八", "九", "十"]).concat(get.cardTranslation(c => get.type(c) == "basic"));
+				//无人生还
+				const list = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
+					.concat(["零", "一", "二", "两", "三", "四", "五", "六", "七", "八", "九", "十"])
+					.concat(["壹", "贰", "叁", "肆", "伍", "陆", "柒", "捌", "玖", "拾", "佰", "仟", "万", "亿"])
+					.concat(get.cardTranslation(c => get.type(c) == "basic"));
 				if (!info || info.charlotte || info.persevereSkill) return false;
 				if (info.zhuSkill) return player.hasZhuSkill(skill);
 				return lib.skill.hm_podai.infoTranslationIncludesString(skill, list);
