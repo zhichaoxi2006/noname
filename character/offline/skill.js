@@ -850,6 +850,7 @@ const skills = {
 			}
 			return false;
 		},
+		derivation: "hm_podai_faq",
 		getSkills: function (player) {
 			return player.getSkills(null, false, true).filter(function (skill) {
 				var info = get.info(skill);
