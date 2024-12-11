@@ -506,10 +506,11 @@ const skills = {
 				if (event.control) event.control.close();
 				game.resume();
 				if (get.attitude(player, target) > 0) event._result = { bool: false };
-				else event._result = {
-					bool: true,
-					position: list.includes("head") ? "head" : "abdomen",
-				};
+				else
+					event._result = {
+						bool: true,
+						position: list.includes("head") ? "head" : "abdomen",
+					};
 				return Promise.resolve(event._result);
 			};
 			const choosePosition = function (player, target, list) {
@@ -518,10 +519,11 @@ const skills = {
 				event.switchToAuto = function () {
 					_status.imchoosing = false;
 					if (get.attitude(player, target) > 0) event._result = { bool: false };
-					else event._result = {
-						bool: true,
-						position: list.includes("head") ? "head" : "abdomen",
-					};
+					else
+						event._result = {
+							bool: true,
+							position: list.includes("head") ? "head" : "abdomen",
+						};
 					resolve(event._result);
 					if (event.dialog) event.dialog.close();
 					if (event.control_cancel) event.control_cancel.close();
@@ -5538,16 +5540,19 @@ const skills = {
 						if (get.tag(card, "damage") && target.hasSkill("yingba")) {
 							let damage = 1.6;
 							if (target.isHealthy()) damage += 1.6;
-							if (game.hasPlayer(cur => {
-								return cur !== target && get.attitude(target, cur) > 0;
-							})) damage -= 0.9;
+							if (
+								game.hasPlayer(cur => {
+									return cur !== target && get.attitude(target, cur) > 0;
+								})
+							)
+								damage -= 0.9;
 							return [0, -damage, 0, -0.4];
 						}
 						if (card.name === "tiesuo") return 0.4;
 					}
 					if (get.tag(card, "recover") && _status.event.type == "phase" && !player.needsToDiscard()) return 0;
-				}
-			}
+				},
+			},
 		},
 	},
 	tianzuo: {
@@ -6451,6 +6456,18 @@ const skills = {
 		sourceSkill: "boss_juejing",
 		audioname2: {
 			dc_zhaoyun: "dcjuejing",
+		},
+		mod: {
+			aiOrder(player, card, num) {
+				if (num > 0) return num;
+				if (card.name === "zhuge" && player.getCardUsable("sha", true) < 6) return 1;
+			},
+			aiValue(player, card, num) {
+				if (card.name === "zhuge") return 60 / (1 + player.getCardUsable("sha", true));
+			},
+			aiUseful(player, card, num) {
+				if (card.name === "zhuge") return 60 / (1 + player.getCardUsable("sha", true));
+			},
 		},
 		trigger: {
 			player: "loseAfter",
@@ -9041,6 +9058,14 @@ const skills = {
 		content() {
 			player.draw();
 		},
+		ai: {
+			effect: {
+				target(card, player, target) {
+					if (target.getHp() > 1) return;
+					if (get.tag(card, "damage") || get.tag(card, "losehp")) return [1, 1];
+				},
+			},
+		},
 	},
 	shelie: {
 		audio: 2,
@@ -9278,7 +9303,7 @@ const skills = {
 				},
 				ai: {
 					noLink: true,
-				}
+				},
 			},
 			2: {
 				audio: "nzry_jieying",
