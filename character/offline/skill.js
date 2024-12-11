@@ -1527,62 +1527,6 @@ const skills = {
 			},
 		},
 	},
-	//张闿
-	hm_xiangshu: {
-		trigger: {
-			global: "phaseUseBegin",
-		},
-		filter(event, player) {
-			if (event.player == player) return false;
-			return event.player.countCards("h") >= event.player.getHp();
-		},
-		async cost(event, trigger, player) {
-			const { result } = await player.chooseNumbers(get.prompt("hm_xiangshu"), [{ prompt: "请选择你要声明的整数", min: 0, max: 5 }], true).set("processAI", () => {
-				const player = get.player();
-				let num = player.getHp() - 1;
-				if (player.countCards("hs", { name: ["tao", "jiu"] })) {
-					num = player.getHp();
-				}
-				return [num];
-			});
-			event.result = {
-				bool: result.bool,
-				cost_data: result.numbers[0],
-			};
-		},
-		async content(event, trigger, player) {
-			const number = event.cost_data;
-			const next = player.chooseToDiscard("【相鼠】：请弃置一张手牌，令此数字对其他角色不可见", "h");
-			const { bool } = await next.forResult();
-			if (!bool) {
-				game.log(player, "声明了数字", `#y${number}`);
-			}
-			player.storage["hm_xiangshu"] = number;
-			player.addSkill("hm_xiangshu_buff");
-		},
-		subSkill: {
-			buff: {
-				trigger: {
-					global: "phaseUseAfter",
-				},
-				silent: true,
-				charlotte: true,
-				async content(event, trigger, player) {
-					const num1 = trigger.player.countCards("h"),
-						num2 = player.storage.hm_xiangshu;
-					const abs = Math.abs(num1 - num2);
-					if (abs <= 1) {
-						await player.gainPlayerCard("h", trigger.player);
-					}
-					if (abs == 0) {
-						await trigger.player.damage(player);
-					}
-					delete player.storage["hm_xiangshu"];
-					player.removeSkill("hm_xiangshu_buff");
-				},
-			},
-		},
-	},
 	//严政
 	hm_didao: {
 		locked: true,
