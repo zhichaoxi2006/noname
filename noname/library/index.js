@@ -14199,17 +14199,9 @@ export class Library {
 		[
 			"SCL",
 			{
-				getSpan: () => {
-					const span = document.createElement("span"),
-						style = span.style;
-					style.writingMode = style.webkitWritingMode = "horizontal-tb";
-					style.letterSpacing = "-0.25em";
-					style.fontFamily = "xingkai";
-					span.style.color = "#fefedc";
-					span.dataset.nature = "soilmm";
-					span.textContent = "王战";
-					return span.outerHTML;
-				},
+				showName: "競",
+				color: "#fefedc",
+				nature: "soilmm",
 			},
 		],
 		[
