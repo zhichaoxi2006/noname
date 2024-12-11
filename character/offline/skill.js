@@ -2117,18 +2117,44 @@ const skills = {
 		forced: true,
 		async content(event, trigger, player) {
 			trigger.phaseList[trigger.num] = "phaseUse|hm_sanshou";
-			const next = player.chooseButton(["请选择变身对象", [["hm_shen_zhangbao", "hm_shen_zhangliang"], "character"]], true);
-			next.set("ai", function(button){
-				return Math.random() - 1;
-			})
-			const { result } = await next;
-			if (result.bool) {
-				//双将适配有时间再写，摆了
-				await player.changeCharacter(result.links);
-				player.when({ player: ["phaseUseAfter"] }).then(function () {
-					player.changeCharacter(["hm_shen_zhangjiao"]);
-				});
+			const newPair = [];
+			for(const i of [player.name1, player.name2]){
+				if (i == "hm_shen_zhangjiao") {
+					const next = player.chooseButton(["请选择变身对象", [["hm_shen_zhangbao", "hm_shen_zhangliang"], "character"]], true);
+					next.set("ai", function(button){
+						return Math.random() - 1;
+					})
+					const { result } = await next;
+					if (result.bool) {
+						newPair.push(result.links[0]);
+					}
+				} else {
+					newPair.push(i);
+				}
 			}
+			await player.changeCharacter(newPair);
+			player.addSkill("hm_sanshou_back");
+		},
+		subSkill: {
+			back: {
+				trigger: {
+					player: "phaseUseAfter",
+				},
+				silent:true,
+				charlotte:true,
+				async content(event, trigger, player){
+					const newPair = [];
+					for(const i of [player.name1, player.name2]){
+						if(["hm_shen_zhangbao", "hm_shen_zhangliang"].includes(i)){
+							newPair.push("hm_shen_zhangjiao");
+						} else {
+							newPair.push(i);
+						}
+					}
+					await player.changeCharacter(newPair);
+					player.removeSkill("hm_sanshou_back");
+				},
+			},
 		},
 	},
 	//祖郎
