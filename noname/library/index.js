@@ -5023,10 +5023,15 @@ export class Library {
 					}
 					if (config.connect_identity_mode == "zhong") {
 						map.connect_player_number.hide();
+						map.connect_choice_zhu.hide();
 						map.connect_limit_zhu.hide();
 						map.connect_enhance_zhu.hide();
+						map.connect_choice_zhong.hide();
+						map.connect_choice_fan.hide();
+						map.connect_choice_nei.hide();
 						map.connect_double_nei.hide();
 						map.connect_enable_commoner.hide();
+						map.connect_choice_commoner.hide();
 						map.connect_enable_year_limit.show();
 						map.connect_zhong_card.show();
 						map.connect_special_identity.hide();
@@ -5034,19 +5039,29 @@ export class Library {
 					} else if (config.connect_identity_mode == "stratagem") {
 						map.connect_double_character.show();
 						map.connect_player_number.show();
+						map.connect_choice_zhu.show();
 						map.connect_limit_zhu.hide();
 						map.connect_enhance_zhu.hide();
+						map.connect_choice_zhong.show();
+						map.connect_choice_fan.show();
+						map.connect_choice_nei.show();
 						map.connect_double_nei.hide();
 						map.connect_enable_commoner.hide();
+						map.connect_choice_commoner.hide();
 						map.connect_enable_year_limit.show();
 						map.connect_zhong_card.hide();
 						map.connect_special_identity.hide();
 					} else if (config.connect_identity_mode == "purple") {
 						map.connect_player_number.hide();
+						map.connect_choice_zhu.hide();
 						map.connect_limit_zhu.hide();
 						map.connect_enhance_zhu.hide();
+						map.connect_choice_zhong.hide();
+						map.connect_choice_fan.hide();
+						map.connect_choice_nei.hide();
 						map.connect_double_nei.hide();
 						map.connect_enable_commoner.hide();
+						map.connect_choice_commoner.hide();
 						map.connect_enable_year_limit.hide();
 						map.connect_zhong_card.hide();
 						map.connect_special_identity.hide();
@@ -5054,10 +5069,15 @@ export class Library {
 					} else {
 						map.connect_double_character.show();
 						map.connect_player_number.show();
+						map.connect_choice_zhu.show();
 						map.connect_limit_zhu.show();
 						map.connect_enhance_zhu.show();
+						map.connect_choice_zhong.show();
+						map.connect_choice_fan.show();
+						map.connect_choice_nei.show();
 						map.connect_double_nei[config.connect_player_number != "2" && !config.connect_enable_commoner ? "show" : "hide"]();
 						map.connect_enable_commoner[config.connect_player_number != "2" && !config.connect_double_nei ? "show" : "hide"]();
+						map.connect_choice_commoner[config.connect_enable_commoner ? "show" : "hide"]();
 						map.connect_enable_year_limit.show();
 						map.connect_zhong_card.hide();
 
@@ -5090,6 +5110,20 @@ export class Library {
 					frequent: true,
 					restart: true,
 				},
+				connect_choice_zhu: {
+					name: "主公候选武将数",
+					init: 3,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_zhu", num, "identity");
+					},
+				},
 				connect_limit_zhu: {
 					name: "常备主候选武将数",
 					init: "group",
@@ -5102,11 +5136,53 @@ export class Library {
 						8: "八",
 					},
 				},
+				connect_choice_zhong: {
+					name: "忠臣候选武将数",
+					init: 4,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_zhong", num, "identity");
+					},
+				},
 				connect_zhong_card: {
 					name: "明忠卡牌替换",
 					init: true,
 					frequent: true,
 					restart: true,
+				},
+				connect_choice_fan: {
+					name: "反贼候选武将数",
+					init: 3,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_fan", num, "identity");
+					},
+				},
+				connect_choice_nei: {
+					name: "内奸候选武将数",
+					init: 6,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 6;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_nei", num, "identity");
+					},
 				},
 				connect_double_nei: {
 					name: "双内奸",
@@ -5124,6 +5200,20 @@ export class Library {
 					frequent: false,
 					get intro() {
 						return lib.mode.identity.config.enable_commoner.intro;
+					},
+				},
+				connect_choice_commoner: {
+					name: "平民候选武将数",
+					init: 4,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_commoner", num, "identity");
 					},
 				},
 				connect_double_character: {
@@ -5632,15 +5722,16 @@ export class Library {
 				},
 				choice_zhu: {
 					name: "主公候选武将数",
-					init: "3",
+					init: 3,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_zhu", num, "identity");
 					},
 				},
 				limit_zhu: {
@@ -5657,41 +5748,44 @@ export class Library {
 				},
 				choice_zhong: {
 					name: "忠臣候选武将数",
-					init: "4",
+					init: 4,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_zhong", num, "identity");
 					},
 				},
 				choice_nei: {
 					name: "内奸候选武将数",
-					init: "5",
+					init: 6,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 6;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_nei", num, "identity");
 					},
 				},
 				choice_fan: {
 					name: "反贼候选武将数",
-					init: "3",
+					init: 3,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_fan", num, "identity");
 					},
 				},
 				enable_commoner: {
@@ -5703,15 +5797,16 @@ export class Library {
 				},
 				choice_commoner: {
 					name: "平民候选武将数",
-					init: "4",
+					init: 4,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_commoner", num, "identity");
 					},
 				},
 				enable_year_limit: {
@@ -6650,6 +6745,10 @@ export class Library {
 					name: "联机昵称",
 					input: true,
 					frequent: true,
+					onclick(item) {
+						game.saveConfig("connect_nickname", item);
+						game.saveConfig("connect_avatar", item, "connect");
+					},
 				},
 				connect_avatar: {
 					name: "联机头像",

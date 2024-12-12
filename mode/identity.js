@@ -1308,26 +1308,11 @@ export default () => {
 					var list = [];
 					var selectButton = lib.configOL.double_character ? 2 : 1;
 
-					var num,
-						num2 = 0;
-					num = Math.floor(event.list.length / (game.players.length - 1));
-					if (num > 5) {
-						num = 5;
-					}
-					num2 = event.list.length - num * (game.players.length - 1);
-					if (lib.configOL.double_nei) {
-						num2 = Math.floor(num2 / 2);
-					}
-					if (num2 > 2) {
-						num2 = 2;
-					}
+					var num = Math.floor(event.list.length / (game.players.length - 1));
 					for (var i = 0; i < game.players.length; i++) {
-						var num3 = 0;
-						if (game.players[i].identity == "nei") {
-							num3 = num2;
-						}
+						let num2 = lib.configOL["choice_" + identity];
 						var str = "选择角色";
-						list.push([game.players[i], [str, [event.list.randomRemove(num + num3), "characterx"]], selectButton, true]);
+						list.push([game.players[i], [str, [event.list.randomRemove(Math.min(num, num2)), "characterx"]], selectButton, true]);
 					}
 					game.me.chooseButtonOL(list, function (player, result) {
 						if (game.online || player == game.me) player.init(result.links[0], result.links[1]);
@@ -1351,7 +1336,7 @@ export default () => {
 						} else {
 							result[i] = result[i].links;
 						}
-						if (get.is.double(result[i][0]) || (lib.character[result[i][0]] && (lib.character[result[i][0]].group == "shen"  || lib.character[result[i][0]].group == "western") && !lib.character[result[i][0]].hasHiddenSkill)) shen.push(lib.playerOL[i]);
+						if (get.is.double(result[i][0]) || (lib.character[result[i][0]] && (lib.character[result[i][0]].group == "shen" || lib.character[result[i][0]].group == "western") && !lib.character[result[i][0]].hasHiddenSkill)) shen.push(lib.playerOL[i]);
 					}
 					event.result2 = result;
 					if (shen.length) {
@@ -2389,7 +2374,7 @@ export default () => {
 							list2x.sort(lib.sort.character);
 							return list2x;
 						};
-						list = getZhuList(list2).concat(list3.randomGets(5));
+						list = getZhuList(list2).concat(list3.randomGets(lib.configOL.choice_zhu));
 					}
 					var next = game.zhu.chooseButton(true);
 					next.set("selectButton", lib.configOL.double_character ? 2 : 1);
@@ -2459,40 +2444,22 @@ export default () => {
 					var list = [];
 					var selectButton = lib.configOL.double_character ? 2 : 1;
 
-					var num,
-						num2 = 0;
-					if (event.zhongmode) {
-						num = 6;
-					} else {
-						num = Math.floor(event.list.length / (game.players.length - 1));
-						if (num > 5) {
-							num = 5;
-						}
-						num2 = event.list.length - num * (game.players.length - 1);
-						if (lib.configOL.double_nei) {
-							num2 = Math.floor(num2 / 2);
-						}
-						if (num2 > 2) {
-							num2 = 2;
-						}
-					}
+					var num = Math.floor(event.list.length / (game.players.length - 1));
 					for (var i = 0; i < game.players.length; i++) {
 						if (game.players[i] != game.zhu) {
-							var num3 = 0;
+							const identity = game.players[i].identity;
+							let num2;
 							if (event.zhongmode) {
-								if (game.players[i].identity == "nei" || game.players[i].identity == "zhu") {
-									num3 = 2;
-								}
+								if (identity == "nei" || identity == "zhu") num2 = 8;
+								else num2 = 6;
 							} else {
-								if (game.players[i].identity == "nei") {
-									num3 = num2;
-								}
+								num2 = lib.configOL["choice_" + identity];
 							}
 							var str = "选择角色";
 							if (game.players[i].special_identity) {
 								str += "（" + get.translation(game.players[i].special_identity) + "）";
 							}
-							list.push([game.players[i], [str, [event.list.randomRemove(num + num3), "characterx"]], selectButton, true]);
+							list.push([game.players[i], [str, [event.list.randomRemove(Math.min(num, num2)), "characterx"]], selectButton, true]);
 						}
 					}
 					game.me.chooseButtonOL(list, function (player, result) {
