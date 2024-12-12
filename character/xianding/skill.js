@@ -3524,7 +3524,7 @@ const skills = {
 				)
 					return false;
 			},
-			order: 1,
+			order: 7,
 			result: {
 				player(player) {
 					if (get.event("dying")) return get.attitude(player, get.event("dying"));

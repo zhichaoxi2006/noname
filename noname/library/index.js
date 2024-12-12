@@ -5263,9 +5263,14 @@ export class Library {
 				// },
 				connect_enhance_zhu: {
 					name: "加强主公",
-					init: false,
+					init: "sixiang",
+					item: {
+						sixiang: "四象标记",
+						special: "专属技能",
+						off: "关闭",
+					},
 					restart: true,
-					intro: "为主公增加一个额外技能",
+					intro: "为主公增加一个额外技能。<br><li>四象标记：主公随机获得一个四象标记（限发动一次）；每个回合结束时，若所有反贼已死亡，主公失去此标记。<br><li>专属技能：主公获得一个专属技能（无则改为〖天命〗）；一名角色阵亡后，若存活反贼数小于2，主公失去此技能。",
 				},
 			},
 			config: {
@@ -5550,9 +5555,14 @@ export class Library {
 				// },
 				enhance_zhu: {
 					name: "加强主公",
-					init: false,
+					init: "sixiang",
+					item: {
+						sixiang: "四象标记",
+						special: "专属技能",
+						off: "关闭",
+					},
 					restart: true,
-					intro: "为主公增加一个额外技能",
+					intro: "为主公增加一个额外技能。<br><li>四象标记：主公随机获得一个四象标记（限发动一次）；每个回合结束时，若所有反贼已死亡，主公失去此标记。<br><li>专属技能：主公获得一个专属技能（无则改为〖天命〗）；一名角色阵亡后，若存活反贼数小于2，主公失去此技能。",
 				},
 				free_choose: {
 					name: "自由选将",
