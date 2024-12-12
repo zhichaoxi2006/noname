@@ -18917,20 +18917,48 @@ const skills = {
 						return target.isFriendOf(player) && target.countDiscardableCards(player, "hej") > 0;
 					}, get.prompt2("wlcuorui"))
 					.set("ai", function (target) {
+						let min = 10;
 						if (
-							target.countCards("e", function (card) {
-								return card.name != "tengjia" && get.value(card, target) <= 0;
-							})
+							target.hasCard(card => {
+								const val = get.value(card, target);
+								if (val < 0 && card.name !== "tengjia") return true;
+								if (val < min) min = val;
+							}, "e")
 						)
 							return 10;
 						if (
-							target.countCards("j", function (card) {
-								return get.effect(target, { name: card.viewAs || card.name }, target, target) < 0;
-							})
+							target.hasCard(card => {
+								const eff = get.effect(
+									target,
+									{
+										name: card.viewAs || card.name,
+										cards: [card],
+									},
+									target,
+									target
+								);
+								if (eff < 0) return true;
+								if (eff < min) min = eff;
+							}, "j")
 						)
 							return 10;
-						return Math.random() + 0.2 - 1 / target.countCards("hej");
+						if (!get.event("discard")) return 0;
+						if (min > 6 && target.countCards("h")) min = 6;
+						return 7 - min - 1 / (1 + target.countCards("h"));
 					})
+					.set(
+						"discard",
+						game.hasPlayer(current => {
+							if (current.isFriendOf(player)) return false;
+							let values = {};
+							current.countCards("e", card => {
+								const color = get.color(card);
+								if (!values[color]) values[color] = 0;
+								values[color] += Math.max(0, get.value(card));
+							});
+							return Math.max(...Object.values(values)) > 8;
+						})
+					)
 					.forResult();
 			} else {
 				event.result = await player
@@ -18938,13 +18966,58 @@ const skills = {
 						return get.distance(player, target) <= 1 && target.countDiscardableCards(player, "hej") > 0;
 					}, get.prompt2("wlcuorui"))
 					.set("ai", function (target) {
+						let min = 10;
+						const player = get.event("player"),
+							att = get.attitude(player, target);
+						if (att === 0) min = 0;
 						if (
-							game.hasPlayer(current => {
-								return current != target && get.attitude(_status.event.player, current) < 0;
+							target.hasCard(card => {
+								const val = get.value(card, target);
+								if (att < 0) {
+									if (val > 0) min = Math.min(min, -val - 6);
+									return false;
+								}
+								if (val < 0 && card.name !== "tengjia") return true;
+								if (val < min) min = val;
+							}, "e")
+						)
+							return 12;
+						if (
+							target.hasCard(card => {
+								const eff = get.effect(
+									target,
+									{
+										name: card.viewAs || card.name,
+										cards: [card],
+									},
+									target,
+									target
+								);
+								if (att < 0) {
+									if (eff < 0) min = Math.min(min, eff - 6);
+									return false;
+								}
+								if (eff < 0) return true;
+								if (eff < min) min = eff;
+							}, "j")
+						)
+							return 14;
+						if (
+							!game.hasPlayer(current => {
+								if (player === current || target === current || get.attitude(player, current) > 0) return false;
+								let values = {};
+								current.countCards("e", card => {
+									const color = get.color(card);
+									if (!values[color]) values[color] = 0;
+									values[color] += Math.max(0, get.value(card));
+								});
+								return Math.max(...Object.values(values)) > 8;
 							})
 						)
-							return get.effect(target, { name: "guohe" }, player, player) + 10;
-						return 0;
+							return 0;
+						if (att <= 0) return 7 - min + 1 / (1 + target.countCards("h"));
+						if (min > 6 && target.countCards("h")) min = 6;
+						return 7 - min - 1 / (1 + target.countCards("h"));
 					})
 					.forResult();
 			}
@@ -18987,15 +19060,15 @@ const skills = {
 						(function () {
 							let color = get.color(card);
 							if (
-								game.countPlayer(function (current) {
-									if (!filter(current)) return false;
+								game.hasPlayer(current => {
+									if (!filter(current) || get.attitude(player, current) > 0) return false;
 									return (
-										get.attitude(player, current) <= 0 &&
-										current.countCards("e", function (card) {
-											return get.color(card) == color && get.value(card) > 0;
-										})
+										current.countCards("e", card => {
+											if (get.color(card) === color) return Math.max(0, get.value(card));
+											return 0;
+										}) > 8
 									);
-								}) > 1
+								})
 							)
 								return 1;
 							return 0;

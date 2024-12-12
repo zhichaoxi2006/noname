@@ -4269,9 +4269,7 @@ export default () => {
 				},
 			},
 			sixiang_zhuque: {
-				name: "朱雀",
 				mark: true,
-				marktext: "<img style=width:21px src=" + lib.assetURL + "image/mode/identity/mark/sixiang_zhuque.jpg>",
 				intro: {
 					content: "出牌阶段，你可以弃置一张非基本牌，对一名角色造成1点伤害，以此法杀死反贼不执行奖惩。",
 				},
@@ -4327,9 +4325,7 @@ export default () => {
 				},
 			},
 			sixiang_xuanwu: {
-				name: "玄武",
 				mark: true,
-				marktext: "<img style=width:21px src=" + lib.assetURL + "image/mode/identity/mark/sixiang_xuanwu.jpg>",
 				intro: {
 					content: "你可以将一张牌当【桃】使用。",
 				},
@@ -4353,9 +4349,7 @@ export default () => {
 				group: "sixiang_remove",
 			},
 			sixiang_qinglong: {
-				name: "青龙",
 				mark: true,
-				marktext: "<img style=width:21px src=" + lib.assetURL + "image/mode/identity/mark/sixiang_qinglong.jpg>",
 				intro: {
 					content: "回合开始时，你可以弃置两张牌，弃置你判定区的【乐不思蜀】或【兵粮寸断】。",
 				},
@@ -4363,7 +4357,7 @@ export default () => {
 					player: "phaseBegin",
 				},
 				filter: function (event, player) {
-					if (!player.hasJudge("lebu") || !player.hasJudge("bingliang")) return false;
+					if (!player.hasJudge("lebu") && !player.hasJudge("bingliang")) return false;
 					return player.countCards("he") > 1;
 				},
 				async cost(event, trigger, player) {
@@ -4376,7 +4370,7 @@ export default () => {
 						info += "【兵粮寸断】";
 					}
 					event.result = await player
-						.chooseToDiscard("he", 2, "是否发动〖青龙〗？", info)
+						.chooseToDiscard("he", 2, get.prompt("sixiang_qinglong"), info)
 						.set("logSkill", "sixiang_qinglong")
 						.set("ai", function (card) {
 							if (_status.event.goon) return 6 - get.value(card);
@@ -4406,6 +4400,7 @@ export default () => {
 						.forResult();
 					event.result.skill_popup = false;
 				},
+				charlotte: true,
 				async content(event, trigger, player) {
 					const lebu = player.getCards("j", j => {
 							return j.viewAs === "lebu" || j.name === "lebu";
@@ -4455,9 +4450,7 @@ export default () => {
 				group: "sixiang_remove",
 			},
 			sixiang_baihu: {
-				name: "白虎",
 				mark: true,
-				marktext: "<img style=width:21px src=" + lib.assetURL + "image/mode/identity/mark/sixiang_baihu.jpg>",
 				intro: {
 					content: "你可以将一张牌当【杀】或【闪】使用或打出。",
 				},
@@ -4469,6 +4462,7 @@ export default () => {
 				check(card) {
 					return 5 - get.value(card);
 				},
+				charlotte: true,
 				precontent() {
 					player.removeSkill("sixiang_baihu");
 				},
