@@ -727,7 +727,7 @@ const skills = {
 			const skills = get.info("olhuyi").getList();
 			return (event.name != "phase" || game.phaseNumber == 0) && skills.some(skill => !player.hasSkill(skill, null, null, false));
 		},
-		locked: true,
+		locked: false,
 		async cost(event, trigger, player) {
 			if (["useCard", "respond"].includes(trigger.name)) {
 				event.result = {
