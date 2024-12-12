@@ -1127,6 +1127,9 @@ const skills = {
 			}
 			const playerMap = new Map();
 			while (true) {
+				if (!player.countCards("he")) {
+					break;
+				}
 				const next = player.chooseCardTarget({
 					filterTarget(card, player, target) {
 						if (player == target) {
@@ -1145,6 +1148,7 @@ const skills = {
 					},
 					prompt: "交给一名其他角色一张牌",
 				});
+				next.set("forced", true);
 				const { result } = await next;
 				playerMap.set(result.targets[0], result.cards);
 				if (playerMap.size >= cards.length || playerMap.size >= game.countPlayer(target => target != player)) {
