@@ -109,25 +109,31 @@ export async function cordovaReady() {
 			url = get.url(dev) + url;
 		}
 		var fileTransfer = new FileTransfer();
-		folder = nonameInitialized + folder;
-		if (onprogress) {
-			fileTransfer.onprogress = function (progressEvent) {
-				onprogress(progressEvent.loaded, progressEvent.total);
-			};
-		}
-		lib.config.brokenFile.add(folder);
-		game.saveConfigValue("brokenFile");
-		fileTransfer.download(
-			encodeURI(url),
-			encodeURI(folder),
+		game.ensureDirectory(
+			folder,
 			function () {
-				lib.config.brokenFile.remove(folder);
-				game.saveConfigValue("brokenFile");
-				if (onsuccess) {
-					onsuccess();
+				// folder = nonameInitialized + folder;
+				if (onprogress) {
+					fileTransfer.onprogress = function (progressEvent) {
+						onprogress(progressEvent.loaded, progressEvent.total);
+					};
 				}
+				lib.config.brokenFile.add(nonameInitialized + folder);
+				game.saveConfigValue("brokenFile");
+				fileTransfer.download(
+					encodeURI(url),
+					encodeURI(nonameInitialized + folder),
+					function () {
+						lib.config.brokenFile.remove(nonameInitialized + folder);
+						game.saveConfigValue("brokenFile");
+						if (onsuccess) {
+							onsuccess();
+						}
+					},
+					onerror
+				);
 			},
-			onerror
+			true
 		);
 	};
 
