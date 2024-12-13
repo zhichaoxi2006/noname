@@ -1723,7 +1723,7 @@ export class Player extends HTMLDivElement {
 		next.setContent(function () {
 			"step 0";
 			player.lose(cards, ui.special).set("getlx", false);
-			("step 1");
+			"step 1";
 			var cards = event.cards.slice(0);
 			cards.removeArray(player.getCards("hejsx"));
 			if (cards.length) target.directgains(cards, null, event.tag);
@@ -6037,12 +6037,12 @@ export class Player extends HTMLDivElement {
 					if (typeof player[event.log] === "function") player[event.log](i);
 				}
 			if (!cards.length) event.finish();
-			("step 1");
+			"step 1";
 			game.log(player, "弃置了", cards);
 			event.done = player.lose(cards, event.position, "visible");
 			event.done.type = "discard";
 			if (event.discarder) event.done.discarder = event.discarder;
-			("step 2");
+			"step 2";
 			event.trigger("discard");
 		});
 		return next;

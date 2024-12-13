@@ -5251,16 +5251,6 @@ export class Library {
 					restart: true,
 					intro: "谋攻篇规则为第二轮开始才可使用怒气强化卡牌，开启此选项从游戏开始即可强化卡牌。",
 				},
-				// connect_ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// connect_ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				connect_enhance_zhu: {
 					name: "加强主公",
 					init: "sixiang",
@@ -5543,22 +5533,12 @@ export class Library {
 					init: true,
 					intro: "根据角色的出牌行为自动标记可能的身份",
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				enhance_zhu: {
 					name: "加强主公",
 					init: "sixiang",
 					item: {
 						sixiang: "四象标记",
-						special: "专属技能",
+						specific: "专属技能",
 						off: "关闭",
 					},
 					restart: true,
@@ -5897,16 +5877,6 @@ export class Library {
 					frequent: true,
 					restart: true,
 				},
-				// connect_ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:false,
-				// 	restart:true,
-				// },
-				// connect_ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 			config: {
 				update: function (config, map) {
@@ -6051,16 +6021,6 @@ export class Library {
 					},
 					restart: true,
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				free_choose: {
 					name: "自由选将",
 					init: true,
@@ -6258,16 +6218,6 @@ export class Library {
 						5: "5人",
 					},
 				},
-				// connect_ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// connect_ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 			config: {
 				update: function (config, map) {
@@ -6532,16 +6482,6 @@ export class Library {
 					},
 					frequent: true,
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true
-				// },
 				ladder_reset: {
 					name: "重置天梯数据",
 					onclick() {
@@ -6876,16 +6816,6 @@ export class Library {
 					},
 					intro: "只控制一名角色，其他角色由AI控制",
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 		},
 		doudizhu: {
@@ -7406,14 +7336,6 @@ export class Library {
 						map.free_choose.hide();
 						map.change_choice.hide();
 					}
-					// if(config.chess_mode!='leader'){
-					// 	map.ban_weak.show();
-					// 	map.ban_strong.show();
-					// }
-					// else{
-					// 	map.ban_weak.hide();
-					// 	map.ban_strong.hide();
-					// }
 				},
 				chess_leader_save: {
 					name: "选择历程",
@@ -7532,16 +7454,6 @@ export class Library {
 						}
 					},
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				chessscroll_speed: {
 					name: "边缘滚动速度",
 					init: "20",
@@ -7597,16 +7509,6 @@ export class Library {
 					name: "显示距离",
 					init: true,
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				chessscroll_speed: {
 					name: "边缘滚动速度",
 					intro: "鼠标移至屏幕边缘时自动滚屏",
@@ -7816,16 +7718,6 @@ export class Library {
 						}
 					},
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 		},
 	};
@@ -10352,16 +10244,6 @@ export class Library {
 				if (double_character && lib.config.forbiddouble.includes(i)) {
 					return true;
 				}
-				// if(lib.configOL.ban_weak){
-				// 	if(lib.config.replacecharacter[i]&&libCharacter&&libCharacter[lib.config.replacecharacter[i]]) return true;
-				// 	if(lib.config.forbidall.includes(i)) return true;
-				// 	if(!double_character&&get.rank(i,true)<=2){
-				// 		return true;
-				// 	}
-				// }
-				// if(lib.configOL.ban_strong&&get.rank(i,true)>=8){
-				// 	return true;
-				// }
 			} else {
 				if (lib.config.banned.includes(i)) return true;
 				var double_character = false;
@@ -10375,16 +10257,6 @@ export class Library {
 				if (double_character && lib.config.forbiddouble.includes(i)) {
 					return true;
 				}
-				// if(get.config('ban_weak')){
-				// 	if(lib.config.replacecharacter[i]&&lib.character[lib.config.replacecharacter[i]]) return true;
-				// 	if(lib.config.forbidall.includes(i)) return true;
-				// 	if(!double_character&&get.rank(i,true)<=2){
-				// 		return true;
-				// 	}
-				// }
-				// if(get.config('ban_strong')&&get.rank(i,true)>=8){
-				// 	return true;
-				// }
 			}
 		},
 		characterDisabled2: function (i) {
