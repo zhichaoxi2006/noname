@@ -1993,7 +1993,14 @@ const skills = {
 					if (target != player) await player.give(card, target);
 					else await player.showCards(card, get.translation(player) + "发动了【势举】");
 					if (!target.getCards("h").includes(card) || get.type(card) !== "equip") return;
-					const bool = await target.chooseUseTarget(card).forResultBool();
+					const bool = await target
+						.chooseUseTarget(card)
+						.set("ai", () => {
+							const giver = get.event("giver");
+							return get.attitude(get.event("player"), giver) >= 0;
+						})
+						.set("giver", player)
+						.forResultBool();
 					if (!bool) return;
 					const count = target.countCards("e");
 					if (count > 0) {
@@ -5474,8 +5481,8 @@ const skills = {
 						const num = target.maxHp - target.countMark("dcmoshou");
 						return [1, 0.6 * num];
 					}
-				}
-			}
+				},
+			},
 		},
 		onremove: true,
 		mark: true,
@@ -11709,12 +11716,7 @@ const skills = {
 						target = _status.event.getTrigger().player,
 						att = get.attitude(player, target);
 					if (att <= 0) {
-						if (
-							!player.hasSkill("yaopei") ||
-							target.isDamaged() ||
-							!player.countCards("he") ||
-							target.needsToDiscard() - target.needsToDiscard(-target.countCards("h") / 4) > (att > -2 ? 1.6 : 1)
-						) return "cancel2";
+						if (!player.hasSkill("yaopei") || target.isDamaged() || !player.countCards("he") || target.needsToDiscard() - target.needsToDiscard(-target.countCards("h") / 4) > (att > -2 ? 1.6 : 1)) return "cancel2";
 					}
 					let list = lib.suit.slice(0);
 					if (att <= 0 && target.getStorage("huguan_add"))
@@ -12535,13 +12537,10 @@ const skills = {
 		async cost(event, trigger, player) {
 			event.result = await player
 				.chooseToDiscard("h", [2, Infinity], get.prompt("reshejian", trigger.player), '<div class="text center">弃置至少两张手牌，然后选择一项：<br>⒈弃置其等量的牌。⒉对其造成1点伤害。</div>')
-				.set(
-					"ai",
-					function (card) {
-						if (_status.event.goon && ui.selected.cards.length < 2) return 5.6 - get.value(card);
-						return 0;
-					}
-				)
+				.set("ai", function (card) {
+					if (_status.event.goon && ui.selected.cards.length < 2) return 5.6 - get.value(card);
+					return 0;
+				})
 				.set(
 					"goon",
 					(function () {

@@ -388,6 +388,9 @@ const skills = {
 		filter(event, player) {
 			return event.player.hp < 1;
 		},
+		check(event, player) {
+			return get.attitude(player, event.player) > 0;
+		},
 		async content(event, trigger, player) {
 			const target = event.targets[0];
 			const result = await target

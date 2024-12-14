@@ -2,6 +2,7 @@
  * https://github.com/accforgit/blog-data/blob/master/%E7%AE%80%E5%8D%95%E5%88%86%E9%A1%B5/demo/index.html
  */
 
+import dedent from "../../game/dedent.js";
 import { lib } from "../../noname.js";
 
 /**
@@ -191,7 +192,7 @@ export class Pagination {
 
 		let { totalPageCount, pCName, prevCName, disbalePrevCName, pageNumber, pageNumberCName, activeCName, dataNumberAttr, maxShowBtnCount, nextCName, disbaleNextCName } = state;
 
-		let paginationStr = `
+		let paginationStr = dedent`
 				<ul class="pagination">
 					<li class="${pCName} ${prevCName} ${disbalePrevCName}">上一页</li>
 					<li class="${pCName} ${pageNumberCName} ${activeCName}" ${dataNumberAttr}='1'>1</li>
@@ -201,7 +202,7 @@ export class Pagination {
 			for (let i = 2; i < maxShowBtnCount + 2; i++) {
 				paginationStr += `<li class="${pCName} ${pageNumberCName} ${i === 1 ? activeCName : ""}" ${dataNumberAttr}='${i}'>${i}</li>`;
 			}
-			paginationStr += `
+			paginationStr += dedent`
 				<li class="${pCName} number-ellipsis ellipsis-tail">...</li>
 				<li class="${pCName} ${pageNumberCName}" ${dataNumberAttr}='${totalPageCount}'>${totalPageCount}</li>
 			`;
@@ -211,7 +212,7 @@ export class Pagination {
 			}
 		}
 		paginationStr += `<li class="${pCName} ${nextCName}${totalPageCount === 1 ? " " + disbaleNextCName : ""}">下一页</li></ul>`;
-		
+
 		if (state.insertAfter) {
 			let afterElement = state.insertAfter instanceof Element ? state.insertAfter : document.querySelector(state.insertAfter);
 			if (!afterElement || !pageContainer.contains(afterElement)) {
@@ -224,7 +225,7 @@ export class Pagination {
 				// @ts-ignore
 				this.element = afterElement.nextElementSibling;
 				// @ts-ignore
-				this.element.style.position = 'static';
+				this.element.style.position = "static";
 			}
 		} else {
 			pageContainer.insertAdjacentHTML("beforeend", paginationStr);
@@ -236,7 +237,7 @@ export class Pagination {
 		let ele = this.element;
 		while (ele !== null) {
 			// @ts-ignore
-			if (ele.classList.contains('dialog')) {
+			if (ele.classList.contains("dialog")) {
 				// @ts-ignore
 				Array.from(this.element.children).forEach(item => {
 					if (item.classList.contains("number-ellipsis") || item.classList.contains("ellipsis-tail")) return;
@@ -257,7 +258,7 @@ export class Pagination {
 	 */
 	isIllegal(pageNumber) {
 		let { state } = this;
-		return /*state.pageNumber === pageNumber || */Math.ceil(pageNumber) !== pageNumber || pageNumber > state.totalPageCount || pageNumber < 1 || typeof pageNumber !== "number" || pageNumber !== pageNumber;
+		return /*state.pageNumber === pageNumber || */ Math.ceil(pageNumber) !== pageNumber || pageNumber > state.totalPageCount || pageNumber < 1 || typeof pageNumber !== "number" || pageNumber !== pageNumber;
 	}
 	/**
 	 * 隐藏/显示省略符号占位

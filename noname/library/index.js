@@ -5023,10 +5023,15 @@ export class Library {
 					}
 					if (config.connect_identity_mode == "zhong") {
 						map.connect_player_number.hide();
+						map.connect_choice_zhu.hide();
 						map.connect_limit_zhu.hide();
 						map.connect_enhance_zhu.hide();
+						map.connect_choice_zhong.hide();
+						map.connect_choice_fan.hide();
+						map.connect_choice_nei.hide();
 						map.connect_double_nei.hide();
 						map.connect_enable_commoner.hide();
+						map.connect_choice_commoner.hide();
 						map.connect_enable_year_limit.show();
 						map.connect_zhong_card.show();
 						map.connect_special_identity.hide();
@@ -5034,19 +5039,29 @@ export class Library {
 					} else if (config.connect_identity_mode == "stratagem") {
 						map.connect_double_character.show();
 						map.connect_player_number.show();
+						map.connect_choice_zhu.show();
 						map.connect_limit_zhu.hide();
 						map.connect_enhance_zhu.hide();
+						map.connect_choice_zhong.show();
+						map.connect_choice_fan.show();
+						map.connect_choice_nei.show();
 						map.connect_double_nei.hide();
 						map.connect_enable_commoner.hide();
+						map.connect_choice_commoner.hide();
 						map.connect_enable_year_limit.show();
 						map.connect_zhong_card.hide();
 						map.connect_special_identity.hide();
 					} else if (config.connect_identity_mode == "purple") {
 						map.connect_player_number.hide();
+						map.connect_choice_zhu.hide();
 						map.connect_limit_zhu.hide();
 						map.connect_enhance_zhu.hide();
+						map.connect_choice_zhong.hide();
+						map.connect_choice_fan.hide();
+						map.connect_choice_nei.hide();
 						map.connect_double_nei.hide();
 						map.connect_enable_commoner.hide();
+						map.connect_choice_commoner.hide();
 						map.connect_enable_year_limit.hide();
 						map.connect_zhong_card.hide();
 						map.connect_special_identity.hide();
@@ -5054,10 +5069,15 @@ export class Library {
 					} else {
 						map.connect_double_character.show();
 						map.connect_player_number.show();
+						map.connect_choice_zhu.show();
 						map.connect_limit_zhu.show();
 						map.connect_enhance_zhu.show();
+						map.connect_choice_zhong.show();
+						map.connect_choice_fan.show();
+						map.connect_choice_nei.show();
 						map.connect_double_nei[config.connect_player_number != "2" && !config.connect_enable_commoner ? "show" : "hide"]();
 						map.connect_enable_commoner[config.connect_player_number != "2" && !config.connect_double_nei ? "show" : "hide"]();
+						map.connect_choice_commoner[config.connect_enable_commoner ? "show" : "hide"]();
 						map.connect_enable_year_limit.show();
 						map.connect_zhong_card.hide();
 
@@ -5090,6 +5110,20 @@ export class Library {
 					frequent: true,
 					restart: true,
 				},
+				connect_choice_zhu: {
+					name: "主公候选武将数",
+					init: 3,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_zhu", num, "identity");
+					},
+				},
 				connect_limit_zhu: {
 					name: "常备主候选武将数",
 					init: "group",
@@ -5102,11 +5136,53 @@ export class Library {
 						8: "八",
 					},
 				},
+				connect_choice_zhong: {
+					name: "忠臣候选武将数",
+					init: 4,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_zhong", num, "identity");
+					},
+				},
 				connect_zhong_card: {
 					name: "明忠卡牌替换",
 					init: true,
 					frequent: true,
 					restart: true,
+				},
+				connect_choice_fan: {
+					name: "反贼候选武将数",
+					init: 3,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_fan", num, "identity");
+					},
+				},
+				connect_choice_nei: {
+					name: "内奸候选武将数",
+					init: 6,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 6;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_nei", num, "identity");
+					},
 				},
 				connect_double_nei: {
 					name: "双内奸",
@@ -5124,6 +5200,20 @@ export class Library {
 					frequent: false,
 					get intro() {
 						return lib.mode.identity.config.enable_commoner.intro;
+					},
+				},
+				connect_choice_commoner: {
+					name: "平民候选武将数",
+					init: 4,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_commoner", num, "identity");
 					},
 				},
 				connect_double_character: {
@@ -5161,21 +5251,16 @@ export class Library {
 					restart: true,
 					intro: "谋攻篇规则为第二轮开始才可使用怒气强化卡牌，开启此选项从游戏开始即可强化卡牌。",
 				},
-				// connect_ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// connect_ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				connect_enhance_zhu: {
 					name: "加强主公",
-					init: false,
+					init: "sixiang",
+					item: {
+						sixiang: "四象标记",
+						special: "专属技能",
+						off: "关闭",
+					},
 					restart: true,
-					intro: "为主公增加一个额外技能",
+					intro: "为主公增加一个额外技能。<br><li>四象标记：主公随机获得一个四象标记（限发动一次）；每个回合结束时，若所有反贼已死亡，主公失去此标记。<br><li>专属技能：主公获得一个专属技能（无则改为〖天命〗）；一名角色阵亡后，若存活反贼数小于2，主公失去此技能。",
 				},
 			},
 			config: {
@@ -5448,21 +5533,16 @@ export class Library {
 					init: true,
 					intro: "根据角色的出牌行为自动标记可能的身份",
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				enhance_zhu: {
 					name: "加强主公",
-					init: false,
+					init: "sixiang",
+					item: {
+						sixiang: "四象标记",
+						specific: "专属技能",
+						off: "关闭",
+					},
 					restart: true,
-					intro: "为主公增加一个额外技能",
+					intro: "为主公增加一个额外技能。<br><li>四象标记：主公随机获得一个四象标记（限发动一次）；每个回合结束时，若所有反贼已死亡，主公失去此标记。<br><li>专属技能：主公获得一个专属技能（无则改为〖天命〗）；一名角色阵亡后，若存活反贼数小于2，主公失去此技能。",
 				},
 				free_choose: {
 					name: "自由选将",
@@ -5632,15 +5712,16 @@ export class Library {
 				},
 				choice_zhu: {
 					name: "主公候选武将数",
-					init: "3",
+					init: 3,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_zhu", num, "identity");
 					},
 				},
 				limit_zhu: {
@@ -5657,41 +5738,44 @@ export class Library {
 				},
 				choice_zhong: {
 					name: "忠臣候选武将数",
-					init: "4",
+					init: 4,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_zhong", num, "identity");
 					},
 				},
 				choice_nei: {
 					name: "内奸候选武将数",
-					init: "5",
+					init: 6,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 6;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_nei", num, "identity");
 					},
 				},
 				choice_fan: {
 					name: "反贼候选武将数",
-					init: "3",
+					init: 3,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_fan", num, "identity");
 					},
 				},
 				enable_commoner: {
@@ -5703,15 +5787,16 @@ export class Library {
 				},
 				choice_commoner: {
 					name: "平民候选武将数",
-					init: "4",
+					init: 4,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_commoner", num, "identity");
 					},
 				},
 				enable_year_limit: {
@@ -5792,16 +5877,6 @@ export class Library {
 					frequent: true,
 					restart: true,
 				},
-				// connect_ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:false,
-				// 	restart:true,
-				// },
-				// connect_ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 			config: {
 				update: function (config, map) {
@@ -5946,16 +6021,6 @@ export class Library {
 					},
 					restart: true,
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				free_choose: {
 					name: "自由选将",
 					init: true,
@@ -6153,16 +6218,6 @@ export class Library {
 						5: "5人",
 					},
 				},
-				// connect_ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// connect_ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 			config: {
 				update: function (config, map) {
@@ -6427,16 +6482,6 @@ export class Library {
 					},
 					frequent: true,
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true
-				// },
 				ladder_reset: {
 					name: "重置天梯数据",
 					onclick() {
@@ -6650,6 +6695,10 @@ export class Library {
 					name: "联机昵称",
 					input: true,
 					frequent: true,
+					onclick(item) {
+						game.saveConfig("connect_nickname", item);
+						game.saveConfig("connect_avatar", item, "connect");
+					},
 				},
 				connect_avatar: {
 					name: "联机头像",
@@ -6767,16 +6816,6 @@ export class Library {
 					},
 					intro: "只控制一名角色，其他角色由AI控制",
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 		},
 		doudizhu: {
@@ -7297,14 +7336,6 @@ export class Library {
 						map.free_choose.hide();
 						map.change_choice.hide();
 					}
-					// if(config.chess_mode!='leader'){
-					// 	map.ban_weak.show();
-					// 	map.ban_strong.show();
-					// }
-					// else{
-					// 	map.ban_weak.hide();
-					// 	map.ban_strong.hide();
-					// }
 				},
 				chess_leader_save: {
 					name: "选择历程",
@@ -7423,16 +7454,6 @@ export class Library {
 						}
 					},
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				chessscroll_speed: {
 					name: "边缘滚动速度",
 					init: "20",
@@ -7488,16 +7509,6 @@ export class Library {
 					name: "显示距离",
 					init: true,
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				chessscroll_speed: {
 					name: "边缘滚动速度",
 					intro: "鼠标移至屏幕边缘时自动滚屏",
@@ -7707,16 +7718,6 @@ export class Library {
 						}
 					},
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 		},
 	};
@@ -10243,16 +10244,6 @@ export class Library {
 				if (double_character && lib.config.forbiddouble.includes(i)) {
 					return true;
 				}
-				// if(lib.configOL.ban_weak){
-				// 	if(lib.config.replacecharacter[i]&&libCharacter&&libCharacter[lib.config.replacecharacter[i]]) return true;
-				// 	if(lib.config.forbidall.includes(i)) return true;
-				// 	if(!double_character&&get.rank(i,true)<=2){
-				// 		return true;
-				// 	}
-				// }
-				// if(lib.configOL.ban_strong&&get.rank(i,true)>=8){
-				// 	return true;
-				// }
 			} else {
 				if (lib.config.banned.includes(i)) return true;
 				var double_character = false;
@@ -10266,16 +10257,6 @@ export class Library {
 				if (double_character && lib.config.forbiddouble.includes(i)) {
 					return true;
 				}
-				// if(get.config('ban_weak')){
-				// 	if(lib.config.replacecharacter[i]&&lib.character[lib.config.replacecharacter[i]]) return true;
-				// 	if(lib.config.forbidall.includes(i)) return true;
-				// 	if(!double_character&&get.rank(i,true)<=2){
-				// 		return true;
-				// 	}
-				// }
-				// if(get.config('ban_strong')&&get.rank(i,true)>=8){
-				// 	return true;
-				// }
 			}
 		},
 		characterDisabled2: function (i) {
@@ -14227,15 +14208,9 @@ export class Library {
 		[
 			"SCL",
 			{
-				getSpan: () => {
-					const span = document.createElement("span"),
-						style = span.style;
-					style.writingMode = style.webkitWritingMode = "horizontal-tb";
-					style.fontFamily = "MotoyaLMaru";
-					style.transform = "scaleY(0.85)";
-					span.textContent = "SCL";
-					return span.outerHTML;
-				},
+				showName: "競",
+				color: "#fefedc",
+				nature: "soilmm",
 			},
 		],
 		[

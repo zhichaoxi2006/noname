@@ -1164,11 +1164,12 @@ const skills = {
 					if (!player.canUse({ name: "jiu", isCard: true }, player, true, true)) return false;
 					return player.hasCard(card => {
 						return lib.skill.olsbyanliang_give.filterCard(card, player);
-					}, "h");
+					}, "he");
 				},
 				filterCard(card, player) {
 					return get.type(card) == "equip";
 				},
+				position: "he",
 				log: false,
 				visible: true,
 				filterTarget(card, player, target) {

@@ -338,16 +338,8 @@ game.import("card", function () {
 				recastable: true,
 				ai: {
 					wuxie: (target, card, player, viewer, status) => {
-						if (
-							status * get.attitude(viewer, player._trueMe || player) > 0 ||
-							target.hasSkillTag("nodamage") ||
-							target.hasSkillTag("nofire") ||
-							target.hasSkillTag("nothunder")
-						) return 0;
-						if (
-							get.damageEffect(target, player, viewer, "thunder") >= 0 ||
-							get.damageEffect(target, player, viewer, "fire") >= 0
-						) return 0;
+						if (status * get.attitude(viewer, player._trueMe || player) > 0 || target.hasSkillTag("noLink") || target.hasSkillTag("nodamage") || target.hasSkillTag("nofire") || target.hasSkillTag("nothunder")) return 0;
+						if (get.damageEffect(target, player, viewer, "thunder") >= 0 || get.damageEffect(target, player, viewer, "fire") >= 0) return 0;
 						if (target.hp + target.hujia > 2 && target.mayHaveShan(viewer, "use")) return 0;
 					},
 					basic: {
@@ -357,9 +349,9 @@ game.import("card", function () {
 					},
 					result: {
 						target: (player, target) => {
-							if (target.hasSkillTag("link")) return 0;
+							if (target.hasSkillTag("link") || target.hasSkillTag("noLink")) return 0;
 							let curs = game.filterPlayer(current => {
-								if (current.hasSkillTag("nodamage")) return false;
+								if (current.hasSkillTag("noLink") || current.hasSkillTag("nodamage")) return false;
 								return !current.hasSkillTag("nofire") || !current.hasSkillTag("nothunder");
 							});
 							if (curs.length < 2) return 0;

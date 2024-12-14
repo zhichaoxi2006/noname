@@ -60,10 +60,10 @@ const skills = {
 		async content(event, trigger, player) {
 			await player.discard(event.cards);
 			var card = {
-				name: trigger.card.name,
-				nature: trigger.card.nature,
-				isCard: true,
-			},
+					name: trigger.card.name,
+					nature: trigger.card.nature,
+					isCard: true,
+				},
 				target = trigger.player;
 			if (target.isIn() && player.canUse(card, target, false)) await player.useCard(card, target, false);
 		},
@@ -627,8 +627,8 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			const num = player.getHistory("custom", function (evt) {
-				return evt.kyouko_gongmian == true;
-			}).length,
+					return evt.kyouko_gongmian == true;
+				}).length,
 				target = event.targets[0];
 			let result = await player.gainPlayerCard(target, "hej", true, [1, num]).forResult();
 			if (target.isIn() && result.bool && result.cards && result.cards.length && player.countCards("he") > 0) {
@@ -890,7 +890,7 @@ const skills = {
 		enable: "phaseUse",
 		usable: 1,
 		filter(event, player) {
-			return !player.hasVCard(card => card.storage?.kud_qiaoshou, "e")
+			return !player.hasVCard(card => card.storage?.kud_qiaoshou, "e");
 		},
 		chooseButton: {
 			dialog() {
@@ -965,11 +965,12 @@ const skills = {
 			return 6 - get.value(card);
 		},
 		async content(event, trigger, player) {
-			const name = lib.skill.kud_qiaoshou_backup.cardname, card = {
-				name,
-				subtypes: [],
-				storage: { kud_qiaoshou: true },
-			}
+			const name = lib.skill.kud_qiaoshou_backup.cardname,
+				card = {
+					name,
+					subtypes: [],
+					storage: { kud_qiaoshou: true },
+				};
 			game.log(player, "声明了", "#y" + get.translation(name));
 			player.$throw(event.cards);
 			await game.delay(0, 300);
@@ -988,10 +989,12 @@ const skills = {
 	kud_qiaoshou_equip: {
 		charlotte: true,
 		onremove(player, skill) {
-			const cards = player.getVCards("e", card => card.storage?.kud_qiaoshou).reduce((cards, vcard) => {
-				if (vcard?.cards.length) cards.addArray(vcard.cards);
-				return cards;
-			}, []);
+			const cards = player
+				.getVCards("e", card => card.storage?.kud_qiaoshou)
+				.reduce((cards, vcard) => {
+					if (vcard?.cards.length) cards.addArray(vcard.cards);
+					return cards;
+				}, []);
 			if (cards.length) player.loseToDiscardpile(cards);
 		},
 		intro: {
@@ -1059,11 +1062,12 @@ const skills = {
 			}
 		},
 		async content(event, trigger, player) {
-			const name = event.cost_data.cardname, card = {
-				name,
-				subtypes: [],
-				storage: { kud_qiaoshou: true },
-			}
+			const name = event.cost_data.cardname,
+				card = {
+					name,
+					subtypes: [],
+					storage: { kud_qiaoshou: true },
+				};
 			game.log(player, "声明了", "#y" + get.translation(name));
 			player.$throw(event.cards);
 			await game.delay(0, 300);
@@ -1500,7 +1504,9 @@ const skills = {
 		selectTarget() {
 			return game.countPlayer(function (current) {
 				return lib.skill.nao_shouqing2.filterTarget(null, _status.event.player, current);
-			}) > 1 ? 1 : -1;
+			}) > 1
+				? 1
+				: -1;
 		},
 		filter(event, player) {
 			return (
@@ -2827,12 +2833,12 @@ const skills = {
 		position: "he",
 		getType(cards, player) {
 			var nums = cards
-				.map(card => {
-					var num = get.number(card, player);
-					if (num <= 2) return num + 13;
-					return num;
-				})
-				.sort((a, b) => a - b),
+					.map(card => {
+						var num = get.number(card, player);
+						if (num <= 2) return num + 13;
+						return num;
+					})
+					.sort((a, b) => a - b),
 				len = nums.length;
 			if (len == 1) return ["单张", nums[0], 1];
 			if (len == 2) return nums[1] == nums[0] ? ["对子", nums[0], 1] : null;
@@ -2907,10 +2913,10 @@ const skills = {
 			//收益都一样 多一牌不如少一牌
 			var types = ["炸弹", "三顺", "单顺", "双顺", "三张", "对子"];
 			var getNum = function (card, player) {
-				var num = get.number(card, player);
-				if (num <= 2) return num + 13;
-				return num;
-			},
+					var num = get.number(card, player);
+					if (num <= 2) return num + 13;
+					return num;
+				},
 				hasEnemy = game.hasPlayer(current => get.attitude(player, current) < 0);
 			//所有手牌
 			var nums = player
@@ -3043,10 +3049,10 @@ const skills = {
 					case "双顺":
 					case "三顺":
 						var map = {
-							单顺: [5, 0],
-							双顺: [3, 1],
-							三顺: [2, 2],
-						},
+								单顺: [5, 0],
+								双顺: [3, 1],
+								三顺: [2, 2],
+							},
 							len = map[_status.event._iriya_haozhi_type][0],
 							addNum = map[_status.event._iriya_haozhi_type][1];
 						if (numu.length >= len) return 0;
@@ -3062,10 +3068,10 @@ const skills = {
 			var type = _status.event.type,
 				player = _status.event.player;
 			var getNum = function (card, player) {
-				var num = get.number(card, player);
-				if (num <= 2) return num + 13;
-				return num;
-			},
+					var num = get.number(card, player);
+					if (num <= 2) return num + 13;
+					return num;
+				},
 				nums = player
 					.getCards("he", function (card) {
 						return lib.filter.cardDiscardable(card, player, "iriya_haozhi");
@@ -4458,7 +4464,7 @@ const skills = {
 									get.buttonValue({
 										link: card,
 									}) *
-									get.attitude(player, current) >
+										get.attitude(player, current) >
 									0
 								);
 							}) >= (ai ? 1 : Math.min(2, current.countDiscardableCards(player, "hej")))
@@ -5141,7 +5147,7 @@ const skills = {
 			},
 		},
 		ai: {
-			combo: "youlong"
+			combo: "youlong",
 		},
 	},
 	//铃木央人
@@ -6212,7 +6218,7 @@ const skills = {
 			event.cards = result.cards;
 		},
 		ai: {
-			halfneg: true
+			halfneg: true,
 		},
 	},
 	//乙坂有宇
@@ -6359,7 +6365,7 @@ const skills = {
 		},
 		ai: {
 			combo: "godan_feiqu",
-			halfneg: true
+			halfneg: true,
 		},
 	},
 	//游佐
@@ -8151,7 +8157,7 @@ const skills = {
 		},
 		ai: {
 			combo: "noda_xunxin",
-			halfneg: true
+			halfneg: true,
 		},
 	},
 	noda_xunxin: {
@@ -8769,11 +8775,14 @@ const skills = {
 			let cards = [];
 			if (get.itemtype(event.respondTo[1]) == "card") cards.push(event.respondTo[1]);
 			else if (event.respondTo[1].cards) cards.addArray(event.respondTo[1].cards);
-			return event.cards.filterInD("od").reduce((acc, card) => {
-				return acc + get.value(card);
-			}, 0) - cards.filterInD("od").reduce((acc, card) => {
-				return acc + get.value(card);
-			});
+			return (
+				event.cards.filterInD("od").reduce((acc, card) => {
+					return acc + get.value(card);
+				}, 0) -
+				cards.filterInD("od").reduce((acc, card) => {
+					return acc + get.value(card);
+				})
+			);
 		},
 		logTarget: "player",
 		content() {
@@ -8887,7 +8896,7 @@ const skills = {
 			},
 		},
 		ai: {
-			combo: "sunohara_jianren"
+			combo: "sunohara_jianren",
 		},
 	},
 	sunohara_chengshuang_phase: {
@@ -9357,7 +9366,8 @@ const skills = {
 				.forResult();
 		},
 		async content(event, trigger, player) {
-			const target = event.targets[0], cards = trigger.cards.filterInD();
+			const target = event.targets[0],
+				cards = trigger.cards.filterInD();
 			await target.gain(cards, "gain2", "log");
 			const result = await target
 				.chooseToUse({
@@ -9817,7 +9827,7 @@ const skills = {
 			player.storage.kengo_guidui2.addArray(list);
 		},
 		ai: {
-			combo: "kengo_weishang"
+			combo: "kengo_weishang",
 		},
 	},
 	kengo_guidui2: { onremove: true },
@@ -10358,11 +10368,7 @@ const skills = {
 		forceunique: true,
 		enable: "chooseToUse",
 		filter(summer, umi) {
-			return (
-				summer.type == "dying" &&
-				umi.isDying() &&
-				[umi.name1, umi.name2].includes("key_umi")
-			);
+			return summer.type == "dying" && umi.isDying() && [umi.name1, umi.name2].includes("key_umi");
 		},
 		limited: true,
 		skillAnimation: true,
@@ -10728,8 +10734,8 @@ const skills = {
 			abnormalDraw: true,
 			skillTagFilter: function (player, tag, arg) {
 				if (tag === "abnormalDraw") return !arg || arg === "bottom";
-			}
-		}
+			},
+		},
 	},
 	//此花露西娅
 	lucia_duqu: {
