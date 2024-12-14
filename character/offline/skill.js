@@ -12605,7 +12605,7 @@ const skills = {
 				if (evt.skill == "yjtuicheng") tuicheng = true;
 				if (evt.skill == "yjyaoling") yaoling = true;
 			});
-			return !(tuicheng && yaoling);
+			return !tuicheng && !yaoling;
 		},
 		content() {
 			player.addTempSkill("yjshicha_limit");
