@@ -19,6 +19,23 @@ export class Get extends GetCompatible {
 	promises = new Promises();
 	Audio = Audio;
 	/**
+	 * 返回牌名“【XXX】”形式的数组
+	 * @param { Function } [filter] 
+	 * @returns { string[] }
+	 */
+	cardTranslation(filter = lib.filter.all){
+		let list = [];
+		if (get["#cardTranslation"]) {
+			list = get["#cardTranslation"];
+		} else {
+			for (const key in lib.cardPack) {
+				list.addArray(lib.cardPack[key]);
+			}
+			get["#cardTranslation"] = list;
+		}
+		return list.filter(filter).map(c=>`【${get.translation(c)}】`);
+	}
+	/**
 	 * 获取装备牌对应的技能
 	 * @param { Card[]|VCard[] } cards
 	 * @returns { any[] }

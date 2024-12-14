@@ -84,6 +84,10 @@ const characters = {
 	old_majun: ["male", "wei", 3, ["xinfu_jingxie", "xinfu_qiaosi"]],
 	ns_mengyou: ["male", "qun", 4, ["nsmanzhi"]],
 
+	diy_zhujun: ["male", "qun", "4/4", ["xinyangjie", "diy_juxiang", "houfeng"], ["character:sp_zhujun"]],
+	diy_liaohua: ["male", "shu", "4/4", ["redangxian", "diy_fuli"], ["character:xin_liaohua"]],
+	diy_zhangfei: ["male", "shu", "4/4", ["diy_paoxiao", "diy_tishen"], ["character:re_zhangfei"]],
+
 	junk_zhangrang: ["male", "qun", 3, ["junktaoluan"], ["sex:male_castrated"]],
 	old_bulianshi: ["female", "wu", 3, ["anxu", "zhuiyi"]],
 	ol_maliang: ["male", "shu", 3, ["zishu", "xinyingyuan"]],
