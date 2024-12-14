@@ -13864,6 +13864,17 @@ export class Library {
 			},
 		],
 		[
+			"蛇",
+			{
+				getSpan: () => {
+					const span = document.createElement("span");
+					span.style.fontFamily = "NonameSuits";
+					span.textContent = "🐍";
+					return span.outerHTML;
+				},
+			},
+		],
+		[
 			"SP",
 			{
 				getSpan: () => {
@@ -13943,6 +13954,23 @@ export class Library {
 					span.textContent = "TW";
 					return span.outerHTML;
 				},
+			},
+		],
+		[
+			"汉末", 	
+			{
+				showName: "汉",
+				color: "#fefedc",
+				nature: "shenmm",
+			}
+		],
+		[
+			"汉末神",
+			{
+				/**
+				 * @returns {string}
+				 */
+				getSpan: () => `${get.prefixSpan("汉末")}${get.prefixSpan("神")}`,
 			},
 		],
 		[
