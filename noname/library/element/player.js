@@ -3381,7 +3381,9 @@ export class Player extends HTMLDivElement {
 			this.smoothAvatar(false, video);
 		}
 		if (node) {
-			node.setBackground(name2, "character");
+			var skinName = this.skin.name;
+			if (!skinName || skinName === name2) node.setBackground(name2, "character");
+			else node.setBackground(skinName, "character");
 			if (this == game.me && ui.fakeme && fakeme !== false) {
 				ui.fakeme.style.backgroundImage = node.style.backgroundImage;
 			}

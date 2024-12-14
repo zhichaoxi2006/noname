@@ -1310,7 +1310,7 @@ export default () => {
 
 					var num = Math.floor(event.list.length / (game.players.length - 1));
 					for (var i = 0; i < game.players.length; i++) {
-						let num2 = lib.configOL["choice_" + identity];
+						let num2 = lib.configOL["choice_" + game.players[i].identity];
 						var str = "选择角色";
 						list.push([game.players[i], [str, [event.list.randomRemove(Math.min(num, num2)), "characterx"]], selectButton, true]);
 					}
