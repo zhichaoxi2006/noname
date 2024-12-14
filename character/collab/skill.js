@@ -388,6 +388,9 @@ const skills = {
 		filter(event, player) {
 			return event.player.hp < 1;
 		},
+		check(event, player) {
+			return get.attitude(player, event.player) > 0;
+		},
 		async content(event, trigger, player) {
 			const target = event.targets[0];
 			const result = await target
@@ -727,7 +730,7 @@ const skills = {
 			const skills = get.info("olhuyi").getList();
 			return (event.name != "phase" || game.phaseNumber == 0) && skills.some(skill => !player.hasSkill(skill, null, null, false));
 		},
-		locked: true,
+		locked: false,
 		async cost(event, trigger, player) {
 			if (["useCard", "respond"].includes(trigger.name)) {
 				event.result = {

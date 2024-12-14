@@ -21,6 +21,7 @@ import {
 	getTreesFromGithub,
 } from "../../../../library/update.js";
 import security from "../../../../util/security.js";
+import dedent from "../../../../../game/dedent.js";
 
 export const otherMenu = function (/** @type { boolean | undefined } */ connectMenu) {
 	if (connectMenu) return;
@@ -1282,7 +1283,7 @@ export const otherMenu = function (/** @type { boolean | undefined } */ connectM
 				// 	};
 				// `, { window: proxyWindow });
 			} else {
-				fun = (new Function('window', `
+				fun = (new Function('window', dedent`
 					const _status=window._status;
 					const lib=window.lib;
 					const game=window.game;
