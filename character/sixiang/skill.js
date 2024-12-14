@@ -1802,10 +1802,18 @@ const skills = {
 			event.result = await player
 				.chooseCard(get.prompt2("stdjinglve"), 2)
 				.set("ai", card => {
-					if (_status.event.att <= 0) return 0;
+					if (!_status.event.bool) return 0;
 					return 5 - get.value(card);
 				})
-				.set("att", get.attitude(player, trigger.player))
+				.set(
+					"bool",
+					(() => {
+						if (get.attitude(player, trigger.player) >= 0) return false;
+						const hs = trigger.player.countCards("h"),
+							dis = trigger.player.needsToDiscard(0, true, true);
+						return hs && dis > 0;
+					})()
+				)
 				.forResult();
 			event.result.targets = [trigger.player];
 		},
@@ -1836,7 +1844,8 @@ const skills = {
 							cards.addArray(moves);
 						}
 					});
-					player.chooseButton(["景略：是否获得本阶段弃置的一张牌？", cards]);
+					if (cards.length) player.chooseButton(["景略：是否获得本阶段弃置的一张牌？", cards]);
+					else event._result = { bool: false };
 				})
 				.then(() => {
 					if (result.bool) player.gain(result.links, "gain2");
