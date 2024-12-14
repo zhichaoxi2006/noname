@@ -88,11 +88,11 @@ const skills = {
 			buff: {
 				charlotte:true,
 				mod: {
-					globalFrom(from, to, currentm){
-						return num - from.countMark("hm_zhong_club_skill_buff");
+					globalFrom(from, to, current){
+						return current - from.countMark("hm_zhong_club_skill_buff");
 					},
 					globalTo(from, to, current){
-						return num + to.countMark("hm_zhong_club_skill_buff");
+						return current + to.countMark("hm_zhong_club_skill_buff");
 					}
 				}
 			}
@@ -1863,7 +1863,10 @@ const skills = {
 			return event.name != "phase" || game.phaseNumber == 0;
 		},
 		async cost(event, trigger, player){
-			const { result } = await player.chooseVCardButton(["hm_zhong_heart", "hm_zhong_diamond", "hm_zhong_club", "hm_zhong_spade"]);
+			const { result } = await player.chooseVCardButton(["hm_zhong_heart", "hm_zhong_diamond", "hm_zhong_club", "hm_zhong_spade"])
+				.set("ai", function(button){
+					return Math.random();
+				})
 			event.result = {
 				bool: result.bool,
 				cost_data: result.links,
