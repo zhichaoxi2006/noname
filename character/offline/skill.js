@@ -3,14 +3,38 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
 	//【众】
-	hm_zhong_skill: {
+	hm_zhong_heart_skill: {
 		equipSkill: true,
 		forced: true,
 		trigger: {
 			player: "damageEnd",
 		},
 		async content(event, trigger, player) {
-			await player.draw(2 * player.countCards("e", { name: "hm_zhong" }));
+			player.addSkill("hm_zhong_heart_skill_buff");
+			player.addMark("hm_zhong_heart_skill_buff", player.countCards("e", { name: "hm_zhong_heart" }));
+		},
+		subSkill: {
+			buff: {
+				charlotte:true,
+				mod: {
+					attackRange(player, num){
+						return num + player.countMark("hm_zhong_heart_skill_buff");
+					},
+					cardUsable(card, player, num) {
+						if (card.name == "sha") return num + player.countMark("hm_zhong_heart_skill_buff");
+					},
+				}
+			}
+		},
+	},
+	hm_zhong_diamond_skill: {
+		equipSkill: true,
+		forced: true,
+		trigger: {
+			player: "damageEnd",
+		},
+		async content(event, trigger, player) {
+			await player.draw(2 * player.countCards("e", { name: "hm_zhong_diamond" }));
 		},
 		ai: {
 			maixie: true,
@@ -20,13 +44,58 @@ const skills = {
 					if (get.tag(card, "damage")) {
 						if (player.hasSkillTag("jueqing", false, target)) return [1, -2];
 						if (!target.hasFriend()) return;
-						let num = target.countCards("e", { name: "hm_zhong" });
+						let num = target.countCards("e", { name: "hm_zhong_diamond" });
 						if (target.hp >= 4) return [1, num * 2];
 						if (target.hp == 3) return [1, num * 1.5];
 						if (target.hp == 2) return [1, num * 0.5];
 					}
 				},
 			},
+		},
+	},
+	hm_zhong_club_skill: {
+		equipSkill: true,
+		forced: true,
+		trigger: {
+			player: "damageEnd",
+		},
+		async content(event, trigger, player) {
+			player.addSkill("hm_zhong_club_skill_buff");
+			player.addMark("hm_zhong_club_skill_buff", player.countCards("e", { name: "hm_zhong_club" }));
+		},
+		subSkill: {
+			buff: {
+				charlotte:true,
+				mod: {
+					maxHandcard(player, num){
+						return num + player.countMark("hm_zhong_club_skill_buff");
+					}
+				}
+			}
+		},
+	},
+	hm_zhong_spade_skill: {
+		equipSkill: true,
+		forced: true,
+		trigger: {
+			player: "damageEnd",
+		},
+		async content(event, trigger, player) {
+			player.addSkill("hm_zhong_spade_skill_buff");
+			player.addMark("hm_zhong_spade_skill_buff", player.countCards("e", { name: "hm_zhong_spade" }));
+		},
+		subSkill: {
+			buff: {
+				charlotte:true,
+				mod: {
+					globalFrom(from, to, currentm){
+						return num - from.countMark("hm_zhong_club_skill_buff");
+					},
+					globalTo(from, to, current){
+						return num + to.countMark("hm_zhong_club_skill_buff");
+					}
+				}
+			}
 		},
 	},
 	//白绕
@@ -1787,14 +1856,22 @@ const skills = {
 	//神张角
 	hm_fudao: {
 		trigger: {
-			global: "phaseBefore",
+			global: ["phaseBefore", "useSkill_hm_fudao"],
 			player: "enterGame",
 		},
 		filter(event, player) {
 			return event.name != "phase" || game.phaseNumber == 0;
 		},
-		content: function () {
-			const card = game.createCard("hm_zhong", lib.suit.randomGet(), 1);
+		async cost(event, trigger, player){
+			const { result } = await player.chooseVCardButton(["hm_zhong_heart", "hm_zhong_diamond", "hm_zhong_club", "hm_zhong_spade"]);
+			event.result = {
+				bool: result.bool,
+				cost_data: result.links,
+			};
+		},
+		async content(event, trigger, player){
+			const { cost_data } = event;
+			const card = game.createCard(cost_data[0][2], lib.suit.randomGet(), 1);
 			player.chooseUseTarget(card, true);
 		},
 	},
@@ -1825,7 +1902,7 @@ const skills = {
 				if (result.bool) {
 					await i.lose(result.cards, ui.cardPile, "insert");
 					game.log(i, "将一张牌置于牌堆顶");
-					i.addSkill("hm_zongfu_lose");
+					i.addTempSkill("hm_zongfu_lose", {global: "roundStart"});
 				} else {
 					await i.draw("bottom");
 				}
@@ -1846,7 +1923,7 @@ const skills = {
 					return event.source?.hasSkill("hm_zongfu_lose");
 				},
 				async content(event, trigger, player) {
-					await player.useSkill("hm_fudao");
+					event.trigger("useSkill_hm_fudao");
 				},
 			},
 		},
@@ -1856,7 +1933,7 @@ const skills = {
 			player: "hm_zongfuAfter",
 		},
 		filter(event, player) {
-			return true;
+			return player.isMaxEquip();
 		},
 		async cost(event, trigger, player) {
 			const next = player.chooseTarget("令一名角色进行一次判定");
@@ -2119,6 +2196,7 @@ const skills = {
 			trigger.phaseList[trigger.num] = "phaseUse|hm_sanshou";
 			const newPair = [];
 			for (const i of [player.name1, player.name2]) {
+				if (!i) continue;
 				if (i == "hm_shen_zhangjiao") {
 					const next = player.chooseButton(["请选择变身对象", [["hm_shen_zhangbao", "hm_shen_zhangliang"], "character"]], true);
 					next.set("ai", function (button) {
@@ -2145,6 +2223,7 @@ const skills = {
 				async content(event, trigger, player) {
 					const newPair = [];
 					for (const i of [player.name1, player.name2]) {
+						if (!i) continue;
 						if (["hm_shen_zhangbao", "hm_shen_zhangliang"].includes(i)) {
 							newPair.push("hm_shen_zhangjiao");
 						} else {

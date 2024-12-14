@@ -281,12 +281,13 @@ const cards = {
 			},
 		},
 	},
-	hm_zhong: {
+	hm_zhong_heart: {
 		audio: true,
 		fullskin: true,
 		derivation: "hm_shen_zhangjiao",
 		type: "equip",
-		skills: ["hm_zhong_skill"],
+		skills: ["hm_zhong_heart_skill"],
+		destroy: "discardPile",
 		async content(event, trigger, player) {
 			if (!event.card.subtypes) {
 				const choices = [];
@@ -348,5 +349,209 @@ const cards = {
 		allowMultiple: false,
 		toself: true,
 	},
+	hm_zhong_diamond: {
+		audio: true,
+		fullskin: true,
+		derivation: "hm_shen_zhangjiao",
+		type: "equip",
+		skills: ["hm_zhong_diamond_skill"],
+		destroy: "discardPile",
+		async content(event, trigger, player) {
+			if (!event.card.subtypes) {
+				const choices = [];
+				for (let i = 0; i <= 4; i++) {
+					if (player.hasEquipableSlot(i)) choices.push(`equip${i}`);
+				}
+				if (!choices.length) return;
+				const result = await player
+					.chooseControl(choices)
+					.set("prompt", "请选择置入【众】的装备栏")
+					.set("ai", () => _status.event.controls.randomGet())
+					.forResult();
+				event.card.subtypes = [result.control];
+			}
+			if (
+				!event.card?.cards.some(card => {
+					return get.position(card, true) !== "o";
+				})
+			) {
+				await event.target.equip(event.card);
+			}
+		},
+		ai: {
+			equipValue(card, player) {
+				return 5;
+			},
+			basic: {
+				equipValue: 5,
+				order: (card, player) => {
+					const equipValue = get.equipValue(card, player) / 20;
+					return player && player.hasSkillTag("reverseEquip") ? 8.5 - equipValue : 8 + equipValue;
+				},
+				useful: 2,
+				value: (card, player, index, method) => {
+					if (!player.getCards("e").includes(card) && !player.canEquip(card, true)) return 0.01;
+					const info = get.info(card),
+						current = player.getEquip(info.subtype),
+						value = current && card != current && get.value(current, player);
+					let equipValue = info.ai.equipValue || info.ai.basic.equipValue;
+					if (typeof equipValue == "function") {
+						if (method == "raw") return equipValue(card, player);
+						if (method == "raw2") return equipValue(card, player) - value;
+						return Math.max(0.1, equipValue(card, player) - value);
+					}
+					if (typeof equipValue != "number") equipValue = 0;
+					if (method == "raw") return equipValue;
+					if (method == "raw2") return equipValue - value;
+					return Math.max(0.1, equipValue - value);
+				},
+			},
+			result: {
+				target: (player, target, card) => get.equipResult(player, target, card),
+			},
+		},
+		enable: true,
+		selectTarget: -1,
+		filterTarget: (card, player, target) => player == target && target.canEquip(card, true),
+		modTarget: true,
+		allowMultiple: false,
+		toself: true,
+	},
+	hm_zhong_club: {
+		audio: true,
+		fullskin: true,
+		derivation: "hm_shen_zhangjiao",
+		type: "equip",
+		skills: ["hm_zhong_club_skill"],
+		destroy: "discardPile",
+		async content(event, trigger, player) {
+			if (!event.card.subtypes) {
+				const choices = [];
+				for (let i = 0; i <= 4; i++) {
+					if (player.hasEquipableSlot(i)) choices.push(`equip${i}`);
+				}
+				if (!choices.length) return;
+				const result = await player
+					.chooseControl(choices)
+					.set("prompt", "请选择置入【众】的装备栏")
+					.set("ai", () => _status.event.controls.randomGet())
+					.forResult();
+				event.card.subtypes = [result.control];
+			}
+			if (
+				!event.card?.cards.some(card => {
+					return get.position(card, true) !== "o";
+				})
+			) {
+				await event.target.equip(event.card);
+			}
+		},
+		ai: {
+			equipValue(card, player) {
+				return 5;
+			},
+			basic: {
+				equipValue: 5,
+				order: (card, player) => {
+					const equipValue = get.equipValue(card, player) / 20;
+					return player && player.hasSkillTag("reverseEquip") ? 8.5 - equipValue : 8 + equipValue;
+				},
+				useful: 2,
+				value: (card, player, index, method) => {
+					if (!player.getCards("e").includes(card) && !player.canEquip(card, true)) return 0.01;
+					const info = get.info(card),
+						current = player.getEquip(info.subtype),
+						value = current && card != current && get.value(current, player);
+					let equipValue = info.ai.equipValue || info.ai.basic.equipValue;
+					if (typeof equipValue == "function") {
+						if (method == "raw") return equipValue(card, player);
+						if (method == "raw2") return equipValue(card, player) - value;
+						return Math.max(0.1, equipValue(card, player) - value);
+					}
+					if (typeof equipValue != "number") equipValue = 0;
+					if (method == "raw") return equipValue;
+					if (method == "raw2") return equipValue - value;
+					return Math.max(0.1, equipValue - value);
+				},
+			},
+			result: {
+				target: (player, target, card) => get.equipResult(player, target, card),
+			},
+		},
+		enable: true,
+		selectTarget: -1,
+		filterTarget: (card, player, target) => player == target && target.canEquip(card, true),
+		modTarget: true,
+		allowMultiple: false,
+		toself: true,
+	},
+	hm_zhong_spade: {
+		audio: true,
+		fullskin: true,
+		derivation: "hm_shen_zhangjiao",
+		type: "equip",
+		skills: ["hm_zhong_spade_skill"],
+		destroy: "discardPile",
+		async content(event, trigger, player) {
+			if (!event.card.subtypes) {
+				const choices = [];
+				for (let i = 0; i <= 4; i++) {
+					if (player.hasEquipableSlot(i)) choices.push(`equip${i}`);
+				}
+				if (!choices.length) return;
+				const result = await player
+					.chooseControl(choices)
+					.set("prompt", "请选择置入【众】的装备栏")
+					.set("ai", () => _status.event.controls.randomGet())
+					.forResult();
+				event.card.subtypes = [result.control];
+			}
+			if (
+				!event.card?.cards.some(card => {
+					return get.position(card, true) !== "o";
+				})
+			) {
+				await event.target.equip(event.card);
+			}
+		},
+		ai: {
+			equipValue(card, player) {
+				return 5;
+			},
+			basic: {
+				equipValue: 5,
+				order: (card, player) => {
+					const equipValue = get.equipValue(card, player) / 20;
+					return player && player.hasSkillTag("reverseEquip") ? 8.5 - equipValue : 8 + equipValue;
+				},
+				useful: 2,
+				value: (card, player, index, method) => {
+					if (!player.getCards("e").includes(card) && !player.canEquip(card, true)) return 0.01;
+					const info = get.info(card),
+						current = player.getEquip(info.subtype),
+						value = current && card != current && get.value(current, player);
+					let equipValue = info.ai.equipValue || info.ai.basic.equipValue;
+					if (typeof equipValue == "function") {
+						if (method == "raw") return equipValue(card, player);
+						if (method == "raw2") return equipValue(card, player) - value;
+						return Math.max(0.1, equipValue(card, player) - value);
+					}
+					if (typeof equipValue != "number") equipValue = 0;
+					if (method == "raw") return equipValue;
+					if (method == "raw2") return equipValue - value;
+					return Math.max(0.1, equipValue - value);
+				},
+			},
+			result: {
+				target: (player, target, card) => get.equipResult(player, target, card),
+			},
+		},
+		enable: true,
+		selectTarget: -1,
+		filterTarget: (card, player, target) => player == target && target.canEquip(card, true),
+		modTarget: true,
+		allowMultiple: false,
+		toself: true,
+	}
 };
 export default cards;
