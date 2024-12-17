@@ -10488,46 +10488,43 @@ const skills = {
 		audio: "qianxi",
 		trigger: { player: "phaseZhunbeiBegin" },
 		preHidden: true,
-		content: function () {
-			"step 0";
-			player.draw();
-			"step 1";
+		async content(event, trigger, player) {
+			await player.draw();
 			if (
-				player.hasCard(card => {
+				!player.hasCard(card => {
 					return lib.filter.cardDiscardable(card, player, "tweqianxi");
 				}, "he")
 			)
-				player.chooseToDiscard("he", true).set("ai", card => {
+				return;
+			const cards = await player
+				.chooseToDiscard("he", true)
+				.set("ai", card => {
 					let player = get.event("player");
 					if (get.color(card, player)) return 7 - get.value(card, player);
 					return 4 - get.value(card, player);
-				});
-			else event.finish();
-			"step 2";
+				})
+				.forResultCards();
 			if (
-				!result.bool ||
+				!cards ||
 				!game.hasPlayer(target => {
 					return player != target && get.distance(player, target) <= 1;
 				})
-			) {
-				event.finish();
+			)
 				return;
-			}
-			event.color = get.color(result.cards[0], player);
-			player
+			const color = get.color(cards[0], player);
+			const targets = await player
 				.chooseTarget(function (card, player, target) {
 					return player != target && get.distance(player, target) <= 1;
 				}, true)
 				.set("ai", function (target) {
 					return get.effect(target, { name: "sha" }, _status.event.player, _status.event.player) + 5;
-				});
-			"step 3";
-			if (result.bool) {
-				var target = result.targets[0];
+				})
+				.forResultTargets();
+			if (targets) {
+				const target = targets[0];
 				player.line(target);
-				target.storage.twqianxi2 = event.color;
 				target.addTempSkill("twqianxi2");
-				target.markSkill("twqianxi2");
+				target.markAuto("twqianxi2", color);
 				player.addTempSkill("twqianxi_self");
 				player.markAuto("twqianxi_self", [target]);
 			}
@@ -10546,9 +10543,8 @@ const skills = {
 						return false;
 					});
 				},
-				content: function () {
-					"step 0";
-					var targets = [];
+				async content(event, trigger, player) {
+					let targets = [];
 					player.getHistory("sourceDamage", evt => {
 						if (!evt.card || evt.card.name != "sha") return false;
 						if (player.getStorage("twqianxi_self").includes(evt.player)) {
@@ -10557,10 +10553,9 @@ const skills = {
 						return false;
 					});
 					player.line(targets);
-					for (var target of targets) {
-						target.storage.twqianxi3 = target.storage.twqianxi2;
+					for (const target of targets) {
 						target.addTempSkill("twqianxi3", { player: "phaseAfter" });
-						target.markSkill("twqianxi3");
+						target.markAuto("twqianxi3", target.storage.twqianxi2);
 					}
 				},
 			},
@@ -10578,14 +10573,14 @@ const skills = {
 		},
 		mod: {
 			cardEnabled2: function (card, player) {
-				if (get.itemtype(card) == "card" && get.color(card) == player.getStorage("twqianxi2") && get.position(card) == "h") return false;
+				if (get.itemtype(card) == "card" && player.getStorage("twqianxi2").includes(get.color(card)) && get.position(card) == "h") return false;
 			},
 		},
 	},
 	twqianxi3: {
 		mod: {
 			cardEnabled2: function (card, player) {
-				if (get.itemtype(card) == "card" && get.color(card) != player.getStorage("twqianxi3") && get.position(card) == "h") return false;
+				if (get.itemtype(card) == "card" && !player.getStorage("twqianxi3").includes(get.color(card)) && get.position(card) == "h") return false;
 			},
 		},
 		mark: true,

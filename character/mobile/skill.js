@@ -6479,9 +6479,14 @@ const skills = {
 					var str = get.translation(type),
 						user = get.translation(player);
 					target
-						.chooseTarget("达命：选择另一名其他角色", "若该角色有" + str + "牌，其将一张该类型的牌交给" + user + "，你获得1点“达命”值；否则你将" + get.translation(cards) + "交给" + user, (card, player, target) => {
-							return target != player && target != _status.event.getParent().player;
-						}, true)
+						.chooseTarget(
+							"达命：选择另一名其他角色",
+							"若该角色有" + str + "牌，其将一张该类型的牌交给" + user + "，你获得1点“达命”值；否则你将" + get.translation(cards) + "交给" + user,
+							(card, player, target) => {
+								return target != player && target != _status.event.getParent().player;
+							},
+							true
+						)
 						.set("ai", target => 1 - get.attitude(_status.event.player, target));
 					"step 2";
 					if (result.bool) {
@@ -16976,21 +16981,8 @@ const skills = {
 			player: "linkBefore",
 		},
 		forced: true,
-		//priority:20,
 		filter: function (event, player) {
 			return !player.isLinked();
-		},
-		content: function () {
-			trigger.cancel();
-		},
-		ai: {
-			effect: {
-				target(card, player, target, current) {
-					if (["tiesuo", "lulitongxin"].includes(card.name)) {
-						return "zeroplayertarget";
-					}
-				},
-			},
 		},
 	},
 	rw_renwang_skill: {
@@ -17041,15 +17033,6 @@ const skills = {
 	rw_tengjia3: {
 		audio: "rw_tengjia1",
 		inherit: "rw_minguangkai_link",
-		ai: {
-			effect: {
-				target(card, player, target, current) {
-					if (["tiesuo", "lulitongxin"].includes(card.name)) {
-						return "zeroplayertarget";
-					}
-				},
-			},
-		},
 	},
 	rw_tengjia4: {
 		inherit: "tengjia3",

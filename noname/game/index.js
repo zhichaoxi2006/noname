@@ -2551,8 +2551,8 @@ export class Game extends GameCompatible {
 						if (onsuccess) onsuccess(list.length);
 						download();
 					},
-					function () {
-						if (onerror) onerror(list.length);
+					function (e) {
+						if (onerror) onerror(e);
 						download();
 					},
 					dev

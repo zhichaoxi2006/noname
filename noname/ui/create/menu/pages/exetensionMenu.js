@@ -2432,7 +2432,7 @@ export const extensionMenu = function (connectMenu) {
 						dashes.content.node.code =
 							"function(config,pack){\n    \n}\n\n/*\n函数执行时机为游戏数据加载之后、界面加载之前\n参数1扩展选项（见选项代码）；参数2为扩展定义的武将、卡牌和技能等（可在此函数中修改）\n导出时本段代码中的换行、缩进以及注释将被清除\n*/";
 						dashes.precontent.node.code =
-							"function(){\n    \n}\n\n/*\n函数执行时机为游戏数据加载之前，且不受禁用扩展的限制\n除添加模式外请慎用\n导出时本段代码中的换行、缩进以及注释将被清除\n*/";
+							"function(){\n    \n}\n\n/*\n函数执行时机为游戏数据加载之前，联机模式亦可加载\n除添加模式外请慎用\n导出时本段代码中的换行、缩进以及注释将被清除\n*/";
 						dashes.config.node.code =
 							'config={\n    \n}\n\n/*\n示例：\nconfig={\n    switcher_example:{\n    name:"示例列表选项",\n        init:"3",\n        item:{"1":"一","2":"二","3":"三"}\n    },\n    toggle_example:{\n        name:"示例开关选项",\n        init:true\n    }\n}\n此例中传入的主代码函数的默认参数为{switcher_example:"3",toggle_example:true}\n导出时本段代码中的换行、缩进以及注释将被清除\n*/';
 						dashes.help.node.code =
@@ -2546,7 +2546,7 @@ export const extensionMenu = function (connectMenu) {
 					page,
 					clickCode,
 					"precontent",
-					"function(){\n    \n}\n\n/*\n函数执行时机为游戏数据加载之前，且不受禁用扩展的限制\n除添加模式外请慎用\n导出时本段代码中的换行、缩进以及注释将被清除\n*/"
+					"function(){\n    \n}\n\n/*\n函数执行时机为游戏数据加载之前，联机模式亦可加载\n除添加模式外请慎用\n导出时本段代码中的换行、缩进以及注释将被清除\n*/"
 				);
 				createCode(
 					"选",
