@@ -6016,6 +6016,7 @@ const skills = {
 				.chooseTarget(`狼蹈：为${get.translation(trigger.card)}额外指定至多${get.cnNumber(extraTargetNum)}个目标`, (card, player, target) => {
 					return !_status.event.targets.includes(target) && player.canUse(_status.event.card, target);
 				})
+				.set("selectTarget", [1, extraTargetNum])
 				.set("targets", trigger.targets)
 				.set("ai", target => {
 					var player = _status.event.player;
