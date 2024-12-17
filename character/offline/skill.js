@@ -1530,7 +1530,7 @@ const skills = {
 		filter(event, player) {
 			return (
 				player.getHistory("sourceDamage", function (evt) {
-					return evt.getParent(2)?.targets.length == 1;
+					return evt.getParent(2)?.targets?.length == 1;
 				}).length <= 1
 			);
 		},
