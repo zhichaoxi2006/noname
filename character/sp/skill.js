@@ -406,12 +406,16 @@ const skills = {
 					},
 					async cost(event, trigger, player) {
 						const name = event.name.slice(0, -"_cost".length);
-						event.result = await player.chooseToDiscard(get.prompt2(name), "he", [1, Infinity]).set("ai", lib.skill.zhiheng.check).set("logSkill", name).forResult();
+						event.result = await player.chooseToDiscard(get.prompt2(name), "he", [1, Infinity], "chooseOnly")
+							.set("ai", lib.skill.zhiheng.check)
+							.set("logSkill", name)
+							.forResult();
 					},
 					popup: false,
-					content() {
+					async content(event, trigger, player) {
 						lib.skill.olhedao.tianshuClear(event.name, player);
-						player.draw(event.cards.length);
+						await player.discard(event.cards);
+						await player.draw(event.cards.length);
 					},
 				},
 			},
