@@ -3200,7 +3200,12 @@ export const Content = {
 								next.set("arrangeSkill", true);
 								next.set("includeOut", true);
 								const { result } = await next;
-								event.current = usableSkills.find(info => info.skill == result.control);
+								//千里走单骑全责，把敌人打死可能会打断chooseControl
+								if (result) {
+									event.current = usableSkills.find(info => info.skill == result.control);
+								} else {
+									event.current = usableSkills[0];
+								}
 							}
 						}
 					}
