@@ -1902,6 +1902,15 @@ const skills = {
 			const targets = game.filterPlayer(p => p.isMinHandcard());
 			for (const i of targets) {
 				const next = i.chooseCard("将一张牌置于牌堆顶，否则按“取消”从牌堆底摸一张牌", "he");
+				next.set("ai", function(card){
+					if (get.attitude(i, player) < 0){
+						return 0;
+					}
+					if(get.suit(card) == suit.replace("lukai_", "")){
+						return 8 - get.value(card);
+					}
+					return 6 - get.value(card);
+				});
 				const { result } = await next;
 				if (result.bool) {
 					await i.lose(result.cards, ui.cardPile, "insert");
