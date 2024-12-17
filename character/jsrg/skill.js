@@ -9489,10 +9489,10 @@ const skills = {
 						}
 					},
 					cardRespondable(card, player) {
-						return lib.skill.jsrgfendi_blocker.mod.cardEnabled.apply(this, arguments);
+						return lib.skill.jsrgfendi_tag.mod.cardEnabled.apply(this, arguments);
 					},
 					cardSavable(card, player) {
-						return lib.skill.jsrgfendi_blocker.mod.cardEnabled.apply(this, arguments);
+						return lib.skill.jsrgfendi_tag.mod.cardEnabled.apply(this, arguments);
 					},
 				},
 			},
