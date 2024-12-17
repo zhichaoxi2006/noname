@@ -406,7 +406,7 @@ const skills = {
 					},
 					async cost(event, trigger, player) {
 						const name = event.name.slice(0, -"_cost".length);
-						event.result = await player.chooseToDiscard(get.prompt2(name), "he", [1, Infinity], "chooseOnly")
+						event.result = await player.chooseToDiscard(get.prompt2(name), "he", [1, Infinity], "chooseonly")
 							.set("ai", lib.skill.zhiheng.check)
 							.set("logSkill", name)
 							.forResult();
