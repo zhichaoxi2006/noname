@@ -1819,7 +1819,7 @@ const skills = {
 				.chooseButton(
 					[
 						get.translation(event.name) + "：请选择你要执行的选项",
-						'<div class="text center">' + lib.translate[event.name + '_info'] + '</div>',
+						'<div class="text center">' + lib.translate[event.name + "_info"] + "</div>",
 						[
 							[
 								"失去体力",
@@ -3524,7 +3524,7 @@ const skills = {
 				)
 					return false;
 			},
-			order: 1,
+			order: 7,
 			result: {
 				player(player) {
 					if (get.event("dying")) return get.attitude(player, get.event("dying"));
@@ -4775,7 +4775,7 @@ const skills = {
 				target = event.target;
 			const num = get.cardNameLength(card);
 			await player.showCards([card], get.translation(player) + "发动了【寄春】");
-			player.addTempSkill("dcjichun_used");
+			player.addTempSkill("dcjichun_used", "phaseUseAfter");
 			if (target.countCards("h") < player.countCards("h")) {
 				player.markAuto("dcjichun_used", "draw");
 				await player.give(card, target);
@@ -6193,18 +6193,19 @@ const skills = {
 					.set(
 						"aiTargets",
 						(() => {
-							var targets = game.filterPlayer(i => i != player).sortBySeat(player);
-							var maxEff = -Infinity,
+							const targets = game.filterPlayer(i => i != player).sortBySeat(player),
+								values = targets.map(cur => {
+									const eff = get.damageEffect(cur, cur, player, "fire");
+									if (eff > 0) return Math.min(eff, -get.attitude(player, cur));
+									return eff;
+								});
+							let maxEff = -Infinity,
 								aiTargets = [];
-							for (var i = 0; i < targets.length; i++) {
-								for (var j = 0; j < blackOnes.length; j++) {
-									if (targets.length < i + j) break;
-									var targetsx = targets.slice(i, j);
-									var tmpEff = targetsx
-										.map(current => {
-											return get.damageEffect(current, current, player, "fire");
-										})
-										.reduce((p, c) => {
+							for (let i = 0; i < targets.length; i++) {
+								for (let j = 1; j < blackOnes.length; j++) {
+									if (targets.length < j) break;
+									let targetsx = targets.slice(i, i + j),
+										tmpEff = values.slice(i, i + j).reduce((p, c) => {
 											return p + c;
 										}, 0);
 									if (tmpEff > maxEff) {
@@ -18916,20 +18917,48 @@ const skills = {
 						return target.isFriendOf(player) && target.countDiscardableCards(player, "hej") > 0;
 					}, get.prompt2("wlcuorui"))
 					.set("ai", function (target) {
+						let min = 10;
 						if (
-							target.countCards("e", function (card) {
-								return card.name != "tengjia" && get.value(card, target) <= 0;
-							})
+							target.hasCard(card => {
+								const val = get.value(card, target);
+								if (val < 0 && card.name !== "tengjia") return true;
+								if (val < min) min = val;
+							}, "e")
 						)
 							return 10;
 						if (
-							target.countCards("j", function (card) {
-								return get.effect(target, { name: card.viewAs || card.name }, target, target) < 0;
-							})
+							target.hasCard(card => {
+								const eff = get.effect(
+									target,
+									{
+										name: card.viewAs || card.name,
+										cards: [card],
+									},
+									target,
+									target
+								);
+								if (eff < 0) return true;
+								if (eff < min) min = eff;
+							}, "j")
 						)
 							return 10;
-						return Math.random() + 0.2 - 1 / target.countCards("hej");
+						if (!get.event("discard")) return 0;
+						if (min > 6 && target.countCards("h")) min = 6;
+						return 7 - min - 1 / (1 + target.countCards("h"));
 					})
+					.set(
+						"discard",
+						game.hasPlayer(current => {
+							if (current.isFriendOf(player)) return false;
+							let values = {};
+							current.countCards("e", card => {
+								const color = get.color(card);
+								if (!values[color]) values[color] = 0;
+								values[color] += Math.max(0, get.value(card));
+							});
+							return Math.max(...Object.values(values)) > 8;
+						})
+					)
 					.forResult();
 			} else {
 				event.result = await player
@@ -18937,13 +18966,58 @@ const skills = {
 						return get.distance(player, target) <= 1 && target.countDiscardableCards(player, "hej") > 0;
 					}, get.prompt2("wlcuorui"))
 					.set("ai", function (target) {
+						let min = 10;
+						const player = get.event("player"),
+							att = get.attitude(player, target);
+						if (att === 0) min = 0;
 						if (
-							game.hasPlayer(current => {
-								return current != target && get.attitude(_status.event.player, current) < 0;
+							target.hasCard(card => {
+								const val = get.value(card, target);
+								if (att < 0) {
+									if (val > 0) min = Math.min(min, -val - 6);
+									return false;
+								}
+								if (val < 0 && card.name !== "tengjia") return true;
+								if (val < min) min = val;
+							}, "e")
+						)
+							return 12;
+						if (
+							target.hasCard(card => {
+								const eff = get.effect(
+									target,
+									{
+										name: card.viewAs || card.name,
+										cards: [card],
+									},
+									target,
+									target
+								);
+								if (att < 0) {
+									if (eff < 0) min = Math.min(min, eff - 6);
+									return false;
+								}
+								if (eff < 0) return true;
+								if (eff < min) min = eff;
+							}, "j")
+						)
+							return 14;
+						if (
+							!game.hasPlayer(current => {
+								if (player === current || target === current || get.attitude(player, current) > 0) return false;
+								let values = {};
+								current.countCards("e", card => {
+									const color = get.color(card);
+									if (!values[color]) values[color] = 0;
+									values[color] += Math.max(0, get.value(card));
+								});
+								return Math.max(...Object.values(values)) > 8;
 							})
 						)
-							return get.effect(target, { name: "guohe" }, player, player) + 10;
-						return 0;
+							return 0;
+						if (att <= 0) return 7 - min + 1 / (1 + target.countCards("h"));
+						if (min > 6 && target.countCards("h")) min = 6;
+						return 7 - min - 1 / (1 + target.countCards("h"));
 					})
 					.forResult();
 			}
@@ -18986,15 +19060,15 @@ const skills = {
 						(function () {
 							let color = get.color(card);
 							if (
-								game.countPlayer(function (current) {
-									if (!filter(current)) return false;
+								game.hasPlayer(current => {
+									if (!filter(current) || get.attitude(player, current) > 0) return false;
 									return (
-										get.attitude(player, current) <= 0 &&
-										current.countCards("e", function (card) {
-											return get.color(card) == color && get.value(card) > 0;
-										})
+										current.countCards("e", card => {
+											if (get.color(card) === color) return Math.max(0, get.value(card));
+											return 0;
+										}) > 8
 									);
-								}) > 1
+								})
 							)
 								return 1;
 							return 0;

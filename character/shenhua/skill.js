@@ -5085,7 +5085,7 @@ const skills = {
 								? 2
 								: 1)
 					)
-						return [1, 1];
+						return [1, 0.5];
 				},
 			},
 			threaten(player, target) {
@@ -5173,7 +5173,7 @@ const skills = {
 								? 2
 								: 1)
 					)
-						return [1, 1];
+						return [1, 0.5];
 				},
 			},
 			threaten(player, target) {

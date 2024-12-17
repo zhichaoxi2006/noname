@@ -312,14 +312,15 @@ export default () => {
 						game.zhong.addSkill("sheshen");
 					}
 				}
-				var enhance_zhu = false;
-				if (_status.connectMode) {
-					enhance_zhu = !["zhong", "stratagem", "purple"].includes(_status.mode) && lib.configOL.enhance_zhu && get.population("fan") >= 3;
-				} else {
-					enhance_zhu = !["zhong", "stratagem", "purple"].includes(_status.mode) && get.config("enhance_zhu") && get.population("fan") >= 3;
-				}
+				let enhance_zhu = !["zhong", "stratagem", "purple"].includes(_status.mode),
+					skill;
 				if (enhance_zhu) {
-					var skill;
+					if (_status.connectMode) enhance_zhu = lib.configOL.enhance_zhu;
+					else enhance_zhu = get.config("enhance_zhu");
+				}
+				if (enhance_zhu === "sixiang") {
+					skill = "sixiang_" + ["zhuque", "xuanwu", "qinglong", "baihu"].randomGet();
+				} else if (enhance_zhu === "specific" && get.population("fan") >= 3) {
 					switch (game.zhu.name) {
 						case "key_yuri":
 							skill = "buqu";
@@ -361,6 +362,8 @@ export default () => {
 							skill = "tianming";
 							break;
 					}
+				}
+				if (skill)
 					game.broadcastAll(
 						function (player, skill) {
 							player.addSkill(skill);
@@ -369,7 +372,6 @@ export default () => {
 						game.zhu,
 						skill
 					);
-				}
 			}
 			game.syncState();
 			event.trigger("gameStart");
@@ -481,7 +483,7 @@ export default () => {
 					} else if (lib.configOL.identity_mode != "purple") {
 						uiintro.add('<div class="text chat">双内奸：' + (lib.configOL.double_nei ? "开启" : "关闭"));
 						if (lib.configOL.identity_mode != "stratagem") {
-							uiintro.add('<div class="text chat">加强主公：' + (lib.configOL.enhance_zhu ? "开启" : "关闭"));
+							uiintro.add('<div class="text chat">加强主公：' + (lib.configOL.enhance_zhu === "off" ? "关闭" : lib.configOL.enhance_zhu === "sixiang" ? "四象标记" : "专属技能"));
 							uiintro.add('<div class="text chat">平民身份：' + (lib.configOL.enable_commoner ? "开启" : "关闭"));
 						}
 						uiintro.add('<div class="text chat">年机制：' + (lib.configOL.enable_year_limit ? "开启" : "关闭"));
@@ -490,8 +492,6 @@ export default () => {
 					uiintro.add('<div class="text chat">卡牌替换：' + (lib.configOL.zhong_card ? "开启" : "关闭"));
 				}
 				var last = uiintro.add('<div class="text chat">出牌时限：' + lib.configOL.choose_timeout + "秒");
-				// uiintro.add('<div class="text chat">屏蔽弱将：'+(lib.configOL.ban_weak?'开启':'关闭'));
-				// var last=uiintro.add('<div class="text chat">屏蔽强将：'+(lib.configOL.ban_strong?'开启':'关闭'));
 				if (lib.configOL.banned.length) {
 					last = uiintro.add('<div class="text chat">禁用武将：' + get.translation(lib.configOL.banned));
 				}
@@ -1308,26 +1308,11 @@ export default () => {
 					var list = [];
 					var selectButton = lib.configOL.double_character ? 2 : 1;
 
-					var num,
-						num2 = 0;
-					num = Math.floor(event.list.length / (game.players.length - 1));
-					if (num > 5) {
-						num = 5;
-					}
-					num2 = event.list.length - num * (game.players.length - 1);
-					if (lib.configOL.double_nei) {
-						num2 = Math.floor(num2 / 2);
-					}
-					if (num2 > 2) {
-						num2 = 2;
-					}
+					var num = Math.floor(event.list.length / (game.players.length - 1));
 					for (var i = 0; i < game.players.length; i++) {
-						var num3 = 0;
-						if (game.players[i].identity == "nei") {
-							num3 = num2;
-						}
+						let num2 = lib.configOL["choice_" + game.players[i].identity];
 						var str = "选择角色";
-						list.push([game.players[i], [str, [event.list.randomRemove(num + num3), "characterx"]], selectButton, true]);
+						list.push([game.players[i], [str, [event.list.randomRemove(Math.min(num, num2)), "characterx"]], selectButton, true]);
 					}
 					game.me.chooseButtonOL(list, function (player, result) {
 						if (game.online || player == game.me) player.init(result.links[0], result.links[1]);
@@ -1351,7 +1336,7 @@ export default () => {
 						} else {
 							result[i] = result[i].links;
 						}
-						if (get.is.double(result[i][0]) || (lib.character[result[i][0]] && (lib.character[result[i][0]].group == "shen"  || lib.character[result[i][0]].group == "western") && !lib.character[result[i][0]].hasHiddenSkill)) shen.push(lib.playerOL[i]);
+						if (get.is.double(result[i][0]) || (lib.character[result[i][0]] && (lib.character[result[i][0]].group == "shen" || lib.character[result[i][0]].group == "western") && !lib.character[result[i][0]].hasHiddenSkill)) shen.push(lib.playerOL[i]);
 					}
 					event.result2 = result;
 					if (shen.length) {
@@ -2389,7 +2374,7 @@ export default () => {
 							list2x.sort(lib.sort.character);
 							return list2x;
 						};
-						list = getZhuList(list2).concat(list3.randomGets(5));
+						list = getZhuList(list2).concat(list3.randomGets(lib.configOL.choice_zhu));
 					}
 					var next = game.zhu.chooseButton(true);
 					next.set("selectButton", lib.configOL.double_character ? 2 : 1);
@@ -2459,40 +2444,22 @@ export default () => {
 					var list = [];
 					var selectButton = lib.configOL.double_character ? 2 : 1;
 
-					var num,
-						num2 = 0;
-					if (event.zhongmode) {
-						num = 6;
-					} else {
-						num = Math.floor(event.list.length / (game.players.length - 1));
-						if (num > 5) {
-							num = 5;
-						}
-						num2 = event.list.length - num * (game.players.length - 1);
-						if (lib.configOL.double_nei) {
-							num2 = Math.floor(num2 / 2);
-						}
-						if (num2 > 2) {
-							num2 = 2;
-						}
-					}
-					for (var i = 0; i < game.players.length; i++) {
+					var num = Math.floor(event.list.length / (game.players.length - 1));
+					for (let i = 0; i < game.players.length; i++) {
 						if (game.players[i] != game.zhu) {
-							var num3 = 0;
+							const identity = game.players[i].identity;
+							let num2;
 							if (event.zhongmode) {
-								if (game.players[i].identity == "nei" || game.players[i].identity == "zhu") {
-									num3 = 2;
-								}
+								if (identity == "nei" || identity == "zhu") num2 = 8;
+								else num2 = 6;
 							} else {
-								if (game.players[i].identity == "nei") {
-									num3 = num2;
-								}
+								num2 = lib.configOL["choice_" + identity];
 							}
-							var str = "选择角色";
+							let str = "选择角色";
 							if (game.players[i].special_identity) {
 								str += "（" + get.translation(game.players[i].special_identity) + "）";
 							}
-							list.push([game.players[i], [str, [event.list.randomRemove(num + num3), "characterx"]], selectButton, true]);
+							list.push([game.players[i], [str, [event.list.randomRemove(Math.min(num, num2)), "characterx"]], selectButton, true]);
 						}
 					}
 					game.me.chooseButtonOL(list, function (player, result) {
@@ -2687,6 +2654,10 @@ export default () => {
 			sheshen_info: "锁定技，主公处于濒死状态即将死亡时，令主公+1体力上限，回复体力至X点（X为你的体力值数），获得你的所有牌，然后你死亡。",
 			yexinbilu: "野心毕露",
 			stratagem_insight: "洞察",
+			sixiang_zhuque: "朱雀",
+			sixiang_xuanwu: "玄武",
+			sixiang_qinglong: "青龙",
+			sixiang_baihu: "白虎",
 		},
 		element: {
 			player: {
@@ -2834,7 +2805,7 @@ export default () => {
 							});
 						}
 					}
-					if (game.zhu && game.zhu.storage.enhance_zhu && get.population("fan") < 3) {
+					if (game.zhu && game.zhu.storage.enhance_zhu && !game.zhu.storage.enhance_zhu.startsWith("sixiang_") && get.population("fan") < 3) {
 						game.zhu.removeSkill(game.zhu.storage.enhance_zhu);
 						delete game.zhu.storage.enhance_zhu;
 					}
@@ -4294,6 +4265,264 @@ export default () => {
 					trigger.cancel();
 					player.die();
 				},
+			},
+			sixiang_zhuque: {
+				mark: true,
+				markimage: "image/mode/identity/mark/sixiang_zhuque.jpg",
+				intro: {
+					content: "出牌阶段，你可以弃置一张非基本牌，对一名角色造成1点伤害，以此法杀死反贼不执行奖惩。",
+				},
+				enable: "phaseUse",
+				filter(event, player) {
+					return player.hasCard(card => {
+						return get.type(card, null, player) !== "basic";
+					}, "he");
+				},
+				filterCard(card, player) {
+					return get.type(card, null, player) !== "basic";
+				},
+				position: "he",
+				filterTarget: true,
+				check(card) {
+					return 7 - get.value(card);
+				},
+				charlotte: true,
+				async content(event, trigger, player) {
+					player.removeSkill("sixiang_zhuque");
+					player.addTempSkill("sixiang_zhuque_cancel", "phaseUseEnd");
+					await event.target.damage("nocard");
+				},
+				ai: {
+					order: 0.6,
+					result: {
+						player(player, target) {
+							if (ui.selected.cards.length) return -get.value(ui.selected.cards[0], player);
+						},
+						target(player, target) {
+							return get.damageEffect(target, player, target);
+						},
+					},
+				},
+				group: "sixiang_remove",
+				subSkill: {
+					cancel: {
+						trigger: {
+							global: ["drawBegin", "discardBegin"],
+						},
+						filter(event, player) {
+							const evt = event.getParent();
+							if (!evt || !evt.player) return false;
+							return evt.name === "die" && evt.player.identity === "fan" && event.getParent(4).name === "sixiang_zhuque";
+						},
+						silent: true,
+						forceDie: true,
+						charlotte: true,
+						content() {
+							trigger.cancel();
+						},
+					},
+				},
+			},
+			sixiang_xuanwu: {
+				mark: true,
+				markimage: "image/mode/identity/mark/sixiang_xuanwu.jpg",
+				intro: {
+					content: "你可以将一张牌当【桃】使用。",
+				},
+				enable: "chooseToUse",
+				filter(event, player) {
+					return player.countCards("hes");
+				},
+				filterCard: true,
+				position: "hes",
+				viewAs: {
+					name: "tao",
+				},
+				check(card) {
+					if (get.tag(card, "recover")) return 0;
+					return 9 - get.value(card);
+				},
+				charlotte: true,
+				precontent() {
+					player.removeSkill("sixiang_xuanwu");
+				},
+				ai: {
+					result: {
+						player(player, target) {
+							return -ui.selected.cards.reduce((p, c) => p + get.value(c, player), 0) / 6;
+						},
+					},
+				},
+				group: "sixiang_remove",
+			},
+			sixiang_qinglong: {
+				mark: true,
+				markimage: "image/mode/identity/mark/sixiang_qinglong.jpg",
+				intro: {
+					content: "回合开始时，你可以弃置两张牌，弃置你判定区的【乐不思蜀】或【兵粮寸断】。",
+				},
+				trigger: {
+					player: "phaseBegin",
+				},
+				filter: function (event, player) {
+					if (!player.hasJudge("lebu") && !player.hasJudge("bingliang")) return false;
+					return player.countCards("he") > 1;
+				},
+				async cost(event, trigger, player) {
+					const lebu = player.hasJudge("lebu"),
+						bingliang = player.hasJudge("bingliang");
+					let info = "弃置两张牌，然后弃置判定区内的";
+					if (lebu) info += "【乐不思蜀】";
+					if (bingliang) {
+						if (lebu) info += "或";
+						info += "【兵粮寸断】";
+					}
+					event.result = await player
+						.chooseToDiscard("he", 2, get.prompt("sixiang_qinglong"), info)
+						.set("logSkill", "sixiang_qinglong")
+						.set("ai", function (card) {
+							if (_status.event.goon) return 7 - get.value(card);
+							return 0;
+						})
+						.set(
+							"goon",
+							(() => {
+								if (player.hasSkillTag("rejudge") && player.countCards("j") < 2) return false;
+								return player.hasCard(card => {
+									const name = card.viewAs || card.name;
+									if (name !== "lebu" || name !== "bingliang") return false;
+									return (
+										get.effect(
+											player,
+											{
+												name,
+												cards: [card],
+											},
+											player,
+											player
+										) < 0
+									);
+								}, "j");
+							})()
+						)
+						.forResult();
+					event.result.skill_popup = false;
+				},
+				charlotte: true,
+				async content(event, trigger, player) {
+					const lebu = player.getCards("j", j => {
+							return j.viewAs === "lebu" || j.name === "lebu";
+						}),
+						bingliang = player.getCards("j", j => {
+							return j.viewAs === "bingliang" || j.name === "bingliang";
+						});
+					player.removeSkill("sixiang_qinglong");
+					let control;
+					if (lebu.length && bingliang.length)
+						control = await player
+							.chooseControl("lebu", "bingliang")
+							.set("prompt", "请选择要弃置的牌")
+							.set("ai", () => get.event("control"))
+							.set(
+								"control",
+								(() => {
+									if (
+										get.effect(
+											player,
+											{
+												name: "lebu",
+												cards: lebu,
+											},
+											player,
+											player
+										) >
+										get.effect(
+											player,
+											{
+												name: "bingliang",
+												cards: bingliang,
+											},
+											player,
+											player
+										)
+									)
+										return "bingliang";
+									return "lebu";
+								})()
+							)
+							.forResultControl();
+					else if (lebu) control = "lebu";
+					else if (bingliang) control = "bingliang";
+					if (control) await player.discard(control === "lebu" ? lebu : bingliang);
+				},
+				group: "sixiang_remove",
+			},
+			sixiang_baihu: {
+				mark: true,
+				markimage: "image/mode/identity/mark/sixiang_baihu.jpg",
+				intro: {
+					content: "你可以将一张牌当【杀】或【闪】使用或打出。",
+				},
+				enable: ["chooseToUse", "chooseToRespond"],
+				filterCard: true,
+				position: "hes",
+				viewAs: { name: "sha" },
+				prompt: "将一张牌当【杀】使用或打出",
+				check(card) {
+					return 5 - get.value(card);
+				},
+				charlotte: true,
+				precontent() {
+					player.removeSkill("sixiang_baihu");
+				},
+				ai: {
+					respondSha: true,
+					result: {
+						player(player, target) {
+							return -ui.selected.cards.reduce((p, c) => p + get.value(c, player), 0) / 6;
+						},
+					},
+				},
+				group: ["sixiang_baihu_shan", "sixiang_remove"],
+				subSkill: {
+					shan: {
+						enable: ["chooseToUse", "chooseToRespond"],
+						filterCard: true,
+						viewAs: { name: "shan" },
+						position: "hes",
+						prompt: "将一张牌当【闪】使用或打出",
+						check(card) {
+							return 5 - get.value(card);
+						},
+						ai: {
+							respondShan: true,
+							result: {
+								player(player, target) {
+									return 1 - ui.selected.cards.reduce((p, c) => p + get.value(c, player), 0) / 6;
+								},
+							},
+							effect: {
+								target(card, player, target, current) {
+									if (get.tag(card, "respondShan") && current < 0) return 0.8;
+								},
+							},
+						},
+					},
+				},
+			},
+			sixiang_remove: {
+				trigger: {
+					global: "phaseEnd",
+				},
+				filter(event, player) {
+					return !game.hasPlayer(cur => cur.identity === "fan");
+				},
+				silent: true,
+				charlotte: true,
+				content() {
+					player.removeSkill(["sixiang_zhuque", "sixiang_xuanwu", "sixiang_qinglong", "sixiang_baihu"]);
+				},
+				sub: true,
 			},
 		},
 		help: {

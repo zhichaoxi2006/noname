@@ -1978,13 +1978,17 @@ export const Content = {
 				next.set("prompt", event.prompt || "是否" + (event.targets2.length ? "对" : "") + get.translation(event.targets2) + "使用" + get.translation(card) + "?");
 				if (event.hsskill) next.setHiddenSkill(event.hsskill);
 				if (event.prompt2) next.set("prompt2", event.prompt2);
-				next.ai = function () {
-					var eff = 0;
-					for (var i = 0; i < event.targets2.length; i++) {
-						eff += get.effect(event.targets2[i], card, player, player);
-					}
-					return eff > 0;
-				};
+				next.set(
+					"ai",
+					event.ai ||
+						function () {
+							var eff = 0;
+							for (var i = 0; i < event.targets2.length; i++) {
+								eff += get.effect(event.targets2[i], card, player, player);
+							}
+							return eff > 0;
+						}
+				);
 			}
 		} else {
 			if (event.filterTarget) {

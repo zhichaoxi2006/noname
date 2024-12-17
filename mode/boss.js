@@ -6354,6 +6354,54 @@ export default () => {
 						return game.players.length == 2;
 					},
 				},
+				ai: {
+					combo: "xiangxing",
+					neg: true,
+					effect: {
+						target(card, player, target) {
+							if (!target.hasSkill("xiangxing") || !target.storage.xiangxing || target.storage.xiangxing_count < 6) return;
+							switch (target.storage.xiangxing) {
+								case 7:
+									if (get.tag(card, "discard") || get.tag(card, "lose")) {
+										if (player !== target) return [1, 0, 1, 6 / (1 + target.countCards("h"))];
+									}
+									if (get.tag(card, "damage") || get.tag(card, "losehp")) {
+										if (target.countCards("h")) return [1, 7, 1, -7];
+									}
+									break;
+								case 6:
+									if (typeof card === "object" && game.hasNature(card, "fire")) return;
+									if (get.tag(card, "damage") || get.tag(card, "losehp")) return [1, 6, 1, -6];
+									break;
+								case 5:
+									if (typeof card !== "object" || game.hasNature(card, "thunder")) return;
+									if (get.tag(card, "damage") || get.tag(card, "losehp")) return [1, 5, 1, -5];
+									break;
+								case 4:
+									if (get.tag(card, "damage")) return [1, 2, 1, -2];
+									if (get.tag(card, "losehp")) return [1, -4];
+									break;
+								case 3:
+									if (get.tag(card, "damage") || get.tag(card, "losehp")) {
+										if (!game.hasPlayer(current => {
+											return current !== target && current.countCards("e") >= 4;
+										})) return [1, 3, 1, -3];
+									}
+									break;
+								case 2:
+									if (typeof card === "object" && get.type(card) === "delay") {
+										if (target.countCards("j")) return [1, -4];
+									}
+									if (get.tag(card, "damage") || get.tag(card, "losehp")) {
+										if (target.countCards("j") <= 2) return [1, 2, 1, -3];
+									}
+									break;
+								case 1:
+									if (game.players.length !== 2) return [1, 2, 1, -3];
+							}
+						}
+					}
+				},
 			},
 			xiangxing: {
 				unique: true,
@@ -6485,14 +6533,7 @@ export default () => {
 					}
 				},
 				ai: {
-					threaten: 1.5,
-				},
-			},
-			fengqi2: {
-				mod: {
-					wuxieRespondable: function () {
-						return false;
-					},
+					threaten: 3,
 				},
 			},
 			gaiming: {
@@ -6572,6 +6613,15 @@ export default () => {
 					trigger.result.node.delete();
 					game.delay();
 				},
+				ai: {
+					effect: {
+						target(card, player, target) {
+							if (typeof card !== "object" || get.type(card) !== "delay") return;
+							if (target.storage.xiangxing === 2 && target.storage.xiangxing_count > 4 && target.hasSkill("xiangxing") && target.hasSkill("yueyin")) return;
+							return 0.13;
+						}
+					}
+				}
 			},
 			tiandao: {
 				audio: true,

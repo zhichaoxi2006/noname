@@ -589,8 +589,6 @@ export default () => {
 					if (lib.configOL.versus_mode == "2v2") uiintro.add('<div class="text chat">四号位【飞扬】：' + (lib.configOL.olfeiyang_four ? "开启" : "关闭"));
 				}
 				var last = uiintro.add('<div class="text chat">出牌时限：' + lib.configOL.choose_timeout + "秒");
-				// uiintro.add('<div class="text chat">屏蔽弱将：'+(lib.configOL.ban_weak?'开启':'关闭'));
-				// var last=uiintro.add('<div class="text chat">屏蔽强将：'+(lib.configOL.ban_strong?'开启':'关闭'));
 				if (lib.configOL.banned.length) {
 					last = uiintro.add('<div class="text chat">禁用武将：' + get.translation(lib.configOL.banned));
 				}
