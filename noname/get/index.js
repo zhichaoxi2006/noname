@@ -4607,7 +4607,7 @@ export class Get extends GetCompatible {
 				}
 			}
 			if (node.skill) {
-				uiintro.add('<div class="text center">' + get.translation(node.skill, "skill") + "</div>");
+				uiintro.add('<div class="text center">' + get.translation(node.skill) + "</div>");
 				uiintro._place_text = uiintro.add('<div class="text" style="display:inline">' + get.translation(node.skill, "info") + "</div>");
 			}
 			if (node.targets && get.itemtype(node.targets) == "players") {
