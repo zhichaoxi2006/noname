@@ -1874,7 +1874,8 @@ const skills = {
 		},
 		async content(event, trigger, player){
 			const { cost_data } = event;
-			const card = game.createCard(cost_data[0][2], lib.suit.randomGet(), 1);
+			const { result } = await player.chooseControl("请选择【众】的花色", lib.suit.slice());
+			const card = game.createCard(cost_data[0][2], result.control, 1);
 			player.chooseUseTarget(card, true);
 		},
 	},
@@ -1933,7 +1934,7 @@ const skills = {
 	},
 	hm_dangjing: {
 		trigger: {
-			player: "hm_zongfuAfter",
+			player: ["hm_zongfuAfter", "hm_dangjing_callback"],
 		},
 		filter(event, player) {
 			return player.isMaxEquip();
@@ -1948,22 +1949,19 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			const { targets } = event;
-			while (true) {
-				const next = targets[0].judge(function (card) {
-					const evt = get.event();
-					if (get.suit(card) == evt.suitx) return -4;
-					return 0;
-				});
-				next.judge2 = function (result) {
-					return result.bool == false ? true : false;
-				};
-				next.set("suitx", player.storage.hm_zongfu);
-				const { result } = await next;
-				if (result.suit == player.storage.hm_zongfu) {
-					targets[0].damage("thunder", player);
-				} else {
-					break;
-				}
+			const next = targets[0].judge(function (card) {
+				const evt = get.event();
+				if (get.suit(card) == evt.suitx) return -4;
+				return 0;
+			});
+			next.judge2 = function (result) {
+				return result.bool == false ? true : false;
+			};
+			next.set("suitx", player.storage.hm_zongfu);
+			const { result } = await next;
+			if (result.suit == player.storage.hm_zongfu) {
+				targets[0].damage("thunder", player);
+				event.trigger("hm_dangjing_callback");
 			}
 		},
 	},
