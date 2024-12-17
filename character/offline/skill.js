@@ -1874,7 +1874,7 @@ const skills = {
 		},
 		async content(event, trigger, player){
 			const { cost_data } = event;
-			const { result } = await player.chooseControl("请选择【众】的花色", lib.suit.slice());
+			const { result } = await player.chooseControl(lib.suit.slice()).set("prompt", "请选择【众】的花色");
 			const card = game.createCard(cost_data[0][2], result.control, 1);
 			player.chooseUseTarget(card, true);
 		},
