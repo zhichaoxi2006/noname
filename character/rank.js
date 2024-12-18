@@ -405,6 +405,7 @@ window.noname_character_rank = {
 		"ol_sb_dengai",
 	],
 	am: [
+		"lvju",
 		"hm_shen_luzhi",
 		"moqiongshu",
 		"huan_liufeng",
@@ -758,6 +759,7 @@ window.noname_character_rank = {
 		"yue_zhouyu",
 	],
 	bp: [
+		"ol_guozhao",
 		"hm_bairao",
 		"dongxie",
 		"ol_dongxie",
@@ -1685,6 +1687,8 @@ window.noname_character_rank = {
 		"ol_wuguotai",
 	],
 	bm: [
+		"panghong",
+		"star_dingfeng",
 		"yy_gongsunzan",
 		"yy_wenchou",
 		"kongrong",

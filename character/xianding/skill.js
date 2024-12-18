@@ -3,6 +3,91 @@ import cards from "../sp2/card.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//吕据
+	dczhengyue: {
+		trigger: {
+			player: "phaseBeginStart",
+		},
+		mark:true,
+		intro: {
+			content: "expansion",
+			markcount: "expansion",
+		},
+		filter(event, player){
+			if (player.getExpansions("dczhengyue").length) return false;
+			return true;
+		},
+		frequent:true,
+		async content(event, trigger, player){
+			const cards = get.cards(5);
+			await game.cardsGotoOrdering(cards);
+			const next = player.chooseToMove();
+			next.set("list", [
+				["牌堆顶", cards],
+				["武将牌上", []],
+			]);
+			const { result: { moved } } = await next;
+			const cardsx = moved[1];
+			cardsx.reverse();
+			await player.addToExpansion(cardsx, player, "giveAuto").gaintag.add("dczhengyue");
+		},
+		group: "dczhengyue_useCard",
+		subSkill: {
+			useCard: {
+				trigger: {
+					player: "useCardAfter",
+				},
+				forced:true,
+				filter(event, player){
+					if (player.getExpansions("dczhengyue").length) return true;
+					return false;
+				},
+				async content(event, trigger, player){
+					const firstCard = player.getExpansions("dczhengyue")[0];
+					if (
+						get.suit(firstCard) == get.suit(trigger.card) ||
+						get.number(firstCard) == get.number(trigger.card) ||
+						get.name(firstCard) == get.name(trigger.card)
+					) {
+						await player.discard([firstCard]);
+						await player.draw(2);
+					} else {
+						if (player.getExpansions("dczhengyue").length >= 5) return;
+						const expansion = player.getExpansions("dczhengyue");
+						await game.cardsGotoOrdering(expansion.addArray(trigger.cards));
+						const next = player.chooseToMove();
+						next.set("list", [
+							["武将牌上", expansion],
+						]);
+						const { result: { moved } } = await next;
+						const cards = moved[0];
+						cards.reverse();
+						await player.addToExpansion(cards, player, "giveAuto").gaintag.add("dczhengyue");
+						player.addTempSkill("dczhengyue_count");
+						player.storage.dczhengyue_count += trigger.cards.length;
+						if (player.storage.dczhengyue_count >= 2) {
+							player.addTempSkill("dczhengyue_debuff");
+						}
+					}
+				},
+			},
+			count: {
+				onremove:true,
+				init(player, skill){
+					player.storage[skill] = 0;
+				},
+				charlotte:true,
+			},
+			debuff: {
+				mod: {
+					cardEnabled(card, player, result){
+						if (get.position(card) == "h") return false;
+						return result;
+					},
+				},
+			},
+		},
+	},
 	//莫琼树
 	dcwanchan: {
 		audio: 2,

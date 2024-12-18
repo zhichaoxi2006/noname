@@ -2,6 +2,120 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL郭照
+	ol_jiaoyu: {
+		trigger: {
+			global: "roundStart",
+		},
+		forced:true,
+		async content(event, trigger, player){
+			let num = 1;
+			while (true) {
+				if (event.cards == undefined) event.cards = [];
+				const judgeEvent = player.judge(card => {
+					return 0;
+				});
+				judgeEvent.judge2 = result => result.bool;
+				judgeEvent.set("callback", async event => {
+					event.getParent().orderingCards.remove(event.card);
+				});				
+				const {
+					result: { card },
+				} = await judgeEvent;
+				event.cards.push(card);
+				num++;
+				if (num > Math.min(player.countCards("e"), 1)) {
+					//摆了，先不管无色牌了
+					const color = ["black", "red"];
+					const cards = [];
+					const { result: { control } } 
+						= await player.chooseControl(color);
+					player.storage["ol_jiaoyu"] = control;
+					game.log(player, "声明了", control);
+					for(const i of event.cards){
+						if (get.color(i) == control) {
+							cards.add(i);
+						}
+					}
+					await player.gain(cards, "gain2");
+					player.addSkill("ol_jiaoyu_phaseUse");
+					return;
+				}
+			}
+		},
+		subSkill: {
+			phaseUse: {
+				trigger: {
+					player: "phaseBegin",
+				},
+				forced: true,
+				charlotte:true,
+				async content(event, trigger, player) {
+					trigger.phaseList.add("phaseUse|ol_jiaoyu");
+					player.addTempSkill("ol_jiaoyu_debuff");
+					player.removeSkill("ol_jiaoyu_phaseUse");
+				},
+			},
+			debuff: {
+				charlotte:true,
+				mod: {
+					cardEnabled(card, player, result){
+						if (get.color(card) == player.storage["ol_jiaoyu"]) {
+							return result;
+						}
+						return false;
+					},
+				},
+			},
+		}
+	},
+	ol_neixun: {
+		trigger: {
+			global: "useCardEnd",
+		},
+		forced:true,
+		filter(event, player){
+			if (event.player == player || event.player != _status.currentPhase) {
+				return false;
+			}
+			return event.player.getHistory("useCard", evt => get.type(evt.card) != "equip").length === 1;
+		},
+		logTarget(event, player){
+			return event.player;
+		},
+		async content(event, trigger, player){
+			if (get.color(trigger.card) == player.storage["ol_jiaoyu"]) {
+				await player.chooseToGive(trigger.player, "he");
+				const { result } = await player.draw();
+				for(const i of result){
+					i.addGaintag("ol_neixun");
+				}
+				player.addTempSkill("ol_neixun_add", {player: "phaseAfter"});
+			} else {
+				await player.gainPlayerCard(trigger.player, "he");
+				await trigger.player.draw();
+			}
+		},
+		subSkill: {
+			add: {
+				mod: {
+					ignoredHandcard: function (card, player) {
+						if (card.hasGaintag("ol_neixun")) {
+							return true;
+						}
+					},
+					cardDiscardable: function (card, player, name) {
+						if (name == "phaseDiscard" && card.hasGaintag("ol_neixun")) {
+							return false;
+						}
+					},
+				},
+				onremove: function (player) {
+					player.removeGaintag("ol_neixun");
+				},
+			},
+		},
+	},
 	//OL武庙第一人
 	olliyong: {
 		audio: 2,

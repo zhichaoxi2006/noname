@@ -1,4 +1,5 @@
 const characters = {
+	panghong: ["male", "shu", 3, ["dcpingzhi", "dcgangjian"]],
 	yue_zhouyu: ["male", "wu", 3, ["dcguyin", "dcpinglu"]],
 	yue_diaochan: ["female", "qun", 3, ["dctanban", "dcdiou"], ["name:null|null"]],
 	dc_huangwudie: ["female", "shu", 4, ["dcshuangrui", "dcfuxie"]],
