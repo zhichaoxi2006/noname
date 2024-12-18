@@ -2,6 +2,199 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL薛灵芸
+	olsiqi: {
+		trigger: {
+			player: "damageEnd"
+		},
+		frequent:true,
+		mod: {
+			selectTarget(card, player, range){
+				const evt = get.event();
+				if(evt.getParent().name != "olsiqi") return;
+				if (get.type(card) == "equip") {
+					range[0] = 1;
+					range[1] = 1;
+				}
+			},
+			playerEnabled(card, player, target, result){
+				const evt = get.event();
+				if(evt.getParent().name != "olsiqi") return result;
+				if (get.type(card) == "equip") {
+					return target.canEquip(card, true);
+				}
+				return result;
+			}
+		},
+		filter(event, player){
+			const cardPile = Array.from(ui.cardPile.childNodes).reverse();
+			const redCards = [];
+			for(const card of cardPile){
+				if (get.color(card) == "red") {
+					redCards.push(card);
+				} else {
+					break;
+				}
+			};
+			return redCards.length > 0;
+		},
+		async cost(event, trigger, player){
+			const cardPile = Array.from(ui.cardPile.childNodes).reverse();
+			const redCards = [];
+			for(const card of cardPile){
+				if (get.color(card) == "red") {
+					redCards.push(card);
+				} else {
+					break;
+				}
+			};
+			const { result } = await player.chooseNumbers(get.prompt("olsiqi"), [{ prompt: "请选择你要亮出的牌数", min: 1, max: redCards.length }]);
+			if (result.bool) {
+				const number = result.numbers[0];
+				event.result = {
+					bool: result.bool,
+					cost_data: number,
+				}
+			}
+		},
+		async content(event, trigger, player){
+			const cardPile = Array.from(ui.cardPile.childNodes).reverse();
+			const redCards = [];
+			const number = event.cost_data;
+			for(const card of cardPile){
+				if (get.color(card) == "red") {
+					redCards.push(card);
+				} else {
+					break;
+				}
+			};
+			const cards = redCards.slice(0, number);
+			await player.showCards(cards);
+			while(cards.length){
+				if (cards.every(card => {
+					const name = ["tao", "jiu", "wuzhong"];
+					if (name.includes(card.name) || get.type(card) == "equip") {
+						return !player.hasUseTarget(card);
+					}
+					return true;
+				})) {
+					break;
+				}
+				const { result: result2 } = await player.chooseCardButton(cards)
+					.set("filterButton", button => {
+						const card = button.link;
+						const name = ["tao", "jiu", "wuzhong"];
+						if (name.includes(card.name) || get.type(card) == "equip") {
+							return player.hasUseTarget(button);
+						}
+						return false;
+					});
+				if (result2.bool) {
+					const card = result2.links[0];
+					const { result:result3 } = await player.chooseTarget(`是否使用${get.translation(card)}？`)
+						.set("filterTarget", function(_, player, target){
+							return lib.filter.filterTarget(card, player, target);
+						});
+					if(result3.bool){
+						await player.useCard(card, result3.targets);
+						cards.remove(card);
+					}
+				} else {
+					break;
+				}
+			}
+			await game.cardsDiscard(cards);
+		},
+		group: "olsiqi_lose",
+		subSkill: {
+			lose: {
+				trigger: {
+					player: "loseAfter",
+					global: ["loseAsyncAfter", "cardsDiscardAfter"],
+				},
+				filter: function (event, player) {
+					if (event.name == "cardsDiscard") {
+						if (event.getParent().relatedEvent?.player != player) {
+							return false;
+						}
+						const list = [];
+						for (const i of event.getd()) {
+							if (get.color(i) == "red") {
+								list.push(i);
+							}
+						}
+						return list.length;
+					}
+					if (event.getlx === false || event.type == "use") return false;
+					const evt = event.getl(player);
+					if (!evt || !evt.cards2 || !evt.cards2.length) return false;
+					const list = [];
+					for (const i of evt.cards2) {
+						if (get.color(i) == "red") {
+							list.push(i);
+						}
+					}
+					return list.length;
+				},
+				forced:true,
+				locked:true,
+				async content(event, trigger, player){
+					const list = [];
+					if (trigger.name == "cardsDiscard") {
+						for (const i of trigger.getd()) {
+							if (get.color(i) == "red") {
+								list.push(i);
+							}
+						}
+					} else {
+						const evt = trigger.getl(player);
+						if (!evt || !evt.cards2 || !evt.cards2.length) return false;
+						for (const i of evt.cards2) {
+							if (get.color(i) == "red" && get.position(i, true) == "d") {
+								list.push(i);
+							}
+						}
+					}
+					await game.cardsGotoPile(list);
+				},
+			},
+		}
+	},
+	olqiaozi: {
+		trigger: {
+			player: "loseAfter",
+			global: ["equipAfter","addJudgeAfter","gainAfter","loseAsyncAfter","addToExpansionAfter"],
+		},
+		filter(event, player){
+			const evt = event.getl(player);
+			for (var i in evt.gaintag_map) {
+				if (evt.gaintag_map[i].includes("olqiaozi")) return true;
+			}
+			return false;
+		},
+		silent:true,
+		locked:false,
+		async content(event, trigger, player){
+			delete player.storage[`temp_ban_olqiaozi_use`];
+		},
+		group: "olqiaozi_use",
+		subSkill: {
+			use: {
+				enable: "phaseUse",
+				filterCard:true,
+				prompt: "请弃置一张牌",
+				position: "he",
+				async content(event, trigger, player){
+					const cards = get.cards(2);
+					await player.showCards(cards);
+					const { result: { links } } = await player.chooseCardButton("【巧织】：获得其中一张牌", cards, true);
+					await player.gain(links);
+					links[0].addGaintag("olqiaozi");
+					player.tempBanSkill("olqiaozi_use", "forever");
+				},
+			},
+		}
+	},
 	//OL郭照
 	ol_jiaoyu: {
 		trigger: {

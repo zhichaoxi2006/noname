@@ -1,4 +1,10 @@
 const translates = {
+	ol_xuelingyun: "OL薛灵芸",
+	ol_xuelingyun_prefix: "OL",
+	olsiqi: "思泣",
+	olsiqi_info: "你的红色牌进入弃牌堆时，将之置于牌堆底。当你受到伤害后，你可以亮出牌堆底至多9张连续的红色牌，使用其中【桃】、【酒】、【无中生有】与装备牌(可指定其他角色为目标)。",
+	olqiaozi: "巧织",
+	olqiaozi_info: "出牌阶段，你可以弃置一张牌并亮出牌堆顶的两张牌，然后获得其中一张，此技能失效直到你失去以此法获得的牌。",
 	ol_guozhao: "OL郭照",
 	ol_guozhao_prefix: "OL",
 	ol_jiaoyu: "椒遇",

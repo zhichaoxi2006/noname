@@ -1315,6 +1315,7 @@ window.noname_character_rank = {
 		"ol_sb_huaxiong",
 	],
 	b: [
+		"ol_xuelingyun",
 		"hm_guigu",
 		"hm_bozi",
 		"hm_nanhualaoxian",
