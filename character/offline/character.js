@@ -6,7 +6,7 @@ const characters = {
 	hm_shen_luzhi: ["male", "shen", "4/4", ["hm_jigan", "hm_weizhu", "hm_guiquan"], []],
 	hm_shen_zhujun: ["male", "shen", "4/4", ["hm_cheji", "hm_daicui", "hm_kuixiang"], ["character:sp_zhujun"]],
 	hm_guigu: ["male", "qun", "5/5", ["hm_tuntian", "hm_qianjun"], []],
-	hm_busi: ["male", "qun", "4/6", ["hm_weiluan", "hm_tianpan", "hm_gaiming"], []],
+	hm_bozi: ["male", "qun", "4/6", ["hm_weiluan", "hm_tianpan", "hm_gaiming"], []],
 	hm_nanhualaoxian: ["male", "qun", "3/3", ["hm_yufeng", "hm_tianshu"], ["character:nanhualaoxian"]],
 	hm_yudu: ["male", "qun", "4/4", ["hm_dafu", "hm_jipin"], []],
 	hm_taosheng: ["male", "qun", "5/5", ["hm_zhannei", "hm_qianwei"], []],
