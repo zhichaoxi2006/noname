@@ -1268,19 +1268,14 @@ const skills = {
 	jingyu: {
 		audio: 2,
 		trigger: {
-			global: ["useSkill", "logSkillBegin", "useCard", "respond"],
+			global: ["useSkill", "logSkillBegin"],
 		},
 		filter(event, player) {
 			if (["global", "equip"].includes(event.type)) return false;
 			let skill = get.sourceSkillFor(event);
 			if (!skill || skill === "jingyu") return false;
 			let info = get.info(skill);
-			while (true) {
-				if (!info || info.charlotte || info.equipSkill) return false;
-				if (info && !info.sourceSkill) break;
-				skill = info.sourceSkill;
-				info = get.info(skill);
-			}
+			if (!info || info.charlotte || info.equipSkill) return false;
 			return !player.getStorage("jingyu_used").includes(skill);
 		},
 		forced: true,
@@ -1293,13 +1288,7 @@ const skills = {
 					})
 					.then(() => delete player.storage.jingyu_used);
 			}
-			let skill = get.sourceSkillFor(trigger),
-				info = get.info(skill);
-			while (true) {
-				if (info && !info.sourceSkill) break;
-				skill = info.sourceSkill;
-				info = get.info(skill);
-			}
+			let skill = get.sourceSkillFor(trigger);
 			player.markAuto("jingyu_used", skill);
 			await player.draw();
 		},
