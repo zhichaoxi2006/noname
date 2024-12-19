@@ -222,10 +222,15 @@ const skills = {
 					const color = ["black", "red"];
 					const cards = [];
 					const dialog = ui.create.dialog();
-					dialog.addText("红色牌", true);
-					dialog.add([event.cards.filter(c=>get.color(c) == "red"), "card"]);
-					dialog.addText("黑色牌", true);
-					dialog.add([event.cards.filter(c=>get.color(c) == "black"), "card"]);
+					if (event.cards.filter(c=>get.color(c) == "red").length) {
+						dialog.addText("红色牌", true);
+						dialog.add([event.cards.filter(c=>get.color(c) == "red"), "card"]);
+					}
+					if(event.cards.filter(c=>get.color(c) == "black").length){
+						dialog.addText("黑色牌", true);
+						dialog.add([event.cards.filter(c=>get.color(c) == "black"), "card"]);
+					}
+
 					const { result: { control } } 
 						= await player.chooseControl(color, dialog);
 					player.storage["ol_jiaoyu"] = control;
