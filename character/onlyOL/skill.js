@@ -2,13 +2,90 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL界廖化
+	ol_dangxian: {
+		trigger: { player: "phaseBegin" },
+		locked: true,
+		audio: "dangxian",
+		async cost(event, trigger, player) {
+			trigger.phaseList.splice(trigger.num, 0, `phaseUse|${event.name}`);
+			event.result = await player.chooseBool("是否从牌堆或弃牌堆获得一张【杀】？").forResult();
+		},
+		async content(event, trigger, player) {
+			const card = get.cardPile(function (card) {
+				return card.name == "sha";
+			});
+			if (card) await player.gain(card, "draw");
+			player
+				.when({ player: "phaseUseAfter" })
+				.filter((event, player) => {
+					return !player.getHistory("sourceDamage").length;
+				})
+				.then(function () {
+					player.damage();
+				});
+		},
+	},
+	ol_fuli: {
+		skillAnimation: true,
+		animationColor: "soil",
+		audio: "xinfuli",
+		enable: "chooseToUse",
+		locked:true,
+		init: function (player, skill) {
+			player.storage[skill] = false;
+		},
+		mark: true,
+		filter: function (event, player) {
+			if (event.type != "dying") return false;
+			if (player != event.dying) return false;
+			return true;
+		},
+		async content(event, trigger, player) {
+			player.awakenSkill("ol_fuli");
+			await player.recoverTo(game.countGroup());
+			await player.drawTo(game.countGroup());
+			let maxDamage = 0;
+			let bool = false;
+			player.getAllHistory("sourceDamage").forEach(evt => {
+				maxDamage += evt.num;
+			});
+			for(const i of get.players(null, true, true)){
+				let num = 0;
+				i.getAllHistory("sourceDamage").forEach(evt => {
+					num += evt.num;
+				});
+				if (num > maxDamage) {
+					bool = true;
+				}
+			}
+			if (bool) {
+				await player.turnOver();
+			}
+		},
+		ai: {
+			save: true,
+			skillTagFilter: function (player, arg, target) {
+				return player == target && player.storage.ol_fuli != true;
+			},
+			result: {
+				player: 10,
+			},
+			threaten: function (player, target) {
+				if (!target.storage.ol_fuli) return 0.9;
+			},
+		},
+		intro: {
+			content: "limited",
+		},
+	},
 	//OL谋黄月英
 	olsbbingcai: {
 		trigger: {
 			player: "useCard",
 		},
 		filter(event, player) {
-			if (!player.countCards("he", {type: ["trick", "delay"]})) return false;
+			if (!player.countCards("he", { type: ["trick", "delay"] })) return false;
 			return player.getHistory("useCard", evt => get.type(evt.card) == "basic").length == 1;
 		},
 		async cost(event, trigger, player) {
@@ -27,7 +104,7 @@ const skills = {
 	},
 	olsblixian: {
 		mod: {
-			cardEnabled(card, player, result){
+			cardEnabled(card, player, result) {
 				const evt = get.event();
 				if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
 					if (card.cards.some(c => c.hasGaintag("olsblixian")) && !["olsblixian_sha", "olsblixian_shan"].includes(evt.skill)) return false;
@@ -41,8 +118,8 @@ const skills = {
 				trigger: {
 					global: "phaseJieshuBegin",
 				},
-				forced:true,
-				filter(event, player){
+				forced: true,
+				filter(event, player) {
 					const gain = [];
 					game.getGlobalHistory("useCard").forEach(evt => {
 						if (get.type2(evt.card) != "trick" || get.position(evt.card) != "d") return false;
@@ -51,7 +128,7 @@ const skills = {
 					});
 					return gain.length;
 				},
-				async content(event, trigger, player){
+				async content(event, trigger, player) {
 					const gain = [];
 					game.getGlobalHistory("useCard").forEach(evt => {
 						if (get.type2(evt.card) != "trick" || get.position(evt.card) != "d") return false;
@@ -62,8 +139,8 @@ const skills = {
 				},
 			},
 			sha: {
-				enable: ["chooseToUse","chooseToRespond"],
-				filterCard(card){
+				enable: ["chooseToUse", "chooseToRespond"],
+				filterCard(card) {
 					return card.hasGaintag("olsblixian");
 				},
 				viewAs: {
@@ -89,8 +166,8 @@ const skills = {
 				},
 			},
 			shan: {
-				enable: ["chooseToRespond","chooseToUse"],
-				filterCard(card){
+				enable: ["chooseToRespond", "chooseToUse"],
+				filterCard(card) {
 					return card.hasGaintag("olsblixian");
 				},
 				viewAs: {
