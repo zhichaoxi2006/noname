@@ -7627,6 +7627,11 @@ export class Player extends HTMLDivElement {
 			delete this.node.timer;
 		}
 	}
+	/**
+	 * 向角色对应storage中添加相应元素，刷新标记状态
+	 * @param { string } name 技能ID
+	 * @param { * } [info] 向storage数组中添加对应元素/元素数组
+	 */
 	markAuto(name, info) {
 		if (typeof info != "undefined") {
 			if (!Array.isArray(this.storage[name])) this.storage[name] = [];
@@ -7640,14 +7645,25 @@ export class Player extends HTMLDivElement {
 				this[storage.length > 0 ? "markSkill" : "unmarkSkill"](name);
 			} else if (typeof storage == "number") {
 				this[storage > 0 ? "markSkill" : "unmarkSkill"](name);
+			} else if (storage) {
+				this.markSkill(name);
+			} else {
+				this.unmarkSkill(name);
 			}
 		}
 	}
+	/**
+	 * 移除角色对应storage中相应元素并刷新标记状态
+	 * @param { string } name 技能ID
+	 * @param { * } info 移除storage数组中对应元素/元素数组
+	 */
 	unmarkAuto(name, info) {
 		var storage = this.storage[name];
-		if (Array.isArray(info) && Array.isArray(storage)) {
-			storage.removeArray(info.slice(0));
-			this.markAuto(name);
+		if (Array.isArray(storage)) {
+			if (Array.isArray(info)) {
+				storage.removeArray(info.slice(0));
+			} else storage.remove(info);
+			this[storage.length > 0 ? "markSkill" : "unmarkSkill"](name);
 		}
 	}
 	getExpansions(tag) {

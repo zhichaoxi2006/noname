@@ -397,17 +397,7 @@ const skills = {
 					}
 					player.popup("整肃成功", "wood");
 					game.log(player, "整肃成功");
-					let control = "摸牌";
-					if (player.isDamaged()) await player
-						.chooseControl("摸牌", "回复体力")
-						.set("prompt", "整肃奖励：摸两张牌或回复1点体力")
-						.set("ai", () => get.event("idx"))
-						.set("idx", function () {
-							if (2 * get.effect(player, { name: "draw" }, player, player) < get.recoverEffect(player, player, player)) return 1;
-							return 0;
-						}());
-					if (control === "摸牌") await player.draw(2);
-					else await player.recover();
+					await player.chooseDrawRecover(2, "整肃奖励：摸两张牌或回复1点体力", true);
 					let result = await player
 						.chooseTarget("整军：是否令一名其他角色也获得整肃奖励？", lib.filter.notMe)
 						.set("ai", function (target) {
@@ -415,22 +405,19 @@ const skills = {
 							return Math.max(2 * get.effect(target, { name: "draw" }, target, player), get.recoverEffect(target, target, player));
 						})
 						.forResult();
-					if (result.bool) {
-						var target = result.targets[0];
-						var num1 = 2 * get.effect(target, { name: "draw" }, target, player);
-						var num2 = get.recoverEffect(target, target, player);
-						player.line(target);
-						if (target.isHealthy()) result.index = 0;
-						else
-							result = await player
-								.chooseControl("摸牌", "回血")
-								.set("prompt", "整肃奖励：令" + get.translation(target) + "摸两张牌或回复1点体力")
-								.set("ai", function () {
-									return _status.event.goon ? 0 : 1;
-								})
-								.set("goon", num1 >= num2)
-								.forResult();
-					} else return;
+					if (!result.bool) return;
+					const target = result.targets[0];
+					player.line(target);
+					if (target.isHealthy()) result.index = 0;
+					else
+						result = await player
+							.chooseControl("摸牌", "回血")
+							.set("prompt", "整肃奖励：令" + get.translation(target) + "摸两张牌或回复1点体力")
+							.set("ai", function () {
+								return _status.event.goon ? 1 : 0;
+							})
+							.set("goon", 2 * get.effect(target, { name: "draw" }, target, player) < get.recoverEffect(target, target, player))
+							.forResult();
 					if (result.index) await target.recover();
 					else await target.draw(2);
 				},
