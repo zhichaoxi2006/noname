@@ -1,4 +1,10 @@
 const translates = {
+	ol_sb_zhangfei: "OL谋张飞",
+	ol_sb_zhangfei_prefix: "OL谋",
+	olsbjingxian: "敬贤",
+	olsbjingxian_info: "出牌阶段每名角色限一次，你可以交给其至多两张非基本牌，然后其选择等量项：1.其与你各摸一张牌；2.令你从牌堆中获得一张【杀】。",
+	olsbxieyong: "狭勇",
+	olsbxieyong_info: "出牌阶段限一次，你可以选择一名其他角色，直至其下个回合结束，你处于【酒】的状态。其于此期间使用一张牌后（目标不为其自己），你可以对其使用一张无视防具的【杀】。",
 	ol_liaohua: "OL界廖化",
 	ol_liaohua_prefix: "OL界",
 	ol_dangxian: "当先",

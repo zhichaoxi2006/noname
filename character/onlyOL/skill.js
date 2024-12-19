@@ -2,6 +2,79 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL谋张飞
+	olsbjingxian: {
+		enable:"phaseUse",
+		filter(event, player){
+			if(!player.countCards("he", card => get.type(card) != "basic")) return false;
+			return game.hasPlayer(target => {
+				if(target.hasSkill("olsbjingxian_used")) return false;
+				return player != target;
+			});
+		},
+		filterTarget(card, player, target){
+			if(target.hasSkill("olsbjingxian_used")) return false;
+			return player != target;
+		},
+		filterCard(card){
+			return get.type(card) != "basic";
+		},
+		selectCard:[1, 2],
+		async content(event, trigger, player){
+			const { cards, targets } = event;
+			const target = targets[0];
+			player.give(cards, target);
+			if (event.cards.length != 2) {
+				const { result } = await player.chooseButton(
+					[
+						"请选择一项",
+						[
+							[
+								["draw", `你与${get.translation(player)}各摸一张牌`],
+								["gain", `令${get.translation(player)}从牌堆中获得一张【杀】`],
+							],
+							"textbutton",
+						]
+					],
+					true,
+				);
+				for (const i of result.links){
+					if (i == "draw") {
+						await game.asyncDraw([player, target]);
+					} else if(i == "gain") {
+						const card = get.cardPile(function (card) {
+							return card.name == "sha";
+						});
+						if (card) {
+							await player.gain(card, "draw");
+						} else {
+							player.chat("不是哥们，杀呢");
+						}
+					}
+				}
+			} else {
+				await game.asyncDraw([player, target]);
+				const card = get.cardPile(function (card) {
+					return card.name == "sha";
+				});
+				if (card) {
+					await player.gain(card, "draw");
+				} else {
+					player.chat("不是哥们，杀呢");
+				}
+			}
+			target.addTempSkill("olsbjingxian_used");
+		},
+		subSkill: {
+			used: {
+				charlotte:true,
+				onremove:true,
+			}
+		},
+	},
+	olsbxieyong: {
+		//todo
+	},
 	//OL界廖化
 	ol_dangxian: {
 		trigger: { player: "phaseBegin" },
