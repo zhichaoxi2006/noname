@@ -31114,7 +31114,6 @@ const skills = {
 		derivation: ["lingren_jianxiong", "lingren_xingshang"],
 		content: function () {
 			"step 0";
-			game.me.discard(game.me.getCards("h"));
 			player
 				.chooseTarget(get.prompt("xinfu_lingren"), "选择一名目标角色并猜测其手牌构成", function (card, player, target) {
 					return _status.event.targets.includes(target);
@@ -31133,25 +31132,40 @@ const skills = {
 					trick: false,
 					equip: false,
 				};
-				player.chooseButton(["凌人：猜测其有哪些类别的手牌", [["basic", "trick", "equip"], "vcard"]], [0, 3], true).set("ai", function (button) {
-					switch (button.link[2]) {
-						case "basic":
-							var rand = 0.95;
-							if (!target.countCards("h", { type: ["basic"] })) rand = 0.05;
-							if (!target.countCards("h")) rand = 0;
-							return Math.random() < rand ? true : false;
-						case "trick":
-							var rand = 0.9;
-							if (!target.countCards("h", { type: ["trick", "delay"] })) rand = 0.1;
-							if (!target.countCards("h")) rand = 0;
-							return Math.random() < rand ? true : false;
-						case "equip":
-							var rand = 0.75;
-							if (!target.countCards("h", { type: ["equip"] })) rand = 0.25;
-							if (!target.countCards("h")) rand = 0;
-							return Math.random() < rand ? true : false;
-					}
-				});
+				player
+					.chooseButton(["凌人：猜测其有哪些类别的手牌", [["basic", "trick", "equip"], "vcard"]], [0, 3], true)
+					.set("ai", function (button) {
+						return get.event("choice").includes(button.link[2]);
+					})
+					.set(
+						"choice",
+						(() => {
+							if (!target.countCards("h")) return [];
+							let choice = [],
+								known = target.getKnownCards(player),
+								unknown = target.getCards("h", i => !known.includes(i));
+							for (let i of known) {
+								choice.add(get.type2(i, target));
+							}
+							if (!unknown.length || choice.length > 2) return choice;
+							let rand = 0.05;
+							if (!choice.includes("basic")) {
+								if (unknown.some(i => get.type(i, null, target) === "basic")) rand = 0.95;
+								if (Math.random() < rand) choice.push("basic");
+							}
+							if (!choice.includes("trick")) {
+								if (unknown.some(i => get.type(i, "trick", target) === "trick")) rand = 0.9;
+								else rand = 0.1;
+								if (Math.random() < rand) choice.push("trick");
+							}
+							if (!choice.includes("equip")) {
+								if (unknown.some(i => get.type(i, null, target) === "equip")) rand = 0.75;
+								else rand = 0.25;
+								if (Math.random() < rand) choice.push("equip");
+							}
+							return choice;
+						})()
+					);
 			} else {
 				player.storage.counttrigger.xinfu_lingren--;
 				event.finish();

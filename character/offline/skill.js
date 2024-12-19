@@ -4484,7 +4484,7 @@ const skills = {
 						for (let i of known) {
 							choice.add(get.type2(i, target));
 						}
-						if (!cards) return choice;
+						if (!cards || choice.length > 2) return choice;
 						if (!choice.includes("basic") && cards > 2 * Math.random()) choice.push("basic");
 						if (!choice.includes("trick") && cards > 3 * Math.random()) choice.push("trick");
 						if (!choice.includes("equip") && cards > 6 * Math.random()) choice.push("equip");
