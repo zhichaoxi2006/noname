@@ -2,6 +2,196 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL谋赵云
+	ol_sb_nilan: {
+		trigger: {
+			source: "damageSource",
+		},
+		filter(event, player){
+			if (event.getParent().name == "ol_sb_nilan") return false;
+			return true;
+		},
+		async cost(event, trigger, player){
+			const { result } = await player.chooseButton(
+				[
+					"请选择一项",
+					[
+						[
+							["discard", "弃置所有手牌"],
+							["draw", "摸两张牌"],
+						],
+						"textbutton",
+					],
+				]
+			).set("filterButton", function(button){
+				if (button.link == "discard") {
+					return player.countCards("h");
+				}
+				return true;
+			});
+			event.result = {
+				bool: result.bool,
+				cost_data: result.links[0],
+			}
+		},
+		choice: {
+			async discard(event, trigger, player) {
+				const next = await player.discard(player.getCards("h"));
+				const cards = next.cards;
+				if (!cards) return;
+				if (cards.some(c=>c.name == "sha")) {
+					const { result } = await player.chooseTarget("对一名其他角色造成一点伤害")
+						.set("filterTarget", lib.filter.notMe);
+					if (result.bool) {
+						result.targets[0].damage(player);
+					}
+				}
+			},
+			async draw(event, trigger, player){
+				await player.draw(2);
+			},
+		},
+		async content(event, trigger, player){
+			const { cost_data } = event;
+			player.addSkill("ol_sb_nilan_buff");
+			let list = player.storage.ol_sb_nilan_buff;
+			if (cost_data == "discard") {
+				await lib.skill.ol_sb_nilan.choice.discard.apply(this, arguments);
+				list.push("draw");
+			} else {
+				await lib.skill.ol_sb_nilan.choice.draw.apply(this, arguments);
+				list.push("discard");
+			}
+		},
+		subSkill: {
+			buff: {
+				trigger: {
+					player: "damageEnd",
+				},
+				onremove:true,
+				init(player, skill){
+					player.storage[skill] = [];
+				},
+				async content(event, trigger, player){
+					const list = player.storage.ol_sb_nilan_buff;
+					for(const i of list){
+						await lib.skill.ol_sb_nilan.choice[i].apply(this, arguments);
+					}
+					player.removeSkill("ol_sb_nilan_buff");
+				},
+			},
+		},
+	},
+	ol_sb_jueya: {
+		audio: 2,
+		enable: ["chooseToUse","chooseToRespond"],
+		init: function (player, skill) {
+			if (!player.storage[skill]) player.storage[skill] = [];
+		},
+		hiddenCard: function (player, name) {
+			if (get.type(name) != "basic") return false;
+			if (player.storage.ol_sb_jueya && !player.storage.ol_sb_jueya.includes(name)) return !player.countCards("h");
+			return false;
+		},
+		marktext: "崖",
+		mark: true,
+		intro: {
+			markcount: function (storage) {
+				return storage.length;
+			},
+			content: function (storage, player) {
+				if (!storage) return;
+				var str = "<li>";
+				str += "已使用过的牌：";
+				str += get.translation(storage);
+				return str;
+			},
+		},
+		filter: function (event, player) {
+			if (event.type == "wuxie") return false;
+			if (player.countCards("h")) return false;
+			const storage = player.storage.ol_sb_jueya;
+			for (var i of lib.inpile.filter(c=>get.type(c) == "basic")) {
+				var card = { name: i, isCard: true };
+				if (event.filterCard(card, player, event)) return true;
+			}
+			return false;
+		},
+		chooseButton: {
+			dialog: function (event, player) {
+				const list = [];
+				const cardname = lib.inpile.filter(c=>get.type(c) == "basic");
+				const storage = player.storage.ol_sb_jueya;
+				cardname.removeArray(storage);
+				for (var i of cardname) list.push(["基本", "", i]);
+				return ui.create.dialog("绝崖", [list, "vcard"], "hidden");
+			},
+			filter: function (button, player) {
+				var evt = _status.event.getParent();
+				return evt.filterCard({ name: button.link[2], isCard: true }, player, evt);
+			},
+			check: function (button) {
+				var card = { name: button.link[2] },
+					player = _status.event.player;
+				if (_status.event.getParent().type != "phase") return 1;
+				if (card.name == "jiu") return 0;
+				if (card.name == "sha" && player.hasSkill("jiu")) return 0;
+				return player.getUseValue(card, null, true);
+			},
+			backup: function (links, player) {
+				return {
+					audio: "ol_sb_jueya",
+					filterCard: function () {
+						return false;
+					},
+					popname: true,
+					viewAs: {
+						name: links[0][2],
+						isCard: true,
+					},
+					selectCard: -1,
+					async precontent(event, trigger, player){
+						player.markAuto("ol_sb_jueya", event.result.card.name);
+					}
+				};
+			},
+			prompt: function (links, player) {
+				return "选择【" + get.translation(links[0][2]) + "】的目标";
+			},
+		},
+		ai: {
+			respondSha: true,
+			respondShan: true,
+			skillTagFilter: function (player, tag, arg) {
+				var storage = player.storage.dunshi;
+				if (!storage || !storage[0].length) return false;
+				if (player.getStat("skill").dunshi) return false;
+				switch (tag) {
+					case "respondSha":
+						return (_status.event.type != "phase" || player == game.me || player.isUnderControl() || player.isOnline()) && storage[0].includes("sha");
+					case "respondShan":
+						return storage[0].includes("shan");
+					case "save":
+						if (arg == player && storage[0].includes("jiu")) return true;
+						return storage[0].includes("tao");
+				}
+			},
+			order: 2,
+			result: {
+				player: function (player) {
+					if (_status.event.type == "dying") {
+						return get.attitude(player, _status.event.dying);
+					}
+					return 1;
+				},
+			},
+		},
+		subSkill: {
+			backup: {
+				audio: "ol_sb_jueya",
+			},
+		},
+	},
 	//OL谋张飞
 	olsbjingxian: {
 		enable:"phaseUse",

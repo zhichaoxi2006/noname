@@ -5013,7 +5013,7 @@ export class Get extends GetCompatible {
 		for (var i = 0; i < skills1.length; i++) {
 			const info = get.info(skills1[i]);
 			if (!info) {
-				throw new Error("不存在的技能");
+				throw new Error(`${skills1[i]}不存在的技能`);
 			}
 			temp1 = info.ai;
 			if (temp1 && typeof temp1.effect == "object" && typeof temp1.effect.player_use == "function") {
@@ -5047,7 +5047,7 @@ export class Get extends GetCompatible {
 			for (var i = 0; i < skills2.length; i++) {
 				const info = get.info(skills2[i]);
 				if (!info) {
-					throw new Error("不存在的技能");
+					throw new Error(`${skills2[i]}不存在的技能`);
 				}
 				temp2 = info.ai;
 				if (temp2 && temp2.threaten) temp3 = temp2.threaten;
@@ -5212,7 +5212,7 @@ export class Get extends GetCompatible {
 		for (var i = 0; i < skills1.length; i++) {
 			const info = get.info(skills1[i]);
 			if (!info) {
-				throw new Error("不存在的技能");
+				throw new Error(`${skills1[i]}不存在的技能`);
 			}
 			temp1 = info.ai;
 			if (temp1 && typeof temp1.effect == "object" && typeof temp1.effect.player == "function") {
@@ -5242,9 +5242,9 @@ export class Get extends GetCompatible {
 			var skills2 = target.getSkills().concat(lib.skill.global);
 			game.expandSkills(skills2);
 			for (var i = 0; i < skills2.length; i++) {
-				const info = get.info(skills1[i]);
+				const info = get.info(skills2[i]);
 				if (!info) {
-					throw new Error("不存在的技能");
+					throw new Error(`${skills2[i]}不存在的技能`);
 				}
 				temp2 = info.ai;
 				if (!temp2) continue;

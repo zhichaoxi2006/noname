@@ -1,4 +1,10 @@
 const translates = {
+	ol_sb_zhaoyun: "OL谋赵云",
+	ol_sb_zhaoyun_prefix: "OL谋",
+	ol_sb_nilan: "逆澜",
+	ol_sb_nilan_info: "当你不因此技能造成伤害后，你可以选择一项：1.弃置所有手牌，若其中有【杀】，你可对一名其他角色造成1点伤害；2.摸两张牌。若如此做，你下次受到伤害后可以执行另一项。",
+	ol_sb_jueya: "绝崖",
+	ol_sb_jueya_info: "当你需要使用一张基本牌时（不能为你因此使用过的），若你没有手牌，你可以视为使用此牌。",
 	ol_sb_zhangfei: "OL谋张飞",
 	ol_sb_zhangfei_prefix: "OL谋",
 	olsbjingxian: "敬贤",
