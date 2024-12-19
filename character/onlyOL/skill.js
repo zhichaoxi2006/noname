@@ -2,6 +2,105 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL谋沮授
+	olsbguliang: {
+		usable: 1,
+		trigger: {
+			target: "useCardToPlayer",
+		},
+		filter(event, player) {
+			return event.player != player;
+		},
+		async content(event, trigger, player) {
+			trigger.getParent().excluded.add(player);
+			player.addTempSkill("olsbguliang_debuff");
+			player.storage.olsbguliang_debuff = trigger.player;
+		},
+		subSkill: {
+			debuff: {
+				charlotte: true,
+				onremove: true,
+				trigger: {
+					target: "useCardToPlayer",
+				},
+				silent: true,
+				filter(event, player) {
+					return event.player == player.storage.olsbguliang_debuff;
+				},
+				async content(event, trigger, player) {
+					trigger.getParent().directHit.add(player);
+				},
+			},
+		},
+	},
+	olsbxutu: {
+		trigger: {
+			global: "phaseBefore",
+			player: "enterGame",
+		},
+		forced: true,
+		marktext: "资",
+		mark: true,
+		intro: {
+			content: "expansion",
+			markcount: "expansion",
+		},
+		filter(event, player) {
+			return (event.name != "phase" || game.phaseNumber == 0) && !player.getExpansions("olsbxutu").length;
+		},
+		async content(event, trigger, player) {
+			const cards = get.cards(3);
+			await player.addToExpansion(cards, player, "giveAuto").gaintag.add("olsbxutu");
+		},
+		group: ["olsbxutu_exchange"],
+		subSkill: {
+			exchange: {
+				trigger: {
+					global: "phaseJieshuBegin",
+				},
+				filter(event, player) {
+					return get.discarded().length > 0;
+				},
+				async cost(event, trigger, player) {
+					const xs = player.getExpansions("olsbxutu");
+					const discardPile = get.discarded();
+					const dialog = ["徐图：选择要交换的牌", '<div class="text center">“资”</div>', xs, '<div class="text center">弃牌堆</div>', discardPile];
+					const { result } = await player
+						.chooseButton(dialog, 2)
+						.set("filterButton", function (button) {
+							if (ui.selected.buttons.length) return get.position(button.link) != get.position(ui.selected.buttons[0].link);
+							return true;
+						})
+						.set("cards1", xs)
+						.set("cards2", discardPile);
+					event.result = {
+						bool: result.bool,
+						cost_data: result.links,
+					};
+				},
+				async content(event, trigger, player) {
+					const { cost_data } = event;
+					const cards = cost_data;
+					if (get.position(cards[0]) != "x") cards.reverse();
+					await player.addToExpansion([cards[1]], player, "giveAuto").gaintag.add("olsbxutu");
+					await player.loseToDiscardpile([cards[0]]);
+					const xs = player.getExpansions("olsbxutu");
+					let bool =
+						xs.every(c => {
+							return get.suit(c) == get.suit(xs[0]);
+						}) ||
+						xs.every(c => {
+							return get.number(c) == get.number(xs[0]);
+						});
+					if (bool) {
+						const { result } = await player.chooseTarget(lib.filter.notMe).set("prompt", `将${get.translation(xs)}交给一名其他角色`);
+						await result.targets[0].gain(xs, "draw");
+						await player.addToExpansion(get.cards(3), player, "giveAuto").gaintag.add("olsbxutu");
+					}
+				},
+			},
+		},
+	},
 	//OL谋公孙
 	olsbjiaodi: {
 		audio: 2,
