@@ -1,4 +1,10 @@
 const translates = {
+	ol_sb_huangyueying: "OL谋黄月英",
+	ol_sb_huangyueying_prefix: "OL谋",
+	olsbbingcai: "并才",
+	olsbbingcai_info: "每回合第一张基本牌被使用时，你可重铸一张锦囊牌。若此两张牌均为伤害类或非伤害类，则此牌对相同目标再结算一次。",
+	olsblixian: "理贤",
+	olsblixian_info: "锁定技，每个结束阶段，你获得弃牌堆中所有本回合目标包含你的锦囊牌。你以此法获得的牌仅可当作【杀】或【闪】使用。",
 	ol_sb_jushou: "OL谋沮授",
 	ol_sb_jushou_prefix: "OL谋",
 	olsbguliang: "固粮",

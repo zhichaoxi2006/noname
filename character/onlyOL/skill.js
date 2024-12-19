@@ -2,6 +2,118 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL谋黄月英
+	olsbbingcai: {
+		trigger: {
+			player: "useCard",
+		},
+		filter(event, player) {
+			if (!player.countCards("he", {type: ["trick", "delay"]})) return false;
+			return player.getHistory("useCard", evt => get.type(evt.card) == "basic").length == 1;
+		},
+		async cost(event, trigger, player) {
+			const { result } = await player.chooseCard("he", "请重铸一张锦囊牌").set("filterCard", function (card) {
+				return get.type2(card) == "trick";
+			});
+			event.result = result;
+		},
+		async content(event, trigger, player) {
+			await player.recast(event.cards);
+			const card = event.cards[0];
+			if (Boolean(get.tag(card, "damage")) == Boolean(get.tag(trigger.card, "damage"))) {
+				trigger.effectCount++;
+			}
+		},
+	},
+	olsblixian: {
+		mod: {
+			cardEnabled(card, player, result){
+				const evt = get.event();
+				if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
+					if (card.cards.some(c => c.hasGaintag("olsblixian")) && !["olsblixian_sha", "olsblixian_shan"].includes(evt.skill)) return false;
+				}
+				if (card.hasGaintag("olsblixian") && !["olsblixian_sha", "olsblixian_shan"].includes(evt.skill)) return false;
+			},
+		},
+		group: ["olsblixian_gain", "olsblixian_sha", "olsblixian_shan"],
+		subSkill: {
+			gain: {
+				trigger: {
+					global: "phaseJieshuBegin",
+				},
+				forced:true,
+				filter(event, player){
+					const gain = [];
+					game.getGlobalHistory("useCard").forEach(evt => {
+						if (get.type2(evt.card) != "trick" || get.position(evt.card) != "d") return false;
+						if (!evt.targets || !evt.targets.includes(player)) return false;
+						gain.addArray(evt.cards);
+					});
+					return gain.length;
+				},
+				async content(event, trigger, player){
+					const gain = [];
+					game.getGlobalHistory("useCard").forEach(evt => {
+						if (get.type2(evt.card) != "trick" || get.position(evt.card) != "d") return false;
+						if (!evt.targets || !evt.targets.includes(player)) return false;
+						gain.addArray(evt.cards);
+					});
+					await player.gain(gain, "draw").gaintag.add("olsblixian");
+				},
+			},
+			sha: {
+				enable: ["chooseToUse","chooseToRespond"],
+				filterCard(card){
+					return card.hasGaintag("olsblixian");
+				},
+				viewAs: {
+					name: "sha",
+					isCard: true,
+				},
+				viewAsFilter: function (player) {
+					if (!player.countCards("hs", lib.skill["olsblixian_sha"].filterCard)) return false;
+				},
+				position: "hs",
+				prompt: "将一张“理贤”牌当杀使用或打出",
+				check: function () {
+					return 1;
+				},
+				ai: {
+					respondSha: true,
+					skillTagFilter: function (player) {
+						if (!player.countCards("hs", lib.skill["olsblixian_sha"].filterCard)) return false;
+					},
+					order: function () {
+						return get.order({ name: "sha" }) - 0.1;
+					},
+				},
+			},
+			shan: {
+				enable: ["chooseToRespond","chooseToUse"],
+				filterCard(card){
+					return card.hasGaintag("olsblixian");
+				},
+				viewAs: {
+					name: "shan",
+					isCard: true,
+				},
+				prompt: "将一张“理贤”牌当闪打出",
+				check: function () {
+					return 1;
+				},
+				viewAsFilter: function (player) {
+					if (!player.countCards("hs", lib.skill["olsblixian_sha"].filterCard)) return false;
+				},
+				position: "hs",
+				ai: {
+					respondShan: true,
+					skillTagFilter: function (player) {
+						if (!player.countCards("hs", lib.skill["olsblixian_sha"].filterCard)) return false;
+					},
+				},
+			},
+		},
+	},
 	//OL谋沮授
 	olsbguliang: {
 		usable: 1,
