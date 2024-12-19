@@ -864,8 +864,7 @@ const skills = {
 							(player.countCards("he", card => {
 								if (get.position(card) === "h" && _status.connectMode) return true;
 								return lib.filter.cardDiscardable(card, player);
-							}) >= 2 &&
-								game.hasPlayer(target => target !== player))
+							}) >= 2 && game.hasPlayer(target => target !== player))
 						);
 					},
 					async cost(event, trigger, player) {
@@ -10960,19 +10959,28 @@ const skills = {
 						type = get.type2(cards[0]),
 						damage = get.damageEffect(target, player, target, "thunder");
 					if (player === target) {
-						if (target.countCards("he", card => {
-							return !cards.includes(card) && get.type(card) === type && get.value(card) < 6;
-						}) >= cards.length) return Math.max(2, damage);
+						if (
+							target.countCards("he", card => {
+								return !cards.includes(card) && get.type(card) === type && get.value(card) < 6;
+							}) >= cards.length
+						)
+							return Math.max(2, damage);
 						return damage;
 					}
-					const he = target.getCards("he"), known = target.getKnownCards(player);
+					const he = target.getCards("he"),
+						known = target.getKnownCards(player);
 					let num = 0;
 					if (type === "basic") num = 0.42;
 					else if (type === "equip") num = 0.1;
 					else if (type === "trick") num = 0.25;
-					if (known.filter(card => {
-						return get.type(card) === type && get.value(card) < 6;
-					}).length + (he - known.length) * num >= cards.length) return Math.max(3, damage);
+					if (
+						known.filter(card => {
+							return get.type(card) === type && get.value(card) < 6;
+						}).length +
+							(he - known.length) * num >=
+						cards.length
+					)
+						return Math.max(3, damage);
 					return damage;
 				},
 			},
@@ -28859,7 +28867,8 @@ const skills = {
 			const result = await player
 				.chooseControl(controls)
 				.set("ai", function () {
-					var trigger = _status.event.getTrigger(), player = _status.event.player;
+					var trigger = _status.event.getTrigger(),
+						player = _status.event.player;
 					if (trigger.target.countCards("he") && get.attitude(_status.event.player, trigger.target) < 0) {
 						return "discard_card";
 					}
@@ -31105,6 +31114,7 @@ const skills = {
 		derivation: ["lingren_jianxiong", "lingren_xingshang"],
 		content: function () {
 			"step 0";
+			game.me.discard(game.me.getCards("h"));
 			player
 				.chooseTarget(get.prompt("xinfu_lingren"), "选择一名目标角色并猜测其手牌构成", function (card, player, target) {
 					return _status.event.targets.includes(target);
@@ -31161,10 +31171,7 @@ const skills = {
 			game.log(player, "猜对了" + get.cnNumber(event.num) + "项");
 			if (event.num > 0) {
 				target.addTempSkill("lingren_adddamage");
-				target.storage.lingren = {
-					card: trigger.card,
-					//player:event.targett,
-				};
+				lib.skill.lingren_adddamage.addCardDamage(target, trigger.card);
 			}
 			if (event.num > 1) player.draw(2);
 			if (event.num > 2) {
@@ -31178,23 +31185,48 @@ const skills = {
 		},
 	},
 	lingren_adddamage: {
-		onremove: function (player) {
-			delete player.storage.lingren;
-		},
+		onremove: true,
 		trigger: {
 			player: "damageBegin3",
 		},
 		filter: function (event, player) {
-			var info = player.storage.lingren;
-			return event.card && event.card == info.card;
+			const info = player.storage.lingren_adddamage;
+			if (!event.card || !Array.isArray(info)) return false;
+			for (let obj of info) {
+				if (obj.card === event.card) return true;
+			}
+			return false;
 		},
 		silent: true,
 		popup: false,
 		forced: true,
 		charlotte: true,
 		sourceSkill: "xinfu_lingren",
+		addCardDamage(target, card, num = 1) {
+			if (!target.storage.lingren_adddamage) target.storage.lingren_adddamage = [];
+			let find;
+			for (let obj of target.storage.lingren_adddamage) {
+				if (obj.card === card) {
+					obj.num += num;
+					find = true;
+					break;
+				}
+			}
+			if (!find)
+				target.storage.lingren_adddamage.push({
+					card,
+					num: 1,
+				});
+		},
 		content: function () {
-			trigger.num++;
+			let num = 0;
+			for (let obj of player.storage.lingren_adddamage) {
+				if (obj.card === trigger.card) {
+					num = obj.num;
+					break;
+				}
+			}
+			trigger.num += num;
 		},
 	},
 	lingren_jianxiong: {
