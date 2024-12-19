@@ -18745,20 +18745,15 @@ const skills = {
 		},
 		forced: true,
 		logTarget: "target",
-		content: function () {
-			"step 0";
-			player.judge(function (card) {
+		async content(event, trigger, player) {
+			const next = player.judge(function (card) {
 				var type = get.subtype(card);
 				return ["equip1", "equip4", "equip3", "equip6"].includes(type) ? 6 : -6;
-				// switch(type){
-				// 	case 'equip':return 4;
-				// 	case 'trick':return -4;
-				// 	default:return 0;
-				// }
-			}).judge2 = function (result) {
+			})
+			next.judge2 = function (result) {
 				return result.bool;
 			};
-			"step 1";
+			const { result } = await next;
 			if (trigger.getParent().addCount !== false) {
 				trigger.getParent().addCount = false;
 				var stat = player.getStat();
@@ -18770,7 +18765,26 @@ const skills = {
 				if (!map[id]) map[id] = {};
 				if (typeof map[id].extraDamage != "number") map[id].extraDamage = 0;
 				map[id].extraDamage += trigger.target.hp - 1;
-			} else if (result.bool === false) player.loseHp();
+			} else if (result.bool === false && get.type(result.card) != "basic") {
+				await player.loseHp();
+				await player.gain(result.card);
+			}
+		},
+		group: "spzhuilie_sha",
+		subSkill: {
+			sha: {
+				silent:true,
+				charlotte:true,
+				trigger: { player: "useCardToTargeted" },
+				filter(event, player){
+					return event.card && event.card.name == "sha";
+				},
+				async content(event, trigger, player){
+					trigger.target.addTempSkill("qinggang2");
+					trigger.target.storage.qinggang2.add(trigger.card);
+					trigger.target.markSkill("qinggang2");
+				}
+			}
 		},
 	},
 	spzhuilie2: {
