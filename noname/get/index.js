@@ -5011,7 +5011,11 @@ export class Get extends GetCompatible {
 		var zerotarget = false,
 			zeroplayer = false;
 		for (var i = 0; i < skills1.length; i++) {
-			temp1 = get.info(skills1[i]).ai;
+			const info = get.info(skills1[i]);
+			if (!info) {
+				throw new Error("不存在的技能");
+			}
+			temp1 = info.ai;
 			if (temp1 && typeof temp1.effect == "object" && typeof temp1.effect.player_use == "function") {
 				temp1 = cache.delegate(temp1.effect).player_use(card, player, target, result1, isLink);
 			} else if (temp1 && typeof temp1.effect == "object" && typeof temp1.effect.player == "function") {
@@ -5041,7 +5045,11 @@ export class Get extends GetCompatible {
 			var skills2 = target.getSkills().concat(lib.skill.global);
 			game.expandSkills(skills2);
 			for (var i = 0; i < skills2.length; i++) {
-				temp2 = get.info(skills2[i]).ai;
+				const info = get.info(skills2[i]);
+				if (!info) {
+					throw new Error("不存在的技能");
+				}
+				temp2 = info.ai;
 				if (temp2 && temp2.threaten) temp3 = temp2.threaten;
 				else temp3 = undefined;
 				if (temp2 && typeof temp2.effect == "function") {
@@ -5202,7 +5210,11 @@ export class Get extends GetCompatible {
 		var zerotarget = false,
 			zeroplayer = false;
 		for (var i = 0; i < skills1.length; i++) {
-			temp1 = get.info(skills1[i]).ai;
+			const info = get.info(skills1[i]);
+			if (!info) {
+				throw new Error("不存在的技能");
+			}
+			temp1 = info.ai;
 			if (temp1 && typeof temp1.effect == "object" && typeof temp1.effect.player == "function") {
 				temp1 = temp1.effect.player(card, player, target, result1, isLink);
 			} else temp1 = undefined;
@@ -5230,7 +5242,11 @@ export class Get extends GetCompatible {
 			var skills2 = target.getSkills().concat(lib.skill.global);
 			game.expandSkills(skills2);
 			for (var i = 0; i < skills2.length; i++) {
-				temp2 = get.info(skills2[i]).ai;
+				const info = get.info(skills1[i]);
+				if (!info) {
+					throw new Error("不存在的技能");
+				}
+				temp2 = info.ai;
 				if (!temp2) continue;
 				if (temp2.threaten) temp3 = cache.delegate(temp2).threaten;
 				else temp3 = undefined;
