@@ -8,6 +8,9 @@ const skills = {
 		marktext: "☯",
 		usable:1,
 		enable: "phaseUse",
+		init(player, skill){
+			player.storage[skill] = true;
+		},
 		filterTarget(card, player, target){
 			return target.countCards("h");
 		},

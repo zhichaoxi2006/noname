@@ -221,8 +221,13 @@ const skills = {
 					//摆了，先不管无色牌了
 					const color = ["black", "red"];
 					const cards = [];
+					const dialog = ui.create.dialog();
+					dialog.addText("红色牌", true);
+					dialog.add([event.cards.filter(c=>get.color(c) == "red"), "card"]);
+					dialog.addText("黑色牌", true);
+					dialog.add([event.cards.filter(c=>get.color(c) == "black"), "card"]);
 					const { result: { control } } 
-						= await player.chooseControl(color);
+						= await player.chooseControl(color, dialog);
 					player.storage["ol_jiaoyu"] = control;
 					game.log(player, "声明了", control);
 					for(const i of event.cards){
@@ -236,6 +241,7 @@ const skills = {
 				}
 			}
 		},
+		group: "ol_jiaoyu_phaseChange",
 		subSkill: {
 			phaseUse: {
 				trigger: {
@@ -245,9 +251,19 @@ const skills = {
 				charlotte:true,
 				async content(event, trigger, player) {
 					trigger.phaseList.add("phaseUse|ol_jiaoyu");
-					player.addTempSkill("ol_jiaoyu_debuff");
 					player.removeSkill("ol_jiaoyu_phaseUse");
 				},
+			},
+			phaseChange: {
+				trigger: {
+					player: "phaseChange",
+				},
+				filter(event, player){
+					event.phaseList[event.num].includes("ol_jiaoyu");
+				},
+				async content(event, trigger, player){
+					player.addTempSkill("ol_jiaoyu_debuff");
+				}
 			},
 			debuff: {
 				charlotte:true,
