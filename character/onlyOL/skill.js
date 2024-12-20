@@ -7,13 +7,13 @@ const skills = {
 		trigger: {
 			source: "damageSource",
 		},
-		filter(event, player){
+		filter(event, player) {
 			if (event.getParent().name == "ol_sb_nilan") return false;
 			return true;
 		},
-		async cost(event, trigger, player){
-			const { result } = await player.chooseButton(
-				[
+		async cost(event, trigger, player) {
+			const { result } = await player
+				.chooseButton([
 					"请选择一项",
 					[
 						[
@@ -22,36 +22,35 @@ const skills = {
 						],
 						"textbutton",
 					],
-				]
-			).set("filterButton", function(button){
-				if (button.link == "discard") {
-					return player.countCards("h");
-				}
-				return true;
-			});
+				])
+				.set("filterButton", function (button) {
+					if (button.link == "discard") {
+						return player.countCards("h");
+					}
+					return true;
+				});
 			event.result = {
 				bool: result.bool,
 				cost_data: result.links[0],
-			}
+			};
 		},
 		choice: {
 			async discard(event, trigger, player) {
 				const next = await player.discard(player.getCards("h"));
 				const cards = next.cards;
 				if (!cards) return;
-				if (cards.some(c=>c.name == "sha")) {
-					const { result } = await player.chooseTarget("对一名其他角色造成一点伤害")
-						.set("filterTarget", lib.filter.notMe);
+				if (cards.some(c => c.name == "sha")) {
+					const { result } = await player.chooseTarget("对一名其他角色造成一点伤害").set("filterTarget", lib.filter.notMe);
 					if (result.bool) {
 						result.targets[0].damage(player);
 					}
 				}
 			},
-			async draw(event, trigger, player){
+			async draw(event, trigger, player) {
 				await player.draw(2);
 			},
 		},
-		async content(event, trigger, player){
+		async content(event, trigger, player) {
 			const { cost_data } = event;
 			player.addSkill("ol_sb_nilan_buff");
 			let list = player.storage.ol_sb_nilan_buff;
@@ -68,13 +67,13 @@ const skills = {
 				trigger: {
 					player: "damageEnd",
 				},
-				onremove:true,
-				init(player, skill){
+				onremove: true,
+				init(player, skill) {
 					player.storage[skill] = [];
 				},
-				async content(event, trigger, player){
+				async content(event, trigger, player) {
 					const list = player.storage.ol_sb_nilan_buff;
-					for(const i of list){
+					for (const i of list) {
 						await lib.skill.ol_sb_nilan.choice[i].apply(this, arguments);
 					}
 					player.removeSkill("ol_sb_nilan_buff");
@@ -84,7 +83,7 @@ const skills = {
 	},
 	ol_sb_jueya: {
 		audio: 2,
-		enable: ["chooseToUse","chooseToRespond"],
+		enable: ["chooseToUse", "chooseToRespond"],
 		init: function (player, skill) {
 			if (!player.storage[skill]) player.storage[skill] = [];
 		},
@@ -111,7 +110,7 @@ const skills = {
 			if (event.type == "wuxie") return false;
 			if (player.countCards("h")) return false;
 			const storage = player.storage.ol_sb_jueya;
-			for (var i of lib.inpile.filter(c=>get.type(c) == "basic")) {
+			for (var i of lib.inpile.filter(c => get.type(c) == "basic")) {
 				var card = { name: i, isCard: true };
 				if (event.filterCard(card, player, event)) return true;
 			}
@@ -120,7 +119,7 @@ const skills = {
 		chooseButton: {
 			dialog: function (event, player) {
 				const list = [];
-				const cardname = lib.inpile.filter(c=>get.type(c) == "basic");
+				const cardname = lib.inpile.filter(c => get.type(c) == "basic");
 				const storage = player.storage.ol_sb_jueya;
 				cardname.removeArray(storage);
 				for (var i of cardname) list.push(["基本", "", i]);
@@ -150,9 +149,9 @@ const skills = {
 						isCard: true,
 					},
 					selectCard: -1,
-					async precontent(event, trigger, player){
+					async precontent(event, trigger, player) {
 						player.markAuto("ol_sb_jueya", event.result.card.name);
-					}
+					},
 				};
 			},
 			prompt: function (links, player) {
@@ -194,23 +193,23 @@ const skills = {
 	},
 	//OL谋张飞
 	olsbjingxian: {
-		enable:"phaseUse",
-		filter(event, player){
-			if(!player.countCards("he", card => get.type(card) != "basic")) return false;
+		enable: "phaseUse",
+		filter(event, player) {
+			if (!player.countCards("he", card => get.type(card) != "basic")) return false;
 			return game.hasPlayer(target => {
-				if(target.hasSkill("olsbjingxian_used")) return false;
+				if (target.hasSkill("olsbjingxian_used")) return false;
 				return player != target;
 			});
 		},
-		filterTarget(card, player, target){
-			if(target.hasSkill("olsbjingxian_used")) return false;
+		filterTarget(card, player, target) {
+			if (target.hasSkill("olsbjingxian_used")) return false;
 			return player != target;
 		},
-		filterCard(card){
+		filterCard(card) {
 			return get.type(card) != "basic";
 		},
-		selectCard:[1, 2],
-		async content(event, trigger, player){
+		selectCard: [1, 2],
+		async content(event, trigger, player) {
 			const { cards, targets } = event;
 			const target = targets[0];
 			player.give(cards, target);
@@ -224,14 +223,14 @@ const skills = {
 								["gain", `令${get.translation(player)}从牌堆中获得一张【杀】`],
 							],
 							"textbutton",
-						]
+						],
 					],
-					true,
+					true
 				);
-				for (const i of result.links){
+				for (const i of result.links) {
 					if (i == "draw") {
 						await game.asyncDraw([player, target]);
-					} else if(i == "gain") {
+					} else if (i == "gain") {
 						const card = get.cardPile(function (card) {
 							return card.name == "sha";
 						});
@@ -257,9 +256,9 @@ const skills = {
 		},
 		subSkill: {
 			used: {
-				charlotte:true,
-				onremove:true,
-			}
+				charlotte: true,
+				onremove: true,
+			},
 		},
 	},
 	olsbxieyong: {
@@ -294,7 +293,7 @@ const skills = {
 		animationColor: "soil",
 		audio: "xinfuli",
 		enable: "chooseToUse",
-		locked:true,
+		locked: true,
 		init: function (player, skill) {
 			player.storage[skill] = false;
 		},
@@ -313,7 +312,7 @@ const skills = {
 			player.getAllHistory("sourceDamage").forEach(evt => {
 				maxDamage += evt.num;
 			});
-			for(const i of get.players(null, true, true)){
+			for (const i of get.players(null, true, true)) {
 				let num = 0;
 				i.getAllHistory("sourceDamage").forEach(evt => {
 					num += evt.num;
@@ -545,7 +544,7 @@ const skills = {
 							return get.number(c) == get.number(xs[0]);
 						});
 					if (bool) {
-						const { result } = await player.chooseTarget(lib.filter.notMe).set("prompt", `将${get.translation(xs)}交给一名其他角色`);
+						const { result } = await player.chooseTarget().set("prompt", `将${get.translation(xs)}交给一名其他角色`);
 						await result.targets[0].gain(xs, "draw");
 						await player.addToExpansion(get.cards(3), player, "giveAuto").gaintag.add("olsbxutu");
 					}
