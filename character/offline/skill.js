@@ -1711,7 +1711,7 @@ const skills = {
 				return false;
 			}
 			const card = new lib.element.VCard({ name: "sha", nature: "thunder" });
-			return player.countCards("h") > event.player.countCards("h") && lib.filter.filterTarget(card, player, event.player);
+			return player.countCards("h") > event.player.countCards("h") && lib.filter.targetEnabled(card, player, event.player);
 		},
 		direct: true,
 		async content(event, trigger, player) {
@@ -1740,7 +1740,7 @@ const skills = {
 					nature: "thunder",
 				},
 				filterTarget: function (card, player, target) {
-					return _status.event.targets && _status.event.targets.includes(target) && lib.filter.filterTarget.apply(this, arguments);
+					return _status.event.targets && _status.event.targets.includes(target) && lib.filter.targetEnabled.apply(this, arguments);
 				},
 				prompt: "将任意张手牌当一张雷【杀】使用",
 				check: function (card) {
