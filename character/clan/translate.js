@@ -17,7 +17,13 @@ const translates = {
 	clan_wanglun_prefix: "族",
 	clan_xunyou_prefix: "族",
 	clan_wuqiao_prefix: "族",
+	clan_wangshen_prefix: "族",
 
+	clan_wangshen: "族王沈",
+	clananran: "岸然",
+	clananran_info: "出牌阶段开始时或你受伤时，你可以选择一项:1.摸X张牌。2.令至多X名角色各摸一张牌。以此法获得牌的角色本回合使用的下一张牌不能为这些牌。（X为此技能发动次数，至多为4）。",
+	clangaoban: "告变",
+	clangaoban_info: "锁定技，其他角色的回合结束时，若本回合仅有一名角色受伤，你令其选择一项:1.使用本回合进入弃牌堆的一张杀。2.失去一点体力。",
 	clan_wuxian: "族吴苋",
 	clanyirong: "移荣",
 	clanyirong_info: "出牌阶段限两次。若你的手牌数：小于X，则你可以将手牌摸至X张，然后X-1；大于X，则你可以将手牌弃置至X张，然后X+1。（X为你的手牌上限）",

@@ -21,6 +21,7 @@ const characters = {
 	clan_wangmingshan: ["male", "wei", 3, ["clantanque", "clanshengmo", "clanzhongliu"], ["clan:太原王氏"]],
 	clan_zhongyao: ["male", "wei", 3, ["clanchengqi", "clanjieli", "clanbaozu"], ["clan:颍川钟氏"]],
 	clan_wangchang: ["male", "wei", 4, ["clankaiji", "clanzhongliu"], ["clan:太原王氏"]],
+	clan_wangshen: ["male", "wei", 3, ["clananran", "clangaoban", "clanzhongliu"], ["clan:太原王氏"]],
 };
 
 export default characters;

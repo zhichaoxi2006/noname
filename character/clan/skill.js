@@ -2,6 +2,95 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//族王沈
+	clananran: {	
+		trigger: {
+			player: ["phaseUseBegin", "damageBegin"],
+		},
+		init:player => player.addSkill("clananran_used"),
+		async cost(event, trigger, player){
+			const count = player.storage["clananran_used"] + 1;
+			const { result } = await player.chooseButton(
+				[
+					"请选择一项",
+					[
+						[
+							["draw", `摸${get.cnNumber(count)}张牌`],
+							["asyncDraw", `令至多${get.cnNumber(count)}名角色摸一张牌`],
+						],
+						"textbutton",
+					]
+				]
+			);
+			event.result = {
+				bool: result.bool,
+				cost_data: result.links[0],
+			}
+		},
+		async content(event, trigger, player){
+			const count = player.storage["clananran_used"] + 1;
+			const { cost_data } = event;
+			if (cost_data == "draw") {
+				await player.draw(count).set("gaintag", ["clananran_tag"]);
+				player.addTempSkill("clananran_tag", {player:"useCardAfter"});
+			} else {
+				const { result } = await player.chooseTarget(`令至多${get.cnNumber(count)}名角色摸一张牌`, [1, count]);
+				for (const i of result.targets){
+					await i.draw().set("gaintag", ["clananran_tag"]);
+					i.addTempSkill("clananran_tag", {player:"useCardAfter"});
+				}
+			}
+			player.storage["clananran_used"]++;
+		},
+		subSkill: {
+			used: {
+				charlotte:true,
+				init:(player, skill) => player.storage[skill] = 0,
+				onremove:true,
+			},
+			tag: {
+				charlotte:true,
+				onremove(player, skill){
+					player.removeGaintag(skill);
+				},
+				mod: {
+					cardEnabled(card, player, result){
+						if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
+							if (card.cards.some(c => c.hasGaintag("clananran_tag"))) return false;
+						}
+						if (card.hasGaintag("clananran_tag")) return false;
+					},
+				}
+			},
+		},
+	},
+	clangaoban: {
+		trigger: {
+			global: "phaseAfter",
+		},
+		filter(event, player){
+			if (event.player == player) return false;
+			return game.countPlayer(target => {
+				return target.getHistory("damage").length;
+			}) === 1;
+		},
+		forced:true,
+		async content(event, trigger, player){
+			const target = game.findPlayer(target => {
+				return target.getHistory("damage").length;
+			});
+			const sha = get.discarded().filter(c => c.name == "sha");
+			const { result } = await target.chooseCardButton(sha)
+				.set("filterButton", button => {
+					return target.hasUseTarget(button);
+				});
+			if (result.bool) {
+				await target.chooseUseTarget(result.links[0], true);
+			} else {
+				await target.loseHp();
+			}
+		},
+	},
 	// 族王昶
 	clankaiji: {
 		audio: 2,

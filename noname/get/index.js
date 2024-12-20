@@ -523,6 +523,10 @@ export class Get extends GetCompatible {
 		if (card) return list[0];
 		return list;
 	}
+	/**
+	 * 返回本回合在进入弃牌堆且还在弃牌堆的牌
+	 * @returns { Card[] }
+	 */
 	discarded() {
 		return _status.discarded.filter(item => item.parentNode == ui.discardPile);
 	}
