@@ -46,7 +46,7 @@ const skills = {
 			used: {
 				charlotte:true,
 				init:(player, skill) => player.storage[skill] = 0,
-				onremove:true,
+				onremove:(player, skill) => player.storage[skill] = 0,
 			},
 			tag: {
 				charlotte:true,
@@ -79,13 +79,31 @@ const skills = {
 			const target = game.findPlayer(target => {
 				return target.getHistory("damage").length;
 			});
-			const sha = get.discarded().filter(c => c.name == "sha");
-			const { result } = await target.chooseCardButton(sha)
-				.set("filterButton", button => {
-					return target.hasUseTarget(button);
-				});
-			if (result.bool) {
-				await target.chooseUseTarget(result.links[0], true);
+			const discarded = get.discarded().filter(c => c.name == "sha");
+			const bool = discarded.some(c => target.hasUseTarget(c));
+			const { result } = await player.chooseButton(
+				[
+					"请选择一项",
+					[
+						[
+							["sha", `令${get.translation(target)}使用本回合进入弃牌堆的一张【杀】`],
+							["loseHp", `令${get.translation(target)}失去一点体力`],
+						],
+						"textbutton",
+					]
+				]
+			).set("filterButton", function(button){
+				if (button.link == "sha") {
+					return bool;
+				}
+				return true;
+			});
+			if (result.links[0] == "sha") {
+				const { result: result2 } = await target.chooseCardButton(discarded)
+					.set("filterButton", button => {
+						return target.hasUseTarget(button);
+					});
+				await target.chooseUseTarget(result2.links[0], true);
 			} else {
 				await target.loseHp();
 			}
