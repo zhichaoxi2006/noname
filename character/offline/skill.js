@@ -9392,7 +9392,7 @@ const skills = {
 					filterCard: true,
 					selectCard: 2,
 					filterTarget: lib.filter.notMe,
-					position: "he",
+					position: "h",
 					ai1(card) {
 						return 10 - get.value(card);
 					},
