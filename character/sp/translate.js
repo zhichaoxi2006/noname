@@ -1434,6 +1434,14 @@ const translates = {
 	ol_wuanguo_prefix: "OL",
 	olliyong: "历勇",
 	olliyong_info: "转换技，出牌阶段。阳：你可以将一张你本回合未使用过的花色的牌当作【决斗】使用；阴：你可以弃置一张你本回合已使用过的花色的牌，令一名角色视为对你使用【决斗】。",
+	ol_taoqian: "OL陶谦",
+	ol_taoqian_prefix: "OL",
+	olzhaohuo: "招祸",
+	olzhaohuo_info: "锁定技，一名角色于你的回合内首次受到伤害后，其须交给你一张手牌。本回合你不能使用、打出或弃置这些牌。",
+	olwenren: "温仁",
+	olwenren_info: "出牌阶段限一次，你可以选择任意名角色，其每满足一项便摸一张牌：1.没有手牌；2.手牌数小于等于你。",
+	olzongluan: "纵乱",
+	olzongluan_info: "准备阶段，你可以选择一名角色，其视为对其攻击范围内的任意名角色各使用一张【杀】，然后你弃置X张牌（X为以此法受到伤害的角色数）。",
 };
 
 export default translates;

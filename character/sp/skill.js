@@ -2,6 +2,95 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL陶谦
+	olzhaohuo: {
+		trigger: {
+			global: "damageEnd",
+		},
+		forced:true,
+		filter(event, player){
+			if (event.player == player || player != _status.currentPhase) return false;
+			return event.player.getHistory("damage").length == 1; 
+		},
+		async content(event, trigger, player){
+			const { result } = await trigger.player.chooseToGive(player, true);
+			for (const i of result.cards){
+				i.addGaintag("olzhaohuo_tag");
+			}
+			player.addTempSkill("olzhaohuo_tag");
+		},
+		subSkill: {
+			tag: {
+				charlotte:true,
+				onremove(player, skill){
+					player.removeGaintag(skill);
+				},
+				mod: {
+					cardEnabled(card, player, result){
+						if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
+							if (card.cards.some(c => c.hasGaintag("olzhaohuo_tag"))) return false;
+						}
+						if (card.hasGaintag("olzhaohuo_tag")) return false;
+					},
+					cardRespondable(card, player, result){
+						if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
+							if (card.cards.some(c => c.hasGaintag("olzhaohuo_tag"))) return false;
+						}
+						if (card.hasGaintag("olzhaohuo_tag")) return false;
+					},
+					cardDiscardable(card, player, result){
+						if (card.hasGaintag("olzhaohuo_tag")) return false;
+					},
+				},
+			},
+		},
+	},
+	olwenren: {
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget:lib.filter.notMe,
+		selectTarget: [1, Infinity],
+		async content(event, trigger, player){
+			const { target } = event;
+			if (target.countCards("h") == 0) {
+				await target.draw();
+			}
+			if (target.countCards("h") <= player.countCards("h")) {
+				await target.draw();
+			}
+		},
+	},
+	olzongluan: {
+		trigger: {
+			player: "phaseZhunbeiBegin",
+		},
+		async cost(event, trigger, player){
+			const { result } = await player.chooseTarget("令一名角色视为对其攻击范围内的任意名角色各使用一张【杀】");
+			event.result = result;
+		},
+		async content(event, trigger, player){
+			const { targets } = event;
+			const targetx = targets[0];
+			const list = [];
+			while(true){
+				const { result: { bool, targets } } = await targetx.chooseTarget("选择一名角色，视为对其使用一张【杀】")
+					.set("targetxs", list)
+					.set("filterTarget", function(card, player, target){
+						const targetxs = get.event("targetxs");
+						if(list.includes(target))return false;
+						const vcard = new lib.element.VCard({ name: "sha", isCard: true });
+						return lib.filter.filterTarget(vcard, player, target);
+					});
+				if (bool) {
+					const vcard = new lib.element.VCard({ name: "sha", isCard: true });
+					await player.useCard(vcard, targets);
+					list.addArray(targets);
+				} else {
+					break;
+				}
+			}
+		},
+	},
 	//OL薛灵芸
 	olsiqi: {
 		trigger: {
