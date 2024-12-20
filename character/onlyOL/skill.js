@@ -2,6 +2,124 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL谋张绣
+	olsbchoulie: {
+		limited: true,
+		trigger: {
+			player: "phaseBeginStart",
+		},
+		async cost(event, trigger, player) {
+			const { result } = await player.chooseTarget(lib.filter.notMe, "请选择【仇猎】目标");
+			event.result = result;
+		},
+		async content(event, trigger, player) {
+			const { targets } = event;
+			player.awakenSkill(event.name);
+			player.addTempSkill(["olsbchoulie_buff", "olsbchoulie_use"]);
+			player.markAuto("olsbchoulie_buff", targets[0]);
+		},
+		subSkill: {
+			buff: {
+				charlotte: true,
+				onremove: true,
+				trigger: {
+					get player() {
+						return lib.phaseName.map(c => `${c}Begin`);
+					},
+				},
+				filter(event, player) {
+					if (!player.countCards("he")) return false;
+					const storage = player.storage.olsbchoulie_buff;
+					const vcard = new lib.element.VCard({ name: "sha" });
+					return lib.filter.targetEnabledx(vcard, player, storage[0]);
+				},
+				async cost(event, trigger, player) {
+					const storage = player.storage.olsbchoulie_buff;
+					event.result = await player
+						.chooseToDiscard("chooseonly")
+						.set("prompt", `是否弃置一张牌，视为对${get.translation(storage[0])}使用一张无视防具的【杀】？`)
+						.forResult();
+				},
+				async content(event, trigger, player) {
+					await player.discard(event.cards);
+					const storage = player.storage.olsbchoulie_buff;
+					const vcard = new lib.element.VCard({ name: "sha" });
+					if (player.canUse(vcard, storage[0])) {
+						await player.useCard(vcard, storage);
+					}
+				},
+			},
+			use: {
+				trigger: {
+					player: "useCard",
+				},
+				filter(event, player) {
+					return event.getParent().name == "olsbchoulie_buff";
+				},
+				charlotte: true,
+				silent: true,
+				async content(event, trigger, player) {
+					const storage = player.storage.olsbchoulie_buff;
+					for (const i of trigger.targets) {
+						i.addTempSkill("qinggang2");
+						i.storage.qinggang2.add(trigger.card);
+						i.markSkill("qinggang2");
+						if (i == storage[0]) {
+							const {
+								result: { bool },
+							} = await i.chooseToDiscard("弃置一张基本牌或武器牌令此【杀】无效").set("filterCard", card => {
+								return get.type(card) == "basic" || get.subtype(card) == "equip1";
+							});
+							if (bool) {
+								trigger.excluded.add(i);
+							}
+						}
+					}
+				},
+			},
+		},
+	},
+	olsbzhunjiao: {
+		trigger: {
+			player: "useCard",
+		},
+		forced: true,
+		filter(event, player) {
+			if (event.card.name != "sha") return false;
+			const evtx = player.getLastUsed(1);
+			if (!evtx) {
+				return false;
+			}
+			const { card } = evtx;
+			return !player.getHistory("sourceDamage", evt => {
+				return evt.card == card;
+			}).length;
+		},
+		async content(event, trigger, player) {
+			await player.draw();
+			trigger.olsbzhunjiao = true;
+			trigger.baseDamage++;
+		},
+		group: "olsbzhunjiao_debuff",
+		subSkill: {
+			debuff: {
+				trigger: {
+					player: "useCardAfter",
+				},
+				forced: true,
+				silent: true,
+				filter(event, player) {
+					if (!event.olsbzhunjiao) return false;
+					return !player.getHistory("sourceDamage", evt => {
+						return evt.card == event.card;
+					}).length;
+				},
+				async content(event, trigger, player) {
+					await player.chooseToDiscard();
+				},
+			},
+		},
+	},
 	//OL谋赵云
 	ol_sb_nilan: {
 		trigger: {

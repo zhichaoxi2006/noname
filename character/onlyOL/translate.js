@@ -1,4 +1,10 @@
 const translates = {
+	ol_sb_zhangxiu: "OL谋张绣",
+	ol_sb_zhangxiu_prefix: "OL谋",
+	olsbchoulie: "仇猎",
+	olsbchoulie_info: "限定技，回合开始时，你可选择一名其他角色。本回合你的每个阶段开始时，你可弃置一张牌视为对其使用一张无视防具的【杀】。 其可弃置一张基本牌或武器牌令此【杀】无效。",
+	olsbzhunjiao: "追剿",
+	olsbzhunjiao_info: "锁定技，你使用【杀】时，若你使用的上一张牌未造成伤害，则你摸一张牌并令此【杀】伤害+1,此【杀】结算后，若仍未造成伤害，你弃置一张牌。",
 	ol_sb_zhaoyun: "OL谋赵云",
 	ol_sb_zhaoyun_prefix: "OL谋",
 	ol_sb_nilan: "逆澜",
