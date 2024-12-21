@@ -74,23 +74,36 @@ const skills = {
 			const list = [];
 			while(true){
 				const vcard = new lib.element.VCard({ name: "sha", isCard: true });
-				const { result: { bool, targets } } = await targetx.chooseTarget("选择一名角色，视为对其使用一张【杀】")
+				let bool = game.players.every(i => {
+					if(list.includes(i))return true;
+					const vcard = new lib.element.VCard({ name: "sha", isCard: true });
+					return !lib.filter.filterTarget(vcard, targetx, i);
+				});
+				if (!bool) {
+					const { result: { bool:boolx, targets } } = await targetx.chooseTarget("选择一名角色，视为对其使用一张【杀】")
 					.set("targetxs", list)
 					.set("ai", function(target){
 						return get.effect(target, vcard, targetx);
 					})
 					.set("filterTarget", function(card, player, target){
 						const targetxs = get.event("targetxs");
-						if(list.includes(target))return false;
+						if(targetxs.includes(target))return false;
 						const vcard = new lib.element.VCard({ name: "sha", isCard: true });
 						return lib.filter.filterTarget(vcard, player, target);
 					});
-				if (bool) {
-					await player.useCard(vcard, targets);
-					list.addArray(targets);
+					if (boolx) {
+						await targetx.useCard(vcard, targets);
+						list.addArray(targets);
+					} else {
+						break;
+					}
 				} else {
 					break;
 				}
+			}
+			const num = game.countPlayer(c => c.getHistory("damage", evt => evt.getParent(3).name == "olzongluan").length > 0);
+			if (num > 0) {
+				await player.chooseToDiscard(num, true);
 			}
 		},
 	},
