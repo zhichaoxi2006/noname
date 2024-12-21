@@ -3330,6 +3330,7 @@ const skills = {
 		trigger: { global: ["loseAfter", "loseAsyncAfter"] },
 		filter(event, player) {
 			if (event.type != "discard" || event.getlx === false) return false;
+			if (player.getExpansions("olchunlao").length >= 9)return false;
 			return game.hasPlayer(target => {
 				if (![player.getPrevious(), player, player.getNext()].includes(target)) return false;
 				return event.getl(target)?.cards2?.some(i => i.name == "sha" && get.position(i) == "d");
@@ -3337,22 +3338,17 @@ const skills = {
 		},
 		forced: true,
 		locked: false,
-		content() {
-			player
-				.addToExpansion(
-					game
-						.filterPlayer(target => {
-							if (![player.getPrevious(), player, player.getNext()].includes(target)) return false;
-							return trigger.getl(target)?.cards2?.some(i => i.name == "sha" && get.position(i) == "d");
-						})
-						.map(target => {
-							return trigger.getl(target).cards2.filter(i => i.name == "sha" && get.position(i) == "d");
-						})
-						.flat()
-						.unique(),
-					"gain2"
-				)
-				.gaintag.add("olchunlao");
+		async content(event, trigger, player) {
+			const cards = game.filterPlayer(target => {
+				if (![player.getPrevious(), player, player.getNext()].includes(target)) return false;
+				return trigger.getl(target)?.cards2?.some(i => i.name == "sha" && get.position(i) == "d");
+			}).map(target => {
+				return trigger.getl(target).cards2.filter(i => i.name == "sha" && get.position(i) == "d");
+			}).flat().unique();
+			const gain = cards.slice(0, Math.min(cards.length, 9 - player.getExpansions("olchunlao").length));
+			if (gain.length) {
+				await player.addToExpansion(gain).gaintag.add("olchunlao");
+			}
 		},
 		ai: {
 			effect: {
