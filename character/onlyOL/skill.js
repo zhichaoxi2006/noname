@@ -433,7 +433,7 @@ const skills = {
 			const target = targets[0];
 			player.give(cards, target);
 			if (event.cards.length != 2) {
-				const { result } = await player.chooseButton(
+				const { result } = await target.chooseButton(
 					[
 						"请选择一项",
 						[
