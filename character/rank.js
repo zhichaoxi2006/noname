@@ -406,6 +406,7 @@ window.noname_character_rank = {
 		"ol_sb_dengai",
 	],
 	am: [
+		"ol_sunxiu",
 		"clan_wangshen",
 		"lvju",
 		"hm_shen_luzhi",

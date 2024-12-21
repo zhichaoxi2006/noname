@@ -2,6 +2,107 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL界孙休
+	ol_yanzhu: {
+		enable: "phaseUse",
+		derivation: "ol_yanzhu_rewrite",
+		filterTarget:lib.filter.notMe,
+		usable: 1,
+		filter(event, player){
+			return !player.storage.ol_yanzhu_rewrite;
+		},
+		async content(event, trigger, player){
+			const target = event.targets[0];
+			const { result } = await target.chooseButton(
+				[
+					"请选择一项",
+					[
+						[
+							["gain", `令${get.translation(player)}获得其装备区的所有牌`],
+							["discard", `弃置一张牌令下一次受到的伤害+1直到其下个回合开始`]
+						],
+						"textbutton",
+					]
+				],
+				true,
+			).set("filterButton", button => {
+				if (button.link == "gain") {
+					return Boolean(target.countCards("e"));
+				}
+				return true;
+			});
+			if (result.links[0] == "gain") {
+				await player.gain(target.getCards("e"));
+				const obj = {
+					ol_yanzhu_rewrite: true,
+					ol_xinxue_rewrite: true,
+				};
+				Object.assign(player.storage, obj);
+			} else {
+				await target.chooseToDiscard(true);
+				target.addTempSkill("ol_yanzhu_debuff");
+				target.addMark("ol_yanzhu_debuff", 1, false);
+			}
+		},
+		group: "ol_yanzhu_rewrite",
+		subSkill: {
+			rewrite: {
+				enable: "phaseUse",
+				usable: 1,
+				filterTarget:lib.filter.notMe,
+				filter(event, player){
+					return player.storage.ol_yanzhu_rewrite;
+				},
+				async content(event, trigger, player){
+					const target = event.targets[0];
+					target.addTempSkill("ol_yanzhu_debuff");
+					target.addMark("ol_yanzhu_debuff", 1, false);
+				},
+			},
+			debuff: {
+				charlotte:true,
+				onremove:true,
+				silent:true,
+				mark:true,
+				intro: {
+					content: "下一次受到的伤害+$",
+				},
+				init(player, skill){
+					player.storage[skill] = 0;
+				},
+				trigger: {
+					player: "damageBegin3",
+				},
+				async content(event, trigger, player){
+					trigger.num += player.countMark("ol_yanzhu_debuff");
+					player.removeSkill(event.name);
+				},
+			},
+		},
+	},
+	ol_xinxue: {
+		derivation: "ol_xinxue_rewrite",
+		trigger: {
+			player: "phaseJieshuBegin",
+		},
+		async cost(event, trigger, player){
+			const max = player.storage.ol_xinxue_rewrite ? player.maxHp : player.getHp();
+			event.result = await player.chooseTarget([1, max])
+				.set("prompt", `令至多${max}名角色依次摸一张牌`)
+				.forResult();
+		},
+		async content(event, trigger, player){
+			for(const i of event.targets){
+				await i.draw();
+			}
+			for(const i of event.targets){
+				if (i.countCards("h") > i.getHp()) {
+					const { result } = await i.chooseCard("选择一张牌置于牌堆顶", "he");
+					await i.lose(result.cards, ui.cardPile, "insert");
+				}
+			}
+		},
+	},
 	//OL谋张绣
 	olsbchoulie: {
 		limited: true,
