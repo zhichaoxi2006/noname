@@ -9,7 +9,7 @@ const skills = {
 		},
 		forced:true,
 		filter(event, player){
-			if (event.player == player || player != _status.currentPhase) return false;
+			if (event.player == player || player != _status.currentPhase || !event.player.isIn()) return false;
 			return event.player.getHistory("damage").length == 1; 
 		},
 		async content(event, trigger, player){
