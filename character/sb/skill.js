@@ -6214,7 +6214,7 @@ const skills = {
 				.chooseToDuiben(target)
 				.set("title", "谋弈")
 				.set("namelist", ["出阵迎战", "拱卫中军", "直取敌营", "扰阵疲敌"])
-				.set("translationList", [`以防止${get.translation(player)}摸2张牌`, `以防止${get.translation(player)}获得你1张牌`, `若成功，你获得${get.translation(target)}1张牌`, `若成功，你摸2张牌`])
+				.set("translationList", [`以防止${get.translation(player)}摸两张牌`, `以防止${get.translation(player)}获得你一张牌`, `若成功，你获得${get.translation(target)}一张牌`, `若成功，你摸两张牌`])
 				.set("ai", button => {
 					var source = get.event().getParent().player,
 						target = get.event().getParent().target;

@@ -1826,7 +1826,7 @@ const skills = {
 			return player.getStorage("olsbjinming").length;
 		},
 		async cost(event, trigger, player) {
-			let choiceList = ["1.回复过1点体力", "2.造成过2点伤害", "3.使用过3种类型的牌", "4.弃置过4张牌"];
+			let choiceList = ["1.回复过1点体力", "2.造成过2点伤害", "3.使用过三种类型的牌", "4.弃置过四张牌"];
 			let list = ["回复体力", "造成伤害", "使用牌", "弃置牌"].filter((key, index) => {
 				return player.getStorage("olsbjinming").includes(index + 1);
 			});

@@ -1478,7 +1478,6 @@ const skills = {
 		audio: 2,
 		enable: "phaseUse",
 		filterTarget: function (card, player, target) {
-			if (target == player) return false;
 			var stat = player.getStat("skill").refuman_targets;
 			return !stat || !stat.includes(target);
 		},
@@ -1511,21 +1510,33 @@ const skills = {
 		},
 		subSkill: {
 			draw: {
-				trigger: { global: ["useCard", "respond"] },
-				forced: true,
 				charlotte: true,
-				filter: function (event, player) {
-					return event.player.hasHistory("lose", function (evt) {
-						if (evt.getParent() != event) return false;
-						for (var i in evt.gaintag_map) {
-							if (evt.gaintag_map[i].includes("refuman")) return true;
-						}
-						return false;
-					});
+				audio: "refuman",
+				trigger: { global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"] },
+				getIndex(event, player) {
+					return game
+						.filterPlayer2(target => {
+							const evt = event.getParent();
+							if (!["useCard", "respond"].includes(evt?.name) && !target.isIn()) return false;
+							if (event.name == "lose") {
+								if (target !== event.player) return false;
+								return Object.values(event.gaintag_map).flat().includes("refuman");
+							}
+							return target.hasHistory("lose", evt => {
+								if (event !== evt.getParent()) return false;
+								return Object.values(evt.gaintag_map).flat().includes("refuman");
+							});
+						})
+						.sortBySeat();
 				},
-				logTarget: "player",
-				content: function () {
-					game.asyncDraw([trigger.player, player]);
+				forced: true,
+				filter: (event, player, name, target) => target,
+				logTarget: (event, player, name, target) => target,
+				content() {
+					const [target] = event.targets,
+						evt = trigger.getParent();
+					if (["useCard", "respond"].includes(evt?.name)) game.asyncDraw([target, player]);
+					else target.draw();
 				},
 			},
 		},
