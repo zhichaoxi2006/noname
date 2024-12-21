@@ -1000,8 +1000,7 @@ const skills = {
 							(player.countCards("he", card => {
 								if (get.position(card) === "h" && _status.connectMode) return true;
 								return lib.filter.cardDiscardable(card, player);
-							}) >= 2 &&
-								game.hasPlayer(target => target !== player))
+							}) >= 2 && game.hasPlayer(target => target !== player))
 						);
 					},
 					async cost(event, trigger, player) {
@@ -11096,19 +11095,28 @@ const skills = {
 						type = get.type2(cards[0]),
 						damage = get.damageEffect(target, player, target, "thunder");
 					if (player === target) {
-						if (target.countCards("he", card => {
-							return !cards.includes(card) && get.type(card) === type && get.value(card) < 6;
-						}) >= cards.length) return Math.max(2, damage);
+						if (
+							target.countCards("he", card => {
+								return !cards.includes(card) && get.type(card) === type && get.value(card) < 6;
+							}) >= cards.length
+						)
+							return Math.max(2, damage);
 						return damage;
 					}
-					const he = target.getCards("he"), known = target.getKnownCards(player);
+					const he = target.getCards("he"),
+						known = target.getKnownCards(player);
 					let num = 0;
 					if (type === "basic") num = 0.42;
 					else if (type === "equip") num = 0.1;
 					else if (type === "trick") num = 0.25;
-					if (known.filter(card => {
-						return get.type(card) === type && get.value(card) < 6;
-					}).length + (he - known.length) * num >= cards.length) return Math.max(3, damage);
+					if (
+						known.filter(card => {
+							return get.type(card) === type && get.value(card) < 6;
+						}).length +
+							(he - known.length) * num >=
+						cards.length
+					)
+						return Math.max(3, damage);
 					return damage;
 				},
 			},
@@ -28995,7 +29003,8 @@ const skills = {
 			const result = await player
 				.chooseControl(controls)
 				.set("ai", function () {
-					var trigger = _status.event.getTrigger(), player = _status.event.player;
+					var trigger = _status.event.getTrigger(),
+						player = _status.event.player;
 					if (trigger.target.countCards("he") && get.attitude(_status.event.player, trigger.target) < 0) {
 						return "discard_card";
 					}
@@ -31259,25 +31268,40 @@ const skills = {
 					trick: false,
 					equip: false,
 				};
-				player.chooseButton(["凌人：猜测其有哪些类别的手牌", [["basic", "trick", "equip"], "vcard"]], [0, 3], true).set("ai", function (button) {
-					switch (button.link[2]) {
-						case "basic":
-							var rand = 0.95;
-							if (!target.countCards("h", { type: ["basic"] })) rand = 0.05;
-							if (!target.countCards("h")) rand = 0;
-							return Math.random() < rand ? true : false;
-						case "trick":
-							var rand = 0.9;
-							if (!target.countCards("h", { type: ["trick", "delay"] })) rand = 0.1;
-							if (!target.countCards("h")) rand = 0;
-							return Math.random() < rand ? true : false;
-						case "equip":
-							var rand = 0.75;
-							if (!target.countCards("h", { type: ["equip"] })) rand = 0.25;
-							if (!target.countCards("h")) rand = 0;
-							return Math.random() < rand ? true : false;
-					}
-				});
+				player
+					.chooseButton(["凌人：猜测其有哪些类别的手牌", [["basic", "trick", "equip"], "vcard"]], [0, 3], true)
+					.set("ai", function (button) {
+						return get.event("choice").includes(button.link[2]);
+					})
+					.set(
+						"choice",
+						(() => {
+							if (!target.countCards("h")) return [];
+							let choice = [],
+								known = target.getKnownCards(player),
+								unknown = target.getCards("h", i => !known.includes(i));
+							for (let i of known) {
+								choice.add(get.type2(i, target));
+							}
+							if (!unknown.length || choice.length > 2) return choice;
+							let rand = 0.05;
+							if (!choice.includes("basic")) {
+								if (unknown.some(i => get.type(i, null, target) === "basic")) rand = 0.95;
+								if (Math.random() < rand) choice.push("basic");
+							}
+							if (!choice.includes("trick")) {
+								if (unknown.some(i => get.type(i, "trick", target) === "trick")) rand = 0.9;
+								else rand = 0.1;
+								if (Math.random() < rand) choice.push("trick");
+							}
+							if (!choice.includes("equip")) {
+								if (unknown.some(i => get.type(i, null, target) === "equip")) rand = 0.75;
+								else rand = 0.25;
+								if (Math.random() < rand) choice.push("equip");
+							}
+							return choice;
+						})()
+					);
 			} else {
 				player.storage.counttrigger.xinfu_lingren--;
 				event.finish();
@@ -31297,10 +31321,7 @@ const skills = {
 			game.log(player, "猜对了" + get.cnNumber(event.num) + "项");
 			if (event.num > 0) {
 				target.addTempSkill("lingren_adddamage");
-				target.storage.lingren = {
-					card: trigger.card,
-					//player:event.targett,
-				};
+				lib.skill.lingren_adddamage.addCardDamage(target, trigger.card);
 			}
 			if (event.num > 1) player.draw(2);
 			if (event.num > 2) {
@@ -31314,23 +31335,48 @@ const skills = {
 		},
 	},
 	lingren_adddamage: {
-		onremove: function (player) {
-			delete player.storage.lingren;
-		},
+		onremove: true,
 		trigger: {
 			player: "damageBegin3",
 		},
 		filter: function (event, player) {
-			var info = player.storage.lingren;
-			return event.card && event.card == info.card;
+			const info = player.storage.lingren_adddamage;
+			if (!event.card || !Array.isArray(info)) return false;
+			for (let obj of info) {
+				if (obj.card === event.card) return true;
+			}
+			return false;
 		},
 		silent: true,
 		popup: false,
 		forced: true,
 		charlotte: true,
 		sourceSkill: "xinfu_lingren",
+		addCardDamage(target, card, num = 1) {
+			if (!target.storage.lingren_adddamage) target.storage.lingren_adddamage = [];
+			let find;
+			for (let obj of target.storage.lingren_adddamage) {
+				if (obj.card === card) {
+					obj.num += num;
+					find = true;
+					break;
+				}
+			}
+			if (!find)
+				target.storage.lingren_adddamage.push({
+					card,
+					num: 1,
+				});
+		},
 		content: function () {
-			trigger.num++;
+			let num = 0;
+			for (let obj of player.storage.lingren_adddamage) {
+				if (obj.card === trigger.card) {
+					num = obj.num;
+					break;
+				}
+			}
+			trigger.num += num;
 		},
 	},
 	lingren_jianxiong: {

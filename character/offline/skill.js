@@ -15,16 +15,16 @@ const skills = {
 		},
 		subSkill: {
 			buff: {
-				charlotte:true,
+				charlotte: true,
 				mod: {
-					attackRange(player, num){
+					attackRange(player, num) {
 						return num + player.countMark("hm_zhong_heart_skill_buff");
 					},
 					cardUsable(card, player, num) {
 						if (card.name == "sha") return num + player.countMark("hm_zhong_heart_skill_buff");
 					},
-				}
-			}
+				},
+			},
 		},
 	},
 	hm_zhong_diamond_skill: {
@@ -65,13 +65,13 @@ const skills = {
 		},
 		subSkill: {
 			buff: {
-				charlotte:true,
+				charlotte: true,
 				mod: {
-					maxHandcard(player, num){
+					maxHandcard(player, num) {
 						return num + player.countMark("hm_zhong_club_skill_buff");
-					}
-				}
-			}
+					},
+				},
+			},
 		},
 	},
 	hm_zhong_spade_skill: {
@@ -86,16 +86,16 @@ const skills = {
 		},
 		subSkill: {
 			buff: {
-				charlotte:true,
+				charlotte: true,
 				mod: {
-					globalFrom(from, to, current){
+					globalFrom(from, to, current) {
 						return current - from.countMark("hm_zhong_club_skill_buff");
 					},
-					globalTo(from, to, current){
+					globalTo(from, to, current) {
 						return current + to.countMark("hm_zhong_club_skill_buff");
-					}
-				}
-			}
+					},
+				},
+			},
 		},
 	},
 	//白绕
@@ -1862,17 +1862,16 @@ const skills = {
 		filter(event, player) {
 			return event.name != "phase" || game.phaseNumber == 0;
 		},
-		async cost(event, trigger, player){
-			const { result } = await player.chooseVCardButton(["hm_zhong_heart", "hm_zhong_diamond", "hm_zhong_club", "hm_zhong_spade"])
-				.set("ai", function(button){
-					return Math.random();
-				})
+		async cost(event, trigger, player) {
+			const { result } = await player.chooseVCardButton(["hm_zhong_heart", "hm_zhong_diamond", "hm_zhong_club", "hm_zhong_spade"]).set("ai", function (button) {
+				return Math.random();
+			});
 			event.result = {
 				bool: result.bool,
 				cost_data: result.links,
 			};
 		},
-		async content(event, trigger, player){
+		async content(event, trigger, player) {
 			const { cost_data } = event;
 			const card = game.createCard(cost_data[0][2], lib.suit.randomGet(), 1);
 			player.chooseUseTarget(card, true);
@@ -1905,7 +1904,7 @@ const skills = {
 				if (result.bool) {
 					await i.lose(result.cards, ui.cardPile, "insert");
 					game.log(i, "将一张牌置于牌堆顶");
-					i.addTempSkill("hm_zongfu_lose", {global: "roundStart"});
+					i.addTempSkill("hm_zongfu_lose", { global: "roundStart" });
 				} else {
 					await i.draw("bottom");
 				}
@@ -4485,7 +4484,7 @@ const skills = {
 						for (let i of known) {
 							choice.add(get.type2(i, target));
 						}
-						if (!cards) return choice;
+						if (!cards || choice.length > 2) return choice;
 						if (!choice.includes("basic") && cards > 2 * Math.random()) choice.push("basic");
 						if (!choice.includes("trick") && cards > 3 * Math.random()) choice.push("trick");
 						if (!choice.includes("equip") && cards > 6 * Math.random()) choice.push("equip");
@@ -4495,7 +4494,6 @@ const skills = {
 				.forResult();
 			if (!result.bool) return;
 			const choices = result.links.map(i => i[2]);
-			//if (!event.isMine() && !event.isOnline()) await game.delayx();
 			await target.showHandcards();
 			let num = 0;
 			["basic", "trick", "equip"].forEach(type => {
@@ -4508,10 +4506,7 @@ const skills = {
 					player.addTempSkills(["scls_lingren_jianxiong", "scls_lingren_xingshang"], { player: "phaseBegin" });
 				case 2:
 					target.addTempSkill("lingren_adddamage");
-					target.storage.lingren = {
-						card: trigger.card,
-						//player:event.targett,
-					};
+					lib.skill.lingren_adddamage.addCardDamage(target, trigger.card);
 				case 1:
 					await player.draw(2);
 			}

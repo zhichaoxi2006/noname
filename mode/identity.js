@@ -483,7 +483,18 @@ export default () => {
 					} else if (lib.configOL.identity_mode != "purple") {
 						uiintro.add('<div class="text chat">双内奸：' + (lib.configOL.double_nei ? "开启" : "关闭"));
 						if (lib.configOL.identity_mode != "stratagem") {
-							uiintro.add('<div class="text chat">加强主公：' + (lib.configOL.enhance_zhu === "off" ? "关闭" : lib.configOL.enhance_zhu === "sixiang" ? "四象标记" : "专属技能"));
+							uiintro.add(
+								`<div class="text chat">加强主公：${(() => {
+									switch (lib.configOL.enhance_zhu) {
+										case "sixiang":
+											return "四象标记";
+										case "specific":
+											return "专属技能";
+										default:
+											return "关闭";
+									}
+								})()}`
+							);
 							uiintro.add('<div class="text chat">平民身份：' + (lib.configOL.enable_commoner ? "开启" : "关闭"));
 						}
 						uiintro.add('<div class="text chat">年机制：' + (lib.configOL.enable_year_limit ? "开启" : "关闭"));
