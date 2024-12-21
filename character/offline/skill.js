@@ -10552,6 +10552,24 @@ const skills = {
 		},
 	},
 	//龙起襄樊
+	//龙庞德
+	dragtaiguan: {
+		enable: "phaseUse",
+		usable(skill, player){
+			return Math.max(1, player.getDamagedHp());
+		},
+		filterCard:true,
+		filterTarget(card, player, target){
+			return player.inRange(target) && target.countDiscardableCards("he");
+		},
+		async content(event, trigger, player){
+			const target = event.targets[0]
+			const { result } = await target.chooseToDiscard("he", true);
+			if (result.cards[0].name != "sha" && player.getHp() <= target.getHp()) {
+				await player.chooseUseTarget("juedou", true, [target]);
+			}
+		},
+	},
 	//关羽
 	//界界关羽
 	dragchaojue: {

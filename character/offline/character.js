@@ -142,6 +142,7 @@ const characters = {
 	yj_zhonghui: ["male", "wei", 4, ["psmouchuan", "pszizhong", "psjizun", "psqingsuan"], ["zhu"]],
 	yj_ehuan: ["male", "qun", 5, ["psdiwan", "pssuiluan", "psconghan"], ["doublegroup:shu:qun"]],
 	yj_zhouji: ["female", "wu", 3, ["psyanmou", "pszhanyan", "psyuhuo"], ["name:周|null"]],
+	drag_pangde: ["male", "wei", 4, ["dragtaiguan", "mashu"]],
 	drag_guanyu: ["male", "shu", 4, ["dragchaojue", "dragjunshen"]],
 	drag_caoren: ["male", "wei", 4, ["draglizhong", "dragjuesui"]],
 	drag_lvchang: ["male", "wei", 3, ["dragjuwu", "dragshouxiang"]],
