@@ -151,7 +151,11 @@ const skills = {
 			const next2 = player.addToExpansion(cardsx, player, "giveAuto");
 			next2.gaintag.add("dczhengyue");
 			await next2;
-			player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
+			if(player.getExpansions("dczhengyue")[0]){
+				player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
+			} else {
+				player.removeTip("dczhengyue");
+			}
 		},
 		group: "dczhengyue_useCard",
 		subSkill: {
@@ -189,7 +193,11 @@ const skills = {
 							player.addTempSkill("dczhengyue_debuff");
 						}
 					}
-					player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
+					if(player.getExpansions("dczhengyue")[0]){
+						player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
+					} else {
+						player.removeTip("dczhengyue");
+					}
 				},
 			},
 			count: {
