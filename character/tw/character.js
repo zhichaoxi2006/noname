@@ -16,7 +16,7 @@ const characters = {
 	huan_zhugeguo: ["female", "shu", 3, ["rexianyuan", "twlingyin"], ["name:诸葛|果"]],
 	huan_zhanghe: ["male", "wei", 4, ["twkuiduan"]],
 	huan_zhaoyun: ["male", "shu", 4, ["twjiezhan", "twlongjin"]],
-	huan_simayi: ["male", "qun", 4, ["twzongquan", "twguimou"], ["name:司马|懿", "border:ye"]],//if线司马懿成野心家了就给野心家border了
+	huan_simayi: ["male", "wei", 4, ["twzongquan", "twguimou"], ["name:司马|懿", "border:ye"]],//if线司马懿成野心家了就给野心家border了
 	huan_weiyan: ["male", "shu", 4, ["twqiji", "twpiankuang"]],
 	tw_zhugejun: ["male", "qun", 3, ["twshouzhu", "twdaigui", "twcairu"], ["name:诸葛|均"]],
 	simafu: ["male", "wei", 3, ["xunde", "chenjie"], ["name:司马|孚", "border:jin"]],
