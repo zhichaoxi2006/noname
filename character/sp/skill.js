@@ -48,7 +48,7 @@ const skills = {
 	olwenren: {
 		enable: "phaseUse",
 		usable: 1,
-		filterTarget:lib.filter.notMe,
+		filterTarget:true,
 		selectTarget: [1, Infinity],
 		async content(event, trigger, player){
 			const { target } = event;
@@ -73,8 +73,12 @@ const skills = {
 			const targetx = targets[0];
 			const list = [];
 			while(true){
+				const vcard = new lib.element.VCard({ name: "sha", isCard: true });
 				const { result: { bool, targets } } = await targetx.chooseTarget("选择一名角色，视为对其使用一张【杀】")
 					.set("targetxs", list)
+					.set("ai", function(target){
+						return get.effect(target, vcard, targetx);
+					})
 					.set("filterTarget", function(card, player, target){
 						const targetxs = get.event("targetxs");
 						if(list.includes(target))return false;
@@ -82,7 +86,6 @@ const skills = {
 						return lib.filter.filterTarget(vcard, player, target);
 					});
 				if (bool) {
-					const vcard = new lib.element.VCard({ name: "sha", isCard: true });
 					await player.useCard(vcard, targets);
 					list.addArray(targets);
 				} else {
