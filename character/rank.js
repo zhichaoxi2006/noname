@@ -1911,6 +1911,8 @@ window.noname_character_rank = {
 	d: ["chendong", "lvmeng", "huaxiong", "gongsunzan", "xuzhu", "old_huaxiong", "chengpu", "zhangwen", "dingyuan", "xin_chengpu", "sunshao", "tadun", "zangba", "junk_zhangrang", "junk_simayi", "key_youta", "old_chenqun", "duanwei", "wangxiang", "duji", "bianxi", "clan_wuban", "wangjun", "xin_wuyi", "xin_zhuzhi", "tw_guanqiujian", "tw_xiahouen", "tw_yl_luzhi", "junk_huangyueying", "junk_liubei", "new_caoren", "old_handang", "old_zhoutai", "tengfanglan", "junk_lidian", "junk_duanwei", "std_panfeng", "qianzhao"],
 	rarity: {
 		legend: [
+			"shen_taishici",
+			"pot_taishici",
 			"zhugejing",
 			"ol_feiyi",
 			"dc_wuyi",
@@ -2038,6 +2040,7 @@ window.noname_character_rank = {
 			"re_sunyi",
 			"shen_guojia",
 			"shen_taishici",
+			"pot_taishici",
 			"shen_xunyu",
 			"tw_gexuan",
 			"fengfangnv",

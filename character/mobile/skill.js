@@ -2,6 +2,345 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//势太史慈 --- by 刘巴
+	potzhanlie: {
+		audio: 2,
+		trigger: { global: "phaseBegin" },
+		forced: true,
+		locked: false,
+		content() {
+			const zhenfeng = player.getStorage("potzhenfeng"),
+				effectMap = new Map([
+					["hp", () => player.getHp()],
+					["damagedHp", () => player.getDamagedHp()],
+					["countplayer", () => game.countPlayer()],
+				]);
+			const num = zhenfeng[0] && effectMap.has(zhenfeng[0]) ? effectMap.get(zhenfeng[0])() : player.getAttackRange();
+			player.addTempSkill("potzhanlie_addMark");
+			if (num > 0) player.addMark("potzhanlie_addMark", num, false);
+		},
+		group: "potzhanlie_lie",
+		subSkill: {
+			addMark: {
+				charlotte: true,
+				onremove: true,
+				audio: "potzhanlie",
+				trigger: { global: ["loseAfter", "loseAsyncAfter", "cardsDiscardAfter"] },
+				getIndex(event, player) {
+					return Math.min(
+						event.getd().filter(i => i.name === "sha").length,
+						8 - player.countMark("potzhanlie_lie"),
+						Math.max(
+							player.countMark("potzhanlie_addMark") -
+								game
+									.getGlobalHistory(
+										"everything",
+										evt => {
+											if (evt === event) return false;
+											return ["lose", "loseAsync", "cardsDiscard"].includes(evt.name) && evt.getd().some(i => i.name === "sha");
+										},
+										event
+									)
+									.reduce((sum, evt) => sum + evt.getd().filter(i => i.name === "sha").length, 0),
+							0
+						)
+					);
+				},
+				forced: true,
+				content() {
+					player.addMark("potzhanlie_lie", 1);
+				},
+				intro: { content: "本回合前#张【杀】进入弃牌堆后，获得等量“烈”标记" },
+			},
+			lie: {
+				trigger: { player: "phaseUseEnd" },
+				filter: (event, player) => player.hasMark("potzhanlie_lie") && player.hasUseTarget(new lib.element.VCard({ name: "sha" }), false),
+				direct: true,
+				content() {
+					player.chooseUseTarget("###" + get.prompt("potzhanlie") + "？###移去所有“烈”，视为使用一张无距离限制的【杀】", new lib.element.VCard({ name: "sha" }), false, "nodistance").set("oncard", () => {
+						const event = get.event(),
+							{ player } = event,
+							num = player.countMark("potzhanlie_lie");
+						player.addTempSkill("potzhanlie_buff");
+						player.clearMark("potzhanlie_lie");
+						event.set("potzhanlie", Math.floor(num / 2));
+					}).logSkill = "potzhanlie";
+				},
+				marktext: "烈",
+				intro: {
+					name: "烈",
+					content: "mark",
+				},
+			},
+			buff: {
+				charlotte: true,
+				trigger: { player: "useCard1" },
+				filter: event => event?.potzhanlie,
+				forced: true,
+				locked: false,
+				popup: false,
+				async content(event, trigger, player) {
+					const num = trigger.potzhanlie,
+						str = get.translation(trigger.card);
+					const result = await player
+						.chooseButton([
+							"战烈：是否选择至多" + get.cnNumber(num) + "项执行？",
+							[
+								[
+									["目标+1", "令" + str + "可以额外指定一个目标"],
+									["伤害+1", "令" + str + "基础伤害值+1"],
+									["弃牌响应", "令" + str + "需额外弃置一张牌方可响应"],
+									["摸牌", str + "结算完毕后，你摸两张牌"],
+								],
+								"textbutton",
+							],
+						])
+						.set("selectButton", [1, num])
+						.set("ai", button => {
+							const player = get.player(),
+								trigger = get.event().getTrigger(),
+								choice = button.link;
+							switch (choice) {
+								case "目标+1":
+									return Math.max(
+										...game
+											.filterPlayer(target => {
+												return !trigger.targets?.includes(target) && lib.filter.targetEnabled2(trigger.card, player, target) && lib.filter.targetInRange(trigger.card, player, target);
+											})
+											.map(target => get.effect(target, trigger.card, player, player))
+									);
+								case "伤害+1":
+									return (trigger.targets || []).reduce((sum, target) => {
+										const effect = get.damageEffect(target, player, player);
+										return (
+											sum +
+											effect *
+												(target.hasSkillTag("filterDamage", null, {
+													player: player,
+													card: trigger.card,
+												})
+													? 1
+													: 1 + (trigger.baseDamage || 1) + (trigger.extraDamage || 0))
+										);
+									}, 0);
+								case "弃牌响应":
+									return (trigger.targets || []).reduce((sum, target) => {
+										const card = get.copy(trigger.card);
+										game.setNature(card, "stab");
+										return sum + get.effect(target, card, player, player);
+									}, 0);
+								case "摸牌":
+									return get.effect(player, { name: "draw" }, player, player) * 2;
+							}
+						})
+						.forResult();
+					if (result.bool) {
+						const choices = result.links;
+						game.log(player, "选择了", "#g【战烈】", "的", "#y" + choices);
+						for (const choice of choices) {
+							player.popup(choice);
+							switch (choice) {
+								case "目标+1":
+									player
+										.when("useCard2")
+										.filter(evt => evt === trigger)
+										.then(() => {
+											player
+												.chooseTarget("是否为" + get.translation(trigger.card) + "增加一个目标？", (card, player, target) => {
+													const evt = get.event().getTrigger();
+													return !evt.targets.includes(target) && lib.filter.targetEnabled2(evt.card, player, target) && lib.filter.targetInRange(evt.card, player, target);
+												})
+												.set("ai", target => {
+													const player = get.player(),
+														evt = get.event().getTrigger();
+													return get.effect(target, evt.card, player);
+												});
+										})
+										.then(() => {
+											if (result?.bool && result.targets?.length) {
+												const [target] = result.targets;
+												player.line(target, trigger.card.nature);
+												trigger.targets.add(target);
+												game.log(target, "成为了", trigger.card, "的额外目标");
+											}
+										});
+									break;
+								case "伤害+1":
+									trigger.baseDamage++;
+									game.log(trigger.card, "造成的伤害", "#y+1");
+									break;
+								case "弃牌响应":
+									player.addTempSkill("potzhanlie_guanshi");
+									player.markAuto("potzhanlie_guanshi", [trigger.card]);
+									break;
+								case "摸牌":
+									player
+										.when("useCardAfter")
+										.filter(evt => evt === trigger)
+										.then(() => player.draw(2));
+									break;
+							}
+						}
+					}
+				},
+			},
+			guanshi: {
+				charlotte: true,
+				audio: "potzhanlie",
+				trigger: { player: ["shaMiss", "eventNeutralized"] },
+				filter: function (event, player) {
+					if (event.type != "card" || !event.target.isIn()) return false;
+					return player.getStorage("potzhanlie_guanshi").includes(event.card);
+				},
+				forced: true,
+				logTarget: "target",
+				async content(event, trigger, player) {
+					const { target } = trigger;
+					const { result } = await target.chooseToDiscard("战烈：弃置一张牌，否则" + get.translation(trigger.card) + "依然造成伤害").set("ai", card => {
+						const target = get.player(),
+							evt = get.event().getParent();
+						if (get.damageEffect(target, evt.player, target, evt.card.nature) < 0) return 8 - get.useful(card);
+						return 0;
+					});
+					if (!result?.bool) {
+						if (event.triggername == "shaMiss") {
+							trigger.untrigger();
+							trigger.trigger("shaHit");
+							trigger._result.bool = false;
+							trigger._result.result = null;
+						} else trigger.unneutralize();
+					}
+				},
+			},
+		},
+	},
+	pothanzhan: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget: lib.filter.notMe,
+		async content(event, trigger, player) {
+			const target = event.targets[0];
+			for (const drawer of [player, target]) {
+				let zhenfeng,
+					num = ((zhenfeng = player.getStorage("potzhenfeng") || []), ({ hp: () => drawer.getHp(), damagedHp: () => drawer.getDamagedHp(), countplayer: () => game.countPlayer() }[zhenfeng[0]] || (() => drawer.maxHp))()) - drawer.countCards("h");
+				if (num > 0) await drawer.draw(Math.min(num, 5));
+			}
+			const juedou = new lib.element.VCard({ name: "juedou" });
+			if (player.canUse(juedou, target)) await player.useCard(juedou, target, false);
+		},
+		ai: {
+			order(item, player) {
+				if ((player.countCards("h", { name: "sha" }) || player.maxHp - player.countCards("h")) > 1) return 10;
+				return 1;
+			},
+			result: {
+				target(player, target) {
+					return get.effect(target, new lib.element.VCard({ name: "juedou" }), player, player) - Math.max(0, Math.min(5, target.maxHp) - target.countCards("h"));
+				},
+			},
+		},
+	},
+	potzhenfeng: {
+		limited: true,
+		audio: 2,
+		enable: "phaseUse",
+		filter(event, player) {
+			return player.isDamaged() || ["pothanzhan", "potzhanlie"].some(skill => player.hasSkill(skill, null, null, false));
+		},
+		skillAnimation: true,
+		animationColor: "metal",
+		chooseButton: {
+			dialog(event, player) {
+				const dialog = ui.create.dialog("振锋：你可以选择一项", "hidden");
+				dialog.add([
+					[
+						["recover", "回复2点体力"],
+						["cover", "修改〖酣战〗和〖战烈〗描述中的“X”值"],
+					],
+					"textbutton",
+				]);
+				return dialog;
+			},
+			filter(button, player) {
+				switch (button.link) {
+					case "recover":
+						return player.isDamaged();
+					case "cover":
+						return ["pothanzhan", "potzhanlie"].some(skill => player.hasSkill(skill, null, null, false));
+				}
+			},
+			check(button) {
+				const player = get.player();
+				if (button.link == "recover") return player.getHp() + player.countCards("h", { name: "tao" }) < 2;
+				if (button.link == "cover") {
+					let numbers = [player.getHp(), player.getDamagedHp(), game.countPlayer()];
+					if (numbers.some(c => c > player.getAttackRange())) return Math.max(...numbers) * 2;
+				}
+				return 0.1;
+			},
+			backup(links) {
+				return {
+					audio: "potzhenfeng",
+					skillAnimation: true,
+					animationColor: "metal",
+					async content(event, trigger, player) {
+						player.awakenSkill("potzhenfeng");
+						if (links[0] === "recover") {
+							await player.recover(2);
+						} else {
+							const result = await player
+								.chooseButton(
+									[
+										"振锋：修改〖酣战〗和〖战烈〗描述中的“X”为...",
+										[
+											[
+												["hp", "当前体力值"],
+												["damagedHp", "当前已损失体力值"],
+												["countplayer", "场上存活角色数"],
+											],
+											"textbutton",
+										],
+									],
+									true
+								)
+								.set("ai", button => {
+									const player = get.player();
+									switch (button.link) {
+										case "hp":
+											return player.getHp();
+										case "damagedHp":
+											return player.getDamagedHp();
+										case "countplayer":
+											return game.countPlayer();
+									}
+								})
+								.forResult();
+							if (result.bool) {
+								player.markAuto("potzhenfeng", result.links[0]);
+							}
+						}
+					},
+				};
+			},
+			prompt(links) {
+				return `点击“确定”，${links[0] === "recover" ? "回复2点体力" : "修改〖酣战〗和〖战烈〗描述中的“X”值"}`;
+			},
+		},
+		subSkill: {
+			backup: {},
+		},
+		ai: {
+			order: 15,
+			threaten: 2,
+			result: {
+				player(player) {
+					if ([player.getHp(), player.getDamagedHp(), game.countPlayer()].some(c => c > player.getAttackRange())) return 10;
+					return get.recoverEffect(player, player, player);
+				},
+			},
+		},
+	},
 	// SP甘夫人
 	mbzhijie: {
 		audio: 2,
