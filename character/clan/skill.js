@@ -28,7 +28,7 @@ const skills = {
 			}
 		},
 		async content(event, trigger, player){
-			const count = player.storage["clananran_used"] + 1;
+			const count = Math.min(player.storage["clananran_used"] + 1, 4);
 			const { cost_data } = event;
 			if (cost_data == "draw") {
 				await player.draw(count).set("gaintag", ["clananran_tag"]);
