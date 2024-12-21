@@ -146,7 +146,10 @@ const skills = {
 			const {
 				result: { moved },
 			} = await next;
-			const cardsx = moved[1];
+			const cardsx = [];
+			if (moved) {
+				cardsx.addArray(moved[1]);
+			}
 			cardsx.reverse();
 			const next2 = player.addToExpansion(cardsx, player, "giveAuto");
 			next2.gaintag.add("dczhengyue");
