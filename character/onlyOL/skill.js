@@ -794,7 +794,9 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			const cards = get.cards(3);
-			await player.addToExpansion(cards, player, "giveAuto").gaintag.add("olsbxutu");
+			const next = player.addToExpansion(cards, player, "giveAuto");
+			next.gaintag.add("olsbxutu");
+			await next;
 		},
 		group: ["olsbxutu_exchange"],
 		subSkill: {
@@ -826,7 +828,9 @@ const skills = {
 					const { cost_data } = event;
 					const cards = cost_data;
 					if (get.position(cards[0]) != "x") cards.reverse();
-					await player.addToExpansion([cards[1]], player, "giveAuto").gaintag.add("olsbxutu");
+					const next =  player.addToExpansion([cards[1]], player, "giveAuto");
+					next.gaintag.add("olsbxutu");
+					await next;
 					await player.loseToDiscardpile([cards[0]]);
 					const xs = player.getExpansions("olsbxutu");
 					let bool =

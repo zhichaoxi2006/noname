@@ -99,8 +99,9 @@ const skills = {
 				},
 				ai: {
 					expose: 0.3,
-					order: 1,
+					order: 13,
 					result: {
+						player: 1,
 						target: 5,
 					},
 				},
@@ -147,7 +148,10 @@ const skills = {
 			} = await next;
 			const cardsx = moved[1];
 			cardsx.reverse();
-			await player.addToExpansion(cardsx, player, "giveAuto").gaintag.add("dczhengyue");
+			const next2 = player.addToExpansion(cardsx, player, "giveAuto");
+			next2.gaintag.add("dczhengyue");
+			await next2;
+			player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
 		},
 		group: "dczhengyue_useCard",
 		subSkill: {
