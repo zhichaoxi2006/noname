@@ -481,7 +481,81 @@ const skills = {
 		},
 	},
 	olsbxieyong: {
-		//todo
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget:lib.filter.notMe,
+		async content(event, trigger, player){
+			player.addSkill(["olsbxieyong_jiu", "olsbxieyong_buff"]);
+			player.markAuto("olsbxieyong_jiu", event.targets);
+			if (!player.storage.jiu) player.storage.jiu = 0;
+            player.storage.jiu += 1;
+            game.broadcastAll(
+                function (player) {
+                    player.addSkill("jiu");
+                    if (!player.node.jiu && lib.config.jiu_effect) {
+                        player.node.jiu = ui.create.div(".playerjiu", player.node.avatar);
+                        player.node.jiu2 = ui.create.div(".playerjiu", player.node.avatar2);
+                    }
+                },
+				player
+            );
+		},
+		subSkill: {
+			jiu: {
+				charlotte:true,
+				silent:true,
+				trigger: {
+					global: "phaseAfter",
+				},
+				filter(event, player){
+					return event.player == player.storage.olsbxieyong_jiu[0];
+				},
+				async content(event, trigger, player){
+					game.broadcastAll(function (player) {
+						player.removeSkill(["olsbxieyong_jiu", "olsbxieyong_buff"]);
+						player.removeSkill("jiu");
+					}, player);
+					game.addVideo("jiuNode", player, false)
+				},
+				ai: {
+					jiuSustain: true,
+				}
+			},
+			buff: {
+				charlotte: true,
+				trigger: {
+					global: "useCard",
+				},
+				filter(event, player){
+					if (event.player != player.storage.olsbxieyong_jiu[0]) return false;
+					return  !event.targets || !event.targets.includes(event.player);
+				},
+				direct: true,
+				async content(event, trigger, player) {
+					const target = player.storage.olsbxieyong_jiu[0];
+					const next = player.chooseToUse();
+					next.set("prompt", `【狭勇】:是否对${get.translation(target)}使用一张【杀】？`);
+					next.set("targetx", target);
+					next.set("filterCard", function(card){
+						return get.name(card) == "sha";
+					});
+					next.set("filterTarget", function(card, player, target){
+						const evt = get.event();
+						return evt.targetx == target && lib.filter.filterTarget.apply(this, arguments);
+					});
+					next.set("oncard", () => {
+						const evt = get.event();
+						const { targets } = evt;
+						for(const target of targets){
+							target.addTempSkill("qinggang2");
+							target.storage.qinggang2.add(evt.card);
+							target.markSkill("qinggang2");
+						}
+					});
+					await next;
+				},
+			},
+		}
 	},
 	//OL界廖化
 	ol_dangxian: {
