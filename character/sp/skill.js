@@ -22,7 +22,7 @@ const skills = {
 				choices = Array.from({ length: hs.length + 1 })
 					.map((_, i) => i)
 					.filter(i => !storage.includes(i));
-			if (hs.length < choices[0]) await player.discard(hs);
+			if (hs.length <= Math.max(...storage)) await player.discard(hs);
 			else {
 				player.addTempSkill(record, "roundStart");
 				const {
