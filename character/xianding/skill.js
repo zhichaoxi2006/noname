@@ -180,13 +180,16 @@ const skills = {
 						} = await next;
 						const cards = moved[0];
 						cards.reverse();
-						await player.addToExpansion(cards, player, "giveAuto").gaintag.add("dczhengyue");
+						const next2 = player.addToExpansion(cards, player, "giveAuto")
+						next2.gaintag.add("dczhengyue");
+						await next2;
 						player.addTempSkill("dczhengyue_count");
 						player.storage.dczhengyue_count += trigger.cards.length;
 						if (player.storage.dczhengyue_count >= 2) {
 							player.addTempSkill("dczhengyue_debuff");
 						}
 					}
+					player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
 				},
 			},
 			count: {
