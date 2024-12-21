@@ -5369,10 +5369,9 @@ const skills = {
 	},
 	nsbaiming: {
 		trigger: { player: "useCard" },
-		direct: true,
 		filter(event, player) {
-			if (player.additionalSkills.nsbaiming) return false;
-			return event.card && event.card.name == "sha" && player.storage.nsbaiming && player.storage.nsbaiming.length > 0;
+			if (player.additionalSkills.nsbaiming?.length) return false;
+			return event.card?.name == "sha" && player.storage.nsbaiming?.length;
 		},
 		group: "nsbaiming_clear",
 		init(player) {
@@ -5399,7 +5398,7 @@ const skills = {
 						}
 					}
 					if (info.shaRelated === false) return false;
-					if (get.skillInfoTranslation(list[i], player).includes("【杀】")) return true;
+					if (get.plainText(get.skillInfoTranslation(list[i], player)).includes("【杀】")) return true;
 				}
 				return false;
 			};
@@ -5409,66 +5408,52 @@ const skills = {
 				return check(list);
 			}, player);
 		},
-		content() {
-			"step 0";
-			var list = player.storage.nsbaiming.slice(0);
-			event.skillai = function () {
-				return get.max(list, get.skillRank, "item");
+		async cost(event, trigger, player) {
+			const skills = player.storage.nsbaiming.slice(0);
+			const list = skills.map(skill => [
+				skill,
+				'<div class="popup text" style="width:calc(100% - 10px);display:inline-block"><div class="skill">' +
+					(() => {
+						let str = get.translation(skill);
+						if (!lib.skill[skill]?.nobracket) str = "【" + str + "】";
+						return str;
+					})() +
+					"</div><div>" +
+					lib.translate[skill + "_info"] +
+					"</div></div>",
+			]);
+			const {
+				result: { bool, links },
+			} = await player
+				.chooseButton([`###百鸣###<div class="text center">你可以获得其中一个技能</div>`, [list, "textbutton"]])
+				.set("displayIndex", false)
+				.set("ai", button => {
+					const { link } = button,
+						{ choice } = get.event();
+					if (choice.includes(link)) return 2;
+					return 1;
+				})
+				.set(
+					"choice",
+					skills.filter(skill => {
+						const info = get.info(skill) || {};
+						if (info.ai?.neg || info.ai?.halfneg || info.ai?.combo) return false;
+						return ["使用【杀】时", "使用【杀】指定"].some(str => get.plainText(get.skillInfoTranslation(skill, player)).includes(str));
+					})
+				);
+			event.result = {
+				bool: bool,
+				cost_data: links,
 			};
-			if (event.isMine()) {
-				var dialog = ui.create.dialog("forcebutton");
-				dialog.add(get.prompt("nsbaiming"));
-				var clickItem = function () {
-					_status.event._result = this.link;
-					dialog.close();
-					game.resume();
-				};
-				for (var i = 0; i < list.length; i++) {
-					if (lib.translate[list[i] + "_info"]) {
-						var translation = get.translation(list[i]);
-						if (translation[0] == "新" && translation.length == 3) {
-							translation = translation.slice(1, 3);
-						} else {
-							translation = translation.slice(0, 2);
-						}
-						var item = dialog.add('<div class="popup pointerdiv" style="width:80%;display:inline-block"><div class="skill">【' + translation + "】</div><div>" + lib.translate[list[i] + "_info"] + "</div></div>");
-						item.firstChild.addEventListener("click", clickItem);
-						item.firstChild.link = list[i];
-					}
-				}
-				dialog.add(ui.create.div(".placeholder"));
-				event.switchToAuto = function () {
-					event._result = event.skillai();
-					dialog.close();
-					game.resume();
-				};
-				event.confirm = ui.create.confirm("c");
-				event.custom.replace.confirm = function () {
-					event._result = null;
-					dialog.close();
-					game.resume();
-				};
-				_status.imchoosing = true;
-				game.pause();
-			} else {
-				event._result = event.skillai();
-			}
-			"step 1";
-			_status.imchoosing = false;
-			if (event.confirm) {
-				event.confirm.close();
-			}
-			if (typeof result == "string") {
-				player.logSkill("nsbaiming");
-				var link = result;
-				player.addAdditionalSkill("nsbaiming", link);
-				player.logSkill("nsbaiming");
-				player.popup(link);
-				game.log(player, "获得了技能", "【" + get.translation(link) + "】");
-				game.delay();
-				player.storage.nsbaiming.remove(link);
-				trigger.nsbaiming = true;
-			}
+		},
+		async content(event, trigger, player) {
+			const { cost_data: links, name } = event;
+			player.addAdditionalSkill(name, links);
+			player.popup(links);
+			game.log(player, "获得了技能", "【" + get.translation(links) + "】");
+			await game.delay();
+			player.storage.nsbaiming.remove(links[0]);
+			trigger.nsbaiming = true;
 		},
 		subSkill: {
 			clear: {

@@ -396,8 +396,10 @@ const skills = {
 				.set("ai", target => {
 					const player = get.player();
 					let eff = get.effect(target, { name: "juedou" }, player, player),
-						shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count");
-					eff += shas > 0 ? get.effect(player, { name: "losehp" }, player, player) : get.effect(player, { name: "draw" }, player, player) * 2;
+						shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count"),
+						att = get.attitude(player, target);
+					if (shas > 0) eff += get.effect(player, { name: "losehp" }, player, player);
+					else if (att <= 0) eff += get.effect(player, { name: "draw" }, player, player) * 2;
 					return eff;
 				})
 				.forResult();
@@ -412,7 +414,7 @@ const skills = {
 				const targetsx = game.filterPlayer(current => {
 					if (!player.canUse({ name: "juedou", isCard: true }, current)) return false;
 					return !player
-						.getRoundHistory("useSkill", evt => (evt.skill = "twchenxun"))
+						.getRoundHistory("useSkill", evt => evt.skill == "twchenxun")
 						.map(evt => evt.targets[0])
 						.includes(current);
 				});
@@ -428,11 +430,11 @@ const skills = {
 					.set("ai", target => {
 						const player = get.player();
 						let eff = get.effect(target, { name: "juedou" }, player, player),
-							shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count");
-						if (shas > 0) {
-							const num = player.getRoundHistory("useCard", evt => evt.card?.storage?.twchenxun).length + 1;
-							eff += get.effect(player, { name: "losehp" }, player, player) * num;
-						} else eff += get.effect(player, { name: "draw" }, player, player) * 2;
+							shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count"),
+							att = get.attitude(player, target);
+						const num = player.getRoundHistory("useCard", evt => evt.card?.storage?.twchenxun).length + 1;
+						if (shas > 0) eff += get.effect(player, { name: "losehp" }, player, player) * num;
+						else if (att <= 0) eff += get.effect(player, { name: "draw" }, player, player) * 2;
 						return eff;
 					})
 					.set("targetsx", targetsx)
@@ -828,9 +830,7 @@ const skills = {
 	},
 	twniwo: {
 		audio: 2,
-		trigger: {
-			player: "phaseUseBegin",
-		},
+		trigger: { player: "phaseUseBegin" },
 		filter(event, player) {
 			return (
 				player.countCards("h") &&
@@ -841,11 +841,9 @@ const skills = {
 		},
 		async cost(event, trigger, player) {
 			event.result = await player
-				.chooseTarget(
-					get.prompt2(event.name.slice(0, -5), (card, player, current) => {
-						return current != player && current.countCards("h");
-					})
-				)
+				.chooseTarget(get.prompt2(event.name.slice(0, -5)), (card, player, current) => {
+					return current != player && current.countCards("h");
+				})
 				.set("ai", target => {
 					return -get.attitude(get.player(), target) / (target.countCards("h") + 1);
 				})

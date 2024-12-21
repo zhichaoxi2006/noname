@@ -403,6 +403,7 @@ window.noname_character_rank = {
 		"new_simayi",
 		"ol_sb_dongzhuo",
 		"ol_sb_dengai",
+		"ol_qinlang",
 	],
 	am: [
 		"hm_shen_luzhi",
@@ -1311,6 +1312,7 @@ window.noname_character_rank = {
 		"re_lvmeng",
 		"re_huaxiong",
 		"ol_sb_huaxiong",
+		"ol_jsrg_lvbu",
 	],
 	b: [
 		"hm_guigu",
@@ -2107,6 +2109,7 @@ window.noname_character_rank = {
 			"ol_sb_dongzhuo",
 		],
 		epic: [
+			"ol_jsrg_lvbu",
 			"moqiongshu",
 			"sb_guojia",
 			"sb_zhangliao",
@@ -2482,6 +2485,7 @@ window.noname_character_rank = {
 			"niufu",
 		],
 		rare: [
+			"ol_qinlang",
 			"ol_sb_dengai",
 			"yue_zhouyu",
 			"huan_caoang",

@@ -5053,20 +5053,15 @@ const skills = {
 					global: ["gainAfter", "loseAsyncAfter"],
 				},
 				filter(event, player, name, target) {
-					const evt = event.getParent("phaseDraw");
-					if (evt && evt.name == "phaseDraw") return false;
-					if (!event.getg(target).length || !target.hasMark("sbxuanhuo_mark")) return false;
-					if (evt && evt.player == target) return false;
-					if (lib.skill.sbxuanhuo.getNum(target, "sbxuanhuo_rob", "sbxuanhuo_mark") >= 5) return false;
-					return target.hasCard(card => lib.filter.canBeGained(card, target, player), "he");
+					return target?.isIn();
 				},
 				getIndex(event, player) {
 					const evt = event.getParent("phaseDraw");
-					if (evt && evt.name == "phaseDraw") return false;
+					if (evt?.name == "phaseDraw") return false;
 					return game
 						.filterPlayer(current => {
 							if (!event.getg(current).length || !current.hasMark("sbxuanhuo_mark")) return false;
-							if (evt && evt.player == current) return false;
+							if (evt?.player == current) return false;
 							if (lib.skill.sbxuanhuo.getNum(current, "sbxuanhuo_rob", "sbxuanhuo_mark") >= 5) return false;
 							return current.hasCard(card => lib.filter.canBeGained(card, current, player), "he");
 						})
@@ -5094,7 +5089,7 @@ const skills = {
 		audio: 2,
 		trigger: { player: "phaseZhunbeiBegin" },
 		filter(event, player, name, target) {
-			return target?.isIn() && target.hasMark("sbxuanhuo_mark");
+			return target?.isIn();
 		},
 		getIndex(event, player) {
 			return game.filterPlayer(target => target.hasMark("sbxuanhuo_mark")).sortBySeat();
