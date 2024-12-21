@@ -38,6 +38,12 @@ const skills = {
 						}
 						if (card.hasGaintag("olzhaohuo_tag")) return false;
 					},
+					cardSavable(card, player, target, result){
+						if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
+							if (card.cards.some(c => c.hasGaintag("olzhaohuo_tag"))) return false;
+						}
+						if (card.hasGaintag("olzhaohuo_tag")) return false;
+					},
 					cardDiscardable(card, player, result){
 						if (card.hasGaintag("olzhaohuo_tag")) return false;
 					},
