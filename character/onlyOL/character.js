@@ -1,4 +1,10 @@
 const characters = {
+	ol_sunxiu: ["male", "wu", 3, ["ol_yanzhu", "ol_xinxue", "xinzhaofu"]],
+	ol_sb_zhangxiu: ["male", "qun", 4, ["olsbchoulie", "olsbzhunjiao"]],
+	ol_sb_zhaoyun: ["male", "shu", 4, ["ol_sb_nilan", "ol_sb_jueya"]],
+	ol_sb_zhangfei: ["male", "shu", 4, ["olsbjingxian", "olsbxieyong"], []],
+	ol_sb_huangyueying: ["female", "shu", 3, ["olsbbingcai", "olsblixian"]],
+	ol_sb_jushou: ["male", "qun", 3, ["olsbguliang", "olsbxutu"]],
 	ol_sb_gongsunzan: ["male", "qun", 4, ["olsbjiaodi", "olsbbaojing"]],
 	ol_sb_dengai: ["male", "wei", 4, ["olsbjigu", "olsbjiewan"]],
 	ol_sb_dongzhuo: ["male", "qun", 4, ["olguanbian", "olxiongni", "olfengshang", "olzhibin"], ["zhu", "die:3"]],
@@ -26,6 +32,7 @@ const characters = {
 	ol_zhangchunhua: ["female", "wei", 3, ["jueqing", "shangshi", "oljianmie"]],
 	ol_caochong: ["male", "wei", 3, ["olchengxiang", "olrenxin"]],
 	ol_caozhi: ["male", "wei", 3, ["reluoying", "oljiushi"]],
+	ol_liaohua: ["male", "shu", 4, ["ol_dangxian", "ol_fuli"]],
 };
 
 export default characters;

@@ -1,4 +1,5 @@
 const characters = {
+	v_sunquan: ["male", "wu", 4, ["dcwoheng", "dcjizheng"]],
 	moqiongshu: ["female", "wei", 3, ["dcwanchan", "dcjiangzhi"]],
 	v_zhangliao: ["male", "qun", 4, ["dcyuxi", "dcporong"]],
 	pangfengyi: ["female", "shu", 3, ["dcyitong", "dcpeiniang"]],
@@ -126,6 +127,7 @@ const characters = {
 	gexuan: ["male", "wu", 3, ["gxlianhua", "zhafu"]],
 	leitong: ["male", "shu", 4, ["kuiji"]],
 	wulan: ["male", "shu", 4, ["wlcuorui"]],
+	lvju: ["male", "wu", 4, ["dczhengyue"]]
 };
 
 export default characters;

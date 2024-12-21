@@ -424,7 +424,7 @@ const translates = {
 	diy_liaohua: "蛇廖化",
 	diy_liaohua_prefix: "蛇",
 	diy_fuli: "伏枥",
-	diy_fuli_info: "锁定技，当你处于濒死状态时，你可以将体力回复到X点，然后若你的体力值为场上唯一最高，你翻面。",
+	diy_fuli_info: "锁定技，当你处于濒死状态时，你可以将体力回复到X点，然后若你的体力值为场上唯一最高，你翻面。（X为场上势力数）",
 	diy_zhangfei: "蛇张飞",
 	diy_zhangfei_prefix: "蛇",
 	diy_paoxiao: "咆哮",

@@ -3,6 +3,223 @@ import cards from "../sp2/card.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//威孙权
+	dcwoheng: {
+		trigger: {
+			player: "damageEnd",
+		},
+		enable: "phaseUse",
+		filterTarget: true,
+		prompt(event){
+			const { player } = event;
+			const num = player.getRoundHistory("useSkill", evt => evt.skill == "dcwoheng").length;
+			return `令一名角色摸或弃置${num + 1}张牌`;
+		},
+		async cost(event, trigger, player) {
+			const num = player.getRoundHistory("useSkill", evt => evt.skill == "dcwoheng").length;
+			event.result = await player.chooseTarget(`令一名角色摸或弃置${num + 1}张牌`).forResult();
+		},
+		async content(event, trigger, player) {
+			const num = player.getRoundHistory("useSkill", evt => evt.skill == "dcwoheng").length;
+			const [target] = event.targets;
+			const str1 = "摸" + get.cnNumber(num, true);
+			const str2 = "弃" + get.cnNumber(num, true);
+			const list = [str1];
+			if (target.countCards("he", function(card){
+				return lib.filter.cardDiscardable(card, target);
+			})) {
+				list.push(str2);
+			}
+			let directcontrol =
+				str1 ==
+				(await player
+					.chooseControl(list, function (event, player) {
+						return _status.event.choice;
+					})
+					.set("choice", get.attitude(player, target) > 0 ? str1 : str2)
+					.forResultControl());
+			if (directcontrol) {
+				await target.draw(num);
+			} else {
+				await target.chooseToDiscard(num, true, "he");
+			}
+			if (target == player || player.countCards("h") !== target.countCards("h")) {
+				player.tempBanSkill("dcwoheng");
+			}
+		},
+	},
+	dcjizheng: {
+		feedPigSkill: true,
+		zhuSkill: true,
+		unique: true,
+    	audio: 2,
+    	global: "dcjizheng_global",
+		subSkill: {
+			global: {
+				enable: "phaseUse",
+				discard: false,
+				lose: false,
+				delay: false,
+				line: true,
+				log: false,
+				prepare: function (cards, player, targets) {
+					targets[0].logSkill("dcjizheng");
+				},
+				prompt: function () {
+					var player = _status.event.player;
+					var list = game.filterPlayer(function (target) {
+						return target != player && target.hasZhuSkill("dcjizheng", player);
+					});
+					var str = "将一张牌交给" + get.translation(list);
+					if (list.length > 1) str += "中的一人";
+					return str;
+				},
+				filter: function (event, player) {
+					if (player.countCards("h", lib.skill.dcjizheng_global.filterCard) == 0) return false;
+					return game.hasPlayer(function (target) {
+						return target != player && target.hasZhuSkill("dcjizheng", player) && !target.hasSkill("dcjizheng_blocker");
+					});
+				},
+				filterCard: function (card) {
+					return true;
+				},
+				visible: true,
+				filterTarget: function (card, player, target) {
+					return target != player && target.hasZhuSkill("dcjizheng", player) && !target.hasSkill("dcjizheng_blocker");
+				},
+				async content(event, trigger, player) {
+					const { cards, targets } = event;
+					await player.give(cards, targets[0]);
+					targets[0].addTempSkill("dcjizheng_blocker", "phaseUseEnd");
+					if (player.group == "wu") {
+						player.addTempSkill("dcjizheng_buff");
+					} else {
+						player.addTempSkill("dcjizheng_buff", {player: "useCardAfter"});
+					}
+				},
+				ai: {
+					expose: 0.3,
+					order: 13,
+					result: {
+						player: 1,
+						target: 5,
+					},
+				},
+			},
+			blocker: {
+				charlotte:true,
+				onremove:true,
+			},
+			buff: {
+				charlotte:true,
+				mod: {
+					targetInRange: function (card, player) {
+						return true;
+					},
+				},
+			},
+		}
+	},
+	//吕据
+	dczhengyue: {
+		trigger: {
+			player: "phaseBeginStart",
+		},
+		mark: true,
+		intro: {
+			content: "expansion",
+			markcount: "expansion",
+		},
+		filter(event, player) {
+			if (player.getExpansions("dczhengyue").length) return false;
+			return true;
+		},
+		frequent: true,
+		async content(event, trigger, player) {
+			const cards = get.cards(5);
+			await game.cardsGotoOrdering(cards);
+			const next = player.chooseToMove();
+			next.set("list", [
+				["牌堆顶", cards],
+				["武将牌上", []],
+			]);
+			const {
+				result: { moved },
+			} = await next;
+			const cardsx = [];
+			if (moved) {
+				cardsx.addArray(moved[1]);
+			}
+			cardsx.reverse();
+			const next2 = player.addToExpansion(cardsx, player, "giveAuto");
+			next2.gaintag.add("dczhengyue");
+			await next2;
+			if(player.getExpansions("dczhengyue")[0]){
+				player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
+			} else {
+				player.removeTip("dczhengyue");
+			}
+		},
+		group: "dczhengyue_useCard",
+		subSkill: {
+			useCard: {
+				trigger: {
+					player: "useCardAfter",
+				},
+				forced: true,
+				filter(event, player) {
+					if (player.getExpansions("dczhengyue").length) return true;
+					return false;
+				},
+				async content(event, trigger, player) {
+					const firstCard = player.getExpansions("dczhengyue")[0];
+					if (get.suit(firstCard) == get.suit(trigger.card) || get.number(firstCard) == get.number(trigger.card) || get.name(firstCard) == get.name(trigger.card)) {
+						await player.discard([firstCard]);
+						await player.draw(2);
+					} else {
+						if (player.getExpansions("dczhengyue").length >= 5) return;
+						const expansion = player.getExpansions("dczhengyue");
+						await game.cardsGotoOrdering(expansion.addArray(trigger.cards));
+						const next = player.chooseToMove();
+						next.set("list", [["武将牌上", expansion]]);
+						const {
+							result: { moved },
+						} = await next;
+						const cards = moved[0];
+						cards.reverse();
+						const next2 = player.addToExpansion(cards, player, "giveAuto")
+						next2.gaintag.add("dczhengyue");
+						await next2;
+						player.addTempSkill("dczhengyue_count");
+						player.storage.dczhengyue_count += trigger.cards.length;
+						if (player.storage.dczhengyue_count >= 2) {
+							player.addTempSkill("dczhengyue_debuff");
+						}
+					}
+					if(player.getExpansions("dczhengyue")[0]){
+						player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
+					} else {
+						player.removeTip("dczhengyue");
+					}
+				},
+			},
+			count: {
+				onremove: true,
+				init(player, skill) {
+					player.storage[skill] = 0;
+				},
+				charlotte: true,
+			},
+			debuff: {
+				mod: {
+					cardEnabled(card, player, result) {
+						if (get.position(card) == "h") return false;
+						return result;
+					},
+				},
+			},
+		},
+	},
 	//莫琼树
 	dcwanchan: {
 		audio: 2,
@@ -18660,20 +18877,15 @@ const skills = {
 		},
 		forced: true,
 		logTarget: "target",
-		content: function () {
-			"step 0";
-			player.judge(function (card) {
+		async content(event, trigger, player) {
+			const next = player.judge(function (card) {
 				var type = get.subtype(card);
 				return ["equip1", "equip4", "equip3", "equip6"].includes(type) ? 6 : -6;
-				// switch(type){
-				// 	case 'equip':return 4;
-				// 	case 'trick':return -4;
-				// 	default:return 0;
-				// }
-			}).judge2 = function (result) {
+			});
+			next.judge2 = function (result) {
 				return result.bool;
 			};
-			"step 1";
+			const { result } = await next;
 			if (trigger.getParent().addCount !== false) {
 				trigger.getParent().addCount = false;
 				var stat = player.getStat();
@@ -18685,7 +18897,26 @@ const skills = {
 				if (!map[id]) map[id] = {};
 				if (typeof map[id].extraDamage != "number") map[id].extraDamage = 0;
 				map[id].extraDamage += trigger.target.hp - 1;
-			} else if (result.bool === false) player.loseHp();
+			} else if (result.bool === false && get.type(result.card) != "basic") {
+				await player.loseHp();
+				await player.gain(result.card);
+			}
+		},
+		group: "spzhuilie_sha",
+		subSkill: {
+			sha: {
+				silent: true,
+				charlotte: true,
+				trigger: { player: "useCardToTargeted" },
+				filter(event, player) {
+					return event.card && event.card.name == "sha";
+				},
+				async content(event, trigger, player) {
+					trigger.target.addTempSkill("qinggang2");
+					trigger.target.storage.qinggang2.add(trigger.card);
+					trigger.target.markSkill("qinggang2");
+				},
+			},
 		},
 	},
 	spzhuilie2: {

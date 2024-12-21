@@ -1530,7 +1530,7 @@ const skills = {
 		filter(event, player) {
 			return (
 				player.getHistory("sourceDamage", function (evt) {
-					return evt.getParent(2)?.targets.length == 1;
+					return evt.getParent(2)?.targets?.length == 1;
 				}).length <= 1
 			);
 		},
@@ -1711,7 +1711,7 @@ const skills = {
 				return false;
 			}
 			const card = new lib.element.VCard({ name: "sha", nature: "thunder" });
-			return player.countCards("h") > event.player.countCards("h") && lib.filter.filterTarget(card, player, event.player);
+			return player.countCards("h") > event.player.countCards("h") && lib.filter.targetEnabled(card, player, event.player);
 		},
 		direct: true,
 		async content(event, trigger, player) {
@@ -1740,7 +1740,7 @@ const skills = {
 					nature: "thunder",
 				},
 				filterTarget: function (card, player, target) {
-					return _status.event.targets && _status.event.targets.includes(target) && lib.filter.filterTarget.apply(this, arguments);
+					return _status.event.targets && _status.event.targets.includes(target) && lib.filter.targetEnabled.apply(this, arguments);
 				},
 				prompt: "将任意张手牌当一张雷【杀】使用",
 				check: function (card) {
@@ -1873,7 +1873,8 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			const { cost_data } = event;
-			const card = game.createCard(cost_data[0][2], lib.suit.randomGet(), 1);
+			const { result } = await player.chooseControl(lib.suit.slice()).set("prompt", "请选择【众】的花色");
+			const card = game.createCard(cost_data[0][2], result.control, 1);
 			player.chooseUseTarget(card, true);
 		},
 	},
@@ -1900,6 +1901,15 @@ const skills = {
 			const targets = game.filterPlayer(p => p.isMinHandcard());
 			for (const i of targets) {
 				const next = i.chooseCard("将一张牌置于牌堆顶，否则按“取消”从牌堆底摸一张牌", "he");
+				next.set("ai", function(card){
+					if (get.attitude(i, player) < 0){
+						return 0;
+					}
+					if(get.suit(card) == suit.replace("lukai_", "")){
+						return 8 - get.value(card);
+					}
+					return 6 - get.value(card);
+				});
 				const { result } = await next;
 				if (result.bool) {
 					await i.lose(result.cards, ui.cardPile, "insert");
@@ -1932,7 +1942,7 @@ const skills = {
 	},
 	hm_dangjing: {
 		trigger: {
-			player: "hm_zongfuAfter",
+			player: ["hm_zongfuAfter", "hm_dangjing_callback"],
 		},
 		filter(event, player) {
 			return player.isMaxEquip();
@@ -1947,22 +1957,19 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			const { targets } = event;
-			while (true) {
-				const next = targets[0].judge(function (card) {
-					const evt = get.event();
-					if (get.suit(card) == evt.suitx) return -4;
-					return 0;
-				});
-				next.judge2 = function (result) {
-					return result.bool == false ? true : false;
-				};
-				next.set("suitx", player.storage.hm_zongfu);
-				const { result } = await next;
-				if (result.suit == player.storage.hm_zongfu) {
-					targets[0].damage("thunder", player);
-				} else {
-					break;
-				}
+			const next = targets[0].judge(function (card) {
+				const evt = get.event();
+				if (get.suit(card) == evt.suitx) return -4;
+				return 0;
+			});
+			next.judge2 = function (result) {
+				return result.bool == false ? true : false;
+			};
+			next.set("suitx", player.storage.hm_zongfu);
+			const { result } = await next;
+			if (result.suit == player.storage.hm_zongfu) {
+				targets[0].damage("thunder", player);
+				event.trigger("hm_dangjing_callback");
 			}
 		},
 	},
@@ -9377,7 +9384,7 @@ const skills = {
 					filterCard: true,
 					selectCard: 2,
 					filterTarget: lib.filter.notMe,
-					position: "he",
+					position: "h",
 					ai1(card) {
 						return 10 - get.value(card);
 					},
@@ -10537,6 +10544,24 @@ const skills = {
 		},
 	},
 	//龙起襄樊
+	//龙庞德
+	dragtaiguan: {
+		enable: "phaseUse",
+		usable(skill, player){
+			return Math.max(1, player.getDamagedHp());
+		},
+		filterCard:true,
+		filterTarget(card, player, target){
+			return player.inRange(target) && target.countDiscardableCards("he");
+		},
+		async content(event, trigger, player){
+			const target = event.targets[0]
+			const { result } = await target.chooseToDiscard("he", true);
+			if (result.cards[0].name != "sha" && player.getHp() <= target.getHp()) {
+				await player.chooseUseTarget("juedou", true, [target]);
+			}
+		},
+	},
 	//关羽
 	//界界关羽
 	dragchaojue: {

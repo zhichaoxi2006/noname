@@ -2,6 +2,80 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//丁奉
+	star_dangchen: {
+		trigger: {
+			player: "phaseUseBegin",
+		},
+		async cost(event, trigger, player){
+			const { result } = await player.chooseTarget()
+				.set("filterTarget", function(card, player, target){
+					return player != target && target.countCards("he") > 1;
+				})
+				.set("prompt", "【荡尘】：是否令一名角色交给你至少一张牌？")
+				.set("ai", function(card, player, target){
+					return -get.attitude(player, target);
+				});
+			event.result = result;
+		},
+		async content(event, trigger, player){
+			const target = event.targets[0];
+			const { result } = await target.chooseToGive(player)
+				.set("selectCard", [1, Infinity])
+				.set("forced", true)
+				.set("position", "he")
+			if (result.bool) {
+				player.addTempSkill("star_dangchen_buff");
+			}
+		},
+		subfrequent: "star_dangchen_buff",
+		subSkill: {
+			buff: {
+				charlotte:true,
+				frequent:true,
+				trigger: {
+					player: "useCard",
+				},
+				async content(event, trigger, player){
+					const { result } = await player.judge();
+					const { number } = result;
+					let num = 0;
+					player.getAllHistory("gain", evt => {
+						if(!evt.giver) return false;
+						return evt.giver != player;
+					}).forEach(event => {
+						num += event.cards.length;
+					});
+					if (number % num == 0) {
+						trigger.effectCount++;
+					}
+				},
+			}
+		}
+	},
+	star_jianyu: {
+		trigger: {
+			global: ["loseAfter","equipAfter","addJudgeAfter","gainAfter","loseAsyncAfter","addToExpansionAfter"],
+		},
+		filter(event, player) {
+			if (_status.currentPhase != player) return false;
+			let bool = false;
+			for(const i of game.filterPlayer(target => target != player)){
+				const evt = event.getl(i);
+				if (evt) {
+					const es = evt.es;
+					if(es.length){
+						bool = true;
+					}
+				}
+			}
+			return bool;
+		},
+		forced:true,
+		async content(event, trigger, player){
+			await player.draw();
+		}
+	},
 	//法正
 	starzhiji: {
 		audio: 2,

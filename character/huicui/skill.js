@@ -2,6 +2,95 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//庞宏
+	dcpingzhi: {
+		zhuanhuanji:true,
+		marktext: "☯",
+		usable:1,
+		enable: "phaseUse",
+		init(player, skill){
+			player.storage[skill] = true;
+		},
+		filterTarget(card, player, target){
+			return target.countCards("h");
+		},
+		intro: {
+			content(storage, player, skill) {
+				if (player.storage.dcpingzhi == true) return "转换技，出牌阶段限一次，你可令一名角色展示1张手牌，你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用";
+				return "转换技，出牌阶段限一次，你可令一名角色展示1张手牌，其使用此牌，若造成伤害则此技能视为未使用。";
+			},
+		},
+		async content(event, trigger, player){
+			const target = event.targets[0];
+			const { result } = await target.chooseCard("请选择一张手牌展示", true);
+			await target.showCards(result.cards);
+			if (player.storage.dcpingzhi) {
+				await target.discard(result.cards).set("discarder", player);
+				await target.chooseUseTarget("huogong", [player], true);
+			} else {
+				await target.chooseUseTarget(result.cards[0]);
+			}
+			player.changeZhuanhuanji("dcpingzhi");
+		},
+		group: "dcpingzhi_check",
+		subSkill: {
+			check: {
+				trigger: {
+					global: "useCardAfter",
+				},
+				filter(event, player){
+					if (player.storage.dcpingzhi) {
+						return (
+							event.getParent(2).name == "dcpingzhi" &&
+							event.player.isIn() &&
+							!game.hasPlayer2(current => {
+								return current.hasHistory("damage", evtx => evtx.card === event.card);
+							})
+						)
+					} else {
+						return (
+							event.getParent(2).name == "dcpingzhi" &&
+							event.player.isIn() &&
+							game.hasPlayer2(current => {
+								return current.hasHistory("damage", evtx => evtx.card === event.card);
+							})
+						)
+					}
+				},
+				charlotte:true,
+				silent:true,
+				async content(event, trigger, player){
+					const stat = player.getStat("skill");
+					delete stat.dcpingzhi;
+				},
+			},
+		}
+	},
+	dcgangjian: {
+		trigger: {
+			global: "phaseAfter",
+		},
+		forced:true,
+		filter(event, player){
+			if (player.getHistory("damage").length) return false;
+			let num = 0;
+			game.getGlobalHistory("everything", evt => {
+				return evt.name == "showCards" && evt.cards.length;
+			}).forEach(evt => {
+				num += evt.cards.length;
+			});
+			return num > 0
+		},
+		async content(event, trigger, player){
+			let num = 0;
+			game.getGlobalHistory("everything", evt => {
+				return evt.name == "showCards" && evt.cards.length;
+			}).forEach(evt => {
+				num += evt.cards.length;
+			});
+			await player.draw(Math.min(num, 5));
+		}
+	},
 	//乐周瑜
 	dcguyin: {
 		audio: 2,

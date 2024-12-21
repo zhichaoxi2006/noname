@@ -22,7 +22,7 @@ const characterSort = {
 	sp2_tianshu: ["star_yuanshu", "star_dongzhuo", "star_yuanshao", "star_zhangzhao"],
 	sp2_yuheng: ["star_caoren", "star_zhangchunhua"],
 	sp2_kaiyang: ["star_sunjian"],
-	sp2_yaoguang: ["star_sunshangxiang"],
+	sp2_yaoguang: ["star_sunshangxiang", "star_dingfeng"],
 	sp2_tianxuan: ["star_xunyu", "star_fazheng"],
 	sp2_waitforsort: ["caobuxing", "re_maliang", "dc_jikang"],
 };

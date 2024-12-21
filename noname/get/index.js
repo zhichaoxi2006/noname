@@ -368,6 +368,7 @@ export class Get extends GetCompatible {
 		if (info.sunbenSkill) list.add("昂扬技");
 		if (info.persevereSkill) list.add("持恒技");
 		if (info.comboSkill) list.add("连招技");
+		if (info.feedPigSkill) list.add("威主技");
 		if (info.categories) list.addArray(info.categories(skill, player));
 		return list;
 	}
@@ -517,6 +518,10 @@ export class Get extends GetCompatible {
 		game.updateRoundNumber();
 		return list;
 	}
+	/**
+	 * 返回本回合在进入弃牌堆且还在弃牌堆的牌
+	 * @returns { Card[] }
+	 */
 	discarded() {
 		return _status.discarded.filter(item => item.parentNode == ui.discardPile);
 	}
@@ -4608,7 +4613,7 @@ export class Get extends GetCompatible {
 				}
 			}
 			if (node.skill) {
-				uiintro.add('<div class="text center">' + get.translation(node.skill, "skill") + "</div>");
+				uiintro.add('<div class="text center">' + get.translation(node.skill) + "</div>");
 				uiintro._place_text = uiintro.add('<div class="text" style="display:inline">' + get.translation(node.skill, "info") + "</div>");
 			}
 			if (node.targets && get.itemtype(node.targets) == "players") {
@@ -5012,7 +5017,11 @@ export class Get extends GetCompatible {
 		var zerotarget = false,
 			zeroplayer = false;
 		for (var i = 0; i < skills1.length; i++) {
-			temp1 = get.info(skills1[i]).ai;
+			const info = get.info(skills1[i]);
+			if (!info) {
+				throw new Error(`${skills1[i]}不存在的技能`);
+			}
+			temp1 = info.ai;
 			if (temp1 && typeof temp1.effect == "object" && typeof temp1.effect.player_use == "function") {
 				temp1 = cache.delegate(temp1.effect).player_use(card, player, target, result1, isLink);
 			} else if (temp1 && typeof temp1.effect == "object" && typeof temp1.effect.player == "function") {
@@ -5042,7 +5051,11 @@ export class Get extends GetCompatible {
 			var skills2 = target.getSkills().concat(lib.skill.global);
 			game.expandSkills(skills2);
 			for (var i = 0; i < skills2.length; i++) {
-				temp2 = get.info(skills2[i]).ai;
+				const info = get.info(skills2[i]);
+				if (!info) {
+					throw new Error(`${skills2[i]}不存在的技能`);
+				}
+				temp2 = info.ai;
 				if (temp2 && temp2.threaten) temp3 = temp2.threaten;
 				else temp3 = undefined;
 				if (temp2 && typeof temp2.effect == "function") {
@@ -5203,7 +5216,11 @@ export class Get extends GetCompatible {
 		var zerotarget = false,
 			zeroplayer = false;
 		for (var i = 0; i < skills1.length; i++) {
-			temp1 = get.info(skills1[i]).ai;
+			const info = get.info(skills1[i]);
+			if (!info) {
+				throw new Error(`${skills1[i]}不存在的技能`);
+			}
+			temp1 = info.ai;
 			if (temp1 && typeof temp1.effect == "object" && typeof temp1.effect.player == "function") {
 				temp1 = temp1.effect.player(card, player, target, result1, isLink);
 			} else temp1 = undefined;
@@ -5231,7 +5248,11 @@ export class Get extends GetCompatible {
 			var skills2 = target.getSkills().concat(lib.skill.global);
 			game.expandSkills(skills2);
 			for (var i = 0; i < skills2.length; i++) {
-				temp2 = get.info(skills2[i]).ai;
+				const info = get.info(skills2[i]);
+				if (!info) {
+					throw new Error(`${skills2[i]}不存在的技能`);
+				}
+				temp2 = info.ai;
 				if (!temp2) continue;
 				if (temp2.threaten) temp3 = cache.delegate(temp2).threaten;
 				else temp3 = undefined;
