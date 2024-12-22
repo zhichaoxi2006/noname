@@ -518,17 +518,15 @@ const skills = {
 							.forResult();
 			if (result?.bool) {
 				const cards = result.cards || [];
-				if (cards.length) {
-					await player.discard(cards);
-					player.markAuto(record, [cards.length]);
-					player.storage[record].sort((a, b) => a - b);
-					player.addTip(record, [get.translation(record), ...player.storage[record]].join(" "));
-					const names = cards.map(card => get.name(card, player)).toUniqued();
-					if (names.length !== 1 || !["basic", "trick"].includes(get.type(names[0]))) return;
-					player.addTempSkill(effect);
-					player.storage[effect].push(names[0]);
-					player.markSkill(effect);
-				}
+				if (cards.length) await player.discard(cards);
+				player.markAuto(record, [cards.length]);
+				player.storage[record].sort((a, b) => a - b);
+				player.addTip(record, [get.translation(record), ...player.storage[record]].join(" "));
+				const names = cards.map(card => get.name(card, player)).toUniqued();
+				if (names.length !== 1 || !["basic", "trick"].includes(get.type(names[0]))) return;
+				player.addTempSkill(effect);
+				player.storage[effect].push(names[0]);
+				player.markSkill(effect);
 			}
 		},
 		ai: {
