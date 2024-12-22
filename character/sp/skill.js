@@ -465,26 +465,24 @@ const skills = {
 		async content(event, trigger, player) {
 			await player.draw(2);
 			const hs = player.getCards("he", card => lib.filter.cardDiscardable(card, player, "olxianying"));
-			if (!hs.length) return;
 			const record = event.name + "_record",
 				effect = event.name + "_effect",
 				storage = player.getStorage(record),
-				forced = storage.includes(0),
 				choices = Array.from({ length: hs.length + 1 })
 					.map((_, i) => i)
 					.filter(i => !storage.includes(i));
 			player.addTempSkill(record, "roundStart");
 			const result =
-				hs.length <= Math.max(...storage)
+				hs.length <= Math.min(...choices)
 					? { bool: true, cards: hs }
 					: await player
-							.chooseToDiscard("he", [0, Infinity], get.prompt(event.name), `你可以弃置任意张牌，若这些牌同名，则本回合结束时你可以视为使用之${storage.length ? `（本轮已弃置过的牌数：${storage}）` : ``}`)
+							.chooseToDiscard("he", [0, Infinity], get.prompt(event.name), `你可以弃置任意张牌，若这些牌同名，则本回合结束时你可以视为使用之${storage.length ? `（本轮已弃置过的牌数：${storage}）` : ``}`, true)
 							.set("filterOk", () => {
 								return !get.event("storage").includes(ui.selected.cards.length);
 							})
+							.set("chooseonly", true)
 							.set("storage", storage)
 							.set("choices", choices)
-							.set("forced", forced)
 							.set("ai", card => {
 								const { player, names, choices } = get.event();
 								const list = names.filter(i => i[1] > choices.remove(0)[0]).map(i => i[0]);
@@ -516,16 +514,21 @@ const skills = {
 										}, [])
 										.sort((a, b) => b[1] - a[1]);
 								})()
-							);
+							)
+							.forResult();
 			if (result?.bool) {
 				const cards = result.cards || [];
-				player.markAuto(record, [cards.length]);
-				player.storage[record].sort((a, b) => a - b);
-				const names = cards.map(card => get.name(card, player)).toUniqued();
-				if (names.length !== 1 || !["basic", "trick"].includes(get.type(names[0]))) return;
-				player.addTempSkill(effect);
-				player.storage[effect].push(names[0]);
-				player.markSkill(effect);
+				if (cards.length) {
+					await player.discard(cards);
+					player.markAuto(record, [cards.length]);
+					player.storage[record].sort((a, b) => a - b);
+					player.addTip(record, [get.translation(record), ...player.storage[record]].join(" "));
+					const names = cards.map(card => get.name(card, player)).toUniqued();
+					if (names.length !== 1 || !["basic", "trick"].includes(get.type(names[0]))) return;
+					player.addTempSkill(effect);
+					player.storage[effect].push(names[0]);
+					player.markSkill(effect);
+				}
 			}
 		},
 		ai: {
@@ -546,7 +549,10 @@ const skills = {
 		subSkill: {
 			record: {
 				charlotte: true,
-				onremove: true,
+				onremove(player, skill) {
+					delete player.storage[skill];
+					player.removeTip(skill);
+				},
 				intro: { content: "本轮因【贤膺】已经弃置牌数：$" },
 			},
 			effect: {
