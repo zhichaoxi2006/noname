@@ -694,7 +694,7 @@ const translates = {
 	dcfengshi: "锋矢",
 	dcfengshi_info: "你使用【杀】指定目标后，若你不在其攻击范围内，你可以弃置该角色装备区里的一张防具或防御马。",
 	dcsuishi: "随势",
-	dcsuishi_info: "锁定技，其他角色进入濒死时，若伤害来源与你势力相同，你摸一张牌；其他角色死亡时，若其势力与你相同，你弃置至少1张手牌。",
+	dcsuishi_info: "锁定技，其他角色进入濒死时，若伤害来源与你势力相同，你摸一张牌；其他角色死亡时，若其势力与你相同，你弃置至少一张手牌。",
 	dc_sb_hucheer: "新杀谋胡车儿",
 	dc_sb_hucheer_prefix: "新杀谋",
 	dcsbkongwu: "孔武",

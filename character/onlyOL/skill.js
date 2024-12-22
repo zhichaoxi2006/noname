@@ -3,13 +3,13 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
 	//OL界孙休
-	ol_yanzhu: {
+	olyanzhu: {
 		enable: "phaseUse",
-		derivation: "ol_yanzhu_rewrite",
+		derivation: "olyanzhu_rewrite",
 		filterTarget: lib.filter.notMe,
 		usable: 1,
 		filter(event, player) {
-			return !player.storage.ol_yanzhu_rewrite;
+			return !player.storage.olyanzhu_rewrite;
 		},
 		async content(event, trigger, player) {
 			const target = event.targets[0];
@@ -36,29 +36,29 @@ const skills = {
 			if (result.links[0] == "gain") {
 				await player.gain(target.getCards("e"));
 				const obj = {
-					ol_yanzhu_rewrite: true,
-					ol_xinxue_rewrite: true,
+					olyanzhu_rewrite: true,
+					olxingxue_rewrite: true,
 				};
 				Object.assign(player.storage, obj);
 			} else {
 				await target.chooseToDiscard(true);
-				target.addTempSkill("ol_yanzhu_debuff");
-				target.addMark("ol_yanzhu_debuff", 1, false);
+				target.addTempSkill("olyanzhu_debuff");
+				target.addMark("olyanzhu_debuff", 1, false);
 			}
 		},
-		group: "ol_yanzhu_rewrite",
+		group: "olyanzhu_rewrite",
 		subSkill: {
 			rewrite: {
 				enable: "phaseUse",
 				usable: 1,
 				filterTarget: lib.filter.notMe,
 				filter(event, player) {
-					return player.storage.ol_yanzhu_rewrite;
+					return player.storage.olyanzhu_rewrite;
 				},
 				async content(event, trigger, player) {
 					const target = event.targets[0];
-					target.addTempSkill("ol_yanzhu_debuff");
-					target.addMark("ol_yanzhu_debuff", 1, false);
+					target.addTempSkill("olyanzhu_debuff");
+					target.addMark("olyanzhu_debuff", 1, false);
 				},
 			},
 			debuff: {
@@ -76,19 +76,19 @@ const skills = {
 					player: "damageBegin3",
 				},
 				async content(event, trigger, player) {
-					trigger.num += player.countMark("ol_yanzhu_debuff");
+					trigger.num += player.countMark("olyanzhu_debuff");
 					player.removeSkill(event.name);
 				},
 			},
 		},
 	},
-	ol_xinxue: {
-		derivation: "ol_xinxue_rewrite",
+	olxingxue: {
+		derivation: "olxingxue_rewrite",
 		trigger: {
 			player: "phaseJieshuBegin",
 		},
 		async cost(event, trigger, player) {
-			const max = player.storage.ol_xinxue_rewrite ? player.maxHp : player.getHp();
+			const max = player.storage.olxingxue_rewrite ? player.maxHp : player.getHp();
 			event.result = await player.chooseTarget([1, max]).set("prompt", `令至多${max}名角色依次摸一张牌`).forResult();
 		},
 		async content(event, trigger, player) {
@@ -132,7 +132,7 @@ const skills = {
 					if (!player.countCards("he")) return false;
 					const storage = player.storage.olsbchoulie_buff;
 					const vcard = new lib.element.VCard({ name: "sha" });
-					return lib.filter.targetEnabledx(vcard, player, storage[0]);
+					return player.canUse(vcard, storage[0], false);
 				},
 				async cost(event, trigger, player) {
 					const storage = player.storage.olsbchoulie_buff;
@@ -145,9 +145,7 @@ const skills = {
 					await player.discard(event.cards);
 					const storage = player.storage.olsbchoulie_buff;
 					const vcard = new lib.element.VCard({ name: "sha" });
-					if (player.canUse(vcard, storage[0])) {
-						await player.useCard(vcard, storage);
-					}
+					if (player.canUse(vcard, storage[0], false)) await player.useCard(vcard, storage);
 				},
 			},
 			use: {
@@ -222,12 +220,12 @@ const skills = {
 		},
 	},
 	//OL谋赵云
-	ol_sb_nilan: {
+	olsbnilan: {
 		trigger: {
 			source: "damageSource",
 		},
 		filter(event, player) {
-			if (event.getParent().name == "ol_sb_nilan") return false;
+			if (event.getParent().name == "olsbnilan") return false;
 			return true;
 		},
 		async cost(event, trigger, player) {
@@ -271,13 +269,13 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			const { cost_data } = event;
-			player.addSkill("ol_sb_nilan_buff");
-			let list = player.storage.ol_sb_nilan_buff;
+			player.addSkill("olsbnilan_buff");
+			let list = player.storage.olsbnilan_buff;
 			if (cost_data == "discard") {
-				await lib.skill.ol_sb_nilan.choice.discard.apply(this, arguments);
+				await lib.skill.olsbnilan.choice.discard.apply(this, arguments);
 				list.push("draw");
 			} else {
-				await lib.skill.ol_sb_nilan.choice.draw.apply(this, arguments);
+				await lib.skill.olsbnilan.choice.draw.apply(this, arguments);
 				list.push("discard");
 			}
 		},
@@ -291,16 +289,16 @@ const skills = {
 					player.storage[skill] = [];
 				},
 				async content(event, trigger, player) {
-					const list = player.storage.ol_sb_nilan_buff;
+					const list = player.storage.olsbnilan_buff;
 					for (const i of list) {
-						await lib.skill.ol_sb_nilan.choice[i].apply(this, arguments);
+						await lib.skill.olsbnilan.choice[i].apply(this, arguments);
 					}
-					player.removeSkill("ol_sb_nilan_buff");
+					player.removeSkill("olsbnilan_buff");
 				},
 			},
 		},
 	},
-	ol_sb_jueya: {
+	olsbjueya: {
 		audio: 2,
 		enable: ["chooseToUse", "chooseToRespond"],
 		init: function (player, skill) {
@@ -308,7 +306,7 @@ const skills = {
 		},
 		hiddenCard: function (player, name) {
 			if (get.type(name) != "basic") return false;
-			if (player.storage.ol_sb_jueya && !player.storage.ol_sb_jueya.includes(name)) return !player.countCards("h");
+			if (player.storage.olsbjueya && !player.storage.olsbjueya.includes(name)) return !player.countCards("h");
 			return false;
 		},
 		marktext: "崖",
@@ -328,7 +326,7 @@ const skills = {
 		filter: function (event, player) {
 			if (event.type == "wuxie") return false;
 			if (player.countCards("h")) return false;
-			const storage = player.storage.ol_sb_jueya;
+			const storage = player.storage.olsbjueya;
 			for (var i of lib.inpile.filter(c => get.type(c) == "basic")) {
 				var card = { name: i, isCard: true };
 				if (event.filterCard(card, player, event)) return true;
@@ -339,7 +337,7 @@ const skills = {
 			dialog: function (event, player) {
 				const list = [];
 				const cardname = lib.inpile.filter(c => get.type(c) == "basic");
-				const storage = player.storage.ol_sb_jueya;
+				const storage = player.storage.olsbjueya;
 				cardname.removeArray(storage);
 				for (var i of cardname) list.push(["基本", "", i]);
 				return ui.create.dialog("绝崖", [list, "vcard"], "hidden");
@@ -358,7 +356,7 @@ const skills = {
 			},
 			backup: function (links, player) {
 				return {
-					audio: "ol_sb_jueya",
+					audio: "olsbjueya",
 					filterCard: function () {
 						return false;
 					},
@@ -369,7 +367,7 @@ const skills = {
 					},
 					selectCard: -1,
 					async precontent(event, trigger, player) {
-						player.markAuto("ol_sb_jueya", event.result.card.name);
+						player.markAuto("olsbjueya", event.result.card.name);
 					},
 				};
 			},
@@ -406,7 +404,7 @@ const skills = {
 		},
 		subSkill: {
 			backup: {
-				audio: "ol_sb_jueya",
+				audio: "olsbjueya",
 			},
 		},
 	},

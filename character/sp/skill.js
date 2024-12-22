@@ -318,7 +318,7 @@ const skills = {
 		},
 	},
 	//OL郭照
-	ol_jiaoyu: {
+	oljiaoyu: {
 		trigger: {
 			global: "roundStart",
 		},
@@ -356,7 +356,7 @@ const skills = {
 					const {
 						result: { control },
 					} = await player.chooseControl(color, dialog);
-					player.storage["ol_jiaoyu"] = control;
+					player.storage["oljiaoyu"] = control;
 					game.log(player, "声明了", control);
 					for (const i of event.cards) {
 						if (get.color(i) == control) {
@@ -364,12 +364,12 @@ const skills = {
 						}
 					}
 					await player.gain(cards, "gain2");
-					player.addSkill("ol_jiaoyu_phaseUse");
+					player.addSkill("oljiaoyu_phaseUse");
 					return;
 				}
 			}
 		},
-		group: "ol_jiaoyu_phaseChange",
+		group: "oljiaoyu_phaseChange",
 		subSkill: {
 			phaseUse: {
 				trigger: {
@@ -378,8 +378,8 @@ const skills = {
 				forced: true,
 				charlotte: true,
 				async content(event, trigger, player) {
-					trigger.phaseList.add("phaseUse|ol_jiaoyu");
-					player.removeSkill("ol_jiaoyu_phaseUse");
+					trigger.phaseList.add("phaseUse|oljiaoyu");
+					player.removeSkill("oljiaoyu_phaseUse");
 				},
 			},
 			phaseChange: {
@@ -387,17 +387,17 @@ const skills = {
 					player: "phaseChange",
 				},
 				filter(event, player) {
-					event.phaseList[event.num].includes("ol_jiaoyu");
+					event.phaseList[event.num].includes("oljiaoyu");
 				},
 				async content(event, trigger, player) {
-					player.addTempSkill("ol_jiaoyu_debuff");
+					player.addTempSkill("oljiaoyu_debuff");
 				},
 			},
 			debuff: {
 				charlotte: true,
 				mod: {
 					cardEnabled(card, player, result) {
-						if (get.color(card) == player.storage["ol_jiaoyu"]) {
+						if (get.color(card) == player.storage["oljiaoyu"]) {
 							return result;
 						}
 						return false;
@@ -406,7 +406,7 @@ const skills = {
 			},
 		},
 	},
-	ol_neixun: {
+	olneixun: {
 		trigger: {
 			global: "useCardEnd",
 		},
@@ -421,13 +421,13 @@ const skills = {
 			return event.player;
 		},
 		async content(event, trigger, player) {
-			if (get.color(trigger.card) == player.storage["ol_jiaoyu"]) {
+			if (get.color(trigger.card) == player.storage["oljiaoyu"]) {
 				await player.chooseToGive(trigger.player, "he");
 				const { result } = await player.draw();
 				for (const i of result) {
-					i.addGaintag("ol_neixun");
+					i.addGaintag("olneixun");
 				}
-				player.addTempSkill("ol_neixun_add", { player: "phaseAfter" });
+				player.addTempSkill("olneixun_add", { player: "phaseAfter" });
 			} else {
 				await player.gainPlayerCard(trigger.player, "he");
 				await trigger.player.draw();
@@ -437,18 +437,18 @@ const skills = {
 			add: {
 				mod: {
 					ignoredHandcard: function (card, player) {
-						if (card.hasGaintag("ol_neixun")) {
+						if (card.hasGaintag("olneixun")) {
 							return true;
 						}
 					},
 					cardDiscardable: function (card, player, name) {
-						if (name == "phaseDiscard" && card.hasGaintag("ol_neixun")) {
+						if (name == "phaseDiscard" && card.hasGaintag("olneixun")) {
 							return false;
 						}
 					},
 				},
 				onremove: function (player) {
-					player.removeGaintag("ol_neixun");
+					player.removeGaintag("olneixun");
 				},
 			},
 		},

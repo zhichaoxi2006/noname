@@ -3795,7 +3795,7 @@ game.import("character", function () {
 				multiline: true,
 				content() {
 					"step 0";
-					var dialog = ui.create.dialog("弃置至多2张手牌", "hidden");
+					var dialog = ui.create.dialog("弃置至多两张手牌", "hidden");
 					for (var i = 0; i < targets.length; i++) {
 						var hs = targets[i].getCards("h");
 						if (hs.length) {

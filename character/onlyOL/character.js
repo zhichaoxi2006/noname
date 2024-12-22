@@ -1,7 +1,7 @@
 const characters = {
-	ol_sunxiu: ["male", "wu", 3, ["ol_yanzhu", "ol_xinxue", "xinzhaofu"]],
+	ol_sunxiu: ["male", "wu", 3, ["olyanzhu", "olxingxue", "xinzhaofu"]],
 	ol_sb_zhangxiu: ["male", "qun", 4, ["olsbchoulie", "olsbzhunjiao"]],
-	ol_sb_zhaoyun: ["male", "shu", 4, ["ol_sb_nilan", "ol_sb_jueya"]],
+	ol_sb_zhaoyun: ["male", "shu", 4, ["olsbnilan", "olsbjueya"]],
 	ol_sb_zhangfei: ["male", "shu", 4, ["olsbjingxian", "olsbxieyong"], []],
 	ol_sb_huangyueying: ["female", "shu", 3, ["olsbbingcai", "olsblixian"]],
 	ol_sb_jushou: ["male", "qun", 3, ["olsbguliang", "olsbxutu"]],
