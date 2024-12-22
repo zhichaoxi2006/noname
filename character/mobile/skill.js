@@ -10391,7 +10391,6 @@ const skills = {
 	xinzenhui2: {},
 	xinjiaojin: {
 		audio: 2,
-		audioname2: { tw_sunluban: "jiaojin" },
 		trigger: { player: "damageBegin4" },
 		filter: function (event, player) {
 			return player.countCards("he", { type: "equip" }) && event.source && event.source.hasSex("male");
