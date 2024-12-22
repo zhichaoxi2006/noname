@@ -16,7 +16,7 @@ const translates = {
 	key_iwasawa: "岩泽雅美",
 	key_kengo: "宫泽谦吾",
 	key_yoshino: "吉野晴彦",
-	key_yui: "由依",
+	key_yui: "芳冈由依",
 	key_tsumugi: "紬文德斯",
 	key_saya: "朱鹭户沙耶",
 	key_harukakanata: "三枝叶留佳&二木佳奈多",
