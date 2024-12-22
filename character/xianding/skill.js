@@ -135,7 +135,7 @@ const skills = {
 			return true;
 		},
 		frequent: true,
-		async content(event, trigger, player) {
+		async cost(event, trigger, player){
 			const cards = get.cards(5);
 			await game.cardsGotoOrdering(cards);
 			const next = player.chooseToMove();
@@ -144,12 +144,19 @@ const skills = {
 				["武将牌上", []],
 			]);
 			const {
-				result: { moved },
+				result: { moved, bool },
 			} = await next;
-			const cardsx = [];
-			if (moved) {
-				cardsx.addArray(moved[1]);
+			if(bool) {
+				event.result = {
+					bool: moved[1].length,
+					cost_data: moved,
+				}
 			}
+		},
+		async content(event, trigger, player) {
+			const { cost_data } = event;
+			const cardsx = [];
+			cardsx.addArray(cost_data[1]);
 			cardsx.reverse();
 			const next2 = player.addToExpansion(cardsx, player, "giveAuto");
 			next2.gaintag.add("dczhengyue");
