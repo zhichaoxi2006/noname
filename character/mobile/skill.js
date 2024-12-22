@@ -57,7 +57,7 @@ const skills = {
 				filter: (event, player) => player.hasMark("potzhanlie_lie") && player.hasUseTarget(new lib.element.VCard({ name: "sha" }), false),
 				direct: true,
 				content() {
-					player.chooseUseTarget("###" + get.prompt("potzhanlie") + "？###移去所有“烈”，视为使用一张无距离限制的【杀】", new lib.element.VCard({ name: "sha" }), false, "nodistance").set("oncard", () => {
+					player.chooseUseTarget("###" + get.prompt("potzhanlie") + "？###移去所有“烈”，视为使用一张无次数限制的【杀】", new lib.element.VCard({ name: "sha" }), false).set("oncard", () => {
 						const event = get.event(),
 							{ player } = event,
 							num = player.countMark("potzhanlie_lie");
@@ -223,7 +223,7 @@ const skills = {
 			const target = event.targets[0];
 			for (const drawer of [player, target]) {
 				let zhenfeng,
-					num = ((zhenfeng = player.getStorage("potzhenfeng") || []), ({ hp: () => drawer.getHp(), damagedHp: () => drawer.getDamagedHp(), countplayer: () => game.countPlayer() }[zhenfeng[0]] || (() => drawer.maxHp))()) - drawer.countCards("h");
+					num = (zhenfeng = player.getStorage("potzhenfeng"), ({ hp: () => drawer.getHp(), damagedHp: () => drawer.getDamagedHp(), countplayer: () => game.countPlayer() }[zhenfeng[0]] || (() => drawer.maxHp))()) - drawer.countCards("h");
 				if (num > 0) await drawer.draw(Math.min(num, 5));
 			}
 			const juedou = new lib.element.VCard({ name: "juedou" });
