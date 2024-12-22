@@ -2073,6 +2073,9 @@ const skills = {
 					cardnature(card) {
 						if (get.itemtype(card) === "card" && card.hasGaintag("olbianyu_viewAs")) return false;
 					},
+					cardUsable(card) {
+						if (card.name === "sha" && card.cards?.length === 1 && card.cards[0].hasGaintag("olbianyu_viewAs")) return Infinity;
+					},
 				},
 				charlotte: true,
 				onremove: (player, skill) => player.removeGaintag(skill),
