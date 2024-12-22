@@ -11,11 +11,11 @@ const skills = {
 		content() {
 			const zhenfeng = player.getStorage("potzhenfeng"),
 				effectMap = new Map([
-					["hp", () => player.getHp()],
-					["damagedHp", () => player.getDamagedHp()],
-					["countplayer", () => game.countPlayer()],
+					["hp", player.getHp()],
+					["damagedHp", player.getDamagedHp()],
+					["countplayer", game.countPlayer()],
 				]);
-			const num = zhenfeng[0] && effectMap.has(zhenfeng[0]) ? effectMap.get(zhenfeng[0])() : player.getAttackRange();
+			const num = effectMap.get(zhenfeng[0]) || player.getAttackRange();
 			player.addTempSkill("potzhanlie_addMark");
 			if (num > 0) player.addMark("potzhanlie_addMark", num, false);
 		},
@@ -222,8 +222,16 @@ const skills = {
 		async content(event, trigger, player) {
 			const target = event.targets[0];
 			for (const drawer of [player, target]) {
-				let zhenfeng,
-					num = (zhenfeng = player.getStorage("potzhenfeng"), ({ hp: () => drawer.getHp(), damagedHp: () => drawer.getDamagedHp(), countplayer: () => game.countPlayer() }[zhenfeng[0]] || (() => drawer.maxHp))()) - drawer.countCards("h");
+				const num = (() => {
+					const [zhenfa] = player.getStorage("potzhenfeng");
+					return (
+						({
+							hp: drawer.getHp(),
+							damagedHp: drawer.getDamagedHp(),
+							countplayer: game.countPlayer(),
+						}[zhenfa] || drawer.maxHp) - drawer.countCards("h")
+					);
+				})();
 				if (num > 0) await drawer.draw(Math.min(num, 5));
 			}
 			const juedou = new lib.element.VCard({ name: "juedou" });
@@ -236,7 +244,26 @@ const skills = {
 			},
 			result: {
 				target(player, target) {
-					return get.effect(target, new lib.element.VCard({ name: "juedou" }), player, player) - Math.max(0, Math.min(5, target.maxHp) - target.countCards("h"));
+					return (
+						get.effect(target, new lib.element.VCard({ name: "juedou" }), player, player) -
+						Math.max(
+							0,
+							Math.min(
+								5,
+								(() => {
+									const [zhenfa] = player.getStorage("potzhenfeng");
+									return (
+										({
+											hp: target.getHp(),
+											damagedHp: target.getDamagedHp(),
+											countplayer: game.countPlayer(),
+										}[zhenfa] || target.maxHp) - target.countCards("h")
+									);
+								})()
+							)
+						) *
+							get.effect(target, { name: "draw" }, player, player)
+					);
 				},
 			},
 		},
