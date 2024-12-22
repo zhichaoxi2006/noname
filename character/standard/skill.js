@@ -1673,7 +1673,7 @@ const skills = {
 	},
 	wushuang: {
 		audio: 2,
-		audioname: ["re_lvbu", "shen_lvbu", "lvlingqi", "ol_jsrg_lvbu"],
+		audioname: ["re_lvbu", "shen_lvbu", "lvlingqi"],
 		forced: true,
 		locked: true,
 		group: ["wushuang1", "wushuang2"],

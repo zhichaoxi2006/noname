@@ -12403,6 +12403,7 @@ const skills = {
 	},
 	new_reyiji: {
 		audio: "reyiji",
+		audioname: ["yj_sb_guojia", "yj_sb_guojia_shadow"],
 		trigger: {
 			player: "damageEnd",
 		},
@@ -14362,6 +14363,7 @@ const skills = {
 	},
 	reyiji: {
 		audio: 2,
+		audioname: ["yj_sb_guojia", "yj_sb_guojia_shadow"],
 		trigger: { player: "damageEnd" },
 		frequent: true,
 		filter: function (event) {
