@@ -6600,12 +6600,9 @@ const skills = {
 			return "摸" + get.cnNumber(lib.skill.dcqinshen.getNum()) + "张牌";
 		},
 		getNum: function () {
-			var list = lib.suit.slice();
-			game.getGlobalHistory("cardMove", function (evt) {
-				if (evt.name != "lose" && evt.name != "cardsDiscard") return false;
-				if (evt.name == "lose" && evt.position != ui.discardPile) return false;
-				for (var card of evt.cards) list.remove(get.suit(card, false));
-			});
+			const list = lib.suit.slice();
+			const suit = _status.discarded.map(c => get.suit(c, false));
+			list.removeArray(suit);
 			return list.length;
 		},
 		filter: function (event, player) {
