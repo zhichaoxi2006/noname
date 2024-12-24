@@ -280,7 +280,7 @@ const skills = {
 			},
 		},
 	},
-	olqiaozi: {
+	olqiaozhi: {
 		trigger: {
 			player: "loseAfter",
 			global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
@@ -288,16 +288,16 @@ const skills = {
 		filter(event, player) {
 			const evt = event.getl(player);
 			for (var i in evt.gaintag_map) {
-				if (evt.gaintag_map[i].includes("olqiaozi")) return true;
+				if (evt.gaintag_map[i].includes("olqiaozhi")) return true;
 			}
 			return false;
 		},
 		silent: true,
 		locked: false,
 		async content(event, trigger, player) {
-			delete player.storage[`temp_ban_olqiaozi_use`];
+			delete player.storage[`temp_ban_olqiaozhi_use`];
 		},
-		group: "olqiaozi_use",
+		group: "olqiaozhi_use",
 		subSkill: {
 			use: {
 				enable: "phaseUse",
@@ -311,8 +311,8 @@ const skills = {
 						result: { links },
 					} = await player.chooseCardButton("【巧织】：获得其中一张牌", cards, true);
 					await player.gain(links);
-					links[0].addGaintag("olqiaozi");
-					player.tempBanSkill("olqiaozi_use", "forever");
+					links[0].addGaintag("olqiaozhi");
+					player.tempBanSkill("olqiaozhi_use", "forever");
 				},
 			},
 		},
