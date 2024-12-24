@@ -2648,7 +2648,7 @@ const skills = {
 		selectCard: 4,
 		complexCard: true,
 		charlotte: true,
-		prompt: "将4张花色各不同的牌交一名角色并令你与其获得【铁骑】和【激昂】直到各自回合结束",
+		prompt: "将四张花色各不同的牌交一名角色并令你与其获得【铁骑】和【激昂】直到各自回合结束",
 		check(card) {
 			if (ui.selected.cards.length && ui.selected.cards[0].name == "du") return 0;
 			if (!ui.selected.cards.length && card.name == "du") return 20;
@@ -6383,7 +6383,7 @@ const skills = {
 			player.awakenSkill("nswulie");
 			player.loseMaxHp();
 			"step 1";
-			player.chooseCardButton(Array.from(ui.discardPile.childNodes), "将至多3张任意顺置于牌堆顶（先选择的在上）", true, [1, 3]);
+			player.chooseCardButton(Array.from(ui.discardPile.childNodes), "将至多三张任意顺置于牌堆顶（先选择的在上）", true, [1, 3]);
 			"step 2";
 			if (result.bool) {
 				var cards = result.links.slice(0);
@@ -6406,7 +6406,7 @@ const skills = {
 					"step 0";
 					player.loseMaxHp();
 					"step 1";
-					player.chooseCardButton(Array.from(ui.discardPile.childNodes), "将至多3张任意顺置于牌堆顶（先选择的在上）", true, [1, 3]);
+					player.chooseCardButton(Array.from(ui.discardPile.childNodes), "将至多三张任意顺置于牌堆顶（先选择的在上）", true, [1, 3]);
 					"step 2";
 					if (result.bool) {
 						var cards = result.links.slice(0);

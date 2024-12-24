@@ -9,15 +9,17 @@ const skills = {
 		forced: true,
 		locked: false,
 		content() {
-			const zhenfeng = player.getStorage("potzhenfeng"),
-				effectMap = new Map([
-					["hp", player.getHp()],
-					["damagedHp", player.getDamagedHp()],
-					["countplayer", game.countPlayer()],
-				]);
-			const num = effectMap.get(zhenfeng[0]) || player.getAttackRange();
+			const effectMap = new Map([
+				["hp", player.getHp()],
+				["damagedHp", player.getDamagedHp()],
+				["countplayer", game.countPlayer()],
+			]);
+			const num = effectMap.get(player.storage.potzhanlie) || player.getAttackRange();
 			player.addTempSkill("potzhanlie_addMark");
 			if (num > 0) player.addMark("potzhanlie_addMark", num, false);
+		},
+		get limit() {
+			return 6;
 		},
 		group: "potzhanlie_lie",
 		subSkill: {
@@ -29,7 +31,7 @@ const skills = {
 				getIndex(event, player) {
 					return Math.min(
 						event.getd().filter(i => i.name === "sha").length,
-						8 - player.countMark("potzhanlie_lie"),
+						get.info("potzhanlie").limit - player.countMark("potzhanlie_lie"),
 						Math.max(
 							player.countMark("potzhanlie_addMark") -
 								game
@@ -223,16 +225,15 @@ const skills = {
 			const target = event.targets[0];
 			for (const drawer of [player, target]) {
 				const num = (() => {
-					const [zhenfa] = player.getStorage("potzhenfeng");
 					return (
 						({
 							hp: drawer.getHp(),
 							damagedHp: drawer.getDamagedHp(),
 							countplayer: game.countPlayer(),
-						}[zhenfa] || drawer.maxHp) - drawer.countCards("h")
+						}[player.storage.pothanzhan] || drawer.maxHp) - drawer.countCards("h")
 					);
 				})();
-				if (num > 0) await drawer.draw(Math.min(num, 5));
+				if (num > 0) await drawer.draw(Math.min(num, 3));
 			}
 			const juedou = new lib.element.VCard({ name: "juedou" });
 			if (player.canUse(juedou, target)) await player.useCard(juedou, target, false);
@@ -249,15 +250,14 @@ const skills = {
 						Math.max(
 							0,
 							Math.min(
-								5,
+								3,
 								(() => {
-									const [zhenfa] = player.getStorage("potzhenfeng");
 									return (
 										({
 											hp: target.getHp(),
 											damagedHp: target.getDamagedHp(),
 											countplayer: game.countPlayer(),
-										}[zhenfa] || target.maxHp) - target.countCards("h")
+										}[player.storage.pothanzhan] || target.maxHp) - target.countCards("h")
 									);
 								})()
 							)
@@ -308,32 +308,35 @@ const skills = {
 			},
 			backup(links) {
 				return {
+					item: links[0],
 					audio: "potzhenfeng",
 					skillAnimation: true,
 					animationColor: "metal",
 					async content(event, trigger, player) {
 						player.awakenSkill("potzhenfeng");
-						if (links[0] === "recover") {
+						if (get.info(event.name).item === "recover") {
 							await player.recover(2);
 						} else {
+							let dialog = [],
+								skills = ["pothanzhan", "potzhanlie"].filter(skill => player.hasSkill(skill, null, null, false)),
+								list = [
+									["hp", "当前体力值"],
+									["damagedHp", "当前已损失体力值"],
+									["countplayer", "场上存活角色数"],
+								];
+							dialog.push("振锋：修改" + skills.map(skill => "〖" + get.translation(skill) + "〗").join("和") + "描述中的“X”为...");
+							for (const skill of skills) {
+								dialog.push('<div class="text center">' + get.translation(skill) + "</div>");
+								dialog.push([list.map(item => [item[0] + "|" + skill, item[1]]), "tdnodes"]);
+							}
 							const result = await player
-								.chooseButton(
-									[
-										"振锋：修改〖酣战〗和〖战烈〗描述中的“X”为...",
-										[
-											[
-												["hp", "当前体力值"],
-												["damagedHp", "当前已损失体力值"],
-												["countplayer", "场上存活角色数"],
-											],
-											"textbutton",
-										],
-									],
-									true
-								)
+								.chooseButton(dialog, skills.length, true)
+								.set("filterButton", button => {
+									return !ui.selected.buttons.some(but => but.link.split("|")[1] === button.link.split("|")[1]);
+								})
 								.set("ai", button => {
 									const player = get.player();
-									switch (button.link) {
+									switch (button.link.split("|")[0]) {
 										case "hp":
 											return player.getHp();
 										case "damagedHp":
@@ -343,8 +346,13 @@ const skills = {
 									}
 								})
 								.forResult();
-							if (result.bool) {
-								player.markAuto("potzhenfeng", result.links[0]);
+							if (result?.bool && result.links?.length) {
+								for (const link of result.links) {
+									const [change, skill] = link.split("|");
+									player.storage[skill] = change;
+									player.popup(skill);
+									game.log(player, "修改", "#g【" + get.translation(skill) + "】", "的", "#yX", "为", "#g" + list.find(item => item[0] === change)[1]);
+								}
 							}
 						}
 					},
@@ -4971,7 +4979,7 @@ const skills = {
 				.chooseToDuiben(target)
 				.set("title", "谋弈")
 				.set("namelist", ["反抗", "归顺", "镇压", "安抚"])
-				.set("translationList", [`对方选择镇压：${get.translation(player)}对你造成1点伤害，然后其摸一张牌<br>对方选择安抚：${get.translation(player)}受到1点伤害，然后其摸两张牌`, `对方选择镇压：${get.translation(player)}获得你一张牌，然后其交给你两张牌<br>对方选择安抚：你须交给${get.translation(player)}两张牌（若你牌数不足2张，则改为其令你跳过你下个摸牌阶段）`, `对方选择反抗：你对${get.translation(target)}造成1点伤害，然后你摸一张牌<br>对方选择归顺：你获得${get.translation(target)}一张牌，然后你交给其两张牌`, `对方选择反抗：你受到1点伤害，然后你摸两张牌<br>对方选择归顺：${get.translation(target)}须交给你两张牌（若其牌数不足两张，则改为令其跳过其下个摸牌阶段）`])
+				.set("translationList", [`对方选择镇压：${get.translation(player)}对你造成1点伤害，然后其摸一张牌<br>对方选择安抚：${get.translation(player)}受到1点伤害，然后其摸两张牌`, `对方选择镇压：${get.translation(player)}获得你一张牌，然后其交给你两张牌<br>对方选择安抚：你须交给${get.translation(player)}两张牌（若你牌数不足两张，则改为其令你跳过你下个摸牌阶段）`, `对方选择反抗：你对${get.translation(target)}造成1点伤害，然后你摸一张牌<br>对方选择归顺：你获得${get.translation(target)}一张牌，然后你交给其两张牌`, `对方选择反抗：你受到1点伤害，然后你摸两张牌<br>对方选择归顺：${get.translation(target)}须交给你两张牌（若其牌数不足两张，则改为令其跳过其下个摸牌阶段）`])
 				.set("ai", button => 1 + Math.random());
 			"step 1";
 			if (result.bool) {

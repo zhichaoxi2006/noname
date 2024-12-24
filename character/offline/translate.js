@@ -1070,7 +1070,7 @@ const translates = {
 	yy_zhaoyun_prefix: "燕幽",
 	yy_baimaxiaoqi: "白马骁骑",
 	yy_baimaxiaoqi_skill: "白马骁骑",
-	yy_baimaxiaoqi_info: "锁定技，若你的装备区牌数X不少于：1张，你的攻击范围+X；2张，你使用【杀】的额定次数+X；3张，你计算与其他角色的距离-X；4张，摸牌阶段，你多摸X张牌。",
+	yy_baimaxiaoqi_info: "锁定技，若你的装备区牌数X不少于：一张，你的攻击范围+X；两张，你使用【杀】的额定次数+X；三张，你计算与其他角色的距离-X；四张，摸牌阶段，你多摸X张牌。",
 	yy_quancong: "燕幽全琮",
 	yy_quancong_prefix: "燕幽",
 	yyyaoming: "邀名",

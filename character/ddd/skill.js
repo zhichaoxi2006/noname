@@ -1086,8 +1086,8 @@ const skills = {
 				return ui.create.dialog(
 					"并肩",
 					// [[
-					// 	[2,'调整至2张'],
-					// 	[4,'调整至4张']
+					// 	[2,'调整至两张'],
+					// 	[4,'调整至四张']
 					// ],'tdnodes'],
 					[["sha", "shan"], "vcard"],
 					"hidden"
@@ -3080,13 +3080,13 @@ const skills = {
 								return 3 * numx(player);
 							}
 							return numx(player);
-						}
+					  }
 					: function (player) {
 							if (player == me) {
 								return 3 * numx;
 							}
 							return numx;
-						};
+					  };
 			player._dddmiaoxing = true;
 		},
 		group: ["dddmiaoxing_out", "dddmiaoxing_balance"],
@@ -4521,13 +4521,13 @@ const skills = {
 								return 3 + numx(player);
 							}
 							return numx(player);
-						}
+					  }
 					: function (player) {
 							if (player == me) {
 								return 3 + numx;
 							}
 							return numx;
-						};
+					  };
 		},
 		mod: {
 			attackRange: (player, num) => num + 3,
@@ -4712,9 +4712,13 @@ const skills = {
 			"step 0";
 			trigger.source.chooseCard("是否响应" + get.translation(player) + "的【附义】？", "弃置两张牌，令其获得其武将牌上的一个技能", "he", 2, lib.filter.cardDiscardable).set("ai", () => {
 				let zhu = _status.event.getParent().player;
-				if (!zhu.getStockSkills(true, true).some(skill => {
-					return !zhu.hasSkill(skill, null, false, false);
-				}) || get.attitude(_status.event.player, zhu) <= 2) return 0;
+				if (
+					!zhu.getStockSkills(true, true).some(skill => {
+						return !zhu.hasSkill(skill, null, false, false);
+					}) ||
+					get.attitude(_status.event.player, zhu) <= 2
+				)
+					return 0;
 				return 6 - get.value(card);
 			});
 			"step 1";
