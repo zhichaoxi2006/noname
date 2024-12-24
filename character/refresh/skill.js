@@ -12403,6 +12403,7 @@ const skills = {
 	},
 	new_reyiji: {
 		audio: "reyiji",
+		audioname: ["yj_sb_guojia", "yj_sb_guojia_shadow"],
 		trigger: {
 			player: "damageEnd",
 		},
@@ -12571,11 +12572,12 @@ const skills = {
 			if (result.bool) {
 				if (cards.length) player.gain(cards, "gain2");
 				//game.cardsDiscard(cards2);
-				player.addTempSkill("reluoyi2", { player: "phaseBefore" });
+				player.addTempSkill("new_reluoyi2", { player: "phaseBefore" });
 				trigger.changeToZero();
 			}
 			//else game.cardsDiscard(cards);
 		},
+		subSkill: { new_reluoyi2: { inherit: "reluoyi2", sourceSkill: "new_reluoyi" }, },
 	},
 	new_rewusheng: {
 		mod: {
@@ -14362,6 +14364,7 @@ const skills = {
 	},
 	reyiji: {
 		audio: 2,
+		audioname: ["yj_sb_guojia", "yj_sb_guojia_shadow"],
 		trigger: { player: "damageEnd" },
 		frequent: true,
 		filter: function (event) {

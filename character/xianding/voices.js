@@ -1,4 +1,7 @@
 export default {
+	"#dczhengyue1": "本将军出手，必教尔等蛮夷俯首系颈！",
+	"#dczhengyue2": "什么山越宗帅，还不是一群土鸡瓦狗！",
+	"#lvju:die": "孙綝，你不当人子！",
 	"#dcyuxi1": "任他千军来，我只一枪去！",
 	"#dcyuxi2": "长枪雪恨，斩尽胡马！",
 	"#dcporong1": "胡未灭，家何为！",

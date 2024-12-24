@@ -1,4 +1,7 @@
 export default {
+	"#olxianying1": "古之贤良，不以一己之得失论成败。",
+	"#olxianying2": "朗感亚父大恩，纵百死亦衔环相报。",
+	"#ol_qinlang:die": "我秦姓人，非属高门。",
 	"#olqingshu1": "赤子青荒，唯记万变其一。",
 	"#olqingshu2": "天地万法，皆在此书之中。",
 	"#olqingshu3": "以小篆记大道，则道可道。",

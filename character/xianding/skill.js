@@ -122,6 +122,7 @@ const skills = {
 	},
 	//吕据
 	dczhengyue: {
+		audio: 2,
 		trigger: {
 			player: "phaseBeginStart",
 		},

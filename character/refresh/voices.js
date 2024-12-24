@@ -1,4 +1,8 @@
 export default {
+	"#reyiji_yj_sb_guojia1": "算无遗策，方能决胜于千里。",
+	"#reyiji_yj_sb_guojia2": "吾身虽殒，然智计长存。",
+	"#reyiji_yj_sb_guojia_shadow1": "今生不借此身度，更向何生度此身？",
+	"#reyiji_yj_sb_guojia_shadow2": "胸怀丹心一颗，欲照山河万朵。",
 	"#huituo_re_caorui1": "谁有权利，谁就拥有天下。",
 	"#huituo_re_caorui2": "严法度，以拓疆土。",
 	"#remingjian1": "以卿之才学，何愁此战不胜。",
