@@ -52,7 +52,7 @@ const dynamicTranslates = {
 		return str + "（X为此技能于本阶段的发动次数）。②出牌阶段结束时，若你本阶段执行过〖渐专①〗的所有选项，则你随机移除〖渐专①〗的一项。";
 	},
 	dcpingzhi(player){
-		if (player.storage.dcpingzhi == true) return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，<span class = 'bluetext'>阳：你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用</span>；阴：其使用此牌，若造成伤害则此技能视为未使用。";
+		if (!player.storage.dcpingzhi) return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，<span class = 'bluetext'>阳：你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用</span>；阴：其使用此牌，若造成伤害则此技能视为未使用。";
 		return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，阳：你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用；<span class = 'bluetext'>阴：其使用此牌，若造成伤害则此技能视为未使用。</span>";
 	}
 };

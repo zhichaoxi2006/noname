@@ -8,20 +8,18 @@ const skills = {
 		marktext: "☯",
 		usable:1,
 		enable: "phaseUse",
-		init(player, skill){
-			player.storage[skill] = true;
-		},
 		filterTarget(card, player, target){
 			return target.countCards("h");
 		},
 		intro: {
-			content(storage, player, skill) {
-				if (player.storage.dcpingzhi == true) return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用";
+			content(storage) {
+				if (!storage) return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用";
 				return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，其使用此牌，若造成伤害则此技能视为未使用。";
 			},
 		},
 		async content(event, trigger, player){
 			const target = event.targets[0];
+			player.changeZhuanhuanji("dcpingzhi");
 			const { result } = await target.chooseCard("请选择一张手牌展示", true);
 			await target.showCards(result.cards);
 			if (player.storage.dcpingzhi) {
@@ -30,7 +28,6 @@ const skills = {
 			} else {
 				await target.chooseUseTarget(result.cards[0]);
 			}
-			player.changeZhuanhuanji("dcpingzhi");
 		},
 		group: "dcpingzhi_check",
 		subSkill: {
