@@ -1060,48 +1060,47 @@ game.import("card", function () {
 				vanish: true,
 				enable: true,
 				filterTarget: true,
-				// contentBefore:function(){
-				// 	player.$skill('卜天术','legend','water');
-				// 	game.delay(2);
-				// },
-				content: function () {
-					"step 0";
+				async content(event, trigger, player) {
 					var list = [];
 					for (var i in lib.card) {
+						if (!lib.card[i].content) continue;
 						if (lib.card[i].mode && lib.card[i].mode.includes(lib.config.mode) == false) continue;
 						if (lib.card[i].vanish) continue;
-						if (lib.card[i].type == "delay") list.push([cards[0].suit, cards[0].number, i]);
-					}
-					var dialog = ui.create.dialog("卜天术", [list, "vcard"]);
-					var bing = target.countCards("h") <= 1;
-					player.chooseButton(dialog, true, function (button) {
-						if (get.effect(target, { name: button.link[2] }, player, player) > 0) {
-							if (button.link[2] == "bingliang") {
-								if (bing) return 2;
-								return 0.7;
-							}
-							if (button.link[2] == "lebu") {
-								return 1;
-							}
-							if (button.link[2] == "guiyoujie") {
-								return 0.5;
-							}
-							if (button.link[2] == "caomu") {
-								return 0.3;
-							}
-							return 0.2;
+						if (lib.card[i].type == "delay") {
+							list.push([event.card.suit, event.card.number, i]);
 						}
-						return 0;
-					}).filterButton = function (button) {
-						return !target.hasJudge(button.link[2]);
-					};
-					"step 1";
-					var card = game.createCard(result.links[0][2]);
-					event.judgecard = card;
-					target.$draw(card);
-					game.delay(0.7);
-					"step 2";
-					target.addJudge(event.judgecard);
+					}
+					if (list.length) {
+						var dialog = ui.create.dialog("卜天术", [list, "vcard"]);
+						var bing = event.target.countCards("h") <= 1;
+						const { result } = await player.chooseButton(dialog, true, function (button) {
+							if (get.effect(event.target, { name: button.link[2] }, player, player) > 0) {
+								if (button.link[2] == "bingliang") {
+									if (bing) return 2;
+									return 0.7;
+								}
+								if (button.link[2] == "lebu") {
+									return 1;
+								}
+								if (button.link[2] == "guiyoujie") {
+									return 0.5;
+								}
+								if (button.link[2] == "caomu") {
+									return 0.3;
+								}
+								return 0.2;
+							}
+							return 0;
+						}).set('filterButton', function (button) {
+							return !event.target.hasJudge(button.link[2]);
+						});
+						if (result.links && result.links[0]) {
+							var card = game.createCard(result.links[0][2]);
+							event.judgecard = card;
+							event.target.$draw(card);
+							event.target.addJudge(event.judgecard);
+						}
+					}
 				},
 				ai: {
 					value: 8,
