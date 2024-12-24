@@ -12,7 +12,7 @@ const pinyins = {
 	岩泽雅美: ["Iwasawa", "Masami"],
 	宫泽谦吾: ["Miyazawa", "Kengo"],
 	吉野晴彦: ["Yoshino", "Haruhiko"],
-	由依: ["Yui"],
+	芳冈由依: ["Yoshioka", "Yui"],
 	紬文德斯: ["Tsumugi", "Wenders"],
 	朱鹭户沙耶: ["Tokido", "Saya"],
 	"三枝叶留佳&二木佳奈多": ["Saigusa", "Haruka", "Futaki", "Kanata"],
