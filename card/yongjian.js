@@ -120,12 +120,12 @@ game.import("card", function () {
 					"step 1";
 					if (result.bool && target.isIn()) {
 						var num = result.cards.length,
-							hs = player.getCards("h");
-						if (!hs.length) event.finish();
-						else if (hs.length < num) event._result = { bool: true, cards: hs };
+							he = player.getCards("he");
+						if (!he.length) event.finish();
+						else if (he.length < num) event._result = { bool: true, cards: he };
 						else
 							player.chooseCard(
-								"h",
+								"he",
 								true,
 								num,
 								"交给" + get.translation(target) + get.cnNumber(num) + "张牌"

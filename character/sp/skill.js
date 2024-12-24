@@ -31611,7 +31611,7 @@ const skills = {
 		content: function () {
 			"step 0";
 			event.target1 = targets[0];
-			player.give(cards, targets[0], "giveAuto");
+			player.give(cards, targets[0], false);
 			"step 1";
 			if (!targets[0].countCards("h")) {
 				event.finish();

@@ -10,7 +10,7 @@ const skills = {
 		},
 		enable: "phaseUse",
 		filterTarget: true,
-		prompt(event){
+		prompt(event) {
 			const { player } = event;
 			const num = player.getRoundHistory("useSkill", evt => evt.skill == "dcwoheng").length;
 			return `令一名角色摸或弃置${num + 1}张牌`;
@@ -25,9 +25,11 @@ const skills = {
 			const str1 = "摸" + get.cnNumber(num, true);
 			const str2 = "弃" + get.cnNumber(num, true);
 			const list = [str1];
-			if (target.countCards("he", function(card){
-				return lib.filter.cardDiscardable(card, target);
-			})) {
+			if (
+				target.countCards("he", function (card) {
+					return lib.filter.cardDiscardable(card, target);
+				})
+			) {
 				list.push(str2);
 			}
 			let directcontrol =
@@ -52,8 +54,8 @@ const skills = {
 		feedPigSkill: true,
 		zhuSkill: true,
 		unique: true,
-    	audio: 2,
-    	global: "dcjizheng_global",
+		audio: 2,
+		global: "dcjizheng_global",
 		subSkill: {
 			global: {
 				enable: "phaseUse",
@@ -94,7 +96,7 @@ const skills = {
 					if (player.group == "wu") {
 						player.addTempSkill("dcjizheng_buff");
 					} else {
-						player.addTempSkill("dcjizheng_buff", {player: "useCardAfter"});
+						player.addTempSkill("dcjizheng_buff", { player: "useCardAfter" });
 					}
 				},
 				ai: {
@@ -107,18 +109,18 @@ const skills = {
 				},
 			},
 			blocker: {
-				charlotte:true,
-				onremove:true,
+				charlotte: true,
+				onremove: true,
 			},
 			buff: {
-				charlotte:true,
+				charlotte: true,
 				mod: {
 					targetInRange: function (card, player) {
 						return true;
 					},
 				},
 			},
-		}
+		},
 	},
 	//吕据
 	dczhengyue: {
@@ -136,7 +138,7 @@ const skills = {
 			return true;
 		},
 		frequent: true,
-		async content(event, trigger, player) {
+		async cost(event, trigger, player) {
 			const cards = get.cards(5);
 			await game.cardsGotoOrdering(cards);
 			const next = player.chooseToMove();
@@ -145,17 +147,24 @@ const skills = {
 				["武将牌上", []],
 			]);
 			const {
-				result: { moved },
+				result: { moved, bool },
 			} = await next;
-			const cardsx = [];
-			if (moved) {
-				cardsx.addArray(moved[1]);
+			if (bool) {
+				event.result = {
+					bool: moved[1].length,
+					cost_data: moved,
+				};
 			}
+		},
+		async content(event, trigger, player) {
+			const { cost_data } = event;
+			const cardsx = [];
+			cardsx.addArray(cost_data[1]);
 			cardsx.reverse();
 			const next2 = player.addToExpansion(cardsx, player, "giveAuto");
 			next2.gaintag.add("dczhengyue");
 			await next2;
-			if(player.getExpansions("dczhengyue")[0]){
+			if (player.getExpansions("dczhengyue")[0]) {
 				player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
 			} else {
 				player.removeTip("dczhengyue");
@@ -188,7 +197,7 @@ const skills = {
 						} = await next;
 						const cards = moved[0];
 						cards.reverse();
-						const next2 = player.addToExpansion(cards, player, "giveAuto")
+						const next2 = player.addToExpansion(cards, player, "giveAuto");
 						next2.gaintag.add("dczhengyue");
 						await next2;
 						player.addTempSkill("dczhengyue_count");
@@ -197,7 +206,7 @@ const skills = {
 							player.addTempSkill("dczhengyue_debuff");
 						}
 					}
-					if(player.getExpansions("dczhengyue")[0]){
+					if (player.getExpansions("dczhengyue")[0]) {
 						player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
 					} else {
 						player.removeTip("dczhengyue");
