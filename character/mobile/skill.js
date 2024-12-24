@@ -1632,6 +1632,10 @@ const skills = {
 		},
 		group: ["mbjiejian_liuli", "mbjiejian_remove"],
 		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+			},
 			liuli: {
 				audio: "mbjiejian2.mp3",
 				trigger: {
@@ -1641,7 +1645,7 @@ const skills = {
 					if (get.type(event.card) == "equip") return false;
 					if (!event.targets || event.targets.length != 1) return false;
 					if (!event.targets[0].hasMark("mbjiejian_mark")) return false;
-					return true;
+					return !player.getStorage("mbjiejian_used").includes(event.target);
 				},
 				prompt2: "将此牌转移给自己",
 				check: function (event, player) {
@@ -1649,6 +1653,8 @@ const skills = {
 				},
 				logTarget: "target",
 				async content(event, trigger, player) {
+					player.addTempSkill("mbjiejian_used");
+					player.markAuto("mbjiejian_used", event.targets);
 					const evt = trigger.getParent();
 					evt.triggeredTargets2.removeArray(event.targets);
 					evt.targets.removeArray(event.targets);
