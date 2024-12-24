@@ -2418,7 +2418,7 @@ const skills = {
 					return (event.name != "phase" || game.phaseNumber == 0) && !player.getExpansions("nzry_mingren").length;
 				},
 				async content(event, trigger, player) {
-					await player.draw(2);
+					await player.draw(2 + event.name.startsWith("sbmingren"));
 					if (!player.countCards("h")) return;
 					const { result } = await player.chooseCard("h", "将一张手牌置于武将牌上，称为“任”", true).set("ai", function (card) {
 						return 6 - get.value(card);
@@ -2431,6 +2431,8 @@ const skills = {
 				},
 			},
 			2: {
+				audio: "nzry_mingren_1",
+				audioname: ["sb_yl_luzhi"],
 				trigger: {
 					player: "phaseJieshuBegin",
 				},
@@ -2484,7 +2486,7 @@ const skills = {
 		zhuanhuanji: true,
 		marktext: "☯",
 		intro: {
-			content(storage, player, skill) {
+			content(storage) {
 				if (storage) return "当你于回合外使用或打出的牌结算完成后，若此牌与“任”颜色相同，则你可以令一名角色摸一张牌。";
 				return "出牌阶段限一次，你可以弃置一张与“任”颜色相同的牌并对攻击范围内的一名角色造成1点伤害。";
 			},
@@ -2521,7 +2523,8 @@ const skills = {
 			const skillName = event.name.slice(0, -5),
 				num = get.info(skillName).drawNum;
 			event.result = await player
-				.chooseTarget(get.prompt(skillName), `令一名角色摸${get.cnNumber(num)}张牌`)
+				.chooseTarget(get.prompt(skillName), `令${(num > 1 ? "至多" : "") + get.cnNumber(num)}名角色${num > 1 ? "各" : ""}摸${get.cnNumber(num)}张牌`)
+				.set("selectTarget", [1, num])
 				.set("ai", target => {
 					const player = get.player();
 					return get.effect(target, { name: "draw" }, player, player);
@@ -2529,15 +2532,21 @@ const skills = {
 				.forResult();
 		},
 		async content(event, trigger, player) {
-			const {
-				targets: [target],
-				name: skill,
-			} = event;
+			const skill = event.name;
 			player.changeZhuanhuanji(skill);
 			if (!trigger) {
+				const target = event.target;
 				player.addTempSkill(skill + "_used", "phaseUseAfter");
 				await target.damage("nocard");
-			} else await target.draw(get.info(skill).drawNum);
+			} else {
+				const targets = event.targets;
+				if (targets.length === 1) {
+					await targets[0].draw(get.info(skill).drawNum);
+				} else {
+					await game.asyncDraw(targets, get.info(skill).drawNum);
+					await game.delayx();
+				}
+			}
 		},
 		ai: {
 			order: 5,

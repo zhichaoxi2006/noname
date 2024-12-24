@@ -3474,13 +3474,17 @@ const skills = {
 		},
 	},
 	//卢植
+	sbmingren: {
+		inherit: "nzry_mingren",
+		group: ["sbmingren_1", "sbmingren_2"],
+	},
 	sbzhenliang: {
 		inherit: "nzry_zhenliang",
 		audio: 2,
 		drawNum: 2,
 		intro: {
 			content(storage, player) {
-				if (storage) return "你的回合外，一名角色使用或打出牌结算完成后，若此牌与“任”类别相同，则你可以令一名角色摸两张牌。";
+				if (storage) return "你的回合外，一名角色使用或打出牌结算完成后，若此牌与“任”类别相同，则你可以令至多两名角色各摸两张牌。";
 				return "出牌阶段限一次，你可以弃置一张与“任”颜色相同的牌并对攻击范围内的一名角色造成1点伤害。";
 			},
 		},
