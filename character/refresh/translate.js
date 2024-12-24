@@ -728,7 +728,7 @@ const translates = {
 	re_mazhong: "界马忠",
 	re_mazhong_prefix: "界",
 	refuman: "抚蛮",
-	refuman_info: "出牌阶段每名角色限一次。你可以弃置一张牌，令一名其他角色从弃牌堆中获得一张【杀】。然后其于其下个回合结束前使用或打出此牌时，你与其各摸一张牌。",
+	refuman_info: "出牌阶段每名角色限一次。你可以弃置一张牌，令一名角色从弃牌堆中获得一张【杀】。然后其于其下个回合结束前失去此牌后，其摸一张牌；若其因使用或打出失去此牌，则改为你与其各摸一张牌。",
 	re_guanzhang: "界关兴张苞",
 	re_guanzhang_prefix: "界",
 	retongxin: "同心",

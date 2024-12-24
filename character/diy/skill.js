@@ -6,7 +6,7 @@ const skills = {
 	diy_juxiang: {
 		audio: "zjjuxiang",
 		inherit: "zjjuxiang",
-		forced:true,
+		forced: true,
 		async content(event, trigger, player) {
 			trigger.player.damage();
 		},
@@ -17,7 +17,7 @@ const skills = {
 		animationColor: "soil",
 		audio: "xinfuli",
 		enable: "chooseToUse",
-		locked:true,
+		locked: true,
 		init: function (player, skill) {
 			player.storage[skill] = false;
 		},
@@ -84,7 +84,7 @@ const skills = {
 		audio: "retishen",
 		skillAnimation: true,
 		animationColor: "soil",
-		locked:true,
+		locked: true,
 		trigger: { player: "phaseZhunbeiBegin" },
 		filter: function (event, player) {
 			return player.isDamaged();
@@ -1665,7 +1665,7 @@ const skills = {
 								game.delay();
 							}
 						},
-						translate: "你展示牌堆顶的3张牌，然后回复X点体力（X为其中红桃牌数目），然后你将其中的红桃牌置于弃牌堆，并获得其他牌",
+						translate: "你展示牌堆顶的三张牌，然后回复X点体力（X为其中红桃牌数目），然后你将其中的红桃牌置于弃牌堆，并获得其他牌",
 						result: {
 							player: 3,
 						},

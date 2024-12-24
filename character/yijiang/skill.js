@@ -55,6 +55,7 @@ const skills = {
 	//孙体
 	xinzhaofu: {
 		audio: "zhaofu",
+		audioname: ["ol_sunxiu"],
 		enable: "phaseUse",
 		usable: 1,
 		mark: true,
@@ -6657,14 +6658,15 @@ const skills = {
 		},
 	},
 	reyanzhu: {
-		enable: "phaseUse",
 		audio: 2,
-		usable: 1,
+		audioname: ["ol_sunxiu"],
+		enable: "phaseUse",
 		filterTarget: lib.filter.notMe,
 		derivation: ["reyanzhu_rewrite", "rexingxue_rewrite"],
 		prompt: function () {
 			return lib.translate[(_status.event.player.storage.reyanzhu ? "reyanzhu_rewrite" : "reyanzhu") + "_info"];
 		},
+		usable: 1,
 		content: function () {
 			"step 0";
 			if (player.storage.reyanzhu || !target.countCards("e")) event._result = { index: 1 };
@@ -6701,6 +6703,7 @@ const skills = {
 		},
 	},
 	reyanzhu2: {
+		charlotte: true,
 		trigger: { player: "damageBegin3" },
 		forced: true,
 		onremove: true,
@@ -6715,12 +6718,13 @@ const skills = {
 		},
 	},
 	rexingxue: {
-		trigger: { player: "phaseJieshuBegin" },
-		direct: true,
 		audio: 2,
+		audioname: ["ol_sunxiu"],
+		trigger: { player: "phaseJieshuBegin" },
 		filter: function (event, player) {
 			return (player.storage.reyanzhu ? player.maxHp : player.hp) > 0;
 		},
+		direct: true,
 		content: function () {
 			"step 0";
 			player.chooseTarget([1, player.storage.reyanzhu ? player.maxHp : player.hp], get.prompt("rexingxue"), "令所有目标角色依次摸一张牌，然后所有手牌数大于体力值的目标角色依次将一张牌置于牌堆顶").set("ai", function (target) {
@@ -6779,6 +6783,7 @@ const skills = {
 	},
 	zhaofu: {
 		audio: 2,
+		audioname: ["ol_sunxiu"],
 		unique: true,
 		global: "zhaofu2",
 		zhuSkill: true,

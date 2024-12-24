@@ -13,7 +13,7 @@ const skills = {
 			if (player != _status.currentPhase || event.getParent("sbtuxi").player == player) return false;
 			return event.getg(player).length;
 		},
-		usable: 3,
+		usable: 2,
 		async cost(event, trigger, player) {
 			const cards = trigger.getg(player).filter(i => get.owner(i) == player);
 			event.result = await player
@@ -79,7 +79,7 @@ const skills = {
 			list.push("cancel2");
 			const control = await await player
 				.chooseControl(list)
-				.set("choiceList", [`令${get.translation(target)}获得其装备区的至多两张牌`, `获得牌堆中的一张【杀】`, "背水！失去1点体力并执行所有选项"])
+				.set("choiceList", [`令${get.translation(target)}获得其装备区的一张牌`, `获得牌堆中的一张【杀】`, "背水！失去1点体力并执行所有选项"])
 				.set("prompt", get.prompt(skillName, target))
 				.set("ai", () => {
 					const { player, target } = get.event();
@@ -107,7 +107,7 @@ const skills = {
 			} = event;
 			if (control == "背水！") await player.loseHp();
 			if (["选项一", "背水！"].includes(control) && target.countCards("e")) {
-				const cards = await player.choosePlayerCard(target, true, "e", [1, 2], `选择${get.translation(target)}至多两张装备牌令其获得之`).forResultCards();
+				const cards = await player.choosePlayerCard(target, true, "e", `选择${get.translation(target)}的一张装备牌令其获得之`).forResultCards();
 				if (cards?.length) await target.gain(cards, "gain2");
 			}
 			if (["选项二", "背水！"].includes(control)) {
@@ -6214,7 +6214,7 @@ const skills = {
 				.chooseToDuiben(target)
 				.set("title", "谋弈")
 				.set("namelist", ["出阵迎战", "拱卫中军", "直取敌营", "扰阵疲敌"])
-				.set("translationList", [`以防止${get.translation(player)}摸2张牌`, `以防止${get.translation(player)}获得你1张牌`, `若成功，你获得${get.translation(target)}1张牌`, `若成功，你摸2张牌`])
+				.set("translationList", [`以防止${get.translation(player)}摸两张牌`, `以防止${get.translation(player)}获得你一张牌`, `若成功，你获得${get.translation(target)}一张牌`, `若成功，你摸两张牌`])
 				.set("ai", button => {
 					var source = get.event().getParent().player,
 						target = get.event().getParent().target;

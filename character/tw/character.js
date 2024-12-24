@@ -1,7 +1,7 @@
 const characters = {
 	huan_caoang: ["male", "wei", "3/4", ["twchihui", "twfuxi"]],
 	huan_liufeng: ["male", "shu", 4, ["twchenxun"]],
-	tw_sunluban: ["female", "wu", 3, ["twzenhui", "xinjiaojin"], ["die:sunluban"]],
+	tw_sunluban: ["female", "wu", 3, ["twzenhui", "xinjiaojin"], ["die:xin_sunluban"]],
 	tw_mazhong: ["male", "shu", 4, ["twfuman"], ["die:mazhong"]],
 	tw_jsp_guanyu: ["male", "wei", 4, ["wusheng", "twdanji"], ["die:jsp_guanyu", "tempname:jsp_guanyu"]],
 	tw_fuhuanghou: ["female", "qun", 3, ["rezhuikong", "xinqiuyuan"], ["die:xin_fuhuanghou"]],

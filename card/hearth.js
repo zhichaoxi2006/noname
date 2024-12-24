@@ -114,8 +114,7 @@ game.import("card", function () {
 							var noh = nh == 0 || target.hasSkillTag("noh");
 							if (noh && noe) return 0;
 							if (noh && noe2) return 0.01;
-							if (get.attitude(player, target) <= 0)
-								return target.countCards("he") ? -1.5 : 1.5;
+							if (get.attitude(player, target) <= 0) return target.countCards("he") ? -1.5 : 1.5;
 							return 0.1;
 						},
 					},
@@ -217,17 +216,10 @@ game.import("card", function () {
 						return get.value(card);
 					};
 					"step 1";
-					event.dialog = ui.create.dialog(
-						get.translation(target.name) + "展示的手牌",
-						result.cards
-					);
+					event.dialog = ui.create.dialog(get.translation(target.name) + "展示的手牌", result.cards);
 					event.card2 = result.cards[0];
 					event.videoId = lib.status.videoId++;
-					game.addVideo("cardDialog", null, [
-						get.translation(target.name) + "展示的手牌",
-						get.cardsInfo(result.cards),
-						event.videoId,
-					]);
+					game.addVideo("cardDialog", null, [get.translation(target.name) + "展示的手牌", get.cardsInfo(result.cards), event.videoId]);
 					game.log(target, "展示了", event.card2);
 					player.chooseToDiscard(
 						function (card) {
@@ -263,10 +255,7 @@ game.import("card", function () {
 						player: function (player) {
 							var nh = player.countCards("h");
 							if (nh <= player.hp && nh <= 4 && _status.event.name == "chooseToUse") {
-								if (
-									typeof _status.event.filterCard == "function" &&
-									_status.event.filterCard(new lib.element.VCard({ name: "shandianjian" }))
-								) {
+								if (typeof _status.event.filterCard == "function" && _status.event.filterCard(new lib.element.VCard({ name: "shandianjian" }))) {
 									return -10;
 								}
 								if (_status.event.skill) {
@@ -281,10 +270,7 @@ game.import("card", function () {
 							if (target.hasSkill("huogong2") || target.countCards("h") == 0) return 0;
 							if (player.countCards("h") <= 1) return 0;
 							if (target == player) {
-								if (
-									typeof _status.event.filterCard == "function" &&
-									_status.event.filterCard(new lib.element.VCard({ name: "shandianjian" }))
-								) {
+								if (typeof _status.event.filterCard == "function" && _status.event.filterCard(new lib.element.VCard({ name: "shandianjian" }))) {
 									return -1.5;
 								}
 								if (_status.event.skill) {
@@ -409,11 +395,7 @@ game.import("card", function () {
 					"step 0";
 					var gained = get.cards()[0];
 					target.gain(gained, "gain2");
-					if (
-						event.getParent(3).name == "phaseUse" &&
-						_status.currentPhase == target &&
-						lib.filter.filterCard(gained, target, event.getParent(2))
-					) {
+					if (event.getParent(3).name == "phaseUse" && _status.currentPhase == target && lib.filter.filterCard(gained, target, event.getParent(2))) {
 						var next = target.chooseToUse();
 						next.filterCard = function (card) {
 							return card == gained;
@@ -707,18 +689,15 @@ game.import("card", function () {
 			shenenshu: "神恩术",
 			shenenshu_info: "出牌阶段对自己使用，将所有手牌（含此张）替换为基本牌。",
 			zhiliaobo: "治疗波",
-			zhiliaobo_info:
-				"出牌阶段对一名受伤角色使用，目标进行一次判定，若结果为红色，则回复1点体力，否则获得1点护甲。",
+			zhiliaobo_info: "出牌阶段对一名受伤角色使用，目标进行一次判定，若结果为红色，则回复1点体力，否则获得1点护甲。",
 			yuansuhuimie: "元素毁灭",
 			yuansuhuimie_info: "对所有角色使用，令目标弃置0~2张牌，并受到2-X点雷电伤害，X为其弃置的手牌数。",
 			xingjiegoutong: "星界沟通",
 			xingjiegoutong_info: "增加1点体力上限并回复1点体力，弃置你的所有手牌。",
 			tanshezhiren: "弹射之刃",
-			tanshezhiren_info:
-				"出牌阶段对自己使用，依次按敌方-友方-敌方-的顺序随机弃置阵营内一名随机角色的一张牌（目标不包含你），共结算X次，X为存活角色数，若X为偶数，改为X-1。",
+			tanshezhiren_info: "出牌阶段对自己使用，依次按敌方-友方-敌方-的顺序随机弃置阵营内一名随机角色的一张牌（目标不包含你），共结算X次，X为存活角色数，若X为偶数，改为X-1。",
 			chuansongmen: "传送门",
-			chuansongmen_info:
-				"摸一张牌并展示，若发生在出牌阶段，你可以立即使用摸到的牌，若如此做，你将传送门收回手牌（每阶段最多收回2张传送门）。",
+			chuansongmen_info: "摸一张牌并展示，若发生在出牌阶段，你可以立即使用摸到的牌，若如此做，你将传送门收回手牌（每阶段最多收回2张传送门）。",
 			dunpaigedang: "盾牌格挡",
 			dunpaigedang_info: "获得1点护甲值，摸一张牌，然后弃置一张牌。",
 			siwangchanrao: "死亡缠绕",
@@ -726,8 +705,7 @@ game.import("card", function () {
 			shihuawuqi: "石化武器",
 			shihuawuqi_infox: "本回合内攻击范围+1；若你手牌中没有杀，则从牌堆中获得一张杀。",
 			shandianjian: "闪电箭",
-			shandianjian_info:
-				"目标角色展示一张手牌，然后若你能弃掉一张与所展示牌相同花色的手牌，则对该角色造成1点雷电伤害。",
+			shandianjian_info: "目标角色展示一张手牌，然后若你能弃掉一张与所展示牌相同花色的手牌，则对该角色造成1点雷电伤害。",
 			shijieshu: "视界术",
 			shijieshu_info: "目标从牌堆或弃牌堆中随机装备两张类别不同的装备牌，然后弃置一张牌。",
 			zhaomingdan: "照明弹",

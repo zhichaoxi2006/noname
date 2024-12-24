@@ -448,7 +448,7 @@ const skills = {
 	},
 	//TW孙鲁班
 	twzenhui: {
-		audio: "chanhui",
+		audio: "xinzenhui",
 		trigger: { player: "useCardToPlayer" },
 		filter: function (event, player) {
 			if (event.targets.length != 1) return false;
@@ -4038,6 +4038,7 @@ const skills = {
 				},
 			},
 		},
+		frequent: true,
 		subSkill: {
 			used: { charlotte: true },
 			buff: {
@@ -4095,9 +4096,12 @@ const skills = {
 						})
 						.sortBySeat();
 					for (const target of targets) {
-						target.popup("劫囚");
-						target.addTempSkill("twjieqiu_used", "roundStart");
-						target.insertPhase();
+						const { result } = await target.chooseBool("劫囚：是否执行一个额外回合？").set("frequentSkill", "twjieqiu");
+						if (result.bool) {
+							target.popup("劫囚");
+							target.addTempSkill("twjieqiu_used", "roundStart");
+							target.insertPhase();
+						}
 					}
 				},
 			},
