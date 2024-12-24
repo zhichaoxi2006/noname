@@ -1208,111 +1208,107 @@ game.import("card", function () {
 				},
 			},
 			gw_zirankuizeng: {
-				fullborder: "silver",
-				type: "spell",
-				subtype: "spell_silver",
+				fullborder: 'silver',
+				type: 'spell',
+				subtype: 'spell_silver',
 				vanish: true,
 				enable: true,
 				notarget: true,
-				// contentBefore:function(){
-				// 	player.$skill('自然馈赠','legend','water');
-				// 	game.delay(2);
-				// },
-				content: function () {
-					"step 0";
+				async content(event, trigger, player) {
 					var list = [];
 					for (var i in lib.card) {
-						if (lib.card[i].subtype == "spell_bronze")
-							list.push([cards[0].suit, cards[0].number, i]);
+						if (lib.card[i].subtype == 'spell_bronze') {
+							list.push([event.card.suit, event.card.number, i]);
+						}//QQQ
 					}
-					var dialog = ui.create.dialog("自然馈赠", [list, "vcard"]);
-					var rand = get.rand();
+					var dialog = ui.create.dialog('自然馈赠', [list, 'vcard']);
 					var aozu = game.hasPlayer(function (current) {
 						return (
-							player.canUse("gw_aozuzhilei", current) &&
+							player.canUse('gw_aozuzhilei', current, true, true) &&
 							current.hp <= 3 &&
-							get.effect(current, { name: "gw_aozuzhilei" }, player, player) > 0
+							get.effect(current, { name: 'gw_aozuzhilei' }, player, player) > 0
 						);
 					});
 					var aozu2 = game.hasPlayer(function (current) {
 						return (
-							player.canUse("gw_aozuzhilei", current) &&
+							player.canUse('gw_aozuzhilei', current, true, true) &&
 							current.hp <= 2 &&
-							get.effect(current, { name: "gw_aozuzhilei" }, player, player) > 0
+							get.effect(current, { name: 'gw_aozuzhilei' }, player, player) > 0
 						);
 					});
 					var aozu3 = game.hasPlayer(function (current) {
 						return (
-							player.canUse("gw_aozuzhilei", current) &&
-							get.effect(current, { name: "gw_aozuzhilei" }, player, player) > 0
+							player.canUse('gw_aozuzhilei', current, true, true) &&
+							get.effect(current, { name: 'gw_aozuzhilei' }, player, player) > 0
 						);
 					});
 					var baoxue = game.hasPlayer(function (current) {
 						return (
-							player.canUse("gw_baoxueyaoshui", current) &&
+							player.canUse('gw_baoxueyaoshui', current, true, true) &&
 							get.attitude(player, current) < 0 &&
-							[2, 3].includes(current.countCards("h")) &&
-							!current.hasSkillTag("noh")
+							[2, 3].includes(current.countCards('h')) &&
+							!current.hasSkillTag('noh')
 						);
 					});
 					var baoxue2 = game.hasPlayer(function (current) {
 						return (
-							player.canUse("gw_baoxueyaoshui", current) &&
+							player.canUse('gw_baoxueyaoshui', current, true, true) &&
 							get.attitude(player, current) < 0 &&
-							[2].includes(current.countCards("h")) &&
-							!current.hasSkillTag("noh")
+							[2].includes(current.countCards('h')) &&
+							!current.hasSkillTag('noh')
 						);
 					});
 					var baoxue3 = game.hasPlayer(function (current) {
 						return (
-							player.canUse("gw_baoxueyaoshui", current) &&
+							player.canUse('gw_baoxueyaoshui', current, true, true) &&
 							get.attitude(player, current) < 0 &&
-							current.countCards("h") >= 2 &&
-							!current.hasSkillTag("noh")
+							current.countCards('h') >= 2 &&
+							!current.hasSkillTag('noh')
 						);
 					});
 					var nongwu = game.hasPlayer(function (current) {
 						return (
 							get.attitude(player, current) < 0 &&
-							(get.attitude(player, current.getNext()) < 0 ||
-								get.attitude(player, current.getPrevious()) < 0)
+							(!current.getNext() || get.attitude(player, current.getNext()) < 0) &&
+							(!current.getPrevious() || get.attitude(player, current.getPrevious()) < 0)
 						);
 					});
 					var nongwu2 = game.hasPlayer(function (current) {
 						return (
 							get.attitude(player, current) < 0 &&
-							get.attitude(player, current.getNext()) < 0 &&
-							get.attitude(player, current.getPrevious()) < 0
+							(!current.getNext() || get.attitude(player, current.getNext()) < 0) &&
+							(!current.getPrevious() || get.attitude(player, current.getPrevious()) < 0)
 						);
 					});
 					var yanzi = game.hasPlayer(function (current) {
 						return get.attitude(player, current) > 0 && current.isMinHandcard();
 					});
-					player.chooseButton(dialog, true, function (button) {
+					const { result: { links } } = await player.chooseButton(dialog, true, function (button) {
+						var player = _status.event.player;//QQQ
 						var name = button.link[2];
 						switch (name) {
-							case "gw_ciguhanshuang":
+							case 'gw_ciguhanshuang':
 								if (nongwu2) return 3;
 								if (nongwu) return 1;
 								return 0;
-							case "gw_baoxueyaoshui":
+							case 'gw_baoxueyaoshui':
 								if (baoxue2) return 2;
 								if (baoxue) return 1.5;
 								if (baoxue3) return 0.5;
 								return 0;
-							case "gw_aozuzhilei":
+							case 'gw_aozuzhilei':
 								if (aozu2) return 2.5;
 								if (aozu) return 1.2;
 								if (aozu3) return 0.2;
 								return 0;
-							case "gw_yanziyaoshui":
+							case 'gw_yanziyaoshui':
 								if (yanzi) return 2;
 								return 0.6;
 						}
 						if (
 							game.hasPlayer(function (current) {
 								return (
-									player.canUse(name, current) &&
+									player.canUse(name, current, true, true) &&
 									get.effect(current, { name: name }, player, player) > 0
 								);
 							})
@@ -1320,20 +1316,21 @@ game.import("card", function () {
 							return Math.random();
 						}
 						return 0;
-					}).filterButton = function (button) {
+					}).set('filterButton', function (button) {
 						var name = button.link[2];
 						if (!lib.card[name].notarget) {
 							return game.hasPlayer(function (current) {
-								return player.canUse(name, current);
+								return player.canUse(name, current, true, true);
 							});
 						}
 						return true;
-					};
-					"step 1";
-					player.chooseUseTarget(
-						true,
-						game.createCard(result.links[0][2], get.suit(card), get.number(card))
-					);
+					});
+					if (links && links[0]) {
+						player.chooseUseTarget(
+							true,
+							game.createCard(links[0][2], event.card.suit, event.card.number)
+						);
+					}
 				},
 				ai: {
 					value: 7,
