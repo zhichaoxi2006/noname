@@ -329,6 +329,9 @@ const skills = {
 			return get.type(card) != "basic";
 		},
 		selectCard: [1, 2],
+		lose: false,
+		discard: false,
+		delay: false,
 		async content(event, trigger, player) {
 			const { cards, targets } = event;
 			const target = targets[0];
