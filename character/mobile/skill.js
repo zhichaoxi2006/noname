@@ -56,7 +56,7 @@ const skills = {
 			},
 			lie: {
 				trigger: { player: "phaseUseEnd" },
-				filter: (event, player) => player.hasMark("potzhanlie_lie") && player.hasUseTarget(new lib.element.VCard({ name: "sha" }), false),
+				filter: (event, player) => player.hasUseTarget(new lib.element.VCard({ name: "sha" }), false),
 				direct: true,
 				content() {
 					player.chooseUseTarget("###" + get.prompt("potzhanlie") + "？###移去所有“烈”，视为使用一张无次数限制的【杀】", new lib.element.VCard({ name: "sha" }), false).set("oncard", () => {
