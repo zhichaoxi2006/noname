@@ -125,84 +125,103 @@ const skills = {
 	//吕据
 	dczhengyue: {
 		audio: 2,
-		trigger: {
-			player: "phaseBeginStart",
+		trigger: { player: "phaseBegin" },
+		filter(event, player) {
+			return !player.getExpansions("dczhengyue").length;
 		},
-		mark: true,
+		async cost(event, trigger, player) {
+			const { result } = await player
+				.chooseControl(
+					Array.from({ length: 5 }).map((_, i) => get.cnNumber(i + 1) + "张"),
+					"cancel2"
+				)
+				.set("ai", () => {
+					return 4;
+				})
+				.set("prompt", get.prompt("dczhengyue"))
+				.set("prompt2", "将牌堆顶至多五张牌置于武将牌上");
+			event.result = result;
+			event.result.bool = result.control !== "cancel2";
+			event.result.cost_data = result.index + 1;
+		},
+		async content(event, trigger, player) {
+			const cards = get.cards(event.cost_data);
+			await game.cardsGotoOrdering(cards);
+			const next = player.chooseToMove("征越：将这些牌以任意顺序置于武将牌上", true);
+			next.set("list", [["武将牌", cards]]);
+			next.set("processAI", list => [list[0][1]]);
+			const {
+				result: { bool, moved: cost_data },
+			} = await next;
+			if (bool) {
+				const cardsx = [];
+				cardsx.addArray(cost_data[0]);
+				cardsx.reverse();
+				const next2 = player.addToExpansion(cardsx, "gain2");
+				next2.gaintag.add("dczhengyue");
+				await next2;
+				if (player.getExpansions("dczhengyue")[0]) {
+					player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
+				} else {
+					player.removeTip("dczhengyue");
+				}
+			}
+		},
 		intro: {
 			content: "expansion",
 			markcount: "expansion",
 		},
-		filter(event, player) {
-			if (player.getExpansions("dczhengyue").length) return false;
-			return true;
-		},
-		frequent: true,
-		async cost(event, trigger, player) {
-			const cards = get.cards(5);
-			await game.cardsGotoOrdering(cards);
-			const next = player.chooseToMove();
-			next.set("list", [
-				["牌堆顶", cards],
-				["武将牌上", []],
-			]);
-			const {
-				result: { moved, bool },
-			} = await next;
-			if (bool) {
-				event.result = {
-					bool: moved[1].length,
-					cost_data: moved,
-				};
-			}
-		},
-		async content(event, trigger, player) {
-			const { cost_data } = event;
-			const cardsx = [];
-			cardsx.addArray(cost_data[1]);
-			cardsx.reverse();
-			const next2 = player.addToExpansion(cardsx, player, "giveAuto");
-			next2.gaintag.add("dczhengyue");
-			await next2;
-			if (player.getExpansions("dczhengyue")[0]) {
-				player.addTip("dczhengyue", get.translation(player.getExpansions("dczhengyue")[0]));
-			} else {
-				player.removeTip("dczhengyue");
-			}
+		onremove(player, skill) {
+			const cards = player.getExpansions(skill);
+			if (cards.length) player.loseToDiscardpile(cards);
 		},
 		group: "dczhengyue_useCard",
 		subSkill: {
 			useCard: {
-				trigger: {
-					player: "useCardAfter",
+				audio: "dczhengyue",
+				trigger: { player: "useCardAfter" },
+				filter(event, player) {
+					const cards = player.getExpansions("dczhengyue"),
+						firstCard = cards[0];
+					if (!firstCard) return false;
+					if (get.suit(firstCard) == get.suit(event.card) || get.number(firstCard) == get.number(event.card) || get.name(firstCard) == get.name(event.card)) return true;
+					return cards.length < 5 && event.cards?.someInD();
 				},
 				forced: true,
-				filter(event, player) {
-					if (player.getExpansions("dczhengyue").length) return true;
-					return false;
-				},
 				async content(event, trigger, player) {
 					const firstCard = player.getExpansions("dczhengyue")[0];
 					if (get.suit(firstCard) == get.suit(trigger.card) || get.number(firstCard) == get.number(trigger.card) || get.name(firstCard) == get.name(trigger.card)) {
 						await player.discard([firstCard]);
 						await player.draw(2);
 					} else {
-						if (player.getExpansions("dczhengyue").length >= 5) return;
+						const puts = trigger.cards.filterInD();
 						const expansion = player.getExpansions("dczhengyue");
-						await game.cardsGotoOrdering(expansion.addArray(trigger.cards));
-						const next = player.chooseToMove();
-						next.set("list", [["武将牌上", expansion]]);
+						await game.cardsGotoOrdering(expansion.addArray(puts));
+						const next = player.chooseToMove("征越：将这些牌以任意顺序置于武将牌上", true);
+						next.set("list", [
+							["武将牌", expansion],
+							["实体牌", puts],
+						]);
+						next.set("processAI", list => {
+							const cards = list[1][1].randomGets(5 - list[0][1].length, list[1][1].length);
+							return [list[0][1].addArray(cards), list[1][1].removeArray(cards)];
+						});
+						next.set("filterOk", moved => {
+							const { list } = get.event();
+							return moved[0].length === Math.min(5, list[0][1].length + list[1][1].length);
+						});
 						const {
 							result: { moved },
 						} = await next;
 						const cards = moved[0];
 						cards.reverse();
-						const next2 = player.addToExpansion(cards, player, "giveAuto");
+						const next2 = player.addToExpansion(cards, "gain2");
 						next2.gaintag.add("dczhengyue");
 						await next2;
 						player.addTempSkill("dczhengyue_count");
-						player.storage.dczhengyue_count += trigger.cards.length;
+						player.addMark("dczhengyue_count", puts.length - moved[1].length);
 						if (player.storage.dczhengyue_count >= 2) {
+							player.storage.dczhengyue_count = player.storage.dczhengyue_count % 2;
 							player.addTempSkill("dczhengyue_debuff");
 						}
 					}
@@ -214,11 +233,8 @@ const skills = {
 				},
 			},
 			count: {
-				onremove: true,
-				init(player, skill) {
-					player.storage[skill] = 0;
-				},
 				charlotte: true,
+				onremove: true,
 			},
 			debuff: {
 				mod: {

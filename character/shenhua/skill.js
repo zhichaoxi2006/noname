@@ -1910,6 +1910,7 @@ const skills = {
 	//没错 这是个橘
 	tachibana_effect: {
 		audio: "nzry_huaiju",
+		sourceSkill: "nzry_huaiju",
 		trigger: {
 			global: ["damageBegin4", "phaseDrawBegin2"],
 		},

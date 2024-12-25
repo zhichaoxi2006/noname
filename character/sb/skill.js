@@ -13,7 +13,9 @@ const skills = {
 			if (player != _status.currentPhase || event.getParent("sbtuxi").player == player) return false;
 			return event.getg(player).length;
 		},
-		usable: 2,
+		get usable() {
+			return 1 + get.mode() === "identity";
+		},
 		async cost(event, trigger, player) {
 			const cards = trigger.getg(player).filter(i => get.owner(i) == player);
 			event.result = await player
@@ -281,7 +283,7 @@ const skills = {
 						return 0;
 					},
 					yiji: yiji,
-					position: "eh".slice(-1 + (!["identity", "doudizhu"].includes(mode) && name === "dying")),//三若为，怎么若都为构思
+					position: "eh".slice(-1 + (!["identity", "doudizhu"].includes(mode) && name === "dying")), //三若为，怎么若都为构思
 				});
 				if (bool) {
 					num -= cards.length;

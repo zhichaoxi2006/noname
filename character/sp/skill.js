@@ -407,15 +407,14 @@ const skills = {
 		},
 	},
 	olneixun: {
-		trigger: {
-			global: "useCardEnd",
-		},
+		audio: 2,
+		trigger: { global: "useCardAfter" },
 		forced: true,
 		filter(event, player) {
 			if (event.player == player || event.player != _status.currentPhase) {
 				return false;
 			}
-			return event.player.getHistory("useCard", evt => get.type(evt.card) != "equip").length === 1;
+			return event.player.getHistory("useCard", evt => get.type(evt.card) != "equip").indexOf(event) === 0;
 		},
 		logTarget(event, player) {
 			return event.player;
