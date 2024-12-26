@@ -21,52 +21,30 @@ const skills = {
 		async content(event, trigger, player) {
 			const target = event.targets[0];
 			const { result } = await target.chooseToGive(player).set("selectCard", [1, Infinity]).set("forced", true).set("position", "he");
-			if (result.bool) player.addTempSkill("stardangchen_buff");
+			if (result?.bool && result.cards?.length) {
+				player.addTempSkill("stardangchen_buff");
+				player.addMark("stardangchen_buff", result.cards.length, false);
+			}
 		},
 		subSkill: {
 			buff: {
 				charlotte: true,
+				onremove: true,
 				filter(event, player) {
-					if (!lib.skill.dcshixian.filterx(event)) return false;
-					if (typeof get.number(event.card) !== "number") return false;
-					return player.hasAllHistory("gain", evt => evt.giver && evt.giver !== player);
+					if (!lib.skill.dcshixian.filterx(event) || !player.hasMark("stardangchen_buff")) return false;
+					return typeof get.number(event.card) === "number";
 				},
 				check(event, player) {
 					return !get.tag(event.card, "norepeat") ^ (event.targets?.reduce((sum, i) => sum + get.effect(event.card, i, player, player), 0) < 0);
 				},
 				trigger: { player: "useCard" },
 				prompt2(event, player) {
-					return (
-						"进行一次判定，若判定结果为其他角色交给你牌的数量（" +
-						(() => {
-							let num = 0;
-							player
-								.getAllHistory("gain", evt => {
-									if (!evt.giver) return false;
-									return evt.giver != player;
-								})
-								.forEach(event => {
-									num += event.cards.length;
-								});
-						})() +
-						"）的倍数，则" +
-						get.translation(event.card) +
-						"额外结算一次"
-					);
+					return "进行一次判定，若判定结果为其他角色交给你牌的数量（" + player.countMark("stardangchen_buff") + "）的倍数，则" + get.translation(event.card) + "额外结算一次";
 				},
 				async content(event, trigger, player) {
 					const { result } = await player.judge();
 					const { number } = result;
-					let num = 0;
-					player
-						.getAllHistory("gain", evt => {
-							if (!evt.giver) return false;
-							return evt.giver != player;
-						})
-						.forEach(event => {
-							num += event.cards.length;
-						});
-					if (number % num == 0) {
+					if (number % player.countMark(event.name) === 0) {
 						trigger.effectCount++;
 						game.log(trigger.card, "额外结算一次");
 					}
@@ -76,26 +54,16 @@ const skills = {
 	},
 	starjianyu: {
 		audio: 2,
-		trigger: {
-			global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
+		trigger: { global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"] },
+		getIndex(event, player) {
+			if (_status.currentPhase !== player) return false;
+			return game.filterPlayer2(target => target !== player && event.getl?.(target)?.es?.length);
 		},
-		filter(event, player) {
-			if (_status.currentPhase != player) return false;
-			let bool = false;
-			for (const i of game.filterPlayer(target => target != player)) {
-				const evt = event.getl(i);
-				if (evt) {
-					const es = evt.es;
-					if (es.length) {
-						bool = true;
-					}
-				}
-			}
-			return bool;
-		},
+		filterTarget: (event, player, name, target) => target,
+		logTarget: (event, player, name, target) => target,
 		forced: true,
-		async content(event, trigger, player) {
-			await player.draw();
+		content() {
+			player.draw();
 		},
 	},
 	//法正
