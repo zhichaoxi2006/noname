@@ -539,7 +539,7 @@ const skills = {
 		},
 		filter(event, player) {
 			if (!player.countCards("he", { type: ["trick", "delay"] })) return false;
-			return game.getGlobalHistory("everything", evt => evt.name === "useCard" && get.type(evt.card) === "basic").indexOf(event);
+			return game.getGlobalHistory("everything", evt => evt.name === "useCard" && get.type(evt.card) === "basic").indexOf(event) === 0;
 		},
 		async cost(event, trigger, player) {
 			const { result } = await player.chooseCard("he", "请重铸一张锦囊牌").set("filterCard", function (card) {

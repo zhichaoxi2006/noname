@@ -188,10 +188,11 @@ const skills = {
 			},
 			guanshi: {
 				charlotte: true,
+				onremove: true,
 				audio: "potzhanlie",
 				trigger: { player: ["shaMiss", "eventNeutralized"] },
 				filter: function (event, player) {
-					if (event.type != "card" || !event.target.isIn()) return false;
+					if (event.type != "card" || !event.target?.isIn()) return false;
 					return player.getStorage("potzhanlie_guanshi").includes(event.card);
 				},
 				forced: true,
