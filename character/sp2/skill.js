@@ -45,7 +45,7 @@ const skills = {
 					const { result } = await player
 						.judge(card => {
 							const number = get.number(card);
-							return number % get.player().countMark("stardangchen_buff") === 0;
+							return 10 * (0.5 - (number % get.player().countMark("stardangchen_buff") !== 0));
 						})
 						.set("judge2", result => Boolean(result.bool));
 					const { number } = result;
