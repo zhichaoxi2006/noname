@@ -3,78 +3,100 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
 	//丁奉
-	star_dangchen: {
-		trigger: {
-			player: "phaseUseBegin",
-		},
-		async cost(event, trigger, player){
-			const { result } = await player.chooseTarget()
-				.set("filterTarget", function(card, player, target){
-					return player != target && target.countCards("he") > 1;
+	stardangchen: {
+		audio: 2,
+		trigger: { player: "phaseUseBegin" },
+		async cost(event, trigger, player) {
+			const { result } = await player
+				.chooseTarget()
+				.set("filterTarget", function (card, player, target) {
+					return player != target && target.countCards("he");
 				})
-				.set("prompt", "【荡尘】：是否令一名角色交给你至少一张牌？")
-				.set("ai", function(card, player, target){
+				.set("prompt", get.prompt2("stardangchen"))
+				.set("ai", function (card, player, target) {
 					return -get.attitude(player, target);
 				});
 			event.result = result;
 		},
-		async content(event, trigger, player){
+		async content(event, trigger, player) {
 			const target = event.targets[0];
-			const { result } = await target.chooseToGive(player)
-				.set("selectCard", [1, Infinity])
-				.set("forced", true)
-				.set("position", "he")
-			if (result.bool) {
-				player.addTempSkill("star_dangchen_buff");
-			}
+			const { result } = await target.chooseToGive(player).set("selectCard", [1, Infinity]).set("forced", true).set("position", "he");
+			if (result.bool) player.addTempSkill("stardangchen_buff");
 		},
-		subfrequent: "star_dangchen_buff",
 		subSkill: {
 			buff: {
-				charlotte:true,
-				frequent:true,
-				trigger: {
-					player: "useCard",
+				charlotte: true,
+				filter(event, player) {
+					if (!lib.skill.dcshixian.filterx(event)) return false;
+					if (typeof get.number(event.card) !== "number") return false;
+					return player.hasAllHistory("gain", evt => evt.giver && evt.giver !== player);
 				},
-				async content(event, trigger, player){
+				check(event, player) {
+					return !get.tag(event.card, "norepeat") ^ (event.targets?.reduce((sum, i) => sum + get.effect(event.card, i, player, player), 0) < 0);
+				},
+				trigger: { player: "useCard" },
+				prompt2(event, player) {
+					return (
+						"进行一次判定，若判定结果为其他角色交给你牌的数量（" +
+						(() => {
+							let num = 0;
+							player
+								.getAllHistory("gain", evt => {
+									if (!evt.giver) return false;
+									return evt.giver != player;
+								})
+								.forEach(event => {
+									num += event.cards.length;
+								});
+						})() +
+						"）的倍数，则" +
+						get.translation(event.card) +
+						"额外结算一次"
+					);
+				},
+				async content(event, trigger, player) {
 					const { result } = await player.judge();
 					const { number } = result;
 					let num = 0;
-					player.getAllHistory("gain", evt => {
-						if(!evt.giver) return false;
-						return evt.giver != player;
-					}).forEach(event => {
-						num += event.cards.length;
-					});
+					player
+						.getAllHistory("gain", evt => {
+							if (!evt.giver) return false;
+							return evt.giver != player;
+						})
+						.forEach(event => {
+							num += event.cards.length;
+						});
 					if (number % num == 0) {
 						trigger.effectCount++;
+						game.log(trigger.card, "额外结算一次");
 					}
 				},
-			}
-		}
+			},
+		},
 	},
-	star_jianyu: {
+	starjianyu: {
+		audio: 2,
 		trigger: {
-			global: ["loseAfter","equipAfter","addJudgeAfter","gainAfter","loseAsyncAfter","addToExpansionAfter"],
+			global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
 		},
 		filter(event, player) {
 			if (_status.currentPhase != player) return false;
 			let bool = false;
-			for(const i of game.filterPlayer(target => target != player)){
+			for (const i of game.filterPlayer(target => target != player)) {
 				const evt = event.getl(i);
 				if (evt) {
 					const es = evt.es;
-					if(es.length){
+					if (es.length) {
 						bool = true;
 					}
 				}
 			}
 			return bool;
 		},
-		forced:true,
-		async content(event, trigger, player){
+		forced: true,
+		async content(event, trigger, player) {
 			await player.draw();
-		}
+		},
 	},
 	//法正
 	starzhiji: {
@@ -103,7 +125,7 @@ const skills = {
 		},
 		popup: false,
 		async content(event, trigger, player) {
-			const num = event.cards.length - (await player.drawTo(5).forResult() || []).length;
+			const num = event.cards.length - ((await player.drawTo(5).forResult()) || []).length;
 			switch (get.sgn(num)) {
 				case 1:
 					const result = await player
@@ -830,20 +852,23 @@ const skills = {
 				if (player.hasSkill("starruijun_effect")) return num;
 				const info = get.info(card);
 				if (info?.toself) return num;
-				if (game.hasPlayer(cur => {
-					return (
-						player.canUse(card, cur, true, true) &&
-						get.attitude(player, cur) < 0 &&
-						get.effect(cur, card, player, player) > 0 &&
-						get.damageEffect(cur, player, player) > 0 &&
-						!cur.hasSkillTag("filterDamage", null, {
-							player,
-							card
-						})
-					);
-				})) return num + 2;
+				if (
+					game.hasPlayer(cur => {
+						return (
+							player.canUse(card, cur, true, true) &&
+							get.attitude(player, cur) < 0 &&
+							get.effect(cur, card, player, player) > 0 &&
+							get.damageEffect(cur, player, player) > 0 &&
+							!cur.hasSkillTag("filterDamage", null, {
+								player,
+								card,
+							})
+						);
+					})
+				)
+					return num + 2;
 				return num / 10;
-			}
+			},
 		},
 		trigger: {
 			player: "useCardToPlayered",
@@ -875,45 +900,65 @@ const skills = {
 						return 0;
 					}
 					if (get.attitude(player, target) >= 0) return draw * get.effect(player, { name: "draw" }, player, player) - original;
-					let shas = player.getCardUsable("sha"), filterDamage = target.hasSkillTag("filterDamage", null, {
-						player
-					}), idx = filterDamage ? 1 : 0;
-					return player.countCards("hs", card => {
-						if (get.info(card).toself || !player.canUse(card, target, false, true)) return 0;
-						let eff = get.effect(target, card, player, player);
-						if (eff <= 0) return 0;
-						if (card.name === "sha" && shas-- <= 0) return 0;
-						if (!get.tag(card, "damage") || get.type(card, null, player) === "delay") return eff;
-						if (!filterDamage && idx < 3) idx += 0.65;
-						return eff * idx;
-					}) + draw * get.effect(player, { name: "draw" }, player, player) - original;
+					let shas = player.getCardUsable("sha"),
+						filterDamage = target.hasSkillTag("filterDamage", null, {
+							player,
+						}),
+						idx = filterDamage ? 1 : 0;
+					return (
+						player.countCards("hs", card => {
+							if (get.info(card).toself || !player.canUse(card, target, false, true)) return 0;
+							let eff = get.effect(target, card, player, player);
+							if (eff <= 0) return 0;
+							if (card.name === "sha" && shas-- <= 0) return 0;
+							if (!get.tag(card, "damage") || get.type(card, null, player) === "delay") return eff;
+							if (!filterDamage && idx < 3) idx += 0.65;
+							return eff * idx;
+						}) +
+						draw * get.effect(player, { name: "draw" }, player, player) -
+						original
+					);
 				})
-				.set("original", function () {
-					const cards = player.getCards("hs");
-					let shas = player.getCardUsable("sha"), //【杀】的剩余使用次数
-						damage = trigger.targets.filter(tar => { //筛选目标中可狙敌人
-							return get.attitude(player, tar) < 0 && get.damageEffect(tar, player, player) > 0 && !tar.hasSkillTag("filterDamage", null, {
-								player,
-							});
-						}).map(i => [i, 0]),
-						eff = 0;
-					for (let card of cards) {
-						if (card.name === "sha" && shas-- <= 0) continue; //【杀】只能用次数上限张
-						if (get.info(card).toself) continue;
-						if (get.tag(card, "damage") && get.type(card, null, player) !== "delay") for (let arr of damage) {
-							if (player.canUse(card, arr[0], false, true) && get.effect(arr[0], card, player, player) > 0) {
-								arr[1]++; //统计每个可狙敌人可以用的伤害牌数
-								if (arr[1] > 4) return damage.filter(cur => {
-									return cur[1] > 3;
-								}).map(i => i[0]); //针对目标中敌方角色的伤害牌已经足够多，为降低计算开销直接狙他
-							}
+				.set(
+					"original",
+					(function () {
+						const cards = player.getCards("hs");
+						let shas = player.getCardUsable("sha"), //【杀】的剩余使用次数
+							damage = trigger.targets
+								.filter(tar => {
+									//筛选目标中可狙敌人
+									return (
+										get.attitude(player, tar) < 0 &&
+										get.damageEffect(tar, player, player) > 0 &&
+										!tar.hasSkillTag("filterDamage", null, {
+											player,
+										})
+									);
+								})
+								.map(i => [i, 0]),
+							eff = 0;
+						for (let card of cards) {
+							if (card.name === "sha" && shas-- <= 0) continue; //【杀】只能用次数上限张
+							if (get.info(card).toself) continue;
+							if (get.tag(card, "damage") && get.type(card, null, player) !== "delay")
+								for (let arr of damage) {
+									if (player.canUse(card, arr[0], false, true) && get.effect(arr[0], card, player, player) > 0) {
+										arr[1]++; //统计每个可狙敌人可以用的伤害牌数
+										if (arr[1] > 4)
+											return damage
+												.filter(cur => {
+													return cur[1] > 3;
+												})
+												.map(i => i[0]); //针对目标中敌方角色的伤害牌已经足够多，为降低计算开销直接狙他
+									}
+								}
+							let val = player.getUseValue(card, true, true);
+							if (val <= 0) continue;
+							eff += val; //正常对其他人用牌的总收益
 						}
-						let val = player.getUseValue(card, true, true);
-						if (val <= 0) continue;
-						eff += val; //正常对其他人用牌的总收益
-					}
-					return eff;
-				}())
+						return eff;
+					})()
+				)
 				.forResult();
 		},
 		async content(event, trigger, player) {
@@ -926,20 +971,24 @@ const skills = {
 				player_use(card, player, target) {
 					if (!target || target === player || player._starruijun_effect_use || !player.isPhaseUsing() || player.countSkill("starruijun")) return;
 					player._starruijun_effect_use = true;
-					if (get.attitude(player, target) < 0 && get.damageEffect(target, player, player) > 0 && !target.hasSkillTag("filterDamage", null, {
-						player,
-						card
-					})) {
+					if (
+						get.attitude(player, target) < 0 &&
+						get.damageEffect(target, player, player) > 0 &&
+						!target.hasSkillTag("filterDamage", null, {
+							player,
+							card,
+						})
+					) {
 						delete player._starruijun_effect_use;
 						return [1, 1 + player.getDamagedHp(), 1, -1.8 * player.countCards("hs", i => get.tag(i, "damage") > 0.5)];
 					}
 					delete player._starruijun_effect_use;
-				}
+				},
 			},
 			threaten(player, target) {
 				if (target.hp < 3) return 9 / (1 + target.getHp());
 				return 1 + 0.3 * target.getDamagedHp();
-			}
+			},
 		},
 		subSkill: {
 			effect: {
@@ -972,16 +1021,20 @@ const skills = {
 					damageBonus: true,
 					skillTagFilter(player, tag, arg) {
 						if (tag !== "damageBonus") return false;
-						return arg && arg.target && player.hasHistory("sourceDamage", evt => {
-							return evt.source === player && evt.player === arg.target && evt.getParent("phaseUse") === _status.event.getParent("phaseUse");
-						});
+						return (
+							arg &&
+							arg.target &&
+							player.hasHistory("sourceDamage", evt => {
+								return evt.source === player && evt.player === arg.target && evt.getParent("phaseUse") === _status.event.getParent("phaseUse");
+							})
+						);
 					},
 					effect: {
 						player(card, player, target) {
 							if (!target || !player.getStorage("starruijun_effect").includes(target) || !get.tag(card, "damage")) return;
 							return [2.5, 0, 2.5, 0];
-						}
-					}
+						},
+					},
 				},
 				mod: {
 					inRange(from, to) {
@@ -1027,8 +1080,8 @@ const skills = {
 					effect: {
 						target(card, player, target) {
 							if (target.hp <= 0 && get.tag(card, "recover")) return 2;
-						}
-					}
+						},
+					},
 				},
 			},
 			access: {
@@ -12097,13 +12150,17 @@ const skills = {
 			event.num = player.storage.xinfu_lveming;
 			event.toequip = [];
 			"step 1";
-			var equip = get.cardPile(function (card) {
-				var bool1 = true;
-				for (var i = 0; i < event.toequip.length; i++) {
-					if (get.type(card) == "equip" && get.subtype(card) == get.subtype(event.toequip[i])) bool1 = false;
-				}
-				return get.type(card) == "equip" && !event.toequip.includes(card) && target.hasEmptySlot(card) && bool1;
-			}, false, "random");
+			var equip = get.cardPile(
+				function (card) {
+					var bool1 = true;
+					for (var i = 0; i < event.toequip.length; i++) {
+						if (get.type(card) == "equip" && get.subtype(card) == get.subtype(event.toequip[i])) bool1 = false;
+					}
+					return get.type(card) == "equip" && !event.toequip.includes(card) && target.hasEmptySlot(card) && bool1;
+				},
+				false,
+				"random"
+			);
 			if (equip) event.toequip.push(equip);
 			else event.num = 0;
 			event.num--;

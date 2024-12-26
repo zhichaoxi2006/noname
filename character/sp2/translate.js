@@ -616,10 +616,10 @@ const translates = {
 	staranji_info: "锁定技，一名角色使用牌时，若此花色的牌本轮游戏使用的最少，则你摸一张牌。",
 	star_dingfeng: "星丁奉",
 	star_dingfeng_prefix: "星",
-	star_dangchen: "荡尘",
-	star_dangchen_info: "出牌阶段开始时，你可以令一名角色交给你至少一张牌，然后你本回合每使用一张牌，可以进行一次判定，若判定的点数为其他角色交给你牌的数量的倍数，此牌额外结算一次。",
-	star_jianyu: "翦羽",
-	star_jianyu_info: "锁定技，其他角色在你回合内失去装备区的牌后，你摸一张牌。",
+	stardangchen: "荡尘",
+	stardangchen_info: "出牌阶段开始时，你可以令一名角色交给你至少一张牌，然后你本回合使用基本牌或普通锦囊牌时，可以进行一次判定，若判定的点数为其他角色交给你牌的数量的倍数，此牌额外结算一次。",
+	starjianyu: "翦羽",
+	starjianyu_info: "锁定技，其他角色在你回合内失去装备区的牌后，你摸一张牌。",
 };
 
 export default translates;

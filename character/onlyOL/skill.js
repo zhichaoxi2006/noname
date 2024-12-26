@@ -39,7 +39,7 @@ const skills = {
 					const storage = player.storage.olsbchoulie_buff;
 					event.result = await player
 						.chooseToDiscard("chooseonly")
-						.set("prompt", `是否弃置一张牌，视为对${get.translation(storage[0])}使用一张无视防具的【杀】？`)
+						.set("prompt", `是否弃置一张牌，视为对${get.translation(storage[0])}使用一张【杀】？`)
 						.forResult();
 				},
 				async content(event, trigger, player) {
@@ -50,20 +50,15 @@ const skills = {
 				},
 			},
 			use: {
-				trigger: {
-					player: "useCard",
-				},
+				charlotte: true,
+				trigger: { player: "useCard" },
 				filter(event, player) {
 					return event.getParent().name == "olsbchoulie_buff";
 				},
-				charlotte: true,
 				silent: true,
 				async content(event, trigger, player) {
 					const storage = player.storage.olsbchoulie_buff;
 					for (const i of trigger.targets) {
-						i.addTempSkill("qinggang2");
-						i.storage.qinggang2.add(trigger.card);
-						i.markSkill("qinggang2");
 						if (i == storage[0]) {
 							const {
 								result: { bool },
