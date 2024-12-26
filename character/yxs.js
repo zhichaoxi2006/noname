@@ -1539,9 +1539,9 @@ game.import("character", function () {
 							return player != target;
 						})
 						.set("du", du).ai = function (target) {
-							var att = get.attitude(_status.event.player, target);
-							return att * _status.event.du;
-						};
+						var att = get.attitude(_status.event.player, target);
+						return att * _status.event.du;
+					};
 					"step 2";
 					if (result.bool) {
 						var target = result.targets[0];
@@ -2346,7 +2346,7 @@ game.import("character", function () {
 				content: function () {
 					"step 0";
 					var next = trigger.turn.chooseToRespond({ name: "sha" }, "请打出一张杀响应决斗");
-					next.set("prompt2", "（共需打出2张杀）");
+					next.set("prompt2", "（共需打出两张杀）");
 					next.autochoose = lib.filter.autoRespondSha;
 					next.ai = function (card) {
 						if (get.attitude(trigger.turn, player) < 0 && trigger.turn.countCards("h", "sha") > 1) {
@@ -2703,7 +2703,7 @@ game.import("character", function () {
 							next.set("_backupevent", "miaobix");
 							next.set("custom", {
 								add: {},
-								replace: { window: function () { } },
+								replace: { window: function () {} },
 							});
 							next.backup("miaobix");
 						}
@@ -3025,7 +3025,7 @@ game.import("character", function () {
 			fengyi: "凤仪",
 			fengyi_info: "出牌阶段，你可以弃一张手牌，指定任意目标摸两张牌。（每回合限用一次）",
 			wange: "婉歌",
-			wange_info: "摸牌时，你可以少摸一张牌，则结束阶段你可以抽取一名其他角色的手牌，至少1张，至多X张（X为你当前的掉血量）。",
+			wange_info: "摸牌时，你可以少摸一张牌，则结束阶段你可以获得一名其他角色的手牌，至少一张，至多X张（X为你当前的掉血量）。",
 			nichang: "霓裳",
 			nichang2: "霓裳",
 			nichang_info: "摸牌时，你可以选择不摸牌，并在结束阶段展示手牌，每少一种花色摸一张牌。",

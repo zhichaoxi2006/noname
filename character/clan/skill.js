@@ -63,7 +63,7 @@ const skills = {
 			},
 		},
 	},
-	clangaoban: {
+	clangaobian: {
 		audio: 2,
 		trigger: {
 			global: "phaseAfter",

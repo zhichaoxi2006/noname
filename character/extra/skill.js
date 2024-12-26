@@ -9765,106 +9765,48 @@ const skills = {
 			},
 		},
 	},
-	drlt_jieying_mark: {
-		marktext: "营",
-		intro: {
-			name: "营",
-			content: "mark",
-		},
-		mod: {
-			cardUsable(card, player, num) {
-				if (player.hasMark("drlt_jieying_mark") && card.name == "sha")
-					return (
-						num +
-						game.countPlayer(function (current) {
-							return current.hasSkill("drlt_jieying");
-						})
-					);
-			},
-			maxHandcard(player, num) {
-				if (player.hasMark("drlt_jieying_mark"))
-					return (
-						num +
-						game.countPlayer(function (current) {
-							return current.hasSkill("drlt_jieying");
-						})
-					);
-			},
-			aiOrder(player, card, num) {
-				if (
-					player.hasMark("drlt_jieying_mark") &&
-					game.hasPlayer(current => {
-						return current.hasSkill("drlt_jieying") && get.attitude(player, current) <= 0;
-					})
-				)
-					return Math.max(num, 0) + 1;
-			},
-		},
-		audio: "drlt_jieying",
-		trigger: {
-			player: "phaseDrawBegin2",
-		},
-		forced: true,
-		filter(event, player) {
-			return (
-				!event.numFixed &&
-				player.hasMark("drlt_jieying_mark") &&
-				game.hasPlayer(function (current) {
-					return current.hasSkill("drlt_jieying");
-				})
-			);
-		},
-		content() {
-			trigger.num += game.countPlayer(function (current) {
-				return current.hasSkill("drlt_jieying");
-			});
-		},
-		ai: {
-			nokeep: true,
-			skillTagFilter(player) {
-				return (
-					player.hasMark("drlt_jieying_mark") &&
-					game.hasPlayer(current => {
-						return current.hasSkill("drlt_jieying") && get.attitude(player, current) <= 0;
-					})
-				);
-			},
-		},
-	},
 	drlt_jieying: {
 		audio: 2,
+		trigger: { global: "phaseDrawBegin2" },
+		filter(event, player) {
+			return !event.numFixed && event.player.hasMark("drlt_jieying_mark");
+		},
+		forced: true,
 		locked: false,
+		logTarget: "player",
+		content() {
+			trigger.num++;
+		},
 		global: "drlt_jieying_mark",
 		group: ["drlt_jieying_1", "drlt_jieying_2", "drlt_jieying_3"],
 		subSkill: {
 			1: {
 				audio: "drlt_jieying",
-				trigger: {
-					player: "phaseBegin",
+				trigger: { player: "phaseBegin" },
+				filter(event, player) {
+					return !game.hasPlayer(current => current.hasMark("drlt_jieying_mark"));
 				},
 				forced: true,
-				filter(event, player) {
-					return !game.hasPlayer(function (current) {
-						return current.hasMark("drlt_jieying_mark");
-					});
-				},
 				content() {
 					player.addMark("drlt_jieying_mark", 1);
 				},
 			},
 			2: {
 				audio: "drlt_jieying",
-				trigger: {
-					player: "phaseJieshuBegin",
+				trigger: { player: "phaseJieshuBegin" },
+				filter(event, player) {
+					return (
+						player.hasMark("drlt_jieying_mark") &&
+						game.hasPlayer(target => {
+							return target != player && !target.hasMark("drlt_jieying_mark");
+						})
+					);
 				},
 				direct: true,
-				filter(event, player) {
-					return player.hasMark("drlt_jieying_mark");
-				},
 				content() {
 					"step 0";
 					player.chooseTarget(get.prompt("drlt_jieying"), "将“营”交给一名角色；其摸牌阶段多摸一张牌，出牌阶段使用【杀】的次数上限+1且手牌上限+1。该角色回合结束后，其移去“营”标记，然后你获得其所有手牌。", function (card, player, target) {
-						return target != player;
+						return target != player && !target.hasMark("drlt_jieying_mark");
 					}).ai = function (target) {
 						let th = target.countCards("h"),
 							att = get.attitude(_status.event.player, target);
@@ -9903,19 +9845,64 @@ const skills = {
 			},
 			3: {
 				audio: "drlt_jieying",
-				trigger: {
-					global: "phaseEnd",
-				},
-				forced: true,
+				trigger: { global: "phaseEnd" },
 				filter(event, player) {
 					return player != event.player && event.player.hasMark("drlt_jieying_mark") && event.player.isIn();
 				},
+				forced: true,
 				logTarget: "player",
 				content() {
 					if (trigger.player.countCards("h") > 0) {
 						trigger.player.give(trigger.player.getCards("h"), player);
 					}
-					trigger.player.removeMark("drlt_jieying_mark", trigger.player.countMark("drlt_jieying_mark"));
+					trigger.player.clearMark("drlt_jieying_mark");
+				},
+			},
+			mark: {
+				marktext: "营",
+				intro: {
+					name2: "营",
+					content: "mark",
+				},
+				mod: {
+					cardUsable(card, player, num) {
+						if (player.hasMark("drlt_jieying_mark") && card.name == "sha")
+							return (
+								num +
+								game.countPlayer(function (current) {
+									return current.hasSkill("drlt_jieying");
+								})
+							);
+					},
+					maxHandcard(player, num) {
+						if (player.hasMark("drlt_jieying_mark"))
+							return (
+								num +
+								game.countPlayer(function (current) {
+									return current.hasSkill("drlt_jieying");
+								})
+							);
+					},
+					aiOrder(player, card, num) {
+						if (
+							player.hasMark("drlt_jieying_mark") &&
+							game.hasPlayer(current => {
+								return current.hasSkill("drlt_jieying") && get.attitude(player, current) <= 0;
+							})
+						)
+							return Math.max(num, 0) + 1;
+					},
+				},
+				ai: {
+					nokeep: true,
+					skillTagFilter(player) {
+						return (
+							player.hasMark("drlt_jieying_mark") &&
+							game.hasPlayer(current => {
+								return current.hasSkill("drlt_jieying") && get.attitude(player, current) <= 0;
+							})
+						);
+					},
 				},
 			},
 		},

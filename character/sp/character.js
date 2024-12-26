@@ -1,6 +1,6 @@
 const characters = {
 	ol_taoqian: ["male", "qun", 3, ["olzhaohuo", "olwenren", "olzongluan"]],
-	ol_xuelingyun: ["female", "wei", "3/3", ["olsiqi", "olqiaozi"]],
+	ol_xuelingyun: ["female", "wei", "3/3", ["olsiqi", "olqiaozhi"]],
 	ol_guozhao: ["female", "wei", 3, ["oljiaoyu", "olneixun"]],
 	ol_qinlang: ["male", "wei", 3, ["olxianying"]],
 	ol_wuanguo: ["male", "qun", 4, ["olliyong"]],

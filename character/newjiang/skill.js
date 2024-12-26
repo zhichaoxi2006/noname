@@ -559,19 +559,10 @@ const skills = {
 	},
 	//星董卓
 	xiongjin: {
-		mark: true,
-		marktext: "☯",
-		zhuanhuanji: true,
-		intro: {
-			content(storage) {
-				if (!storage) return "出牌阶段开始时，你可以摸X张牌，然后本回合的弃牌阶段开始时，你弃置所有非基本牌（X为你已损失的体力值，至少为1，至多为3）";
-				return "其他角色的出牌阶段开始时，你可以令其摸X张牌，然后本回合的弃牌阶段开始时，其弃置所有基本牌（X为你已损失的体力值，至少为1，至多为3）";
-			},
-		},
 		audio: 2,
 		trigger: { global: "phaseUseBegin" },
 		filter(event, player) {
-			return (event.player !== player) === Boolean(player.storage.xiongjin);
+			return !player.getStorage("xiongjin_used").includes((event.player !== player).toString());
 		},
 		logTarget: "player",
 		prompt2(event, player) {
@@ -579,13 +570,19 @@ const skills = {
 			return (goon ? "" : "令其") + "摸" + get.cnNumber(Math.min(3, Math.max(1, player.getDamagedHp()))) + "张牌，本回合的弃牌阶段开始时，" + (goon ? "弃置所有非基本牌" : "其弃置所有基本牌");
 		},
 		content() {
-			player.changeZhuanhuanji("xiongjin");
 			const target = trigger.player;
+			const goon = target === player;
+			player.addTempSkill("xiongjin_used", "roundStart");
+			player.markAuto("xiongjin_used", [goon.toString()]);
 			target.addTempSkill("xiongjin_effect");
-			target.markAuto("xiongjin_effect", [target === player ? "nobasic" : "basic"]);
+			target.markAuto("xiongjin_effect", [goon ? "nobasic" : "basic"]);
 			target.draw(Math.min(3, Math.max(1, player.getDamagedHp())));
 		},
 		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+			},
 			effect: {
 				charlotte: true,
 				mark: true,
@@ -611,29 +608,28 @@ const skills = {
 			},
 		},
 	},
-	xiawei: {
+	zhenbian: {
 		audio: 2,
 		trigger: { global: ["loseAfter", "cardsDiscardAfter", "loseAsyncAfter"] },
 		filter(event, player) {
 			if (event.name.indexOf("lose") === 0) {
 				if (event.getlx === false || event.position !== ui.discardPile) return false;
 			} else if (event.getParent()?.relatedEvent?.name == "useCard") return false;
-			return event.cards.some(card => !player.getStorage("xiawei").includes(get.suit(card, false)));
+			return event.cards.some(card => !player.getStorage("zhenbian").includes(get.suit(card, false)));
 		},
 		forced: true,
 		async content(event, trigger, player) {
 			player.markAuto(
-				"xiawei",
+				"zhenbian",
 				trigger.cards.reduce((list, card) => list.add(get.suit(card, false)), [])
 			);
-			player.storage.xiawei.sort((a, b) => lib.suit.indexOf(b) - lib.suit.indexOf(a));
-			player.addTip("xiawei", get.translation("xiawei") + player.getStorage("xiawei").reduce((str, suit) => str + get.translation(suit), ""));
-			if (player.getStorage("xiawei").length >= 4 && player.maxHp < 9) {
-				delete player.storage.xiawei;
-				player.unmarkSkill("xiawei");
-				player.removeTip("xiawei");
+			player.storage.zhenbian.sort((a, b) => lib.suit.indexOf(b) - lib.suit.indexOf(a));
+			player.addTip("zhenbian", get.translation("zhenbian") + player.getStorage("zhenbian").reduce((str, suit) => str + get.translation(suit), ""));
+			if (player.getStorage("zhenbian").length >= 4 && player.maxHp < 9) {
+				delete player.storage.zhenbian;
+				player.unmarkSkill("zhenbian");
+				player.removeTip("zhenbian");
 				await player.gainMaxHp();
-				await player.draw();
 			}
 		},
 		intro: { content: "已记录花色$" },
@@ -661,7 +657,7 @@ const skills = {
 				.forResult();
 		},
 		async content(event, trigger, player) {
-			player.addTempSkill("baoxi_used");
+			player.addTempSkill("baoxi_used", "roundStart");
 			player.markAuto("baoxi_used", ["juedou"]);
 			await player.loseMaxHp();
 			await player.useCard(new lib.element.VCard({ name: "juedou" }), event.targets[0], false);

@@ -5,11 +5,12 @@ const skills = {
 	//OL谋张绣
 	olsbchoulie: {
 		limited: true,
+		audio: 2,
 		trigger: {
-			player: "phaseBeginStart",
+			player: "phaseBegin",
 		},
 		async cost(event, trigger, player) {
-			const { result } = await player.chooseTarget(lib.filter.notMe, "请选择【仇猎】目标");
+			const { result } = await player.chooseTarget(lib.filter.notMe, get.prompt2("olsbchoulie"));
 			event.result = result;
 		},
 		async content(event, trigger, player) {
@@ -20,6 +21,7 @@ const skills = {
 		},
 		subSkill: {
 			buff: {
+				audio: "olsbchoulie",
 				charlotte: true,
 				onremove: true,
 				trigger: {
@@ -37,7 +39,7 @@ const skills = {
 					const storage = player.storage.olsbchoulie_buff;
 					event.result = await player
 						.chooseToDiscard("chooseonly")
-						.set("prompt", `是否弃置一张牌，视为对${get.translation(storage[0])}使用一张无视防具的【杀】？`)
+						.set("prompt", `是否弃置一张牌，视为对${get.translation(storage[0])}使用一张【杀】？`)
 						.forResult();
 				},
 				async content(event, trigger, player) {
@@ -48,20 +50,15 @@ const skills = {
 				},
 			},
 			use: {
-				trigger: {
-					player: "useCard",
-				},
+				charlotte: true,
+				trigger: { player: "useCard" },
 				filter(event, player) {
 					return event.getParent().name == "olsbchoulie_buff";
 				},
-				charlotte: true,
 				silent: true,
 				async content(event, trigger, player) {
 					const storage = player.storage.olsbchoulie_buff;
 					for (const i of trigger.targets) {
-						i.addTempSkill("qinggang2");
-						i.storage.qinggang2.add(trigger.card);
-						i.markSkill("qinggang2");
 						if (i == storage[0]) {
 							const {
 								result: { bool },
@@ -78,6 +75,7 @@ const skills = {
 		},
 	},
 	olsbzhunjiao: {
+		audio: 2,
 		trigger: {
 			player: "useCard",
 		},
@@ -120,12 +118,12 @@ const skills = {
 	},
 	//OL谋赵云
 	olsbnilan: {
+		audio: 2,
 		trigger: {
 			source: "damageSource",
 		},
 		filter(event, player) {
-			if (event.getParent().name == "olsbnilan") return false;
-			return true;
+			return event.getParent().name !== "olsbnilan";
 		},
 		async cost(event, trigger, player) {
 			const { result } = await player
@@ -309,6 +307,7 @@ const skills = {
 	},
 	//OL谋张飞
 	olsbjingxian: {
+		audio: 2,
 		enable: "phaseUse",
 		filter(event, player) {
 			if (!player.countCards("he", card => get.type(card) != "basic")) return false;
@@ -325,6 +324,9 @@ const skills = {
 			return get.type(card) != "basic";
 		},
 		selectCard: [1, 2],
+		lose: false,
+		discard: false,
+		delay: false,
 		async content(event, trigger, player) {
 			const { cards, targets } = event;
 			const target = targets[0];
@@ -378,6 +380,7 @@ const skills = {
 		},
 	},
 	olsbxieyong: {
+		audio: 2,
 		enable: "phaseUse",
 		usable: 1,
 		filterTarget: lib.filter.notMe,
@@ -530,12 +533,13 @@ const skills = {
 	},
 	//OL谋黄月英
 	olsbbingcai: {
+		audio: 2,
 		trigger: {
 			player: "useCard",
 		},
 		filter(event, player) {
 			if (!player.countCards("he", { type: ["trick", "delay"] })) return false;
-			return player.getHistory("useCard", evt => get.type(evt.card) == "basic").length == 1;
+			return game.getGlobalHistory("everything", evt => evt.name === "useCard" && get.type(evt.card) === "basic").indexOf(event) === 0;
 		},
 		async cost(event, trigger, player) {
 			const { result } = await player.chooseCard("he", "请重铸一张锦囊牌").set("filterCard", function (card) {
@@ -564,6 +568,7 @@ const skills = {
 		group: ["olsblixian_gain", "olsblixian_sha", "olsblixian_shan"],
 		subSkill: {
 			gain: {
+				audio: "olsblixian",
 				trigger: {
 					global: "phaseJieshuBegin",
 				},
@@ -588,6 +593,7 @@ const skills = {
 				},
 			},
 			sha: {
+				audio: "olsblixian",
 				enable: ["chooseToUse", "chooseToRespond"],
 				filterCard(card) {
 					return card.hasGaintag("olsblixian");
@@ -615,6 +621,7 @@ const skills = {
 				},
 			},
 			shan: {
+				audio: "olsblixian",
 				enable: ["chooseToRespond", "chooseToUse"],
 				filterCard(card) {
 					return card.hasGaintag("olsblixian");
@@ -642,13 +649,12 @@ const skills = {
 	},
 	//OL谋沮授
 	olsbguliang: {
-		usable: 1,
-		trigger: {
-			target: "useCardToPlayer",
-		},
+		audio: 2,
+		trigger: { target: "useCardToPlayer" },
 		filter(event, player) {
 			return event.player != player;
 		},
+		usable: 1,
 		async content(event, trigger, player) {
 			trigger.getParent().excluded.add(player);
 			player.addTempSkill("olsbguliang_debuff");
@@ -672,6 +678,7 @@ const skills = {
 		},
 	},
 	olsbxutu: {
+		audio: 2,
 		trigger: {
 			global: "phaseBefore",
 			player: "enterGame",
@@ -695,6 +702,7 @@ const skills = {
 		group: ["olsbxutu_exchange"],
 		subSkill: {
 			exchange: {
+				audio: "olsbxutu",
 				trigger: {
 					global: "phaseJieshuBegin",
 				},

@@ -2127,6 +2127,10 @@ window.noname_character_rank = {
 			"ol_sb_dongzhuo",
 		],
 		epic: [
+			"ol_sb_zhaoyun",
+			"ol_sb_jushou",
+			"ol_guozhao",
+			"ol_sb_zhangxiu",
 			"ol_jsrg_lvbu",
 			"moqiongshu",
 			"sb_guojia",
@@ -2503,6 +2507,11 @@ window.noname_character_rank = {
 			"niufu",
 		],
 		rare: [
+			"lvju",
+			"panghong",
+			"ol_sb_zhangfei",
+			"ol_xuelingyun",
+			"ol_taoqian",
 			"ol_qinlang",
 			"ol_sb_dengai",
 			"yue_zhouyu",

@@ -13,7 +13,9 @@ const skills = {
 			if (player != _status.currentPhase || event.getParent("sbtuxi").player == player) return false;
 			return event.getg(player).length;
 		},
-		usable: 2,
+		get usable() {
+			return 1 + get.mode() === "identity";
+		},
 		async cost(event, trigger, player) {
 			const cards = trigger.getg(player).filter(i => get.owner(i) == player);
 			event.result = await player
@@ -281,7 +283,7 @@ const skills = {
 						return 0;
 					},
 					yiji: yiji,
-					position: "eh".slice(-1 + (!["identity", "doudizhu"].includes(mode) && name === "dying")),//三若为，怎么若都为构思
+					position: "eh".slice(-1 + (!["identity", "doudizhu"].includes(mode) && name === "dying")), //三若为，怎么若都为构思
 				});
 				if (bool) {
 					num -= cards.length;
@@ -3474,13 +3476,17 @@ const skills = {
 		},
 	},
 	//卢植
+	sbmingren: {
+		inherit: "nzry_mingren",
+		group: ["sbmingren_1", "sbmingren_2"],
+	},
 	sbzhenliang: {
 		inherit: "nzry_zhenliang",
 		audio: 2,
 		drawNum: 2,
 		intro: {
 			content(storage, player) {
-				if (storage) return "你的回合外，一名角色使用或打出牌结算完成后，若此牌与“任”类别相同，则你可以令一名角色摸两张牌。";
+				if (storage) return "你的回合外，一名角色使用或打出牌结算完成后，若此牌与“任”类别相同，则你可以令至多两名角色各摸两张牌。";
 				return "出牌阶段限一次，你可以弃置一张与“任”颜色相同的牌并对攻击范围内的一名角色造成1点伤害。";
 			},
 		},
