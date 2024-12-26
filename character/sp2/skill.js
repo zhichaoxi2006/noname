@@ -39,12 +39,17 @@ const skills = {
 				},
 				trigger: { player: "useCard" },
 				prompt2(event, player) {
-					return "进行一次判定，若判定结果为其他角色交给你牌的数量（" + player.countMark("stardangchen_buff") + "）的倍数，则" + get.translation(event.card) + "额外结算一次";
+					return "进行一次判定，若判定结果为" + player.countMark("stardangchen_buff") + "的倍数，则" + get.translation(event.card) + "额外结算一次";
 				},
 				async content(event, trigger, player) {
-					const { result } = await player.judge();
+					const { result } = await player
+						.judge(card => {
+							const number = get.number(card);
+							return number % get.player().countMark("stardangchen_buff") === 0;
+						})
+						.set("judge2", result => Boolean(result.bool));
 					const { number } = result;
-					if (number % player.countMark(event.name) === 0) {
+					if (number % player.countMark("stardangchen_buff") === 0) {
 						trigger.effectCount++;
 						game.log(trigger.card, "额外结算一次");
 					}
@@ -1702,14 +1707,12 @@ const skills = {
 			var groups = player.getSkills().filter(skill => skill.indexOf("starcanxi_") == 0);
 			groups = groups.map(group => group.slice(10));
 			groups.sort((a, b) => lib.group.indexOf(a) - lib.group.indexOf(b));
-			var map = {};
-			groups.forEach(group => (map[group] = get.translation(group + "2")));
-			event.map = map;
+			event.map = groups;
 			player
 				.chooseButton(
 					[
 						'###残玺###<div class="text center">请选择势力和效果</div>',
-						[Object.values(map), "tdnodes"],
+						[groups.map(group => [group, lib.translate[group + "2"] || lib.translate[group]]), "tdnodes"],
 						[
 							[
 								["wangsheng", '<div class="popup text" style="width:calc(100% - 10px);display:inline-block"><div class="skill">【妄生】</div><div>被选择势力角色每回合首次造成的伤害+1且计算与其他角色间的距离-1</div></div>'],
@@ -1739,20 +1742,20 @@ const skills = {
 						return num;
 					};
 					var listx = [];
-					Object.keys(map).forEach(group => list.forEach(effect => listx.add([group, effect])));
+					map.forEach(group => list.forEach(effect => listx.add([group, effect])));
 					listx.sort((a, b) => getNum(b[0], b[1]) - getNum(a[0], a[1]));
-					if (button.link == map[listx[0][0]] || button.link == listx[0][1]) return 1;
+					if (button.link == listx[0][0] || button.link == listx[0][1]) return 1;
 					return 0;
 				})
-				.set("map", map);
+				.set("map", groups);
 			"step 2";
 			if (result.bool) {
-				if (!Object.keys(event.map).some(group => event.map[group] == result.links[0])) result.links.reverse();
-				player.popup(result.links[0]);
-				var group = Object.keys(event.map).find(group => event.map[group] == result.links[0]);
+				if (!event.map.includes(result.links[0])) result.links.reverse();
+				var group = result.links[0];
 				var skill = "starcanxi_" + result.links[1];
-				player.popup(skill);
-				game.log(player, "选择了", "#g" + result.links[0], "、", "#y" + get.translation(skill));
+				var str = lib.translate[group + "2"] || lib.translate[group];
+				player.popup([str, skill]);
+				game.log(player, "选择了", "#g" + str, "、", "#y" + get.translation(skill));
 				player.addTempSkill(skill, "roundStart");
 				player.markAuto(skill, [group]);
 			}
@@ -1808,9 +1811,11 @@ const skills = {
 				filter: function (event, player) {
 					if (!player.getStorage("starcanxi_xiangsi").includes(event.player.group) || event.player == player) return false;
 					return (
-						game.getGlobalHistory("changeHp", function (evt) {
-							return evt.getParent().name == "recover" && evt.player == event.player;
-						}).length == 1
+						game
+							.getGlobalHistory("changeHp", function (evt) {
+								return evt.getParent().name == "recover" && evt.player == event.player;
+							})
+							.indexOf(event) === 0
 					);
 				},
 				forced: true,
@@ -1820,9 +1825,7 @@ const skills = {
 				},
 				group: ["starcanxi_remove", "starcanxi_cancel"],
 				global: "starcanxi_effect",
-				intro: {
-					content: "其他$势力角色每回合首次回复体力后失去1点体力且每回合对你使用的第一张牌无效",
-				},
+				intro: { content: "其他$势力角色每回合首次回复体力后失去1点体力且每回合对你使用的第一张牌无效" },
 			},
 			cancel: {
 				charlotte: true,
