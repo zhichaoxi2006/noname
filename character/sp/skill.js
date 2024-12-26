@@ -401,9 +401,10 @@ const skills = {
 							game.broadcastAll(
 								(color, player) => {
 									const list = lib.skill.dchuiling_hint.markColor;
+									const map = { red: 0, black: 2 };
 									if (player.marks.oljiaoyu) {
-										player.marks.oljiaoyu.firstChild.style.backgroundColor = list[color === "red" ? 0 : 2][0];
-										player.marks.oljiaoyu.firstChild.innerHTML = '<span style="color: ' + list[color === "red" ? 0 : 2][1] + '">' + get.translation(color)[0] + "</span>";
+										player.marks.oljiaoyu.firstChild.style.backgroundColor = list[map[color] || 1][0];
+										player.marks.oljiaoyu.firstChild.innerHTML = '<span style="color: ' + list[map[color] || 1][1] + '">' + get.translation(color)[0] + "</span>";
 									}
 								},
 								control,
