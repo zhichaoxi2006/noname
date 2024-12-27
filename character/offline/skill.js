@@ -880,7 +880,7 @@ const skills = {
 			if (bool) {
 				if (triggername == "damageBegin4" && event.source) {
 					const playerSkillNum = lib.skill.hm_shice.countSkill(player);
-					const sourceSkillNum = lib.skill.hm_shice.countSkill(player);
+					const sourceSkillNum = lib.skill.hm_shice.countSkill(event.source);
 					return event.hasNature() && playerSkillNum <= sourceSkillNum;
 				}
 			} else {
@@ -956,6 +956,13 @@ const skills = {
 					],
 				];
 				const next = player.chooseButton(dialog);
+				next.set("ai", function (button) {
+					const { link } = button;
+					if (link == "disable") {
+						return -(get.threaten(trigger.player, player) * get.attitude(player, trigger.player));
+					}
+					return 3 * (get.damageEffect(trigger.player, player, player, "fire") + get.attitude(trigger.player, player));
+				});
 				next.set("filterButton", function (button) {
 					const skill = lib.skill.hm_podai.getSkills(trigger.player);
 					if (!skill.length && button.link === "disable") {
