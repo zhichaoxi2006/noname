@@ -403,7 +403,7 @@ const skills = {
 									const list = lib.skill.dchuiling_hint.markColor;
 									const map = { red: 0, black: 2 };
 									if (player.marks.oljiaoyu) {
-										player.marks.oljiaoyu.firstChild.style.backgroundColor = list[map[color] || 1][0];
+										player.marks.oljiaoyu.firstChild.style.backgroundColor = list[Object.keys(map).includes(color) ? map[color] : 1][0];
 										player.marks.oljiaoyu.firstChild.innerHTML = '<span style="color: ' + list[map[color] || 1][1] + '">' + get.translation(color)[0] + "</span>";
 									}
 								},
