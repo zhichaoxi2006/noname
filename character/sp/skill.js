@@ -374,7 +374,6 @@ const skills = {
 								? await player
 										.chooseControl(color)
 										.set("ai", () => {
-											console.log(get.event());
 											let { player, controls } = get.event();
 											const { cards } = get.event().getParent();
 											return controls.sort((a, b) => {
