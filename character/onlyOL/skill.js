@@ -535,7 +535,7 @@ const skills = {
 	olsbbingcai: {
 		audio: 2,
 		trigger: {
-			player: "useCard",
+			global: "useCard",
 		},
 		filter(event, player) {
 			if (!player.countCards("he", { type: ["trick", "delay"] })) return false;
