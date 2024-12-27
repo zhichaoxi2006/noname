@@ -207,6 +207,8 @@ const skills = {
 		filterTarget: lib.filter.notMe,
 		selectTarget: 2,
 		targetprompt: ["展示手牌", "摸牌"],
+		complexTarget:true,
+		multitarget:true,
 		async content(event, trigger, player) {
 			const { targets } = event;
 			player.awakenSkill("hm_wenchen");
@@ -220,7 +222,7 @@ const skills = {
 				if (!list.some(c => targets[0].canUse(c, targets[1], true))) {
 					break;
 				}
-				const next2 = targets[0].chooseCardButton(list);
+				const next2 = targets[0].chooseCardButton(list, true);
 				next2.set("prompt", `选择一张牌使用对${get.translation(targets[1].name)}使用`);
 				next2.set("target", targets[0]);
 				next2.set("filterButton", function (button) {
