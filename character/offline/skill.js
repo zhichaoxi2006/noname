@@ -339,7 +339,8 @@ const skills = {
 		async content(event, trigger, player) {
 			const { cards, targets } = event;
 			await player.showCards(cards);
-			player.give(cards, targets[0]);
+			await player.give(cards, targets[0]);
+			await player.draw(cards.length);
 			const list = [].concat(cards);
 			while (true) {
 				if (!list.some(c => targets[0].hasUseTarget(c, true))) {
