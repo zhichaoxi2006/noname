@@ -2329,7 +2329,8 @@ const skills = {
 		},
 		forced: true,
 		async content(event, trigger, player) {
-			await player.chooseToDiscard("he", true);
+			const { result } = await player.chooseToDiscard("he", true, "chooseonly").set("prompt", "请重铸一张牌");
+			await player.recast(result.cards);
 			const source = trigger.source;
 			if (source?.isIn()) {
 				player.line(source);
