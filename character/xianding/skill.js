@@ -2014,6 +2014,7 @@ const skills = {
 					const card = {
 						name: get.name(button.link),
 						suit: get.suit(button.link),
+						nature: get.nature(button.link),
 						nature: button.link.nature,
 						isCard: true,
 					};
@@ -2024,6 +2025,7 @@ const skills = {
 					const card = {
 						name: get.name(button.link),
 						suit: get.suit(button.link),
+						nature: get.nature(button.link),
 						isCard: true,
 					};
 					return player.getUseValue(card);
@@ -2033,6 +2035,7 @@ const skills = {
 				const card = {
 					name: get.name(result.links[0]),
 					suit: get.suit(result.links[0]),
+					nature: get.nature(result.links[0]),
 					isCard: true,
 				};
 				await player.chooseUseTarget(card, true, false);
