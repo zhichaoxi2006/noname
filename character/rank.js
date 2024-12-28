@@ -120,6 +120,7 @@ window.noname_character_rank = {
 		"mb_sp_zhenji",
 	],
 	a: [
+		"shen_pangtong",
 		"olsbchoulie",
 		"scl_caoying",
 		"scl_luotong",
