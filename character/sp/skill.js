@@ -7,31 +7,31 @@ const skills = {
 		trigger: {
 			global: "roundStart",
 		},
-		forced:true,
-		async content(event, trigger, player){
+		forced: true,
+		async content(event, trigger, player) {
 			const { result } = await player.chooseControl([1, 2, 3, 4]).set("prompt", "选择摸一至四张牌");
 			const { result: result2 } = await player.draw(result.control);
 			player.addGaintag(result2, "olfengwei");
-			player.addTempSkill(["olfengwei_buff", "olfengwei_debuff"], {global: "roundStart"});
+			player.addTempSkill(["olfengwei_buff", "olfengwei_debuff"], { global: "roundStart" });
 			player.addMark("olfengwei_debuff", result.control, false);
 		},
 		subSkill: {
 			debuff: {
-				charlotte:true,
-				silent:true,
+				charlotte: true,
+				silent: true,
 				trigger: {
 					player: "damageBegin1",
 				},
-				filter(event, player){
+				filter(event, player) {
 					return player.countMark("olfengwei_debuff") > 0;
 				},
-				async content(event, trigger, player){
+				async content(event, trigger, player) {
 					trigger.num++;
 					player.removeMark("olfengwei_debuff", 1, false);
-				},	
+				},
 			},
 			buff: {
-				charlotte:true,
+				charlotte: true,
 				mod: {
 					ignoredHandcard(card, player) {
 						if (card.hasGaintag("olfengwei")) {
@@ -78,23 +78,25 @@ const skills = {
 			backup: function (links, player) {
 				return {
 					filterCard: true,
-					selectCard(){
+					selectCard() {
 						const player = get.player();
 						const count = player.getRoundHistory("useSkill", evt => evt.skill == "olzonghu").length + 1;
 						return [count, count];
 					},
-					lose:false,
-					discard:false,
-					visible:false,
+					lose: false,
+					discard: false,
+					visible: false,
 					viewAs: {
 						name: links[0][2],
 						suit: "none",
 						number: "none",
 						isCard: true,
 					},
-					log:false,
+					log: false,
 					async precontent(event, trigger, player) {
-						const { result: { cards } } = event;
+						const {
+							result: { cards },
+						} = event;
 						delete event.result.cards;
 						const { result } = await player.chooseTarget(`将${get.translation(cards)}交给一名其他角色`, lib.filter.notMe);
 						await player.give(cards, result.targets[0], false);

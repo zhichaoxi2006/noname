@@ -207,8 +207,8 @@ const skills = {
 		filterTarget: lib.filter.notMe,
 		selectTarget: 2,
 		targetprompt: ["展示手牌", "摸牌"],
-		complexTarget:true,
-		multitarget:true,
+		complexTarget: true,
+		multitarget: true,
 		async content(event, trigger, player) {
 			const { targets } = event;
 			player.awakenSkill("hm_wenchen");
@@ -1911,11 +1911,11 @@ const skills = {
 			const targets = game.filterPlayer(p => p.isMinHandcard());
 			for (const i of targets) {
 				const next = i.chooseCard("将一张牌置于牌堆顶，否则按“取消”从牌堆底摸一张牌", "he");
-				next.set("ai", function(card){
-					if (get.attitude(i, player) < 0){
+				next.set("ai", function (card) {
+					if (get.attitude(i, player) < 0) {
 						return 0;
 					}
-					if(get.suit(card) == suit.replace("lukai_", "")){
+					if (get.suit(card) == suit.replace("lukai_", "")) {
 						return 8 - get.value(card);
 					}
 					return 6 - get.value(card);
@@ -10557,15 +10557,15 @@ const skills = {
 	//龙庞德
 	dragtaiguan: {
 		enable: "phaseUse",
-		usable(skill, player){
+		usable(skill, player) {
 			return Math.max(1, player.getDamagedHp());
 		},
-		filterCard:true,
-		filterTarget(card, player, target){
+		filterCard: true,
+		filterTarget(card, player, target) {
 			return player.inRange(target) && target.countDiscardableCards("he");
 		},
-		async content(event, trigger, player){
-			const target = event.targets[0]
+		async content(event, trigger, player) {
+			const target = event.targets[0];
 			const { result } = await target.chooseToDiscard("he", true);
 			if (result.cards[0].name != "sha" && player.getHp() <= target.getHp()) {
 				await player.chooseUseTarget("juedou", true, [target]);

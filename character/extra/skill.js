@@ -5,14 +5,14 @@ const skills = {
 	//神庞统
 	//复活神将
 	luansuo: {
-		locked:true,
-		silent:true,
+		locked: true,
+		silent: true,
 		trigger: {
 			player: "phaseBegin",
 		},
-		async content(event, trigger, player){
-			for(const i of game.players){
-				i.addTempSkill("luansuo_debuff", {global: ["phaseBeginStart", "phaseAfter"]});
+		async content(event, trigger, player) {
+			for (const i of game.players) {
+				i.addTempSkill("luansuo_debuff", { global: ["phaseBeginStart", "phaseAfter"] });
 			}
 		},
 		subSkill: {
@@ -21,12 +21,10 @@ const skills = {
 					cardname(card, player) {
 						const suit = _status.discarded.map(item => get.suit(item));
 						const cards = player.getCards("h");
-						const first = cards[0], last = cards[cards.length - 1];
+						const first = cards[0],
+							last = cards[cards.length - 1];
 						if (![first, last].includes(card)) return;
-						if (
-							(!suit.includes(get.suit(first))) && 
-							(!suit.includes(get.suit(last)))
-						) {
+						if (!suit.includes(get.suit(first)) && !suit.includes(get.suit(last))) {
 							return "tiesuo";
 						}
 					},
@@ -50,12 +48,12 @@ const skills = {
 					noSortCard: true,
 				},
 			},
-		}
+		},
 	},
 	fengliao: {
 		zhuanhuanji: true,
-		forced:true,
-		mark:true,
+		forced: true,
+		mark: true,
 		marktext: "☯",
 		init: function (player, skill) {
 			player.storage[skill] = true;
@@ -72,10 +70,10 @@ const skills = {
 			player: "useCardToPlayered",
 		},
 		logTarget: "target",
-		filter(event, player){
+		filter(event, player) {
 			return event.targets.length == 1;
 		},
-		async content(event, trigger, player){
+		async content(event, trigger, player) {
 			const { target } = trigger;
 			if (Boolean(player.storage["fengliao"])) {
 				await target.draw();
@@ -89,8 +87,8 @@ const skills = {
 		trigger: {
 			player: "dieBegin",
 		},
-		filter(event, player){
-			const card = get.cardPile(function(c){
+		filter(event, player) {
+			const card = get.cardPile(function (c) {
 				if (get.natureList(c).includes("fire")) {
 					return true;
 				}
@@ -98,9 +96,9 @@ const skills = {
 			}, "cardPile");
 			return Boolean(card);
 		},
-		forced:true,
-		async content(event, trigger, player){
-			const card = get.cardPile(function(c){
+		forced: true,
+		async content(event, trigger, player) {
+			const card = get.cardPile(function (c) {
 				if (get.natureList(c).includes("fire")) {
 					return true;
 				}
