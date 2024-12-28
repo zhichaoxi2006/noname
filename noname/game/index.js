@@ -840,7 +840,16 @@ export class Game extends GameCompatible {
 			.flat();
 		next.setContent("cardsDiscard");
 		next.getd = function (player, key, position) {
-			return this.cards.slice(0);
+			if (!position) position = ui.ordering;
+			if (!key) key = "cards";
+			var cards = [],
+				event = this;
+			game.checkGlobalHistory("cardMove", function (evt) {
+				if (evt.name != "lose" || evt.position != position || !event.getParent(2).childEvents.find(evtx => evt == evtx)) return;
+				if (player && player != evt.player) return;
+				cards.addArray(evt[key]);
+			});
+			return cards.filter(c => event.cards.includes(c));;
 		};
 		return next;
 	}
