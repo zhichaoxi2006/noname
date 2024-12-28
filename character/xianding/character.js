@@ -1,4 +1,5 @@
 const characters = {
+	sunba: ["male", "wu", 3, ["dcjiedang", "dcjidi"]],
 	v_sunquan: ["male", "wu", 4, ["dcwoheng", "dcjizheng"]],
 	moqiongshu: ["female", "wei", 3, ["dcwanchan", "dcjiangzhi"]],
 	v_zhangliao: ["male", "qun", 4, ["dcyuxi", "dcporong"]],

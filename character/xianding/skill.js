@@ -3,6 +3,78 @@ import cards from "../sp2/card.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//孙霸
+	dcjiedang: {
+		mark:true,
+		intro: {
+			markcount: "expansion",
+			content: "expansion",
+		},
+		onremove(player, skill) {
+			var cards = player.getExpansions(skill);
+			if (cards.length) player.loseToDiscardpile(cards);
+		},
+		trigger: {
+			player: "phaseBegin",
+		},
+		async content(event, trigger, player){
+			for(const i of get.players()){
+				const { result: { bool, cards } } = await i.chooseToDiscard("chooseonly", [1, Infinity]).set("prompt", `将任意张牌置于${get.translation(player)}的武将牌上`);
+				if (bool) {
+					const next = player.addToExpansion(cards, player);
+					next.gaintag.add("dcjiedang");
+					await next;
+					await i.draw();
+				}
+			}
+		},
+		group: "dcjiedang_lose",
+		subSkill: {
+			lose: {
+				trigger: {
+					player: ["phaseUseBegin", "phaseJieshuBegin", "dying"],
+				},
+				forced:true,
+				filter(event, player){
+					return player.getExpansions("dcjiedang").length > 0;
+				},
+				async content(event, trigger, player){
+					const cards = player.getExpansions("dcjiedang");
+					const list = cards.map(c => get.type(c)).unique();
+					const dialog = ui.create.dialog();
+					dialog.addText("移去一种类型的牌");
+					dialog.addAuto(cards);
+					const { result: { control } } = await player.chooseControl(list)
+						.set("dialog", dialog);
+					const lose = cards.filter(c => get.type(c) == control);
+					await player.loseToDiscardpile(lose);
+					await player.draw(lose.length);
+				},
+			},
+		}
+	},
+	dcjidi: {
+		trigger: {
+			player: "damageBegin4",
+		},
+		forced:true,
+		filter(event, player){
+			const { source } = event;
+			if (!source) {
+				return false;
+			}
+			return source.getHp() > player.getHp() || source.countCards("h") > player.countCards("h");
+		},
+		async content(event, trigger, player){
+			const { source } = trigger;
+			if (source.getHp() > player.getHp()) {
+				await source.loseHp()
+			}
+			if (source.countCards("h") > player.countCards("h")) {
+				await source.randomDiscard(2);
+			}
+		},
+	},
 	//威孙权
 	dcwoheng: {
 		trigger: {
