@@ -1,4 +1,5 @@
 const characters = {
+	ol_liuzhang: ["male", "qun", 3, ["olfengwei", "olzonghu"]],
 	ol_taoqian: ["male", "qun", 3, ["olzhaohuo", "olwenren", "olzongluan"]],
 	ol_xuelingyun: ["female", "wei", "3/3", ["olsiqi", "olqiaozhi"]],
 	ol_guozhao: ["female", "wei", 3, ["oljiaoyu", "olneixun"]],

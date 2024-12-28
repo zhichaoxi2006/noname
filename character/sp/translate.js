@@ -1446,6 +1446,12 @@ const translates = {
 	olwenren_info: "出牌阶段限一次，你可以选择任意名角色，其每满足一项便摸一张牌：1.没有手牌；2.手牌数小于等于你。",
 	olzongluan: "纵乱",
 	olzongluan_info: "准备阶段，你可以选择一名角色，其视为对其攻击范围内的任意名角色各使用一张【杀】，然后你弃置X张牌（X为以此法受到伤害的角色数）。",
+	ol_liuzhang: "OL刘璋",
+	ol_liuzhang_prefix: "OL",
+	olfengwei: "奉蔚",
+	olfengwei_info: "锁定技，每轮开始时，你摸一至四张牌（这些牌本轮不计入手牌上限），然后当你本轮前等量次受到伤害时，此伤害+1。",
+	olzonghu: "宗护",
+	olzonghu_info: "每回合限一次，当你需要使用【杀】或【闪】时，你可以将X张牌交给一名其他角色（X为本轮发动此技能的次数），视为使用之。",
 };
 
 export default translates;

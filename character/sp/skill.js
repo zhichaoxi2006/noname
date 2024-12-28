@@ -2,6 +2,149 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL刘璋
+	olfengwei: {
+		trigger: {
+			global: "roundStart",
+		},
+		forced:true,
+		async content(event, trigger, player){
+			const { result } = await player.chooseControl([1, 2, 3, 4]).set("prompt", "选择摸一至四张牌");
+			const { result: result2 } = await player.draw(result.control);
+			player.addGaintag(result2, "olfengwei");
+			player.addTempSkill(["olfengwei_buff", "olfengwei_debuff"], {global: "roundStart"});
+			player.addMark("olfengwei_debuff", result.control, false);
+		},
+		subSkill: {
+			debuff: {
+				charlotte:true,
+				silent:true,
+				trigger: {
+					player: "damageBegin1",
+				},
+				filter(event, player){
+					return player.countMark("olfengwei_debuff") > 0;
+				},
+				async content(event, trigger, player){
+					trigger.num++;
+					player.removeMark("olfengwei_debuff", 1, false);
+				},	
+			},
+			buff: {
+				charlotte:true,
+				mod: {
+					ignoredHandcard(card, player) {
+						if (card.hasGaintag("olfengwei")) {
+							return true;
+						}
+					},
+					cardDiscardable(card, player, name) {
+						if (name == "phaseDiscard" && card.hasGaintag("olfengwei")) {
+							return false;
+						}
+					},
+				},
+				onremove: function (player) {
+					player.removeGaintag("olfengwei");
+				},
+			},
+		},
+	},
+	olzonghu: {
+		audio: 2,
+		enable: "chooseToUse",
+		filter: function (event, player) {
+			const count = player.getRoundHistory("useSkill", evt => evt.skill == "olzonghu").length;
+			if (player.countCards("he") < count) {
+				return false;
+			}
+			if (event.type == "wuxie" || player.hasSkill("olzonghu_used")) return false;
+			for (var name of ["sha", "shan"]) {
+				if (event.filterCard({ name: name, isCard: true }, player, event)) return true;
+			}
+			return false;
+		},
+		chooseButton: {
+			dialog: function (event, player) {
+				var vcards = [];
+				for (var name of ["sha", "shan"]) {
+					var card = { name: name, isCard: true };
+					if (event.filterCard(card, player, event)) vcards.push(["基本", "", name]);
+				}
+				var dialog = ui.create.dialog("宗护", [vcards, "vcard"], "hidden");
+				dialog.direct = true;
+				return dialog;
+			},
+			backup: function (links, player) {
+				return {
+					filterCard: true,
+					selectCard(){
+						const player = get.player();
+						const count = player.getRoundHistory("useSkill", evt => evt.skill == "olzonghu").length + 1;
+						return [count, count];
+					},
+					lose:false,
+					discard:false,
+					visible:false,
+					viewAs: {
+						name: links[0][2],
+						suit: "none",
+						number: "none",
+						isCard: true,
+					},
+					log:false,
+					async precontent(event, trigger, player) {
+						const { result: { cards } } = event;
+						delete event.result.cards;
+						const { result } = await player.chooseTarget(`将${get.translation(cards)}交给一名其他角色`, lib.filter.notMe);
+						await player.give(cards, result.targets[0], false);
+						player.logSkill("olzonghu");
+						player.addTempSkill("olzonghu_used");
+					},
+				};
+			},
+			prompt: function (links, player) {
+				return "宗护：视为使用一张【" + get.translation(links[0][2]) + "】";
+			},
+		},
+		ai: {
+			order: function (item, player) {
+				var player = _status.event.player;
+				var event = _status.event;
+				if (event.filterCard({ name: "sha" }, player, event)) {
+					if (
+						!player.hasShan() &&
+						!game.hasPlayer(function (current) {
+							return player.canUse("sha", current) && current.hp == 1 && get.effect(current, { name: "sha" }, player, player) > 0;
+						})
+					) {
+						return 0;
+					}
+					return 2.95;
+				} else {
+					var player = _status.event.player;
+					return 3.15;
+				}
+			},
+			respondSha: true,
+			respondShan: true,
+			skillTagFilter: function (player, tag, arg) {
+				if (player.hasSkill("weijing_used")) return false;
+				if (arg != "use") return false;
+			},
+			result: {
+				player: 1,
+			},
+		},
+		subSkill: {
+			used: {
+				mark: true,
+				intro: {
+					content: "本回合已发动",
+				},
+			},
+		},
+	},
 	//OL陶谦
 	olzhaohuo: {
 		trigger: {
