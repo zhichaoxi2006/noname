@@ -711,6 +711,7 @@ const skills = {
 		filterCard: true,
 		selectCard: [1, Infinity],
 		position: "he",
+		discard: false,
 		prompt: "重铸任意张牌，然后令一名其他角色重铸等量张手牌",
 		filterTarget: lib.filter.notMe,
 		async content(event, trigger, player) {
