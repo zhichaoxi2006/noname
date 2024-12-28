@@ -378,6 +378,11 @@ export class Get extends GetCompatible {
 	connectNickname() {
 		return typeof lib.config.connect_nickname == "string" ? lib.config.connect_nickname.slice(0, 12) : "无名玩家";
 	}
+	/**
+	 * 返回智囊牌名组成的数组
+	 * @param { Function | boolean } [filter] 
+	 * @returns { String[] } 
+	 */
 	zhinangs(filter) {
 		var list = (_status.connectMode ? lib.configOL : lib.config).zhinang_tricks;
 		if (!list || !list.filter || !list.length) return get.inpile("trick", "trick").randomGets(3);
