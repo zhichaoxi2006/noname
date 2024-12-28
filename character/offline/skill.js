@@ -726,8 +726,8 @@ const skills = {
 				if (cardname.includes("sha")) {
 					await target.damage("fire", player);
 				}
-				if (cardname.includes("shan")) {
-					const next2 = player.chooseTarget("选择使用【杀】的目标");
+				if (cardname.includes("shan") && target.hasUseTarget({ name: "sha", isCard: true })) {
+					const next2 = player.chooseTarget("选择使用【杀】的目标", true);
 					next2.set("filterTarget", function (card, player, targetx) {
 						return lib.filter.filterTarget({ name: "sha", isCard: true }, target, targetx);
 					});
