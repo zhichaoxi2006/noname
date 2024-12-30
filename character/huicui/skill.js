@@ -911,7 +911,7 @@ const skills = {
 			return event.name != "phase" || game.phaseNumber == 0;
 		},
 		forced: true,
-		content() {
+		async content(event, trigger, player) {
 			const cards = player.getCards("h");
 			player.addGaintag(cards, "dcjigu");
 		},
@@ -925,6 +925,10 @@ const skills = {
 		},
 		group: "dcjigu_temp",
 		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+			},
 			temp: {
 				audio: "dcjigu",
 				trigger: {
@@ -945,13 +949,17 @@ const skills = {
 						"张牌"
 					);
 				},
-				content() {
-					player.draw(
+				async contentBefore(event, trigger, player){
+					player.addTempSkill("dcjigu_used", {global: "roundStart"});
+					player.addMark("dcjigu_used");
+				},
+				async content(event, trigger, player) {
+					await player.draw(
 						Array.from({ length: 5 })
 							.map((_, i) => i + 1)
 							.reduce((sum, i) => sum + player.countEmptySlot(i), 0)
 					);
-					let num1 = player.getRoundHistory("useSkill", evt => evt.skill == "dcjigu_temp").length;
+					let num1 = player.countMark("dcjigu_used");
 					let num2 = game.countPlayer2(current => {
 						return current.actionHistory.some(i => i.isMe && !i.isSkipped);
 					});

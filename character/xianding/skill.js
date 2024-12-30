@@ -82,17 +82,33 @@ const skills = {
 		},
 		enable: "phaseUse",
 		filterTarget: true,
+		mark:true,
+		intro: {
+			markcount(_, player){
+				const num = player.countMark("dcwoheng_used");
+				return num + 1;
+			},
+			content(storage, player){
+				const num = player.countMark("dcwoheng_used");
+				return `令一名角色摸或弃置${num + 1}张牌`
+			}
+		},
 		prompt(event) {
 			const { player } = event;
-			const num = player.getRoundHistory("useSkill", evt => evt.skill == "dcwoheng").length;
+			const num = player.countMark("dcwoheng_used");
 			return `令一名角色摸或弃置${num + 1}张牌`;
 		},
 		async cost(event, trigger, player) {
-			const num = player.getRoundHistory("useSkill", evt => evt.skill == "dcwoheng").length;
+			const num = player.countMark("dcwoheng_used");
 			event.result = await player.chooseTarget(`令一名角色摸或弃置${num + 1}张牌`).forResult();
 		},
+		async contentBefore(event, trigger, player){
+			player.addTempSkill("dcwoheng_used", {global: "roundStart"});
+			player.addMark("dcwoheng_used");
+		},
 		async content(event, trigger, player) {
-			const num = player.getRoundHistory("useSkill", evt => evt.skill == "dcwoheng").length;
+			const num = player.countMark("dcwoheng_used");
+			player.addTip("dcwoheng", `斡衡：${num}`);
 			const [target] = event.targets;
 			const str1 = "摸" + get.cnNumber(num, true);
 			const str2 = "弃" + get.cnNumber(num, true);
@@ -121,6 +137,12 @@ const skills = {
 				player.tempBanSkill("dcwoheng");
 			}
 		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+			},
+		}
 	},
 	dcjizheng: {
 		feedPigSkill: true,

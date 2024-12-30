@@ -1224,12 +1224,15 @@ const skills = {
 				return true;
 			return false;
 		},
-		content() {
-			"step 0";
-			player.draw(get.cardNameLength(trigger.card));
-			if (player.isDamaged()) player.chooseToDiscard(player.getDamagedHp(), "he", true);
-			"step 1";
-			if (player.getHistory("useSkill", evt => evt.skill == "clanhuanghan").length > 1 && player.hasSkill("clanbaozu", null, false, false) && player.awakenedSkills.includes("clanbaozu")) {
+		async contentBefore(event, trigger, player){
+			player.addTempSkill("clanhuanghan_used");
+			player.addMark("clanhuanghan_used");
+		},
+		async content(event, trigger, player) {
+			const num = player.countMark("clanhuanghan_used");
+			await player.draw(get.cardNameLength(trigger.card));
+			if (player.isDamaged()) await player.chooseToDiscard(player.getDamagedHp(), "he", true);
+			if (num > 1 && player.hasSkill("clanbaozu", null, false, false) && player.awakenedSkills.includes("clanbaozu")) {
 				player.restoreSkill("clanbaozu");
 				player.popup("保族");
 				game.log(player, "恢复了技能", "#g【保族】");
@@ -1244,6 +1247,12 @@ const skills = {
 					if (num > 0) return [1, 0.8 * num + 0.1];
 				},
 			},
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+			}
 		},
 	},
 	//族钟会

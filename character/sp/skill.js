@@ -54,7 +54,7 @@ const skills = {
 		audio: 2,
 		enable: "chooseToUse",
 		filter: function (event, player) {
-			const count = player.getRoundHistory("useSkill", evt => evt.skill == "olzonghu").length;
+			const count = player.countMark("olzonghu_round") + 1;
 			if (player.countCards("he") < count) {
 				return false;
 			}
@@ -94,11 +94,22 @@ const skills = {
 					},
 					log: false,
 					async precontent(event, trigger, player) {
+						player.addTempSkill("olzonghu_round", {global: "roundStart"});
+						player.addMark("olzonghu_round");
 						const {
 							result: { cards },
 						} = event;
 						delete event.result.cards;
-						const { result } = await player.chooseTarget(`将${get.translation(cards)}交给一名其他角色`, lib.filter.notMe);
+						const { result } = await player.chooseTarget(`将${get.translation(cards)}交给一名其他角色`, lib.filter.notMe).set("filterTarget", function(card, player, target){
+							if (target.hasSkillTag("nogain")) return 0;
+							if (ui.selected.cards.length && ui.selected.cards[0].name == "du") {
+								return target.hasSkillTag("nodu") ? 0 : -10;
+							}
+							if (target.hasJudge("lebu")) return 0;
+							const nh = target.countCards("h");
+							const np = player.countCards("h");
+							return Math.max(1, 5 - nh);
+						});
 						await player.give(cards, result.targets[0], false);
 						player.logSkill("olzonghu");
 						player.addTempSkill("olzonghu_used");
@@ -131,7 +142,7 @@ const skills = {
 			respondSha: true,
 			respondShan: true,
 			skillTagFilter: function (player, tag, arg) {
-				if (player.hasSkill("weijing_used")) return false;
+				if (player.hasSkill("olzonghu_used")) return false;
 				if (arg != "use") return false;
 			},
 			result: {
@@ -139,8 +150,14 @@ const skills = {
 			},
 		},
 		subSkill: {
+			round: {
+				charlotte:true,
+				onremove:true,
+			},
 			used: {
+				charlotte:true,
 				mark: true,
+				onremove:true,
 				intro: {
 					content: "本回合已发动",
 				},
