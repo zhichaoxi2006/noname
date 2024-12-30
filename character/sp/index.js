@@ -22,6 +22,9 @@ game.import("character", function () {
 		},
 		characterFilter: { ...characterFilters },
 		characterTitle: {},
+		characterSubstitute: {
+			sp_ol_caocao: [["sp_ol_caocao_shadow", ["die:sp_ol_caocao"]]],
+		},
 		dynamicTranslate: { ...dynamicTranslates },
 		characterIntro: { ...characterIntros },
 		characterReplace: { ...characterReplaces },
