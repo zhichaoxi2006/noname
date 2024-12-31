@@ -1,6 +1,6 @@
 const pinyins = {
 	加藤うみ: ["Kato", "Umi"],
-        鹰原羽未: ["Takahara", "Umi"],
+	鹰原羽未: ["Takahara", "Umi"],
 	仲村由理: ["Nakamura", "Yuri"],
 	此花露西娅: ["Konohana", "Lucia"],
 	枣恭介: ["Natsume", "Kyousuke"],
