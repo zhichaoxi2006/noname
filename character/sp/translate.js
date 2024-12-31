@@ -1452,6 +1452,14 @@ const translates = {
 	olfengwei_info: "锁定技，每轮开始时，你摸一至四张牌（这些牌本轮不计入手牌上限），然后当你本轮前等量次受到伤害时，此伤害+1。",
 	olzonghu: "宗护",
 	olzonghu_info: "每回合限一次，当你需要使用【杀】或【闪】时，你可以将X张牌交给一名其他角色（X为本轮发动此技能的次数），视为使用之。",
+	sp_ol_liubei: "SP刘备",
+	sp_ol_liubei_prefix: "SP",
+	spolxudai: "虚待",
+	spolxudai_info: "限定技，当你响应牌后，你可以令一名其他角色获得【煮酒】。",
+	spolzhujiu: "煮酒",
+	spolzhujiu_info: "你可以将X+1张梅花牌当【酒】使用（X为你本回合已使用过【酒】的次数）",
+	spoljinglei: "惊雷",
+	spoljinglei_info: "每回合限一次，一名角色使用【酒】结算结束后，若没有处于濒死的角色，你可以受到1点无来源的雷电伤害，令一名拥有【煮酒】角色将手牌调整至体力上限（至多摸至5），然后若该角色不为你：其须将以此法弃置的牌交给你。",
 };
 
 export default translates;

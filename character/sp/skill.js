@@ -2,6 +2,88 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//SP刘备
+	spolxudai: {
+		audio: 2,
+		limited: true,
+		trigger: {
+			player: ["useCard", "respond"],
+		},
+		filter(event, player){
+			if (!event.respondTo) return false;
+			return true;
+		},
+		async cost(event, trigger, player){
+			event.result = await player.chooseTarget("是否令一名其他角色获得【煮酒】？")
+				.set("filterTarget", function(_, player, target){
+					return target != player;
+				})
+				.set("ai", function(target){
+					return get.attitude(player, target);
+				})
+				.forResult();
+		},
+		async content(event, trigger, player){
+			player.awakenSkill(event.name);
+			const { targets:[target] } = event;
+			await target.addSkills("spolzhujiu");
+		}
+	},
+	spolzhujiu: {
+		audio: 2,
+		enable: "chooseToUse",
+		viewAs: {
+			name: "jiu",
+			isCard: true,
+		},
+		viewAsFilter(player){
+			const num = player.countUsed({name:"jiu"}, true) + 1;
+			return player.countCards("hes", { suit: "club" }) >= num;
+		},
+		filterCard(card){
+			return get.suit(card) == "club";
+		},
+		selectCard(){
+			const player = get.player();
+			const num = player.countUsed({name:"jiu"}, true) + 1;
+			return [num, num];
+		},
+	},
+	spoljinglei: {
+		audio: 2,
+		usable: 1,
+		trigger: {
+			global: "useCardAfter",
+		},
+		filter(event, player){
+			if(event.card.name != "jiu") return false;
+			return !game.hasPlayer(c => c.isDying());
+		},
+		async cost(event, trigger, player){
+			const { result } = await player.chooseTarget("令一名拥有【煮酒】角色将手牌调整至体力上限")
+				.set("filterTarget", function(_, player, target){
+					return target.hasSkill("spolzhujiu");
+				})
+				.set("ai", function(target){
+					return get.attitude(player, target);
+				});
+			event.result = result;
+		},
+		async content(event, trigger, player){
+			await player.damage("thunder", "nosource");
+			const { targets: [target] }  = event;
+			if (target.maxHp > target.countCards("h")) {
+				const num = Math.min(target.maxHp - target.countCards("h"), 5);
+				await target.draw(num);
+			} else {
+				const num = target.countCards("h") - target.maxHp;
+				const { result } = await player.chooseToDiscard([num, num], true);
+				if (player != target) {
+					await target.give(result.cards, player);
+				}
+			}
+		}
+	},
 	//OL刘璋
 	olfengwei: {
 		audio: 2,
