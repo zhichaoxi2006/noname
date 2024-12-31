@@ -2,6 +2,63 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL袁涣
+	olderu: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget(card, player, target){
+			if (player == target) {
+				return false;
+			}
+			return target.countCards("h") > 1;
+		},
+		async content(event, trigger, player){
+			const { target } = event;
+			const cardname = lib.inpile.filter(c=>get.type(c) == "basic");
+			const answer = target.getCards("h").filter(c=>get.type(c) == "basic");
+			const dialog = [
+				`请猜测${get.translation(get.translation(target))}手牌中的基本牌牌名`,
+				[
+					cardname.map(c=>[c, get.translation(c)]),
+					"tdnodes",
+				]
+			];
+			const { result: { links } } = await player.chooseButton(dialog, [1, target.countCards("h")], true);
+			let list = links.map(c => answer.map(i => i.name).includes(c));
+			if (list.includes(true)) {
+				await player.recover();
+			}
+			if (list.includes(false)) {
+				const card = answer.randomGet();
+				await player.gain(card);
+			}
+			if (list.every(c => c === true)){
+				await player.drawTo(player.maxHp);
+			}
+		},
+	},
+	ollinjie: {
+		audio: 2,
+		trigger: {
+			player: "damageEnd",
+		},
+		forced:true,
+		filter(event, player){
+			const { source } = event;
+			if (!source) {
+				return false;
+			}
+			return source.countDiscardableCards("h") > 0;
+		},
+		async content(event, trigger, player){
+			const { source } = trigger;
+			const { result: { bool, cards } } = await source.chooseToDiscard(true);
+			if (cards.length && cards[0].name == "sha") {
+				await player.draw();
+			}
+		}
+	},
 	//SP刘备
 	spolxudai: {
 		audio: 2,

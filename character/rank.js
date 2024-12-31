@@ -1327,6 +1327,7 @@ window.noname_character_rank = {
 		"ol_jsrg_lvbu",
 	],
 	b: [
+		"ol_yuanhuan",
 		"sunba",
 		"ol_liuzhang",
 		"ol_liaohua",

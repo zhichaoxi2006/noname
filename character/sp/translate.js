@@ -1460,6 +1460,12 @@ const translates = {
 	spolzhujiu_info: "你可以将X+1张梅花牌当【酒】使用（X为你本回合已使用过【酒】的次数）",
 	spoljinglei: "惊雷",
 	spoljinglei_info: "每回合限一次，一名角色使用【酒】结算结束后，若没有处于濒死的角色，你可以受到1点无来源的雷电伤害，令一名拥有【煮酒】角色将手牌调整至体力上限（至多摸至5），然后若该角色不为你：其须将以此法弃置的牌交给你。",
+	ol_yuanhuan: "OL袁涣",
+	ol_yuanhuan_prefix: "OL",
+	olderu: "德辱",
+	olderu_info: "出牌阶段限一次，你可以猜测一名其他角色手牌中的基本牌牌名，若你:有猜对，你回复1点体力;有猜错，随机获得其一张基本牌:全部猜对，你将手牌摸至体力值。",
+	ollinjie: "临节",
+	ollinjie_info: "锁定技，你受到伤害后，来源弃置一张手牌，若为【杀】，你摸一张牌。",
 };
 
 export default translates;
