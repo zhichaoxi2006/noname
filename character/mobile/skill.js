@@ -4,10 +4,11 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 const skills = {
 	//势太史慈 --- by 刘巴
 	potzhanlie: {
-		audio: 2,
+		audio: 3,
 		trigger: { global: "phaseBegin" },
 		forced: true,
 		locked: false,
+		logAudio: () => 2,
 		content() {
 			const effectMap = new Map([
 				["hp", player.getHp()],
@@ -26,7 +27,7 @@ const skills = {
 			addMark: {
 				charlotte: true,
 				onremove: true,
-				audio: "potzhanlie",
+				audio: "potzhanlie3.mp3",
 				trigger: { global: ["loseAfter", "loseAsyncAfter", "cardsDiscardAfter"] },
 				getIndex(event, player) {
 					return Math.min(
@@ -271,13 +272,14 @@ const skills = {
 	},
 	potzhenfeng: {
 		limited: true,
-		audio: 2,
+		audio: 4,
 		enable: "phaseUse",
 		filter(event, player) {
 			return player.isDamaged() || ["pothanzhan", "potzhanlie"].some(skill => player.hasSkill(skill, null, null, false));
 		},
 		skillAnimation: true,
 		animationColor: "metal",
+		logAudio: index => (typeof index === "number" ? "potzhenfeng" + index + ".mp3" : 2),
 		chooseButton: {
 			dialog(event, player) {
 				const dialog = ui.create.dialog("振锋：你可以选择一项", "hidden");
@@ -310,12 +312,13 @@ const skills = {
 			backup(links) {
 				return {
 					item: links[0],
-					audio: "potzhenfeng",
 					skillAnimation: true,
 					animationColor: "metal",
+					log: false,
 					async content(event, trigger, player) {
 						player.awakenSkill("potzhenfeng");
 						if (get.info(event.name).item === "recover") {
+							player.logSkill("potzhenfeng");
 							await player.recover(2);
 						} else {
 							let dialog = [],
@@ -348,6 +351,7 @@ const skills = {
 								})
 								.forResult();
 							if (result?.bool && result.links?.length) {
+								player.logSkill("potzhenfeng", null, null, null, [get.rand(3, 4)]);
 								for (const link of result.links) {
 									const [change, skill] = link.split("|");
 									player.storage[skill] = change;
