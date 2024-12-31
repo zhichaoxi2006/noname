@@ -12584,12 +12584,12 @@ const skills = {
 			if (result.bool) {
 				if (cards.length) player.gain(cards, "gain2");
 				//game.cardsDiscard(cards2);
-				player.addTempSkill("new_reluoyi2", { player: "phaseBefore" });
+				player.addTempSkill("new_reluoyi_buff", { player: "phaseBefore" });
 				trigger.changeToZero();
 			}
 			//else game.cardsDiscard(cards);
 		},
-		subSkill: { new_reluoyi2: { inherit: "reluoyi2", sourceSkill: "new_reluoyi" }, },
+		subSkill: { buff: { inherit: "reluoyi2", sourceSkill: "new_reluoyi" }, },
 	},
 	new_rewusheng: {
 		mod: {
