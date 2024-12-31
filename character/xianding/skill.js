@@ -5,6 +5,7 @@ import cards from "../sp2/card.js";
 const skills = {
 	//孙霸
 	dcjiedang: {
+		audio: 2,
 		mark:true,
 		intro: {
 			markcount: "expansion",
@@ -54,6 +55,7 @@ const skills = {
 		}
 	},
 	dcjidi: {
+		audio: 2,
 		trigger: {
 			player: "damageBegin4",
 		},

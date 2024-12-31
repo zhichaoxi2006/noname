@@ -5,6 +5,7 @@ const skills = {
 	//神庞统
 	//复活神将
 	luansuo: {
+		audio: 2,
 		locked: true,
 		silent: true,
 		trigger: {
@@ -51,6 +52,7 @@ const skills = {
 		},
 	},
 	fengliao: {
+		audio: 2,
 		zhuanhuanji: true,
 		forced: true,
 		mark: true,
@@ -84,6 +86,7 @@ const skills = {
 		},
 	},
 	kunyu: {
+		audio: 2,
 		trigger: {
 			player: "dieBegin",
 		},

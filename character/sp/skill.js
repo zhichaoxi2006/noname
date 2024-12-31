@@ -4,6 +4,7 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 const skills = {
 	//OL刘璋
 	olfengwei: {
+		audio: 2,
 		trigger: {
 			global: "roundStart",
 		},
