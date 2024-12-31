@@ -1820,7 +1820,10 @@ const skills = {
 				onremove: true,
 				markimage: "image/card/handcard.png",
 				mod: { maxHandcard: (player, num) => num + player.countMark("olhedao_hand") },
-				intro: { content: "手牌上限+#" },
+				intro: { 
+					name: "天书",
+					content: "手牌上限+#" 
+				},
 			},
 			effect: {
 				charlotte: true,
@@ -1833,7 +1836,10 @@ const skills = {
 						if (player.getStorage("olhedao_effect").includes(target)) return Infinity;
 					},
 				},
-				intro: { content: "对$使用牌无距离和次数限制" },
+				intro: { 
+					name: "天书",
+					content: "对$使用牌无距离和次数限制" 
+				},
 			},
 		},
 		ai: {
