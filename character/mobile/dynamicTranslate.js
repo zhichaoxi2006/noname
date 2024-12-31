@@ -11,10 +11,6 @@ const dynamicTranslates = {
 	shhlianhua(player) {
 		return ["当你成为【杀】的目标后，你摸一张牌。", "当你成为【杀】的目标后，你摸一张牌。然后你进行判定，若结果为黑桃，则此【杀】对你无效。", "当你成为【杀】的目标后，你摸一张牌。然后此【杀】的使用者选择一项：①弃置一张牌。②令此【杀】对你无效。"][player.countMark("shhlianhua")];
 	},
-	spshidi(player) {
-		if (player.countMark("spshidi") % 2 == 0) return '转换技，锁定技。①准备阶段/结束阶段开始时，若你发动此分支的累计次数为奇数/偶数，则你获得一个“☯”。<span class="bluetext">②若你的“☯”数为偶数，则你至其他角色的距离-1，且你使用的黑色【杀】不可被响应。</span>③若你的“☯”数为奇数，则其他角色至你的距离+1，且你不可响应红色【杀】。';
-		return '转换技，锁定技。①准备阶段/结束阶段开始时，若你发动此分支的累计次数为奇数/偶数，则你获得一个“☯”。②若你的“☯”数为偶数，则你至其他角色的距离-1，且你使用的黑色【杀】不可被响应。<span class="bluetext">③若你的“☯”数为奇数，则其他角色至你的距离+1，且你不可响应红色【杀】。</span>';
-	},
 	mobilexingxue(player) {
 		return lib.translate[(player.storage.mobileyanzhu ? "mobilexingxuex" : "mobilexingxue") + "_info"];
 	},
@@ -30,19 +26,46 @@ const dynamicTranslates = {
 		const xuetu = player.storage.mbxuetu,
 			status = player.countMark("mbxuetu_status");
 		if (status === 0) {
-			if (!xuetu) return '转换技。出牌阶段限一次，<span class="bluetext">阴：你可以弃置一张牌，然后令一名角色回复1点体力；</span>阳：你可以失去1点体力，然后令一名角色摸两张牌。';
-			return '转换技。出牌阶段限一次，阴：你可以弃置一张牌，然后令一名角色回复1点体力；<span class="bluetext">阳：你可以失去1点体力，然后令一名角色摸两张牌。</span>';
+			if (!xuetu) return '转换技。出牌阶段限一次，<span class="bluetext">阴：你可以令一名角色回复1点体力；</span>阳：你可以令一名角色摸两张牌。';
+			return '转换技。出牌阶段限一次，阴：你可以令一名角色回复1点体力；<span class="bluetext">阳：你可以令一名角色摸两张牌。</span>';
 		} else if (status === 1) {
 			return lib.translate.mbxuetu_achieve_info;
 		} else {
-			if (!xuetu) return '转换技。出牌阶段限一次，<span class="bluetext">阴：你可以回复1点体力，然后令一名角色弃置两张牌；</span>阳：你可以摸一张牌，然后对一名角色造成1点伤害。';
-			return '转换技。出牌阶段限一次，阴：你可以回复1点体力，然后令一名角色弃置两张牌；<span class="bluetext">阳：你可以摸一张牌，然后对一名角色造成1点伤害。</span>';
+			if (!xuetu) return '转换技。出牌阶段限一次，<span class="bluetext">阴：你可以回复1点体力，然后令一名其他角色弃置两张牌；</span>阳：你可以摸一张牌，然后对一名其他角色造成1点伤害。';
+			return '转换技。出牌阶段限一次，阴：你可以回复1点体力，然后令一名其他角色弃置两张牌；<span class="bluetext">阳：你可以摸一张牌，然后对一名其他角色造成1点伤害。</span>';
 		}
 	},
 	mbzuoyou(player) {
-		const mbzuoyou = player.storage.mbzuoyou;
-		if (mbzuoyou) return '转换技。出牌阶段限一次，阴：你可以令一名角色摸两张牌，然后其弃置一张牌；<span class="bluetext">阳：你可以令一名手牌数不少于二的角色弃置两张手牌，然后其获得1点护甲。</span>';
-		return '转换技。出牌阶段限一次，<span class="bluetext">阴：你可以令一名角色摸两张牌，然后其弃置一张牌；</span>阳：你可以令一名手牌数不少于二的角色弃置两张手牌，然后其获得1点护甲。';
+		const mbzuoyou = player.storage.mbzuoyou,
+			versus = get.mode() == "versus" && _status.mode == "two" ? "角色" : "有手牌的角色弃置一张手牌，然后其";
+		if (mbzuoyou) return '转换技。出牌阶段限一次，阴：你可以令一名角色摸三张牌，然后其弃置两张牌；<span class="bluetext">阳：你可以令一名' + versus + "获得1点护甲。</span>";
+		return '转换技。出牌阶段限一次，<span class="bluetext">阴：你可以令一名角色摸三张牌，然后其弃置两张牌；</span>阳：你可以令一名' + versus + "获得1点护甲。";
+	},
+	pothanzhan(player) {
+		let str = lib.translate.pothanzhan_info;
+		if (!player.storage.pothanzhan) return str;
+		return str.replace(
+			"X为各自体力上限",
+			"X为" +
+				{
+					hp: "各自体力值",
+					damagedHp: "各自损失体力值",
+					countplayer: "场上存活角色数",
+				}[player.storage.pothanzhan]
+		);
+	},
+	potzhanlie(player) {
+		let str = lib.translate.potzhanlie_info;
+		if (!player.storage.potzhanlie) return str;
+		return str.replace(
+			"X为你的攻击范围",
+			"X为" +
+				{
+					hp: "你的体力值",
+					damagedHp: "你的损失体力值",
+					countplayer: "场上存活角色数",
+				}[player.storage.pothanzhan]
+		);
 	},
 };
 export default dynamicTranslates;

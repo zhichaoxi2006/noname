@@ -1,8 +1,12 @@
-"use strict";
-game.import("mode", function (lib, game, ui, get, ai, _status) {
+import { lib, game, ui, get, ai, _status } from "../noname.js";
+export const type = "mode";
+/**
+ * @type { () => importModeConfig }
+ */
+export default () => {
 	return {
 		name: "connect",
-		start: function () {
+		start() {
 			var directstartmode = lib.config.directstartmode;
 			ui.create.menu(true);
 			event.textnode = ui.create.div("", "输入联机地址");
@@ -53,9 +57,11 @@ game.import("mode", function (lib, game, ui, get, ai, _status) {
 					event.textnode.textContent = "正在连接...";
 					clearTimeout(event.timeout);
 					if (e) e.preventDefault();
-					game.saveConfig("last_ip", node.textContent);
-					game.connect(node.textContent, function (success) {
+					const ip = node.textContent;
+					game.saveConfig("last_ip", ip);
+					game.connect(ip, function (success) {
 						if (success) {
+							game.requireSandboxOn(ip);
 							var info = lib.config.reconnect_info;
 							if (info && info[0] == _status.ip) {
 								game.onlineID = info[1];
@@ -123,9 +129,7 @@ game.import("mode", function (lib, game, ui, get, ai, _status) {
 						});
 						var list = ui.create.div(".caption");
 						for (var i = 0; i < lib.config.recentIP.length; i++) {
-							ui.create.div(".text.textlink", list, clickLink).textContent = get.trimip(
-								lib.config.recentIP[i]
-							);
+							ui.create.div(".text.textlink", list, clickLink).textContent = get.trimip(lib.config.recentIP[i]);
 						}
 						uiintro.add(list);
 						var clear = uiintro.add('<div class="text center">清除</div>');
@@ -142,15 +146,11 @@ game.import("mode", function (lib, game, ui, get, ai, _status) {
 				);
 				if (get.config("read_clipboard", "connect")) {
 					var ced = false;
-					var read = (text) => {
+					var read = text => {
 						try {
 							var text2 = text.split("\n")[2];
 							var ip = text2.slice(5);
-							if (
-								ip.length > 0 &&
-								text2.startsWith("联机地址:") &&
-								(ced || confirm("是否根据剪贴板的邀请链接以进入联机地址和房间？"))
-							) {
+							if (ip.length > 0 && text2.startsWith("联机地址:") && (ced || confirm("是否根据剪贴板的邀请链接以进入联机地址和房间？"))) {
 								node.innerHTML = ip;
 								event.textnode.innerHTML = "正在连接...";
 								clearTimeout(event.timeout);
@@ -172,7 +172,7 @@ game.import("mode", function (lib, game, ui, get, ai, _status) {
 						navigator.clipboard
 							.readText()
 							.then(read)
-							.catch((_) => {});
+							.catch(_ => {});
 					} else {
 						var input = ui.create.node("textarea", ui.window, { opacity: "0" });
 						input.select();
@@ -205,4 +205,4 @@ game.import("mode", function (lib, game, ui, get, ai, _status) {
 			setTimeout(lib.init.onfree, 1000);
 		},
 	};
-});
+};

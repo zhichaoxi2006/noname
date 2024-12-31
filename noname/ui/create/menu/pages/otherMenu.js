@@ -20,6 +20,8 @@ import {
 	getLatestVersionFromGitHub,
 	getTreesFromGithub,
 } from "../../../../library/update.js";
+import security from "../../../../util/security.js";
+import dedent from "../../../../../game/dedent.js";
 
 export const otherMenu = function (/** @type { boolean | undefined } */ connectMenu) {
 	if (connectMenu) return;
@@ -253,8 +255,7 @@ export const otherMenu = function (/** @type { boolean | undefined } */ connectM
 										// 特殊处理
 										if (
 											name == "noname-server.exe" &&
-											e.message.includes("resource busy or locked") &&
-											location.protocol.startsWith("http")
+											e.message.includes("resource busy or locked")
 										) {
 											if (
 												typeof window.require == "function" &&
@@ -1212,73 +1213,92 @@ export const otherMenu = function (/** @type { boolean | undefined } */ connectM
 				ai: ai,
 				cheat: lib.cheat,
 			});
-			Object.defineProperties(proxyWindow, {
-				_status: {
-					configurable: false,
-					enumerable: true,
-					writable: false,
-				},
-				lib: {
-					configurable: false,
-					enumerable: true,
-					writable: false,
-				},
-				game: {
-					configurable: false,
-					enumerable: true,
-					writable: false,
-				},
-				ui: {
-					configurable: false,
-					enumerable: true,
-					writable: false,
-				},
-				get: {
-					configurable: false,
-					enumerable: true,
-					writable: false,
-				},
-				ai: {
-					configurable: false,
-					enumerable: true,
-					writable: false,
-				},
-				cheat: {
-					configurable: false,
-					enumerable: true,
-					writable: false,
-				},
-			});
-			proxyWindow = new Proxy(proxyWindow, {
-				set(target, prop, newValue) {
-					if (!["_status", "lib", "game", "ui", "get", "ai", "cheat"].includes(prop)) {
-						Reflect.set(window, prop, newValue);
-					}
-					return Reflect.set(target, prop, newValue);
-				},
-			});
+			if (security.isSandboxRequired()) {
+				const { Monitor, AccessAction } = security.importSandbox();
+				new Monitor()
+					.action(AccessAction.DEFINE)
+					.action(AccessAction.WRITE)
+					.action(AccessAction.DELETE)
+					.require("target", proxyWindow)
+					.require("property", "_status", "lib", "game", "ui", "get", "ai", "cheat")
+					.then((access, nameds, control) => {
+						if (access.action == AccessAction.DEFINE) {
+							control.preventDefault();
+							control.stopPropagation();
+							control.setReturnValue(false);
+							return;
+						}
+
+						// 
+						control.overrideParameter("target", window);
+					})
+					.start();
+			} else {
+				const keys = ["_status", "lib", "game", "ui", "get", "ai", "cheat"];
+
+				for (const key of keys) {
+					const descriptor = Reflect.getOwnPropertyDescriptor(proxyWindow, key);
+					if (!descriptor) continue;
+					descriptor.writable = false;
+					descriptor.enumerable = true;
+					descriptor.configurable = false;
+					Reflect.defineProperty(proxyWindow, key, descriptor);
+				}
+
+				proxyWindow = new Proxy(proxyWindow, {
+					set(target, propertyKey, value, receiver) {
+						if (typeof propertyKey == "string" && keys.includes(propertyKey)) {
+							return Reflect.set(target, propertyKey, value, receiver);
+						}
+
+						return Reflect.set(window, propertyKey, value);
+					},
+				});
+			}
 			//使用new Function隔绝作用域，避免在控制台可以直接访问到runCommand等变量
 			/**
 			 * @type { (value:string)=>any }
 			 */
-			const fun = new Function(
-				"window",
-				`
-				const _status=window._status;
-				const lib=window.lib;
-				const game=window.game;
-				const ui=window.ui;
-				const get=window.get;
-				const ai=window.ai;
-				const cheat=window.lib.cheat;
-				//使用正则匹配绝大多数的普通obj对象，避免解析成代码块。
-				const reg=${/^\{([^{}]+:\s*([^\s,]*|'[^']*'|"[^"]*"|\{[^}]*\}|\[[^\]]*\]|null|undefined|([a-zA-Z$_][a-zA-Z0-9$_]*\s*:\s*)?[a-zA-Z$_][a-zA-Z0-9$_]*\(\)))(?:,\s*([^{}]+:\s*(?:[^\s,]*|'[^']*'|"[^"]*"|\{[^}]*\}|\[[^\]]*\]|null|undefined|([a-zA-Z$_][a-zA-Z0-9$_]*\s*:\s*)?[a-zA-Z$_][a-zA-Z0-9$_]*\(\))))*\}$/};
-				return function(value){ 
-					"use strict";
-					return eval(reg.test(value)?('('+value+')'):value);
-				}
-			`
-			)(proxyWindow);
+			let fun
+			if (security.isSandboxRequired()) {
+				const reg = /^\{([^{}]+:\s*([^\s,]*|'[^']*'|"[^"]*"|\{[^}]*\}|\[[^\]]*\]|null|undefined|([a-zA-Z$_][a-zA-Z0-9$_]*\s*:\s*)?[a-zA-Z$_][a-zA-Z0-9$_]*\(\)))(?:,\s*([^{}]+:\s*(?:[^\s,]*|'[^']*'|"[^"]*"|\{[^}]*\}|\[[^\]]*\]|null|undefined|([a-zA-Z$_][a-zA-Z0-9$_]*\s*:\s*)?[a-zA-Z$_][a-zA-Z0-9$_]*\(\))))*\}$/;
+				fun = function (value) {
+					const exp = reg.test(value) ? `(${value})` : value;
+					const expName = "_" + Math.random().toString().slice(2);
+					return security.exec(`return eval(${expName})`, { window: proxyWindow, [expName]: exp });
+				};
+				// security.exec(`
+				// 	const _status=window._status;
+				// 	const lib=window.lib;
+				// 	const game=window.game;
+				// 	const ui=window.ui;
+				// 	const get=window.get;
+				// 	const ai=window.nonameAI;
+				// 	// const cheat=window.lib.cheat; // 不再允许使用 cheat，因为它是不允许访问的变量
+				// 	//使用正则匹配绝大多数的普通obj对象，避免解析成代码块。
+				// 	const reg=${/^\{([^{}]+:\s*([^\s,]*|'[^']*'|"[^"]*"|\{[^}]*\}|\[[^\]]*\]|null|undefined|([a-zA-Z$_][a-zA-Z0-9$_]*\s*:\s*)?[a-zA-Z$_][a-zA-Z0-9$_]*\(\)))(?:,\s*([^{}]+:\s*(?:[^\s,]*|'[^']*'|"[^"]*"|\{[^}]*\}|\[[^\]]*\]|null|undefined|([a-zA-Z$_][a-zA-Z0-9$_]*\s*:\s*)?[a-zA-Z$_][a-zA-Z0-9$_]*\(\))))*\}$/};
+				// 	return function(value){
+				// 		"use strict";
+				// 		return eval(reg.test(value)?('('+value+')'):value);
+				// 	};
+				// `, { window: proxyWindow });
+			} else {
+				fun = (new Function('window', dedent`
+					const _status=window._status;
+					const lib=window.lib;
+					const game=window.game;
+					const ui=window.ui;
+					const get=window.get;
+					const ai=window.nonameAI;
+					const cheat=window.lib.cheat;
+					//使用正则匹配绝大多数的普通obj对象，避免解析成代码块。
+					const reg=${/^\{([^{}]+:\s*([^\s,]*|'[^']*'|"[^"]*"|\{[^}]*\}|\[[^\]]*\]|null|undefined|([a-zA-Z$_][a-zA-Z0-9$_]*\s*:\s*)?[a-zA-Z$_][a-zA-Z0-9$_]*\(\)))(?:,\s*([^{}]+:\s*(?:[^\s,]*|'[^']*'|"[^"]*"|\{[^}]*\}|\[[^\]]*\]|null|undefined|([a-zA-Z$_][a-zA-Z0-9$_]*\s*:\s*)?[a-zA-Z$_][a-zA-Z0-9$_]*\(\))))*\}$/};
+					return function(value){ 
+						"use strict";
+						return eval(reg.test(value)?('('+value+')'):value);
+					}
+				`))(proxyWindow);
+			}
 			const runCommand = () => {
 				if (text2.value && !["up", "down"].includes(text2.value)) {
 					logindex = -1;
@@ -1353,7 +1373,12 @@ export const otherMenu = function (/** @type { boolean | undefined } */ connectM
 								if (Array.isArray(obj)) {
 									return `[${obj.map((v) => parse(v))}]`;
 								} else if (typeof obj == "function") {
-									return `[Function ${obj.name}]`;
+									if (typeof obj.name == "string"){
+										return `[Function ${obj.name}]`;
+									}
+									else {
+										return `[Function]`;
+									}
 								} else if (typeof obj != "string") {
 									if (obj instanceof Error) {
 										return `<span style="color:red;">${String(obj)}</span>`;
@@ -1410,6 +1435,10 @@ export const otherMenu = function (/** @type { boolean | undefined } */ connectM
 			clearButton.listen(() => {
 				pre.innerHTML = "";
 			});
+			if (typeof window.noname_shijianInterfaces?.showDevTools == "function") {
+				game.print("点击以下按钮\n将开启诗笺版内置的控制台");
+				game.print("<button onclick='window.noname_shijianInterfaces.showDevTools();'>开启DevTools</button>");
+			}
 		};
 		if (!get.config("menu_loadondemand")) node._initLink();
 	})();
@@ -1464,6 +1493,7 @@ export const otherMenu = function (/** @type { boolean | undefined } */ connectM
 		lib.videos = [];
 		ui.create.videoNode = (video, before) => {
 			lib.videos.remove(video);
+			if (_status.over) return;
 			lib.videos[before === true ? "unshift" : "push"](video);
 		};
 		node._initLink = function () {

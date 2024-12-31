@@ -110,7 +110,8 @@ const skills = {
 					return [1, -1];
 				},
 			},
-			halfneg: true
+			combo: "oltousui",
+			halfneg: true,
 		},
 		subSkill: {
 			effect: {
@@ -387,7 +388,7 @@ const skills = {
 		audio: "wanyi",
 		trigger: { player: "useCardToTargeted" },
 		filter: function (event, player) {
-			return player != event.target && event.targets.length == 1 && (event.card.name == "sha" || get.type(event.card, false) == "trick") && event.target.countCards("he") > 0;
+			return player != event.target && event.targets.length == 1 && (event.card.name == "sha" || get.type(event.card, null, false) == "trick") && event.target.countCards("he") > 0;
 		},
 		locked: false,
 		logTarget: "target",
@@ -659,6 +660,7 @@ const skills = {
 		group: "jianhui_draw",
 		subSkill: {
 			draw: {
+				audio: "jianhui",
 				trigger: { source: "damageSource" },
 				forced: true,
 				logTarget: "player",
@@ -768,6 +770,7 @@ const skills = {
 				},
 			},
 			die: {
+				audio: "huaiyuan",
 				trigger: { player: "die" },
 				direct: true,
 				forceDie: true,
@@ -884,6 +887,7 @@ const skills = {
 		},
 	},
 	dezhang: {
+		audio: 2,
 		trigger: { player: "phaseZhunbeiBegin" },
 		derivation: "weishu",
 		juexingji: true,
@@ -923,6 +927,7 @@ const skills = {
 		group: "weishu_discard",
 		subSkill: {
 			discard: {
+				audio: "weishu",
 				trigger: {
 					player: "loseAfter",
 					global: "loseAsyncAfter",
@@ -957,15 +962,7 @@ const skills = {
 		trigger: { player: "showCharacterAfter" },
 		hiddenSkill: true,
 		filter: function (event, player) {
-			return (
-				event.toShow.some(name => {
-					return get.character(name, 3).includes("gaoling");
-				}) &&
-				player != _status.currentPhase &&
-				game.hasPlayer(function (current) {
-					return current.isDamaged();
-				})
-			);
+			return event.toShow?.some(i => get.character(i).skills?.includes("gaoling")) && player != _status.currentPhase && game.hasPlayer(current => current.isDamaged());
 		},
 		direct: true,
 		content: function () {
@@ -1438,6 +1435,7 @@ const skills = {
 	recaiwang_hand: {
 		audio: "caiwang",
 		enable: ["chooseToUse", "chooseToRespond"],
+		sourceSkill: "recaiwang",
 		viewAsFilter: function (player) {
 			var js = player.getCards("h");
 			return js.length == 1 && game.checkMod(js[0], player, "unchanged", "cardEnabled2", player);
@@ -1459,6 +1457,7 @@ const skills = {
 	recaiwang_equip: {
 		audio: "caiwang",
 		enable: ["chooseToUse", "chooseToRespond"],
+		sourceSkill: "recaiwang",
 		viewAsFilter: function (player) {
 			var js = player.getCards("e");
 			return js.length == 1 && game.checkMod(js[0], player, "unchanged", "cardEnabled2", player);
@@ -1476,6 +1475,7 @@ const skills = {
 	recaiwang_judge: {
 		audio: "caiwang",
 		enable: ["chooseToUse", "chooseToRespond"],
+		sourceSkill: "recaiwang",
 		viewAsFilter: function (player) {
 			var js = player.getCards("j");
 			return js.length == 1 && game.checkMod(js[0], player, "unchanged", "cardEnabled2", player);
@@ -1494,7 +1494,7 @@ const skills = {
 				return player.countCards("j") == 1;
 			},
 			effect: {
-				target: function (card, player, target, current) {
+				target_use: function (card, player, target, current) {
 					if (card && (card.name == "shandian" || card.name == "fulei") && player == target && !target.countCards("j") && target.isPhaseUsing() && target.hasValueTarget({ name: "sha" }, null, true)) return [1, 2];
 				},
 			},
@@ -1649,9 +1649,9 @@ const skills = {
 							.getCards("he", function (card) {
 								return lib.filter.canBeDiscarded(card, player, target);
 							})
-							.map(c => {
-								link: c;
-							})
+							.map(c => ({
+								link: c,
+							}))
 							.sort(function (a, b) {
 								return get.buttonValue(b) - get.buttonValue(a);
 							})
@@ -1751,7 +1751,7 @@ const skills = {
 					if (!skill || skill.juexingji || skill.hiddenSkill || skill.zhuSkill || skill.dutySkill || skill.chargeSkill || lib.skill.bolan.banned.includes(j)) continue;
 					if (skill.init || (skill.ai && (skill.ai.combo || skill.ai.notemp || skill.ai.neg))) continue;
 					var info = lib.translate[j + "_info"];
-					if (info && info.indexOf("出牌阶段限一次") != -1) skills.add(j);
+					if (info && get.plainText(info).indexOf("出牌阶段限一次") != -1) skills.add(j);
 				}
 			}
 			player.storage.bolan = skills;
@@ -1904,7 +1904,7 @@ const skills = {
 		hiddenSkill: true,
 		filter: function (event, player) {
 			var target = _status.currentPhase;
-			return event.toShow.includes("jin_simayi") && target && target != player && target.countGainableCards(player, "he") > 0;
+			return event.toShow?.some(i => get.character(i).skills?.includes("buchen")) && target && target != player && target.countGainableCards(player, "he") > 0;
 		},
 		direct: true,
 		content: function () {
@@ -2117,6 +2117,7 @@ const skills = {
 			global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
 		},
 		forced: true,
+		sourceSkill: "zhongyun",
 		filter: function (event, player) {
 			var cards1 = event.getl(player).hs,
 				cards2 = [];
@@ -2298,7 +2299,8 @@ const skills = {
 					});
 					"step 1";
 					if (result.bool) {
-						var card = game.createCard(lib.skill.chexuan.derivation.randomGet());
+						const name = lib.skill.chexuan.derivation.randomGet(),
+							card = game.createCard(name, lib.card[name].cardcolor, 5);
 						player.$gain2(card);
 						player.equip(card);
 						game.delay();
@@ -2312,6 +2314,9 @@ const skills = {
 			globalFrom: function (player, target, distance) {
 				if (player.getEquips(5).length) return distance - 1;
 			},
+		},
+		ai: {
+			combo: "chexuan",
 		},
 	},
 	cheliji_sichengliangyu: {
@@ -2441,6 +2446,7 @@ const skills = {
 	},
 	//李肃
 	qiaoyan: {
+		audio: 2,
 		trigger: { player: "damageBegin2" },
 		forced: true,
 		filter: function (event, player) {
@@ -2487,6 +2493,7 @@ const skills = {
 		},
 	},
 	xianzhu: {
+		audio: 2,
 		trigger: { player: "phaseUseBegin" },
 		locked: true,
 		filter: function (event, player) {
@@ -2547,12 +2554,12 @@ const skills = {
 		ai: { combo: "qiaoyan" },
 	},
 	huirong: {
+		audio: 2,
 		trigger: { player: "showCharacterAfter" },
 		forced: true,
 		filter: function (event, player) {
 			return (
-				event.toShow &&
-				event.toShow.includes("jin_yanghuiyu") &&
+				event.toShow?.some(i => get.character(i).skills?.includes("huirong")) &&
 				game.hasPlayer(function (target) {
 					var num = target.countCards("h");
 					return num > target.hp || num < Math.min(5, target.hp);
@@ -2587,8 +2594,9 @@ const skills = {
 			game.addGlobalSkill("ciwei_ai");
 		},
 		onremove: () => {
-			if (!game.hasPlayer(i => i.hasSkill("ciwei"), true)) game.removeGlobalSkill("ciwei_ai");
+			if (!game.hasPlayer(i => i.hasSkill("ciwei", null, null, false), true)) game.removeGlobalSkill("ciwei_ai");
 		},
+		audio: 2,
 		trigger: { global: "useCard" },
 		direct: true,
 		preHidden: true,
@@ -2648,8 +2656,9 @@ const skills = {
 			},
 		},
 		trigger: { player: "dieAfter" },
+		sourceSkill: "ciwei",
 		filter: () => {
-			return !game.hasPlayer(i => i.hasSkill("ciwei"), true);
+			return !game.hasPlayer(i => i.hasSkill("ciwei", null, null, false), true);
 		},
 		silent: true,
 		forceDie: true,
@@ -2658,6 +2667,7 @@ const skills = {
 		},
 	},
 	caiyuan: {
+		audio: 2,
 		trigger: { player: "phaseEnd" },
 		forced: true,
 		preHidden: true,
@@ -2703,20 +2713,18 @@ const skills = {
 			player.removeGaintag("zhuosheng");
 		},
 		mod: {
-			targetInRange: function (card, player, target) {
-				if (!card.cards || get.type(card) != "basic") return;
-				for (var i of card.cards) {
-					if (i.hasGaintag("zhuosheng")) return game.online ? player == _status.currentPhase : player.isPhaseUsing();
-				}
+			targetInRange: function (card, player) {
+				if (get.type(card) !== "basic") return;
+				if (!(game.online ? player === _status.currentPhase : player.isPhaseUsing())) return;
+				if (get.number(card) === "unsure" || card.cards?.every(card => card.hasGaintag("zhuosheng"))) return true;
 			},
-			cardUsable: function (card, player, target) {
-				if (!card.cards || get.mode() == "guozhan" || get.type(card) != "basic" || !(game.online ? player == _status.currentPhase : player.isPhaseUsing())) return;
-				for (var i of card.cards) {
-					if (i.hasGaintag("zhuosheng")) return Infinity;
-				}
+			cardUsable: function (card, player) {
+				if (get.mode() === "guozhan" || get.type(card) !== "basic") return;
+				if (!(game.online ? player === _status.currentPhase : player.isPhaseUsing())) return;
+				if (get.number(card) === "unsure" || card.cards?.every(card => card.hasGaintag("zhuosheng"))) return Infinity;
 			},
 			aiOrder: function (player, card, num) {
-				if (get.itemtype(card) == "card" && card.hasGaintag("zhuosheng") && get.type(card) == "basic") return num - 0.1;
+				if (get.itemtype(card) === "card" && card.hasGaintag("zhuosheng") && get.type(card) === "basic") return num - 0.1;
 			},
 		},
 		trigger: { player: "useCard2" },
@@ -2819,6 +2827,7 @@ const skills = {
 			global: "roundStart",
 		},
 		silent: true,
+		sourceSkill: "zhuosheng",
 		filter: function (event, player) {
 			if (event.name == "gain") return event.getParent(2).name != "zhuosheng_equip";
 			return game.roundNumber > 1;
@@ -2907,6 +2916,7 @@ const skills = {
 		silent: true,
 		firstDo: true,
 		charlotte: true,
+		sourceSkill: "xinquanbian",
 		filter: function (event, player) {
 			if (event.name === "phaseUse") return true;
 			return player.isPhaseUsing() && lib.skill.quanbian.hasHand(event) && get.type(event.card) != "equip";
@@ -2923,7 +2933,7 @@ const skills = {
 		mod: {
 			cardEnabled2: function (card, player) {
 				var stat = player.getStat("skill");
-				if (stat.xinquanbian && stat.xinquanbian >= player.maxHp && get.position(card) == "h" && get.type(card, player) != "equip") return false;
+				if (stat.xinquanbian && stat.xinquanbian >= player.maxHp && get.position(card) == "h" && get.type(card, null, player) != "equip") return false;
 			},
 		},
 	},
@@ -2936,7 +2946,7 @@ const skills = {
 		},
 		filter: function (event, player) {
 			var target = _status.currentPhase;
-			return target && target != player && target.isAlive();
+			return player != target && target && target.isAlive() && event.toShow?.some(i => get.character(i).skills?.includes("taoyin"));
 		},
 		check: function (event, player) {
 			return get.attitude(player, _status.currentPhase) < 0;
@@ -3005,6 +3015,7 @@ const skills = {
 		forced: true,
 		popup: false,
 		charlotte: true,
+		sourceSkill: "yimie",
 		filter: function (event, player) {
 			return typeof event.yimie_num == "number";
 		},
@@ -3084,7 +3095,7 @@ const skills = {
 				player.recover(num);
 			}
 			"step 1";
-			if (player.countCards("h") < player.maxHp) player.drawTo(Math.min(player.maxHp, 5 + player.countCards("h"))).gaintag = ["tairan"];
+			if (player.countCards("h") < player.maxHp) player.drawTo(player.maxHp).gaintag = ["tairan"];
 		},
 	},
 	tairan2: {
@@ -3107,6 +3118,7 @@ const skills = {
 		charlotte: true,
 		forced: true,
 		onremove: true,
+		sourceSkill: "tairan",
 		content: function () {
 			var map = player.storage.tairan2;
 			if (map > 0) player.loseHp(map);
@@ -3123,7 +3135,7 @@ const skills = {
 		forced: true,
 		hiddenSkill: true,
 		filter: function (event, player) {
-			return event.toShow && event.toShow.includes("jin_xiahouhui");
+			return event.toShow?.some(i => get.character(i).skills?.includes("baoqie"));
 		},
 		content: function () {
 			"step 0";
@@ -3237,7 +3249,7 @@ const skills = {
 		hiddenSkill: true,
 		filter: function (event, player) {
 			var target = _status.currentPhase;
-			return player != target && target && target.isAlive() && event.toShow && event.toShow.includes("jin_simazhao");
+			return player != target && target && target.isAlive() && event.toShow?.some(i => get.character(i).skills?.includes("tuishi"));
 		},
 		content: function () {
 			player.addTempSkill("tuishi2");
@@ -3247,6 +3259,7 @@ const skills = {
 		trigger: { global: "phaseEnd" },
 		direct: true,
 		charlotte: true,
+		sourceSkill: "tuishi",
 		filter: function (event, player) {
 			var target = _status.currentPhase;
 			return (
@@ -3386,6 +3399,7 @@ const skills = {
 	zhaoran2: {
 		audio: "zhaoran",
 		group: "zhaoran3",
+		sourceSkill: "zhaoran",
 		init: (player, skill) => {
 			if (!player.storage[skill]) player.storage[skill] = [];
 		},
@@ -3470,6 +3484,7 @@ const skills = {
 		charlotte: true,
 		firstDo: true,
 		silent: true,
+		sourceSkill: "zhaoran",
 		content: function () {
 			if (event.triggername == "gainBegin") {
 				trigger.gaintag.add("visible_zhaoran");
@@ -3479,6 +3494,7 @@ const skills = {
 		},
 	},
 	chengwu: {
+		audio: 2,
 		zhuSkill: true,
 		mod: {
 			inRange: function (from, to) {
@@ -3493,13 +3509,14 @@ const skills = {
 		},
 	},
 	shiren: {
+		audio: 2,
 		trigger: { player: "showCharacterAfter" },
 		hiddenSkill: true,
 		logTarget: function () {
 			return _status.currentPhase;
 		},
 		filter: function (event, player) {
-			if (!event.toShow || !event.toShow.includes("jin_wangyuanji")) return false;
+			if (!event.toShow?.some(i => get.character(i).skills?.includes("shiren"))) return false;
 			var target = _status.currentPhase;
 			return target && target != player && target.isAlive() && target.countCards("h") > 0;
 		},
@@ -3511,6 +3528,7 @@ const skills = {
 		},
 	},
 	yanxi: {
+		audio: 2,
 		enable: "phaseUse",
 		usable: 1,
 		filterTarget: function (card, player, target) {
@@ -3608,19 +3626,22 @@ const skills = {
 		},
 	},
 	sanchen: {
+		audio: 2,
 		enable: "phaseUse",
-		usable: 1,
-		filter: function (event, player) {
+		usable(skill, player) {
+			return 1 + player.countMark("sanchen_add");
+		},
+		filter(event, player) {
 			var stat = player.getStat("sanchen");
 			return game.hasPlayer(function (current) {
 				return !stat || !stat.includes(current);
 			});
 		},
-		filterTarget: function (card, player, target) {
+		filterTarget(card, player, target) {
 			var stat = player.getStat("sanchen");
 			return !stat || !stat.includes(target);
 		},
-		content: function () {
+		content() {
 			"step 0";
 			var stat = player.getStat();
 			if (!stat.sanchen) stat.sanchen = [];
@@ -3643,12 +3664,14 @@ const skills = {
 				for (var i of result.cards) list.add(get.type2(i));
 				if (list.length == result.cards.length) {
 					target.draw();
-					player.getStat("skill").sanchen--;
+					player.addTempSkill(event.name + "_add", "phaseUseAfter");
+					player.addMark(event.name + "_add", 1, false);
 					if (get.mode() == "guozhan") player.addTempSkills("pozhu");
 				}
 			} else {
 				target.draw();
-				player.getStat("skill").sanchen--;
+				player.addTempSkill(event.name + "_add", "phaseUseAfter");
+				player.addMark(event.name + "_add", 1, false);
 				if (get.mode() == "guozhan") player.addTempSkills("pozhu");
 			}
 		},
@@ -3656,7 +3679,7 @@ const skills = {
 			order: 9,
 			threaten: 1.7,
 			result: {
-				target: function (player, target) {
+				target(player, target) {
 					if (target.hasSkillTag("nogain")) return 0.1;
 					return Math.sqrt(target.countCards("he"));
 				},
@@ -3666,9 +3689,16 @@ const skills = {
 			content: "已发动过#次技能",
 		},
 		marktext: "陈",
+		subSkill: {
+			add: {
+				charlotte: true,
+				onremove: true,
+			},
+		},
 	},
 	zhaotao: {
 		forbid: ["guozhan"],
+		audio: 2,
 		trigger: { player: "phaseZhunbeiBegin" },
 		forced: true,
 		juexingji: true,
@@ -3688,9 +3718,10 @@ const skills = {
 		},
 	},
 	pozhu: {
+		audio: 2,
 		enable: "phaseUse",
 		viewAsFilter: function (player) {
-			return !player.hasSkill("pozhu3", null, null, false) && player.countCards("hs") > 0;
+			return player.countCards("hs") > 0;
 		},
 		viewAs: { name: "chuqibuyi" },
 		filterCard: true,
@@ -3703,6 +3734,7 @@ const skills = {
 	pozhu2: {
 		trigger: { player: "useCardAfter" },
 		silent: true,
+		sourceSkill: "pozhu",
 		filter: function (event, player) {
 			return (
 				event.skill == "pozhu" &&
@@ -3713,10 +3745,9 @@ const skills = {
 			);
 		},
 		content: function () {
-			player.addTempSkill("pozhu3");
+			player.tempBanSkill("pozhu");
 		},
 	},
-	pozhu3: { charlotte: true },
 	xijue: {
 		audio: 2,
 		trigger: {
@@ -3725,13 +3756,18 @@ const skills = {
 		},
 		forced: true,
 		filter: function (event, player) {
-			if (player._xijue) return false;
-			if (get.mode() == "guozhan") return event.name == "showCharacter" && event.toShow && event.toShow.includes("gz_zhanghuyuechen");
+			if (get.mode() == "guozhan")
+				return (
+					game
+						.getAllGlobalHistory("everything", evt => {
+							return evt.name == "showCharacter" && evt.toShow?.some(i => get.character(i).skills?.includes("xijue"));
+						})
+						.indexOf(event) == 0
+				);
 			return event.name != "showCharacter" && (event.name != "phase" || game.phaseNumber == 0);
 		},
 		content: function () {
 			player.addMark("xijue", 4);
-			player._xijue = true;
 		},
 		intro: {
 			name2: "爵",
@@ -3744,6 +3780,7 @@ const skills = {
 		audio: "xijue",
 		trigger: { player: "phaseEnd" },
 		forced: true,
+		sourceSkill: "xijue",
 		filter: function (event, player) {
 			var stat = player.getStat();
 			return stat.damage && stat.damage > 0;
@@ -3830,7 +3867,7 @@ const skills = {
 			}
 			var next = player.chooseToDiscard(`是否弃置一枚“爵”和一张${get.mode() == "guozhan" ? "基本" : "手"}牌，对${get.translation(trigger.player)}发动【骁果】？`, "h", function (card, player) {
 				if (get.mode() != "guozhan") return true;
-				return get.type(card, player) == "basic";
+				return get.type(card, null, player) == "basic";
 			});
 			next.set("ai", function (card) {
 				if (_status.event.nono) return 0;
@@ -3950,7 +3987,7 @@ const skills = {
 		forced: true,
 		hiddenSkill: true,
 		filter: function (event, player) {
-			return event.toShow.includes("jin_zhangchunhua") && player != _status.currentPhase;
+			return event.toShow?.some(i => get.character(i).skills?.includes("xuanmu")) && player != _status.currentPhase;
 		},
 		content: function () {
 			player.addTempSkill("xuanmu2");
@@ -3960,6 +3997,7 @@ const skills = {
 		trigger: { player: "damageBegin4" },
 		forced: true,
 		popup: false,
+		sourceSkill: "xuanmu",
 		content: function () {
 			trigger.cancel();
 		},

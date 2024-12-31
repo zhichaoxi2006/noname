@@ -87,5 +87,43 @@ const dynamicTranslates = {
 		if (player.storage.olxuanzhu) return '转换技，每回合限一次，你可以将一张牌称为“玄”置于武将牌上，然后视为使用：阴，任意基本牌；<span class="bluetext">阳，任意普通锦囊牌（须指定目标且仅指定一个目标）</span>。若此次置于武将牌上的“玄”：不为装备牌，你弃置一张牌；为装备牌，你将所有“玄”置入弃牌堆，然后摸等量的牌。';
 		return '转换技，每回合限一次，你可以将一张牌称为“玄”置于武将牌上，然后视为使用：<span class="bluetext">阴，任意基本牌</span>；阳，任意普通锦囊牌（须指定目标且仅指定一个目标）。若此次置于武将牌上的“玄”：不为装备牌，你弃置一张牌；为装备牌，你将所有“玄”置入弃牌堆，然后摸等量的牌。';
 	},
+	olziruo(player) {
+		if (player.storage.olziruo) return '转换技，锁定技。①当你使用最{阴：左；<span class="bluetext">阳：右</span>}侧的手牌时，你摸一张牌。②你以此法摸牌后本回合不能整理手牌。';
+		return '转换技，锁定技。①当你使用最{<span class="bluetext">阴：左</span>；阳：右}侧的手牌时，你摸一张牌。②你以此法摸牌后本回合不能整理手牌。';
+	},
+	olkouchao(player) {
+		const nameList = player.storage.olkouchao || ["sha", "huogong", "guohe"];
+		const str = nameList.map(i => "【" + get.translation(i) + "】").join("/");
+		return "每轮每项限一次，你可以将一张牌当作" + str + "使用。此牌结算完毕后，将此项改为本局游戏最后一张不因使用进入弃牌堆的基本牌或普通锦囊牌的牌名，然后若〖寇钞〗的所有项均为基本牌，则你修改〖寇钞〗的所有项为【顺手牵羊】。";
+	},
+    oljinghua(player) {
+        const storage = player.storage.oljinghua;
+        var str = "当其他角色获得你的牌后，或当你交给其他角色牌后，其";
+        str += storage ? "失去" : "回复";
+        str += "1点体力。";
+        if (!storage) str += "当你失去最后的手牌后，你可以将此技能描述中的“回复”改为“失去”。";
+        return str;
+    },
+    olshuiyue(player) {
+        const storage = player.storage.olshuiyue;
+        var str = "当其他角色受到你造成的伤害后，其";
+        str += storage ? "弃置" : "摸";
+        str += "一张牌。";
+        if (!storage) str += "当你令其他角色进入濒死状态后，你可以将此技能描述中的“摸”改为“弃置”。";
+        return str;
+    },
+	olliyong(player) {
+		const storage = player.storage.olliyong;
+		let str = "转换技，出牌阶段。";
+		if (!storage) str += '<span class="bluetext">';
+		str += "阳：你可以将一张你本回合未使用过的花色的牌当作【决斗】使用";
+		if (!storage) str += "</span>";
+		str += "；";
+		if (storage) str += '<span class="bluetext">';
+		str += "阴：你可以弃置一张你本回合已使用过的花色的牌，令一名角色视为对你使用【决斗】";
+		if (storage) str += "</span>";
+		str += "。";
+		return str;
+	},
 };
 export default dynamicTranslates;

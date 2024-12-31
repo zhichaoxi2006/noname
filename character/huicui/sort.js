@@ -1,7 +1,7 @@
 const characterSort = {
 	sp_baigei: ["re_panfeng", "xingdaorong", "caoxing", "re_chunyuqiong", "xiahoujie", "dc_caiyang", "zhoushan"],
 	sp_caizijiaren: ["dc_kongrong", "re_dongbai", "re_sunluyu", "heyan", "zhaoyan", "wangtao", "wangyue", "zhangxuan", "tengyin", "zhangyao", "xiahoulingnv", "dc_sunru", "pangshanmin", "kuaiqi"],
-	sp_zhilan: ["dc_liuli", "liuyong", "wanniangongzhu", "zhanghu", "lvlingqi", "tenggongzhu", "panghui", "dc_zhaotongzhaoguang", "yuantanyuanxiyuanshang", "yuechen", "dc_lingcao"],
+	sp_zhilan: ["dc_huangwudie", "dc_liuli", "liuyong", "wanniangongzhu", "zhanghu", "lvlingqi", "tenggongzhu", "panghui", "dc_zhaotongzhaoguang", "yuantanyuanxiyuanshang", "yuechen"],
 	sp_guixin: ["zangba", "re_kanze", "re_chendeng", "caimaozhangyun", "dc_lvkuanglvxiang", "dc_gaolan", "yinfuren", "chengui", "chenjiao", "dc_sp_jiaxu", "qinlang", "dc_dongzhao"],
 	sp_daihan: ["mamidi", "dc_jiling", "zhangxun", "dc_yuejiu", "leibo", "qiaorui", "dongwan", "yuanyin"],
 	sp_jianghu: ["guanning", "huzhao", "dc_huangchengyan", "mengjie", "wanglie"],
@@ -10,9 +10,9 @@ const characterSort = {
 	sp_yanhan: ["dc_lifeng", "dc_liuba", "dc_huangquan", "furongfuqian", "xianglang", "dc_huojun", "gaoxiang", "dc_wuban", "jiangfei"],
 	sp_jishi: ["dc_jiben", "zhenghun", "dc_sunhanhua", "liuchongluojun", "wupu"],
 	sp_raoting: ["dc_huanghao", "dc_sunziliufang", "dc_sunchen", "dc_jiachong"],
-	sp_yijun: ["gongsundu", "mengyou", "dc_sp_menghuo", "gongsunxiu"],
-	sp_zhengyin: ["yue_caiwenji", "yue_zhoufei", "yue_caiyong", "yue_xiaoqiao", "yue_daqiao"],
-	sp_zhonghu: ["dc_jiangji", "dc_wangling", "dc_simashi", "dc_caoshuang"],
+	sp_yijun: ["gongsundu", "mengyou", "dc_sp_menghuo", "gongsunxiu", "dc_sp_zhurong", "dc_mateng"],
+	sp_zhengyin: ["yue_zhouyu", "yue_diaochan", "yue_caiwenji", "yue_zhoufei", "yue_caiyong", "yue_xiaoqiao", "yue_daqiao", "yue_miheng", "yue_zoushi", "yue_zhugeguo"],
+	huicui_waitforsort: ["panghong"],
 };
 
 const characterSortTranslate = {
@@ -29,7 +29,7 @@ const characterSortTranslate = {
 	sp_raoting: "绕庭之鸦",
 	sp_yijun: "异军突起",
 	sp_zhengyin: "正音雅乐",
-	sp_zhonghu: "冢虎狼顾",
+	huicui_waitforsort: "等待分包",
 };
 
 export { characterSort, characterSortTranslate };

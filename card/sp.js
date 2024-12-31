@@ -275,7 +275,6 @@ game.import("card", function () {
 				singleCard: true,
 				type: "trick",
 				complexTarget: true,
-				multitarget: true,
 				targetprompt: ["给一张牌", "得两张牌"],
 				filterTarget: function (card, player, target) {
 					return target !== player;
@@ -295,7 +294,7 @@ game.import("card", function () {
 					"step 1";
 					player.give(result.cards, event.target1);
 					"step 2";
-					if (!event.target1.countCards("h")) {
+					if (!event.target1.countCards("h") || !event.target2 || !event.target2.isIn()) {
 						event.finish();
 					} else {
 						var he = event.target1.getCards("he");
@@ -525,20 +524,23 @@ game.import("card", function () {
 				},
 			},
 			qibaodao: {
+				audio: "qibaodao2",
 				equipSkill: true,
 				trigger: { source: "damageBegin1" },
 				forced: true,
+				logTarget: "player",
 				filter: function (event) {
-					return event.card && event.card.name == "sha" && event.player.isHealthy();
+					return event.card && event.card.name == "sha" && event.player.isHealthy() && event.notLink();
 				},
 				content: function () {
 					trigger.num++;
 				},
 				ai: {
 					effect: {
-						player: function (card, player, target) {
+						player: function (card, player, target, current, isLink) {
 							if (
 								card.name == "sha" &&
+								!isLink &&
 								target.isHealthy() &&
 								get.attitude(player, target) > 0
 							) {

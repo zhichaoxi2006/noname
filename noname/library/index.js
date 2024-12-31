@@ -24,6 +24,10 @@ import * as Element from "./element/index.js";
 import { updateURLs } from "./update-urls.js";
 import { defaultHooks } from "./hooks/index.js";
 import { freezeButExtensible } from "../util/index.js";
+import security from "../util/security.js";
+import { ErrorManager } from "../util/error.js";
+
+import { defaultSplashs } from "../init/onload/index.js";
 
 export class Library {
 	configprefix = "noname_0.9_";
@@ -31,7 +35,7 @@ export class Library {
 	updateURLS = updateURLs;
 	updateURL = updateURLs.github;
 	mirrorURL = updateURLs.coding;
-	hallURL = "47.99.105.222";
+	hallURL = "";
 	assetURL = assetURL;
 	userAgent = userAgent;
 	characterDefaultPicturePath = characterDefaultPicturePath;
@@ -50,6 +54,12 @@ export class Library {
 	characterPack = new Proxy(
 		{},
 		{
+			get(target, prop, receiver) {
+				if (typeof prop == "string" && prop.startsWith("mode_extension_")) {
+					prop = prop.slice("mode_extension_".length);
+				}
+				return Reflect.get(target, prop, receiver);
+			},
 			set(target, prop, newValue) {
 				if (typeof prop == "string") {
 					// 新增武将包，且不是“收藏”和“禁用”
@@ -57,6 +67,10 @@ export class Library {
 						Promise.resolve().then(() => {
 							ui.updateCharacterPackMenu.forEach(fun => fun(prop));
 						});
+					}
+
+					if (prop.startsWith("mode_extension_")) {
+						prop = prop.slice("mode_extension_".length);
 					}
 				}
 				const newPack = new Proxy(
@@ -70,10 +84,38 @@ export class Library {
 				Object.assign(newPack, newValue);
 				return Reflect.set(target, prop, newPack);
 			},
+			defineProperty(target, prop, descriptor) {
+				if (typeof prop == "string" && prop.startsWith("mode_extension_")) {
+					prop = prop.slice("mode_extension_".length);
+				}
+				return Reflect.defineProperty(target, prop, descriptor);
+			},
 		}
 	);
 	characterFilter = {};
-	characterSort = {};
+	characterSort = new Proxy(
+		{},
+		{
+			get(target, prop, receiver) {
+				if (typeof prop == "string" && prop.startsWith("mode_extension_")) {
+					prop = prop.slice("mode_extension_".length);
+				}
+				return Reflect.get(target, prop, receiver);
+			},
+			set(target, prop, value, receiver) {
+				if (typeof prop == "string" && prop.startsWith("mode_extension_")) {
+					prop = prop.slice("mode_extension_".length);
+				}
+				return Reflect.set(target, prop, value, receiver);
+			},
+			defineProperty(target, prop, descriptor) {
+				if (typeof prop == "string" && prop.startsWith("mode_extension_")) {
+					prop = prop.slice("mode_extension_".length);
+				}
+				return Reflect.defineProperty(target, prop, descriptor);
+			},
+		}
+	);
 	characterReplace = {};
 	characterSubstitute = {};
 	characterInitFilter = {};
@@ -82,6 +124,12 @@ export class Library {
 	cardPack = new Proxy(
 		{},
 		{
+			get(target, prop, receiver) {
+				if (typeof prop == "string" && prop.startsWith("mode_extension_")) {
+					prop = prop.slice("mode_extension_".length);
+				}
+				return Reflect.get(target, prop, receiver);
+			},
 			set(target, prop, newValue) {
 				if (typeof prop == "string") {
 					if (!Reflect.has(target, prop)) {
@@ -90,7 +138,16 @@ export class Library {
 						});
 					}
 				}
+				if (prop.startsWith("mode_extension_")) {
+					prop = prop.slice("mode_extension_".length);
+				}
 				return Reflect.set(target, prop, newValue);
+			},
+			defineProperty(target, prop, descriptor) {
+				if (typeof prop == "string" && prop.startsWith("mode_extension_")) {
+					prop = prop.slice("mode_extension_".length);
+				}
+				return Reflect.defineProperty(target, prop, descriptor);
 			},
 		}
 	);
@@ -102,6 +159,11 @@ export class Library {
 	onresize = [];
 	onphase = [];
 	onwash = [];
+	onround = [
+		function roundSkillCheck(event) {
+			return !event.skill;
+		},
+	];
 	onover = [];
 	ondb = [];
 	ondb2 = [];
@@ -115,6 +177,7 @@ export class Library {
 		xiaosha_emotion: 20,
 		xiaotao_emotion: 20,
 		xiaojiu_emotion: 20,
+		biexiao_emotion: 18,
 	};
 	animate = {
 		skill: {},
@@ -132,6 +195,12 @@ export class Library {
 	inpile_nature = [];
 	extensions = [];
 	extensionPack = {};
+
+	/**
+	 * @type { IOnloadSplash[] }
+	 */
+	onloadSplashes = [...defaultSplashs];
+
 	cardType = {};
 	hook = { globalskill: {} };
 	/**
@@ -163,8 +232,9 @@ export class Library {
 	 * } }
 	 */
 	node;
+	// 谁写的值类型是string，这也太离谱了喵
 	/**
-	 * @type { { [key: string]: string } }
+	 * @type { { [key: string]: Player } }
 	 */
 	playerOL;
 	/**
@@ -174,7 +244,9 @@ export class Library {
 	//函数钩子
 	/**
 	 * 你可以往这里加入{钩子名:函数数组}，并在数组里增加你的自定义函数
+	 *
 	 * 这样当某个地方调用game.callHook(钩子名,[...函数参数])时，就会按顺序将对应数组中的每个函数运行一遍（传参为callHook的第二个参数）。
+	 *
 	 * 你可以将hook机制类比为event.trigger()，但是这里只能放同步代码
 	 */
 	hooks = freezeButExtensible({ ...defaultHooks });
@@ -231,6 +303,9 @@ export class Library {
 
 	objectURL = new Map();
 	hookmap = {};
+	/**
+	 * @type { { character?: SMap<importCharacterConfig>, card?: SMap<importCardConfig>, mode?: SMap<importModeConfig>, player?: SMap<importPlayerConfig>, extension?: SMap<importExtensionConfig>, play?: SMap<importPlayConfig> } }
+	 */
 	imported = {};
 	layoutfixed = ["chess", "tafang", "stone"];
 	pinyins = {
@@ -881,7 +956,7 @@ export class Library {
 				},
 				sync_speed: {
 					name: "限制结算速度",
-					intro: "在动画结算完成前不执行下一步操作，开启后游戏操作的间隔更长但画面更浏畅，在游戏较卡时建议开启",
+					intro: "在动画结算完成前不执行下一步操作，开启后游戏操作的间隔更长但画面更流畅，在游戏较卡时建议开启",
 					init: true,
 				},
 				enable_vibrate: {
@@ -1036,13 +1111,15 @@ export class Library {
 						game.saveConfig("dev", bool);
 						if (_status.connectMode) return;
 						if (bool) {
+							window.noname_shijianInterfaces?.showDebugButton?.();
 							lib.cheat.i();
 						} else {
+							window.noname_shijianInterfaces?.hideDebugButton?.();
 							delete window.cheat;
 							delete window.game;
 							delete window.ui;
 							delete window.get;
-							delete window.ai;
+							delete window.nonameAI;
 							delete window.lib;
 							delete window._status;
 						}
@@ -1056,11 +1133,6 @@ export class Library {
 				},
 				fuck_sojson: {
 					name: "检测加密扩展",
-					init: false,
-					unfrequent: true,
-				},
-				errstop: {
-					name: "出错时停止游戏",
 					init: false,
 					unfrequent: true,
 				},
@@ -1258,11 +1330,6 @@ export class Library {
 						map.confirm_exit.show();
 					} else {
 						map.confirm_exit.hide();
-					}
-					if (config.dev) {
-						map.errstop.show();
-					} else {
-						map.errstop.hide();
 					}
 				},
 			},
@@ -1463,15 +1530,11 @@ export class Library {
 						style1: "样式一",
 						style2: "样式二",
 					},
-					visualMenu: (node, link) => {
-						node.className = "button character";
-						node.style.width = "200px";
-						node.style.height = `${(node.offsetWidth * 1080) / 2400}px`;
-						node.style.display = "flex";
-						node.style.flexDirection = "column";
-						node.style.alignItems = "center";
-						node.style.backgroundSize = "100% 100%";
-						node.setBackgroundImage(`image/splash/${link}.jpg`);
+					visualMenu: async (node, link) => {
+						let splash = lib.onloadSplashes.find(item => item.id == link);
+						if (splash) {
+							await splash.preview(node);
+						}
 					},
 				},
 				// fewplayer:{
@@ -2446,6 +2509,38 @@ export class Library {
 						}
 					},
 					unfrequent: true,
+				},
+				zhishixian: {
+					name: "指示线",
+					intro: "设置卡牌、技能的指示特效",
+					init: "default",
+					unfrequent: true,
+					item: {
+						default: "默认",
+						Mohua: "水墨",
+						Xiangong: "先攻",
+						Zhuzhang: "竹杖",
+						Shuimo: "幻彩",
+						Anhei: "黑暗",
+						Mozhua: "魔爪",
+						Shenjian: "神剑",
+						Yujian: "御剑",
+						Jianfeng: "剑锋",
+						Jinjian: "金箭",
+						Jinlong: "金龙",
+						Yuexian: "乐仙",
+						Xingdie: "星蝶",
+						Luoying: "落英",
+						Shezhang: "蛇杖",
+					},
+					onclick(items) {
+						game.saveConfig("zhishixian", items);
+						if (items == "default") {
+							game.linexy = game.zsOriginLineXy;
+						} else {
+							game.linexy = game["zs" + items + "LineXy"];
+						}
+					},
 				},
 				border_style: {
 					name: "角色边框",
@@ -3554,6 +3649,11 @@ export class Library {
 						map.show_time.show();
 						map.watchface.hide();
 					}
+					if (lib.config.show_deckMonitor) {
+						map.show_deckMonitor_online.show();
+					} else {
+						map.show_deckMonitor_online.hide();
+					}
 					if (lib.config.show_extensionmaker) {
 						map.show_extensionshare.show();
 					} else {
@@ -3676,7 +3776,7 @@ export class Library {
 					init: false,
 					unfrequent: true,
 					onclick(bool) {
-						game.saveConfig("show_statusbar", bool);
+						game.saveConfig("show_statusbar_android", bool);
 						if (window.StatusBar && lib.device == "android") {
 							if (bool) {
 								window.StatusBar.overlaysWebView(false);
@@ -3867,10 +3967,27 @@ export class Library {
 					intro: "自由选将对话框中最近使用武将的数量",
 					init: "12",
 					item: {
+						5: "5",
 						6: "6",
+						10: "10",
 						12: "12",
 						20: "20",
 						30: "30",
+					},
+					unfrequent: true,
+				},
+				showMax_character_number: {
+					name: "最大武将数显示",
+					intro: "设置自由选将对话框一页显示的最大武将数<br><span class=firetext>注意事项：<br><li>更改此选项后，需要重启游戏以使用新选项配置<br><li>推荐将此选项设置为偏小数值，可降低加载过多武将时导致的性能损耗</span>",
+					init: "10",
+					item: {
+						5: "5",
+						6: "6",
+						10: "10",
+						12: "12",
+						20: "20",
+						24: "24",
+						0: "∞",
 					},
 					unfrequent: true,
 				},
@@ -4072,6 +4189,51 @@ export class Library {
 					unfrequent: true,
 					onclick(bool) {
 						game.saveConfig("show_giveup", bool);
+					},
+				},
+				show_tip: {
+					name: "显示tip标记",
+					init: false,
+					unfrequent: true,
+					onclick(bool) {
+						game.saveConfig("show_tip", bool);
+						document.documentElement.style.setProperty("--tip-display", bool ? "flex" : "none");
+					},
+				},
+				show_deckMonitor: {
+					name: "显示记牌器",
+					init: true,
+					unfrequent: true,
+					onclick(bool) {
+						if (_status.connectMode) {
+							if (confirm("当前为联机模式，修改此设置需重启，是否重启？")) {
+								game.saveConfig("show_deckMonitor", bool);
+								game.reload();
+							} else this.classList.toggle("on");
+						} else {
+							game.saveConfig("show_deckMonitor", bool);
+							if (lib.config.show_deckMonitor) {
+								ui.deckMonitor.style.display = "";
+							} else {
+								ui.deckMonitor.style.display = "none";
+							}
+						}
+					},
+				},
+				show_deckMonitor_online: {
+					name: "联机显示记牌器",
+					intro: "如果你是房主，此设置对所有人生效",
+					init: false,
+					unfrequent: true,
+					onclick(bool) {
+						if (_status.connectMode) {
+							if (confirm("当前为联机模式，修改此设置须重启，是否重启？")) {
+								game.saveConfig("show_deckMonitor_online", bool);
+								game.reload();
+							} else this.classList.toggle("on");
+						} else {
+							game.saveConfig("show_deckMonitor_online", bool);
+						}
 					},
 				},
 				show_wuxie: {
@@ -4861,10 +5023,15 @@ export class Library {
 					}
 					if (config.connect_identity_mode == "zhong") {
 						map.connect_player_number.hide();
+						map.connect_choice_zhu.hide();
 						map.connect_limit_zhu.hide();
 						map.connect_enhance_zhu.hide();
+						map.connect_choice_zhong.hide();
+						map.connect_choice_fan.hide();
+						map.connect_choice_nei.hide();
 						map.connect_double_nei.hide();
 						map.connect_enable_commoner.hide();
+						map.connect_choice_commoner.hide();
 						map.connect_enable_year_limit.show();
 						map.connect_zhong_card.show();
 						map.connect_special_identity.hide();
@@ -4872,19 +5039,29 @@ export class Library {
 					} else if (config.connect_identity_mode == "stratagem") {
 						map.connect_double_character.show();
 						map.connect_player_number.show();
+						map.connect_choice_zhu.show();
 						map.connect_limit_zhu.hide();
 						map.connect_enhance_zhu.hide();
+						map.connect_choice_zhong.show();
+						map.connect_choice_fan.show();
+						map.connect_choice_nei.show();
 						map.connect_double_nei.hide();
 						map.connect_enable_commoner.hide();
+						map.connect_choice_commoner.hide();
 						map.connect_enable_year_limit.show();
 						map.connect_zhong_card.hide();
 						map.connect_special_identity.hide();
 					} else if (config.connect_identity_mode == "purple") {
 						map.connect_player_number.hide();
+						map.connect_choice_zhu.hide();
 						map.connect_limit_zhu.hide();
 						map.connect_enhance_zhu.hide();
+						map.connect_choice_zhong.hide();
+						map.connect_choice_fan.hide();
+						map.connect_choice_nei.hide();
 						map.connect_double_nei.hide();
 						map.connect_enable_commoner.hide();
+						map.connect_choice_commoner.hide();
 						map.connect_enable_year_limit.hide();
 						map.connect_zhong_card.hide();
 						map.connect_special_identity.hide();
@@ -4892,10 +5069,15 @@ export class Library {
 					} else {
 						map.connect_double_character.show();
 						map.connect_player_number.show();
+						map.connect_choice_zhu.show();
 						map.connect_limit_zhu.show();
 						map.connect_enhance_zhu.show();
+						map.connect_choice_zhong.show();
+						map.connect_choice_fan.show();
+						map.connect_choice_nei.show();
 						map.connect_double_nei[config.connect_player_number != "2" && !config.connect_enable_commoner ? "show" : "hide"]();
 						map.connect_enable_commoner[config.connect_player_number != "2" && !config.connect_double_nei ? "show" : "hide"]();
+						map.connect_choice_commoner[config.connect_enable_commoner ? "show" : "hide"]();
 						map.connect_enable_year_limit.show();
 						map.connect_zhong_card.hide();
 
@@ -4928,6 +5110,20 @@ export class Library {
 					frequent: true,
 					restart: true,
 				},
+				connect_choice_zhu: {
+					name: "主公候选武将数",
+					init: 3,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_zhu", num, "identity");
+					},
+				},
 				connect_limit_zhu: {
 					name: "常备主候选武将数",
 					init: "group",
@@ -4940,11 +5136,53 @@ export class Library {
 						8: "八",
 					},
 				},
+				connect_choice_zhong: {
+					name: "忠臣候选武将数",
+					init: 4,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_zhong", num, "identity");
+					},
+				},
 				connect_zhong_card: {
 					name: "明忠卡牌替换",
 					init: true,
 					frequent: true,
 					restart: true,
+				},
+				connect_choice_fan: {
+					name: "反贼候选武将数",
+					init: 3,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_fan", num, "identity");
+					},
+				},
+				connect_choice_nei: {
+					name: "内奸候选武将数",
+					init: 6,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 6;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_nei", num, "identity");
+					},
 				},
 				connect_double_nei: {
 					name: "双内奸",
@@ -4962,6 +5200,20 @@ export class Library {
 					frequent: false,
 					get intro() {
 						return lib.mode.identity.config.enable_commoner.intro;
+					},
+				},
+				connect_choice_commoner: {
+					name: "平民候选武将数",
+					init: 4,
+					input: true,
+					restart: true,
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("connect_choice_commoner", num, "identity");
 					},
 				},
 				connect_double_character: {
@@ -4999,21 +5251,16 @@ export class Library {
 					restart: true,
 					intro: "谋攻篇规则为第二轮开始才可使用怒气强化卡牌，开启此选项从游戏开始即可强化卡牌。",
 				},
-				// connect_ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// connect_ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				connect_enhance_zhu: {
 					name: "加强主公",
-					init: false,
+					init: "sixiang",
+					item: {
+						sixiang: "四象标记",
+						specific: "专属技能",
+						off: "关闭",
+					},
 					restart: true,
-					intro: "为主公增加一个额外技能",
+					intro: "为主公增加一个额外技能。<br><li>四象标记：主公随机获得一个四象标记（限发动一次）；每个回合结束时，若场上没有反贼，主公失去此标记。<br><li>专属技能：至少三名反贼的身份场，主公获得一个专属技能（无则改为〖天命〗）；一名角色阵亡后，若存活反贼数小于3，主公失去此技能。",
 				},
 			},
 			config: {
@@ -5286,21 +5533,16 @@ export class Library {
 					init: true,
 					intro: "根据角色的出牌行为自动标记可能的身份",
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				enhance_zhu: {
 					name: "加强主公",
-					init: false,
+					init: "sixiang",
+					item: {
+						sixiang: "四象标记",
+						specific: "专属技能",
+						off: "关闭",
+					},
 					restart: true,
-					intro: "为主公增加一个额外技能",
+					intro: "为主公增加一个额外技能。<br><li>四象标记：主公随机获得一个四象标记（限发动一次）；每个回合结束时，若场上没有反贼，主公失去此标记。<br><li>专属技能：至少三名反贼的身份场，主公获得一个专属技能（无则改为〖天命〗）；一名角色阵亡后，若存活反贼数小于3，主公失去此技能。",
 				},
 				free_choose: {
 					name: "自由选将",
@@ -5470,15 +5712,16 @@ export class Library {
 				},
 				choice_zhu: {
 					name: "主公候选武将数",
-					init: "3",
+					init: 3,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_zhu", num, "identity");
 					},
 				},
 				limit_zhu: {
@@ -5495,41 +5738,44 @@ export class Library {
 				},
 				choice_zhong: {
 					name: "忠臣候选武将数",
-					init: "4",
+					init: 4,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_zhong", num, "identity");
 					},
 				},
 				choice_nei: {
 					name: "内奸候选武将数",
-					init: "5",
+					init: 6,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 6;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_nei", num, "identity");
 					},
 				},
 				choice_fan: {
 					name: "反贼候选武将数",
-					init: "3",
+					init: 3,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 3;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_fan", num, "identity");
 					},
 				},
 				enable_commoner: {
@@ -5541,15 +5787,16 @@ export class Library {
 				},
 				choice_commoner: {
 					name: "平民候选武将数",
-					init: "4",
+					init: 4,
+					input: true,
 					restart: true,
-					item: {
-						3: "三",
-						4: "四",
-						5: "五",
-						6: "六",
-						8: "八",
-						10: "十",
+					onblur(e) {
+						let text = e.target,
+							num = Number(text.innerText);
+						if (isNaN(num) || num < 2) num = 4;
+						else if (!Number.isInteger(num)) num = Math.round(num);
+						text.innerText = num;
+						game.saveConfig("choice_commoner", num, "identity");
 					},
 				},
 				enable_year_limit: {
@@ -5630,16 +5877,6 @@ export class Library {
 					frequent: true,
 					restart: true,
 				},
-				// connect_ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:false,
-				// 	restart:true,
-				// },
-				// connect_ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 			config: {
 				update: function (config, map) {
@@ -5784,16 +6021,6 @@ export class Library {
 					},
 					restart: true,
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				free_choose: {
 					name: "自由选将",
 					init: true,
@@ -5964,10 +6191,10 @@ export class Library {
 					name: "四号位获得【飞扬】",
 					init: true,
 					frequent: true,
-					intro: "最后行动的角色获得技能【飞扬】（准备阶段，你可以弃置三张牌，然后弃置判定区的一张牌）",
+					intro: "最后行动的角色获得技能【飞扬】（限定技，准备阶段，你可以弃置两张牌，然后弃置判定区的一张牌）",
 				},
 				connect_choice_num: {
-					name: "侯选武将数",
+					name: "候选武将数",
 					init: "20",
 					frequent: true,
 					item: {
@@ -5991,16 +6218,6 @@ export class Library {
 						5: "5人",
 					},
 				},
-				// connect_ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// connect_ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 			config: {
 				update: function (config, map) {
@@ -6242,7 +6459,7 @@ export class Library {
 					name: "四号位获得【飞扬】",
 					init: true,
 					frequent: true,
-					intro: "最后行动的角色获得技能【飞扬】（准备阶段，你可以弃置三张牌，然后弃置判定区的一张牌）",
+					intro: "最后行动的角色获得技能【飞扬】（限定技，准备阶段，你可以弃置两张牌，然后弃置判定区的一张牌）",
 				},
 				replace_character_two: {
 					name: "替补模式",
@@ -6265,16 +6482,6 @@ export class Library {
 					},
 					frequent: true,
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true
-				// },
 				ladder_reset: {
 					name: "重置天梯数据",
 					onclick() {
@@ -6333,8 +6540,7 @@ export class Library {
 								code = container.textarea.value;
 							}
 							try {
-								var character = null;
-								eval(code);
+								var { character } = security.exec2(code);
 								if (!Array.isArray(character)) {
 									throw "err";
 								}
@@ -6421,8 +6627,7 @@ export class Library {
 								code = container.textarea.value;
 							}
 							try {
-								var character = null;
-								eval(code);
+								var { character } = security.exec2(code);
 								if (!Array.isArray(character)) {
 									throw "err";
 								}
@@ -6490,6 +6695,10 @@ export class Library {
 					name: "联机昵称",
 					input: true,
 					frequent: true,
+					onclick(item) {
+						game.saveConfig("connect_nickname", item);
+						game.saveConfig("connect_avatar", item, "connect");
+					},
 				},
 				connect_avatar: {
 					name: "联机头像",
@@ -6532,6 +6741,31 @@ export class Library {
 					init: false,
 					frequent: true,
 					intro: "读取剪贴板以解析邀请链接自动加入联机房间",
+				},
+				check_versionLocal: {
+					name: "禁止不同版本玩家进房",
+					init: false,
+					intro: "禁止与自己版本不同的玩家进入房间",
+				},
+				check_extension: {
+					name: "禁止扩展玩家进房",
+					init: false,
+					intro: "禁止开启了扩展的的玩家进入房间",
+				},
+				reset_banBlacklist: {
+					name: "重置黑名单",
+					onclick() {
+						if (this.firstChild.innerHTML != "已重置") {
+							this.firstChild.innerHTML = "已重置";
+							var banBlacklist = [];
+							game.saveConfig("banBlacklist", banBlacklist);
+							var that = this;
+							setTimeout(function () {
+								that.firstChild.innerHTML = "重置黑名单";
+							}, 1000);
+						}
+					},
+					clear: true,
 				},
 			},
 		},
@@ -6582,16 +6816,6 @@ export class Library {
 					},
 					intro: "只控制一名角色，其他角色由AI控制",
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 		},
 		doudizhu: {
@@ -6850,8 +7074,7 @@ export class Library {
 								code = container.textarea.value;
 							}
 							try {
-								var character = null;
-								eval(code);
+								var { character } = security.exec2(code);
 								if (!get.is.object(character)) {
 									throw "err";
 								}
@@ -6952,6 +7175,27 @@ export class Library {
 					name: "启用手气卡",
 					init: false,
 					frequent: true,
+				},
+				connect_double_character: {
+					name: "启用双将",
+					init: "single",
+					item: {
+						single: "不启用",
+						double: "启用双将",
+						singble: "单双任选",
+					},
+					restart: true,
+				},
+				connect_double_hp: {
+					name: "双将体力上限",
+					init: "pingjun",
+					item: {
+						hejiansan: "和减三",
+						pingjun: "平均值",
+						zuidazhi: "最大值",
+						zuixiaozhi: "最小值",
+						zonghe: "相加",
+					},
 					restart: true,
 				},
 				update: function (config, map) {
@@ -6964,6 +7208,17 @@ export class Library {
 						map.connect_change_card.hide();
 					} else {
 						map.connect_change_card.show();
+					}
+					if (config.connect_single_mode != "dianjiang") {
+						map.connect_double_character.hide();
+						map.connect_double_hp.hide();
+					} else {
+						map.connect_double_character.show();
+						if (["double", "singble"].includes(config.connect_double_character)) {
+							map.connect_double_hp.show();
+						} else {
+							map.connect_double_hp.hide();
+						}
 					}
 				},
 			},
@@ -6997,6 +7252,28 @@ export class Library {
 						unlimited: "无限",
 					},
 				},
+				double_character: {
+					name: "启用双将",
+					init: "single",
+					item: {
+						single: "不启用",
+						double: "启用双将",
+						singble: "单双任选",
+					},
+					restart: true,
+				},
+				double_hp: {
+					name: "双将体力上限",
+					init: "pingjun",
+					item: {
+						hejiansan: "和减三",
+						pingjun: "平均值",
+						zuidazhi: "最大值",
+						zuixiaozhi: "最小值",
+						zonghe: "相加",
+					},
+					restart: true,
+				},
 				update: function (config, map) {
 					if (config.single_mode != "normal") {
 						map.enable_jin.hide();
@@ -7007,6 +7284,17 @@ export class Library {
 						map.change_card.hide();
 					} else {
 						map.change_card.show();
+					}
+					if (config.single_mode != "dianjiang") {
+						map.double_character.hide();
+						map.double_hp.hide();
+					} else {
+						map.double_character.show();
+						if (["double", "singble"].includes(config.double_character)) {
+							map.double_hp.show();
+						} else {
+							map.double_hp.hide();
+						}
 					}
 				},
 			},
@@ -7048,14 +7336,6 @@ export class Library {
 						map.free_choose.hide();
 						map.change_choice.hide();
 					}
-					// if(config.chess_mode!='leader'){
-					// 	map.ban_weak.show();
-					// 	map.ban_strong.show();
-					// }
-					// else{
-					// 	map.ban_weak.hide();
-					// 	map.ban_strong.hide();
-					// }
 				},
 				chess_leader_save: {
 					name: "选择历程",
@@ -7174,16 +7454,6 @@ export class Library {
 						}
 					},
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				chessscroll_speed: {
 					name: "边缘滚动速度",
 					init: "20",
@@ -7239,16 +7509,6 @@ export class Library {
 					name: "显示距离",
 					init: true,
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 				chessscroll_speed: {
 					name: "边缘滚动速度",
 					intro: "鼠标移至屏幕边缘时自动滚屏",
@@ -7458,16 +7718,6 @@ export class Library {
 						}
 					},
 				},
-				// ban_weak:{
-				// 	name:'屏蔽弱将',
-				// 	init:true,
-				// 	restart:true,
-				// },
-				// ban_strong:{
-				// 	name:'屏蔽强将',
-				// 	init:false,
-				// 	restart:true,
-				// },
 			},
 		},
 	};
@@ -7513,6 +7763,8 @@ export class Library {
 			"<li>游击：若一名角色拥有带有“游击”的技能，则当该游击技能执行至“游击”处时，若本次技能的目标角色在你的攻击范围内，且你不在其攻击范围内，则你可以执行“游击”后的额外效果。" +
 			"<li>激昂：一名角色发动“昂扬技”标签技能后，此技能失效，直至从此刻至满足此技能“激昂”条件后。" +
 			"<li>历战：一名角色的回合结束时，若本回合发动过拥有历战效果的技能，则对此技能效果的进行等同于发动次数的永久可叠加式升级或修改。" +
+			"<li>同心：若技能拥有同心效果，则拥有该技能的角色可在回合开始时与其他角色同心直到自己下回合开始（默认为选择一名角色同心），选择的角色称为“同心角色”。拥有同心效果的技能发动后，技能发动者先执行同心效果。然后若有与其同心的角色，这些角色也依次执行同心效果。" +
+			"<li>持恒技：拥有此标签的技能不会被其他技能无效。" +
 			"",
 	};
 	/**
@@ -7752,7 +8004,17 @@ export class Library {
 			if (Array.isArray(context)) {
 				try {
 					const code = context.length == 1 ? context[0].string : context.reduceRight((pre, cur) => (pre.string || pre) + "." + cur.string);
-					obj = eval(code);
+					obj = security.exec(`return ${code};`, {
+						event,
+						trigger,
+						player,
+						card,
+						cards,
+						result,
+						source,
+						target,
+						targets,
+					});
 					if (![null, undefined].includes(obj)) {
 						const keys = Object.getOwnPropertyNames(obj)
 							.concat(Object.getOwnPropertyNames(Object.getPrototypeOf(obj)))
@@ -8034,6 +8296,9 @@ export class Library {
 			game.export(lib.init.encode(JSON.stringify(_status.videoToSave)), "无名杀 - 录像 - " + _status.videoToSave.name[0] + " - " + _status.videoToSave.name[1]);
 		}
 	}
+	/**
+	 * @param {Function} fn
+	 */
 	genAsync(fn) {
 		return gnc.of(fn);
 	}
@@ -8224,7 +8489,7 @@ export class Library {
 			window.game = game;
 			window.ui = ui;
 			window.get = get;
-			window.ai = ai;
+			window.nonameAI = ai;
 			window.lib = lib;
 			window._status = _status;
 		},
@@ -9359,6 +9624,7 @@ export class Library {
 		western: "西",
 		key: "键",
 		jin: "晋",
+		ye: "野",
 		double: "双",
 		wei2: "魏国",
 		shu2: "蜀国",
@@ -9368,6 +9634,7 @@ export class Library {
 		western2: "西方",
 		key2: "KEY",
 		jin2: "晋朝",
+		ye2: "野心家",
 		double2: "双势力",
 		male: "男",
 		female: "女",
@@ -9432,6 +9699,7 @@ export class Library {
 		xiaotao_emotion: "小桃表情",
 		xiaojiu_emotion: "小酒表情",
 		xiaokuo_emotion: "小扩表情",
+		biexiao_emotion: "憋笑表情",
 
 		pause: "暂停",
 		config: "选项",
@@ -9530,7 +9798,6 @@ export class Library {
 
 	element = {
 		content: Element.Content,
-		contents: Element.Contents,
 		Player: Element.Player,
 		Card: Element.Card,
 		VCard: Element.VCard,
@@ -9560,8 +9827,13 @@ export class Library {
 					if (!Array.isArray(message) || typeof lib.message.client[message[0]] !== "function") {
 						throw "err";
 					}
-					for (var i = 1; i < message.length; i++) {
-						message[i] = get.parsedResult(message[i]);
+					if (game.sandbox) security.enterSandbox(game.sandbox);
+					try {
+						for (var i = 1; i < message.length; i++) {
+							message[i] = get.parsedResult(message[i]);
+						}
+					} finally {
+						if (game.sandbox) security.exitSandbox();
 					}
 				} catch (e) {
 					console.log(e);
@@ -9597,6 +9869,7 @@ export class Library {
 				}
 				game.online = false;
 				game.ws = null;
+				game.sandbox = null;
 			},
 		},
 		/**
@@ -9786,7 +10059,7 @@ export class Library {
 		cardGiftable: (card, player, target, strict) => {
 			const mod = game.checkMod(card, player, target, "unchanged", "cardGiftable", player);
 			if (!mod || (strict && ((mod == "unchanged" && (get.position(card) != "h" || !get.cardtag(card, "gifts"))) || player == target))) return false;
-			return get.type(card, false) != "equip" || target.canEquip(card, true);
+			return get.type(card, null, target) != "equip" || target.canEquip(card, true);
 		},
 		/**
 		 * Check if the card is recastable
@@ -9882,7 +10155,11 @@ export class Library {
 				return false;
 			if (info.filter && !info.filter(event, player, triggername, indexedData)) return false;
 			if (event._notrigger.includes(player) && !lib.skill.global.includes(skill)) return false;
-			if (typeof info.usable == "number" && player.hasSkill("counttrigger") && player.storage.counttrigger && player.storage.counttrigger[skill] >= info.usable) return false;
+			if (info.usable !== undefined && player.hasSkill("counttrigger") && player.storage.counttrigger) {
+				let num = info.usable;
+				if (typeof num === "function") num = info.usable(skill, player);
+				if (typeof num === "number" && player.storage.counttrigger[skill] >= num) return false;
+			}
 			if (info.round && info.round - (game.roundNumber - player.storage[skill + "_roundcount"]) > 0) return false;
 			for (const item in player.storage) {
 				if (item.startsWith("temp_ban_")) {
@@ -9929,7 +10206,11 @@ export class Library {
 				if (info.viewAsFilter && info.viewAsFilter(player) === false) return false;
 				if (event.filterCard && !event.filterCard(get.autoViewAs(info.viewAs, "unsure"), player, event)) return false;
 			}
-			if (info.usable && get.skillCount(skill) >= info.usable) return false;
+			if (info.usable !== undefined) {
+				let num = info.usable;
+				if (typeof num === "function") num = info.usable(skill, player);
+				if (typeof num === "number" && get.skillCount(skill, player) >= num) return false;
+			}
 			if (info.chooseButton && _status.event.noButton) return false;
 			if (info.round && info.round - (game.roundNumber - player.storage[skill + "_roundcount"]) > 0) return false;
 			for (const item in player.storage) {
@@ -9943,9 +10224,12 @@ export class Library {
 			return true;
 		},
 		characterDisabled: function (i, libCharacter) {
-			if (!lib.character[i] || lib.character[i].isAiForbidden) return true;
+			const args = Array.from(arguments).slice(2);
+			if (!lib.character[i]) return true;
 			if (lib.character[i].isUnseen) return true;
-			if (lib.config.forbidai.includes(i)) return true;
+			if (!args.includes("ignoreForibidden")) {
+				if (lib.config.forbidai.includes(i) || lib.character[i].isAiForbidden) return true;
+			}
 			if (lib.characterFilter[i] && !lib.characterFilter[i](get.mode())) return true;
 			if (_status.connectMode) {
 				if (lib.configOL.banned.includes(i) || lib.connectBanned.includes(i)) return true;
@@ -9960,16 +10244,6 @@ export class Library {
 				if (double_character && lib.config.forbiddouble.includes(i)) {
 					return true;
 				}
-				// if(lib.configOL.ban_weak){
-				// 	if(lib.config.replacecharacter[i]&&libCharacter&&libCharacter[lib.config.replacecharacter[i]]) return true;
-				// 	if(lib.config.forbidall.includes(i)) return true;
-				// 	if(!double_character&&get.rank(i,true)<=2){
-				// 		return true;
-				// 	}
-				// }
-				// if(lib.configOL.ban_strong&&get.rank(i,true)>=8){
-				// 	return true;
-				// }
 			} else {
 				if (lib.config.banned.includes(i)) return true;
 				var double_character = false;
@@ -9983,27 +10257,18 @@ export class Library {
 				if (double_character && lib.config.forbiddouble.includes(i)) {
 					return true;
 				}
-				// if(get.config('ban_weak')){
-				// 	if(lib.config.replacecharacter[i]&&lib.character[lib.config.replacecharacter[i]]) return true;
-				// 	if(lib.config.forbidall.includes(i)) return true;
-				// 	if(!double_character&&get.rank(i,true)<=2){
-				// 		return true;
-				// 	}
-				// }
-				// if(get.config('ban_strong')&&get.rank(i,true)>=8){
-				// 	return true;
-				// }
 			}
 		},
 		characterDisabled2: function (i) {
 			var info = lib.character[i];
+			const args = Array.from(arguments).slice(1);
 			if (!info) return true;
 			if (info[4]) {
 				if (info.isBoss) return true;
 				if (info.isHiddenBoss) return true;
 				if (info.isMinskin) return true;
 				if (info.isUnseen) return true;
-				if (info.isAiForbidden && (!_status.event.isMine || !_status.event.isMine())) return true;
+				if (!args.includes("ignoreForibidden") && info.isAiForbidden && (!_status.event.isMine || !_status.event.isMine())) return true;
 				if (lib.characterFilter[i] && !lib.characterFilter[i](get.mode())) return true;
 			}
 			return false;
@@ -10098,6 +10363,13 @@ export class Library {
 			}
 			return false;
 		},
+		/**
+		 * player的card在event事件中能否被自己弃置
+		 * @param { Card } card 要被弃置的牌
+		 * @param { Player } player 执行弃牌的角色
+		 * @param { string } [event] 弃置牌事件的名称
+		 * @returns { boolean }
+		 */
 		cardDiscardable: function (card, player, event) {
 			event = event || _status.event;
 			if (typeof event != "string") event = event.getParent().name;
@@ -10105,6 +10377,14 @@ export class Library {
 			if (mod != "unchanged") return mod;
 			return true;
 		},
+		/**
+		 * target的card在event事件中能否被player弃置
+		 * @param { Card } card 要被弃置的牌
+		 * @param { Player } player 执行弃牌的角色
+		 * @param { Player } target 被弃置牌的现持有者
+		 * @param { string } [event] 弃置牌事件的名称
+		 * @returns { boolean }
+		 */
 		canBeDiscarded: function (card, player, target, event) {
 			event = event || _status.event;
 			if (typeof event != "string") event = event.getParent().name;
@@ -10112,6 +10392,14 @@ export class Library {
 			if (mod != "unchanged") return mod;
 			return true;
 		},
+		/**
+		 * target的card在event事件中能否被player获得
+		 * @param { Card } card 要被获得的牌
+		 * @param { Player } player 获得牌的角色
+		 * @param { Player } target 被获得牌的现持有者
+		 * @param { string } [event] 获得牌事件的名称
+		 * @returns { boolean }
+		 */
 		canBeGained: function (card, player, target, event) {
 			event = event || _status.event;
 			if (typeof event != "string") event = event.getParent().name;
@@ -10729,7 +11017,10 @@ export class Library {
 		charge: {
 			markimage: "image/card/charge.png",
 			intro: {
-				content: "当前蓄力点数：#",
+				content(storage, player) {
+					const max = player.getMaxCharge();
+					return `当前蓄力点数：${storage}/${max}`;
+				},
 			},
 		},
 		cooperation: {
@@ -10770,6 +11061,7 @@ export class Library {
 					forced: true,
 					charlotte: true,
 					popup: false,
+					nopop: true,
 					firstDo: true,
 					filter: function (event, player) {
 						if (!event.source) return false;
@@ -10827,6 +11119,7 @@ export class Library {
 					forced: true,
 					charlotte: true,
 					popup: false,
+					nopop: true,
 					firstDo: true,
 					filter: function (event, player) {
 						if (event.getParent().name != "draw") return false;
@@ -10884,6 +11177,7 @@ export class Library {
 					forced: true,
 					charlotte: true,
 					popup: false,
+					nopop: true,
 					firstDo: true,
 					filter: function (event, player) {
 						if (event.type != "discard") return false;
@@ -10951,6 +11245,7 @@ export class Library {
 					forced: true,
 					charlotte: true,
 					popup: false,
+					nopop: true,
 					firstDo: true,
 					filter: function (event, player) {
 						var suit = get.suit(event.card);
@@ -11020,8 +11315,13 @@ export class Library {
 			filter: function (event, player) {
 				return player.storage.zhengsu_leijin || player.storage.zhengsu_bianzhen || player.storage.zhengsu_mingzhi;
 			},
-			content: function () {
-				player.chooseDrawRecover(2, "整肃奖励：摸两张牌或回复1点体力");
+			filterx: function (skill, player) {
+				const zhengsus = player.storage[skill];
+				if (!zhengsus || !zhengsus.length) return false;
+				return zhengsus.some(zhengsu => player.storage[zhengsu]);
+			},
+			async content(event, trigger, player) {
+				await player.chooseDrawRecover(2, "整肃奖励：摸两张牌或回复1点体力", true);
 			},
 			subSkill: {
 				leijin: {
@@ -11046,6 +11346,7 @@ export class Library {
 					charlotte: true,
 					forced: true,
 					popup: false,
+					nopop: true,
 					onremove: true,
 					filter: function (event, player) {
 						return player.isPhaseUsing() && player.storage.zhengsu_leijin !== false;
@@ -11108,6 +11409,7 @@ export class Library {
 					charlotte: true,
 					forced: true,
 					popup: false,
+					nopop: true,
 					onremove: true,
 					filter: function (event, player) {
 						return player.isPhaseUsing() && player.storage.zhengsu_bianzhen !== false;
@@ -11200,6 +11502,7 @@ export class Library {
 					charlotte: true,
 					forced: true,
 					popup: false,
+					nopop: true,
 					onremove: true,
 					filter: function (event, player) {
 						if (player.storage.zhengsu_mingzhi === false || event.type != "discard") return false;
@@ -11309,6 +11612,27 @@ export class Library {
 				trigger.player.loseMaxHp(trigger.num).source = player;
 			},
 		},
+		_doublegroup_choice: {
+			trigger: {
+				global: "gameStart",
+				player: "enterGame",
+			},
+			firstDo: true,
+			forced: true,
+			popup: false,
+			priority: 25,
+			charlotte: true,
+			filter: function (event, player) {
+				return get.mode() != "guozhan" && get.is.double(player.name1) && !player._groupChosen;
+			},
+			content: function () {
+				"step 0";
+				player._groupChosen = true;
+				player.chooseControl(get.is.double(player.name1, true)).set("prompt", "请选择你的势力");
+				"step 1";
+				player.changeGroup(result.control);
+			},
+		},
 		aozhan: {
 			charlotte: true,
 			mod: {
@@ -11416,7 +11740,7 @@ export class Library {
 		autoswap: {
 			firstDo: true,
 			trigger: {
-				player: ["playercontrol", "chooseToUseBegin", "chooseToRespondBegin", "chooseToDiscardBegin", "chooseToCompareBegin", "chooseButtonBegin", "chooseCardBegin", "chooseTargetBegin", "chooseCardTargetBegin", "chooseControlBegin", "chooseBoolBegin", "choosePlayerCardBegin", "discardPlayerCardBegin", "gainPlayerCardBegin", "chooseToMoveBegin", "chooseToPlayBeatmapBegin", "chooseToGiveBegin"],
+				player: ["chooseToUseBegin", "chooseToRespondBegin", "chooseToDiscardBegin", "chooseToCompareBegin", "chooseButtonBegin", "chooseCardBegin", "chooseTargetBegin", "chooseCardTargetBegin", "chooseControlBegin", "chooseBoolBegin", "choosePlayerCardBegin", "discardPlayerCardBegin", "gainPlayerCardBegin", "chooseToMoveBegin", "chooseToPlayBeatmapBegin", "chooseToGiveBegin"],
 			},
 			forced: true,
 			priority: 100,
@@ -11506,13 +11830,15 @@ export class Library {
 		fengyin: {
 			init: function (player, skill) {
 				player.addSkillBlocker(skill);
+				player.addTip(skill, "非锁定技失效");
 			},
 			onremove: function (player, skill) {
 				player.removeSkillBlocker(skill);
+				player.removeTip(skill);
 			},
 			charlotte: true,
 			skillBlocker: function (skill, player) {
-				return !lib.skill[skill].charlotte && !get.is.locked(skill, player);
+				return !lib.skill[skill].persevereSkill && !lib.skill[skill].charlotte && !get.is.locked(skill, player);
 			},
 			mark: true,
 			intro: {
@@ -11534,7 +11860,7 @@ export class Library {
 			},
 			charlotte: true,
 			skillBlocker: function (skill, player) {
-				return !lib.skill[skill].charlotte;
+				return !lib.skill[skill].persevereSkill && !lib.skill[skill].charlotte;
 			},
 			mark: true,
 			intro: {
@@ -11578,7 +11904,7 @@ export class Library {
 				nodamage: true,
 				effect: {
 					target: function (card, player, target, current) {
-						if (get.tag(card, "damage")) return [0, 0];
+						if (get.tag(card, "damage")) return "zeroplayertarget";
 					},
 				},
 			},
@@ -11829,7 +12155,11 @@ export class Library {
 							}
 							return 1;
 						},
-						ai2: get.effect_use,
+						ai2: function (target) {
+							let effect_use = get.effect_use(target);
+							if (effect_use <= 0) return effect_use;
+							return get.effect(target);
+						},
 						type: "dying",
 						targetRequired: true,
 						dying: event.dying,
@@ -11923,6 +12253,7 @@ export class Library {
 			logv: false,
 			forceDie: true,
 			silent: true,
+			forceOut: true,
 			//priority:-5,
 			content: function () {
 				"step 0";
@@ -11991,6 +12322,7 @@ export class Library {
 			},
 		},
 	};
+	/** @type {Object<string, import("./element/character.js").Character>} */
 	character = new Proxy(
 		{},
 		{
@@ -12003,9 +12335,35 @@ export class Library {
 	cardPile = {};
 	message = {
 		server: {
-			/** @this { any } */
+			cardPile() {
+				this.send(
+					JSON.stringify({
+						type: "cardPile",
+						data: {
+							drawPile: Array.from(ui.cardPile.children),
+							discardPile: Array.from(ui.discardPile.children),
+						},
+					})
+				);
+			},
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
 			init(version, config, banned_info) {
-				if (lib.node.banned.includes(banned_info)) {
+				var show_deckMonitor = false;
+				if (lib.config.show_deckMonitor && lib.config.show_deckMonitor_online) {
+					show_deckMonitor = true;
+				}
+				this.send(function (show_deckMonitor) {
+					if (show_deckMonitor) {
+						ui.deckMonitor.style.display = "";
+					} else {
+						ui.deckMonitor.style.display = "none";
+					}
+				}, show_deckMonitor);
+				this.onlineKey = config.onlineKey;
+				var banBlacklist = lib.config.banBlacklist === undefined ? [] : lib.config.banBlacklist;
+				if (lib.node.banned.includes(banned_info) || banBlacklist.includes(config.onlineKey)) {
 					this.send("denied", "banned");
 				} else if (config.id && lib.playerOL && lib.playerOL[config.id]) {
 					var player = lib.playerOL[config.id];
@@ -12021,10 +12379,23 @@ export class Library {
 					this.send("denied", "version");
 					lib.node.clients.remove(this);
 					this.closed = true;
+				} else if (get.config("check_versionLocal", "connect") && config.versionLocal != lib.version) {
+					this.send("denied", "version");
+					lib.node.clients.remove(this);
+					this.closed = true;
+				} else if (get.config("check_extension", "connect") && config.extension) {
+					this.send("denied", "extension");
 				} else if (!_status.waitingForPlayer) {
-					if (game.phaseNumber && lib.configOL.observe) {
+					if (!config.nickname) {
+						this.send("denied", "banned");
+						lib.node.clients.remove(this);
+						this.closed = true;
+					} else if (game.phaseNumber && lib.configOL.observe) {
 						lib.node.observing.push(this);
-						this.send("reinit", lib.configOL, get.arenaState(), game.getState ? game.getState() : {}, game.ip, game.players[0].playerid, null, _status.cardtag);
+						this.send("reinit", lib.configOL, get.arenaState(), game.getState ? game.getState() : {}, game.ip, game.players[0].playerid, null, _status.cardtag, _status.postReconnect);
+						// 没有系统提示的接口喵？
+						game.log("玩家 ", `#y${get.plainText(config.nickname)}`, " 进入房间观战");
+						game.me.chat(`玩家 <span style="font-weight: bold; color: rgb(126, 180, 255)">${get.plainText(config.nickname)}</span> 进入房间观战`);
 						if (!ui.removeObserve) {
 							ui.removeObserve = ui.create.system(
 								"移除旁观",
@@ -12069,37 +12440,53 @@ export class Library {
 					this.send("init", this.id, lib.configOL, game.ip, window.isNonameServer, game.roomId);
 				}
 			},
-			/** @this { any } */
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
 			inited() {
 				this.inited = true;
 				if (_status.waitingForPlayer) {
 					game.updateWaiting();
 				}
 			},
-			/** @this { any } */
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
 			reinited() {
 				this.inited = true;
 			},
-			result: function (result) {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			result(result) {
 				if (lib.node.observing.includes(this)) return;
 				var player = lib.playerOL[this.id];
 				if (player) {
 					player.unwait(result);
 				}
 			},
-			tempResult: function (result) {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			tempResult(result) {
 				if (lib.node.observing.includes(this)) return;
 				var player = lib.playerOL[this.id];
 				if (player) {
 					player.tempUnwait(result);
 				}
 			},
-			startGame: function () {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			startGame() {
 				if (this.id == game.onlinezhu) {
 					game.resume();
 				}
 			},
-			changeRoomConfig: function (config) {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			changeRoomConfig(config) {
 				if (this.id == game.onlinezhu) {
 					game.broadcastAll(function (config) {
 						for (var i in config) {
@@ -12126,7 +12513,10 @@ export class Library {
 					}
 				}
 			},
-			changeNumConfig: function (num, index, bool) {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			changeNumConfig(num, index, bool) {
 				if (this.id == game.onlinezhu) {
 					lib.configOL.number = num;
 					game.send("server", "config", lib.configOL);
@@ -12140,14 +12530,20 @@ export class Library {
 					}
 				}
 			},
-			throwEmotion: function (target, emotion, rotate) {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			throwEmotion(target, emotion, rotate) {
 				if (lib.node.observing.includes(this)) return;
 				var player = lib.playerOL[this.id];
 				if (player) {
 					player.throwEmotion(target, emotion, rotate);
 				}
 			},
-			emotion: function (id, pack, emotion) {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			emotion(id, pack, emotion) {
 				if (lib.node.observing.includes(this)) return;
 				var that = this;
 				if (
@@ -12177,7 +12573,10 @@ export class Library {
 				}
 				if (player) player.emotion(pack, emotion);
 			},
-			chat: function (id, str) {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			chat(id, str) {
 				if (lib.node.observing.includes(this)) return;
 				var that = this;
 				if (
@@ -12207,8 +12606,18 @@ export class Library {
 				}
 				if (player) player.chat(str);
 			},
-			giveup: function (player) {
+			/**
+			 * ```plain
+			 * 当客机向主机发送投降请求时的回调
+			 * ```
+			 *
+			 * @this {import("./element/client.js").Client}
+			 * @param {Player} player
+			 */
+			giveup(player) {
 				if (lib.node.observing.includes(this) || !player || !player._giveUp) return;
+				var self = lib.playerOL[this.id];
+				if (self !== player) return; // 禁止让别人投降
 				_status.event.next.length = 0;
 				game
 					.createEvent("giveup", false)
@@ -12219,7 +12628,10 @@ export class Library {
 						player.die("nosource").includeOut = true;
 					}).player = player;
 			},
-			auto: function () {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			auto() {
 				if (lib.node.observing.includes(this)) return;
 				var player = lib.playerOL[this.id];
 				if (player) {
@@ -12230,7 +12642,10 @@ export class Library {
 					}, player);
 				}
 			},
-			unauto: function () {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			unauto() {
 				if (lib.node.observing.includes(this)) return;
 				var player = lib.playerOL[this.id];
 				if (player) {
@@ -12241,18 +12656,21 @@ export class Library {
 					}, player);
 				}
 			},
-			exec: function (func) {
+			exec(func) {
 				// if(typeof func=='function'){
 				//     var args=Array.from(arguments);
 				//     args.shift();
 				//     func.apply(this,args);
 				// }
 			},
-			log: function () {
+			/**
+			 * @this {import("./element/client.js").Client}
+			 */
+			log() {
 				var items = [];
 				try {
 					for (var i = 0; i < arguments.length; i++) {
-						eval("items.push(" + arguments[i] + ")");
+						items.push(this.sandbox.exec(`return ${arguments[i]}`));
 					}
 				} catch (e) {
 					this.send("log", ["err"]);
@@ -12275,8 +12693,11 @@ export class Library {
 					lib.versionOL,
 					{
 						id: game.onlineID,
+						onlineKey: game.onlineKey,
 						avatar: lib.config.connect_avatar,
 						nickname: get.connectNickname(),
+						versionLocal: lib.version,
+						extension: lib.config.extensions.some(ext => lib.config[`extension_${ext}_enable`]),
 					},
 					lib.config.banned_info
 				);
@@ -12596,6 +13017,7 @@ export class Library {
 				lib.configOL = config;
 				lib.playerOL = {};
 				lib.cardOL = {};
+				lib.vcardOL = {};
 
 				game.clearArena();
 				game.finishCards();
@@ -12708,6 +13130,7 @@ export class Library {
 				lib.configOL = config;
 				lib.playerOL = {};
 				lib.cardOL = {};
+				lib.vcardOL = {};
 
 				game.loadModeAsync(config.mode, function (mode) {
 					for (var i in mode.ai) {
@@ -12868,8 +13291,13 @@ export class Library {
 
 						player.directgain(info.handcards);
 						lib.playerOL[i] = player;
-						for (var i = 0; i < info.equips.length; i++) {
-							player.$equip(info.equips[i]);
+						if (info.vcardsMap) {
+							for (var i = 0; i < info.vcardsMap.equips.length; i++) {
+								player.addVirtualEquip(info.vcardsMap.equips[i], info.vcardsMap.equips[i].cards);
+							}
+							for (var i = 0; i < info.vcardsMap.judges.length; i++) {
+								player.addVirtualJudge(info.vcardsMap.judges[i], info.vcardsMap.judges[i].cards);
+							}
 						}
 						for (var i = 0; i < info.handcards.length; i++) {
 							info.handcards[i].addGaintag(info.gaintag[i]);
@@ -12962,11 +13390,19 @@ export class Library {
 				});
 			},
 			exec: function (func) {
-				var key = game.onlineKey;
+				const key = game.onlineKey;
 				if (typeof func == "function") {
-					var args = Array.from(arguments);
-					args.shift();
-					func.apply(this, args);
+					const isMarshalled = security.isSandboxRequired() && security.importSandbox().Domain.current.isFrom(func);
+					// 被封送的函数额外间隔了四层调用栈
+					const level = isMarshalled ? 4 : 0;
+					const args = Array.from(arguments).slice(1);
+					ErrorManager.errorHandle(
+						() => {
+							func.apply(this, args);
+						},
+						func,
+						level
+					);
 				}
 				if (key) {
 					game.onlineKey = key;
@@ -13001,6 +13437,16 @@ export class Library {
 							setTimeout(game.resume, 500);
 						}
 						break;
+					case "extension":
+						if (confirm("加入失败：房间禁止使用扩展！是否关闭所有扩展？")) {
+							let libexts = lib.config.extensions;
+							for (let i = 0; i < libexts.length; i++) {
+								game.saveConfig("extension_" + libexts[i] + "_enable", false);
+							}
+						}
+						break;
+					default:
+						alert(reason); //其它原因直接弹窗显示
 				}
 				game.ws.close();
 				if (_status.connectDenied) {
@@ -13104,6 +13550,13 @@ export class Library {
 			},
 		},
 	};
+	//为lib.numstrList属性set数字对应花色，即可在get.strNumber和get.numString中获取使用
+	numstrList = new Map([
+		[1, "A"],
+		[11, "J"],
+		[12, "Q"],
+		[13, "K"],
+	]);
 	suit = ["club", "spade", "diamond", "heart"];
 	suits = ["club", "spade", "diamond", "heart", "none"];
 	color = {
@@ -13249,6 +13702,20 @@ export class Library {
 			},
 		],
 		[
+			"衰",
+			{
+				color: "#c3f9ff",
+				nature: "thundermm",
+			},
+		],
+		[
+			"兴",
+			{
+				color: "#c3f9ff",
+				nature: "thundermm",
+			},
+		],
+		[
 			"梦",
 			{
 				color: "#6affe2",
@@ -13378,6 +13845,17 @@ export class Library {
 			},
 		],
 		[
+			"蛇",
+			{
+				getSpan: () => {
+					const span = document.createElement("span");
+					span.style.fontFamily = "NonameSuits";
+					span.textContent = "🐍";
+					return span.outerHTML;
+				},
+			},
+		],
+		[
 			"SP",
 			{
 				getSpan: () => {
@@ -13457,6 +13935,23 @@ export class Library {
 					span.textContent = "TW";
 					return span.outerHTML;
 				},
+			},
+		],
+		[
+			"汉末", 	
+			{
+				showName: "汉",
+				color: "#fefedc",
+				nature: "shenmm",
+			}
+		],
+		[
+			"汉末神",
+			{
+				/**
+				 * @returns {string}
+				 */
+				getSpan: () => `${get.prefixSpan("汉末")}${get.prefixSpan("神")}`,
 			},
 		],
 		[
@@ -13541,6 +14036,15 @@ export class Library {
 			},
 		],
 		[
+			"手杀SP",
+			{
+				/**
+				 * @returns {string}
+				 */
+				getSpan: () => `${get.prefixSpan("手杀")}${get.prefixSpan("SP")}`,
+			},
+		],
+		[
 			"战役篇神",
 			{
 				/**
@@ -13615,6 +14119,127 @@ export class Library {
 			{
 				color: "#ff0000",
 				nature: "firemm",
+			},
+		],
+		[
+			"桃",
+			{
+				color: "#FFC0CB",
+				nature: "firemm",
+			},
+		],
+		[
+			"桃神",
+			{
+				/**
+				 * @returns {string}
+				 */
+				getSpan: () => `${get.prefixSpan("桃")}${get.prefixSpan("神")}`,
+			},
+		],
+		[
+			"玄",
+			{
+				color: "#000000",
+				nature: "metalmm",
+			},
+		],
+		[
+			"荆",
+			{
+				color: "#00ff00",
+				nature: "firemm",
+			},
+		],
+		[
+			"荆神",
+			{
+				/**
+				 * @returns {string}
+				 */
+				getSpan: () => `${get.prefixSpan("荆")}${get.prefixSpan("神")}`,
+			},
+		],
+		[
+			"魂",
+			{
+				color: "#ffff99",
+				nature: "firemm",
+			},
+		],
+		[
+			"幻",
+			{
+				color: "#ffff99",
+				nature: "firemm",
+			},
+		],
+		[
+			"标",
+			{
+				color: "#912cee",
+				nature: "metalmm",
+			},
+		],
+		[
+			"牢",
+			{
+				color: "#EEEE00",
+				nature: "black",
+			},
+		],
+		[
+			"牢神",
+			{
+				/**
+				 * @returns {string}
+				 */
+				getSpan: () => `${get.prefixSpan("牢")}${get.prefixSpan("神")}`,
+			},
+		],
+		[
+			"九鼎",
+			{
+				showName: "鼎",
+				color: "#ffccff",
+				nature: "black",
+			},
+		],
+		[
+			"SCL",
+			{
+				showName: "競",
+				color: "#fefedc",
+				nature: "soilmm",
+			},
+		],
+		[
+			"忠",
+			{
+				color: "#ffd700",
+				nature: "metal",
+			},
+		],
+		[
+			"燕幽",
+			{
+				showName: "幽",
+				color: "#ff6a6a",
+				nature: "red",
+			},
+		],
+		[
+			"威",
+			{
+				color: "#ff9966",
+				nature: "glodenmm",
+			},
+		],
+		[
+			"势",
+			{
+				color: "#7d26cd",
+				nature: "purplemm",
 			},
 		],
 	]);
