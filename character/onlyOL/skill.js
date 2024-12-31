@@ -2267,7 +2267,7 @@ const skills = {
 				},
 				filter(event, player) {
 					if (player.countMark("olsbliwen") >= 5) return false;
-					if (event.name !== "useCard") return event.name !== "phase" || game.phaseNumber === 0;
+					if (!["respond", "useCard"].includes(event.name)) return event.name !== "phase" || game.phaseNumber === 0;
 					if (event.name === "useCard") {
 						let history = player.getAllHistory("useCard");
 						if (history.length <= 1) return false;
