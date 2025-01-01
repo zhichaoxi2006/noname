@@ -59,11 +59,14 @@ const skills = {
 			const { cost_data: gainMap } = event;
 			player.storage[event.name] = gainMap;
 			const cards = Array.from(gainMap.keys());
+			const cardPile = ui.cardPile.childNodes;
 			for (let index = 0; index < cards.length; index++) {
 				const card = cards[index];
 				const next = player.lose([card], ui.cardPile);
 				next.insert_index = function () {
-					return ui.cardPile.childNodes[3 * index];
+					const { length } = cardPile;
+					const num = Math.max(3 * index, length);
+					return ui.cardPile.childNodes[num];
 				};
 				await next;
 			}
@@ -87,9 +90,16 @@ const skills = {
 				async content(event, trigger, player){
 					const { sbjingce: storage } = player.storage;
 					if (storage) {
-						const cardxs = Array.from(storage.keys());
-						for (const card of cardxs) {
-							await player.draw(storage.get(card)[1]);
+						while(true){
+							const index = Array.from(storage.keys())[0];
+							const arr = storage.get(index);
+							if (arr[0] == "none") {
+								await player.draw(arr[1]);	
+							}
+							storage.delete(index);
+							if (storage.size == 0) {
+								break;
+							}
 						}
 					}
 					const cards = get.cards(3);
