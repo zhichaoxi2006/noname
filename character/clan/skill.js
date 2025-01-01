@@ -100,7 +100,7 @@ const skills = {
 					return Math.random();
 				});
 			if (["basic", "equip"].includes(get.type(cards[0]))) {
-				await player.chooseUseTarget({name:"sha", cards: cards});
+				await player.chooseUseTarget({name:"sha", isCard: true}, cards);
 			}
 		},
 		group: ["clanpoxi_directHit", "clanpoxi_check"],
