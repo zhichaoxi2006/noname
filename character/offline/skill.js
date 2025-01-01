@@ -911,7 +911,7 @@ const skills = {
 	},
 	hm_podai: {
 		trigger: {
-			global: ["phaseBeginStart", "phaseAfter"],
+			global: ["phaseBeginStart", "phaseEnd"],
 		},
 		infoTranslationIncludesString: function (skill, list) {
 			const text = get.skillInfoTranslation(skill);
