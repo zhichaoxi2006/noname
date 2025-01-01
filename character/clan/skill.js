@@ -91,8 +91,8 @@ const skills = {
 		async content(event, trigger, player){
 			const { target } = event;
 			const { result: { cards } } = await player.discardPlayerCard(target, true)
-				.set("ai", function(card){
-					if (!["basic", "equip"].includes(get.type(card))) {
+				.set("ai", function(button){
+					if (!["basic", "equip"].includes(get.type(button.link))) {
 						return 0;
 					}
 					return Math.random();
