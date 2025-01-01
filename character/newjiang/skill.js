@@ -723,21 +723,9 @@ const skills = {
 				game.log(player, "展示了", player, "的", carda, "和", target, "的", cardb);
 				await player.showCards([carda, cardb], get.translation(player) + "发动了【妙析】");
 				if (get.color(carda) == get.color(cardb)) {
-					await game
-						.loseAsync({
-							lose_list: [
-								[player, [carda]],
-								[target, [cardb]],
-							],
-							discarder: player,
-						})
-						.setContent("discardMultiple");
+					await player.gain(cardb, "gain2");
 				}
 				if (get.suit(carda) == get.suit(cardb)) await target.loseHp();
-				if (get.name(carda) == get.name(cardb)) {
-					if (get.owner(cardb)) await get.owner(cardb).give(cardb, player);
-					else await player.gain(cardb, "gain2");
-				}
 				if (get.number(carda) == get.number(cardb) && !player.hasSkill("mpmiaoxi_rewrite", null, null, false)) {
 					player.addTempSkill("mpmiaoxi_rewrite");
 				}
@@ -754,13 +742,13 @@ const skills = {
 	mpsijiu: {
 		audio: 2,
 		trigger: {
-			global: "roundStart",
+			player: "phaseEnd",
 		},
 		filter(event, player) {
 			return game.hasPlayer(current => {
 				if (current == player) return false;
 				return (
-					current.getRoundHistory(
+					current.getHistory(
 						"lose",
 						evt => {
 							let evtx = evt.getParent();
