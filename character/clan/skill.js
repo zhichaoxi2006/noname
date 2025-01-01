@@ -92,7 +92,7 @@ const skills = {
 			const { target } = event;
 			const { result: { cards } } = await player.discardPlayerCard(target, true)
 				.set("ai", function(card){
-					if (!["basic", "equip"].includes(get.type(cards))) {
+					if (!["basic", "equip"].includes(get.type(card))) {
 						return 0;
 					}
 					return Math.random();
