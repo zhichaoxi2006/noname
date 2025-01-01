@@ -19,17 +19,15 @@ const skills = {
 			}
 			_status.playerDistanceMap = obj;
 		},
-		hasDistanceChanged(){
+		hasDistanceChanged(player){
 			const map = _status.playerDistanceMap;
 			if (!map) {
 				lib.skill.clangaojin.updateDistanceMap();
 			}
 			let bool = false;
 			for (const i of game.players) {
-				for (const j of game.players) {
-					if (map[i.playerid][j.playerid] != get.distance(i, j)) {
-						bool = true;
-					}
+				if (map[player.playerid][i.playerid] != get.distance(player, i)) {
+					bool = true;
 				}
 			}
 			lib.skill.clangaojin.updateDistanceMap();
@@ -37,11 +35,11 @@ const skills = {
 		},
 		init:() => lib.skill.clangaojin.updateDistanceMap(),
 		trigger: {
-			global: ["logSkill", "useSkillAfter", "useCardAfter", "respondAfter", "changeHp", "changeSkillsAfter"],
+			global: ["logSkill", "useSkillAfter", "dieAfter", "changeHp", "equipAfter", "changeSkillsAfter"],
 		},
 		forced:true,
 		filter(event, player){
-			return lib.skill.clangaojin.hasDistanceChanged();
+			return lib.skill.clangaojin.hasDistanceChanged(player);
 		},
 		async content(event, trigger, player){
 			await player.draw();
