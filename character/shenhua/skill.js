@@ -807,6 +807,7 @@ const skills = {
 		},
 	},
 	drlt_zhenggu_mark: {
+		charlotte:true,
 		init(player, skill) {
 			if (!player.storage[skill]) player.storage[skill] = [];
 		},
