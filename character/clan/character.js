@@ -1,4 +1,5 @@
 const characters = {
+	clan_wuyi: ["male", "shu", 4, ["clangaojin", "clanpoxi", "clanmuyin"], ["clan:陈留吴氏"]],
 	clan_wuxian: ["female", "shu", 3, ["clanyirong", "clanguixiang", "clanmuyin"], ["clan:陈留吴氏"]],
 	clan_wuban: ["male", "shu", 4, ["clanzhanding", "clanmuyin"], ["clan:陈留吴氏"]],
 	clan_xunshu: ["male", "qun", 3, ["clanshenjun", "clanbalong", "clandaojie"], ["clan:颍川荀氏"]],

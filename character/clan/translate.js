@@ -141,6 +141,12 @@ const translates = {
 	clan_wangchang_prefix: "族",
 	clankaiji: "开济",
 	clankaiji_info: "出牌阶段限一次。你可以令一名本轮未以此法选择过的角色弃置你一张手牌，然后你可以使用位于弃牌堆的此牌，若如此做，你摸一张牌。",
+	clan_wuyi: "族吴懿",
+	clan_wuyi_prefix: "族",
+	clangaojin: "高劲",
+	clangaojin_info: "锁定技，游戏开始时你计算与其他角色的距离-X，当你计算与其他角色的距离发生变化时，你摸一张牌（X为你的手牌上限）。",
+	clanpoxi: "破袭",
+	clanpoxi_info: "出牌阶段限一次，你可以弃置距离不大于1的一名角色的一张牌，若弃置的牌为装备牌/基本牌，则你可以将此牌当做【杀】使用，且可令目标角色不能响应此【杀】，若以此法造成伤害则你计算与其他角色的距离+1。",
 };
 
 export default translates;

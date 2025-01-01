@@ -2,6 +2,145 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//族吴懿
+	//距离变化后神将
+	clangaojin: {
+		audio: 2,
+		updateDistanceMap(){
+			const obj = {};
+			for (const i of game.players) {
+				if (!obj[i.playerid]) {
+					obj[i.playerid] = {};
+				}
+				for (const j of game.players) {
+					//i到j的距离
+					obj[i.playerid][j.playerid] = get.distance(i, j);
+				}
+			}
+			_status.playerDistanceMap = obj;
+		},
+		hasDistanceChanged(){
+			const map = _status.playerDistanceMap;
+			if (!map) {
+				lib.skill.clangaojin.updateDistanceMap();
+			}
+			let bool = false;
+			for (const i of game.players) {
+				for (const j of game.players) {
+					if (map[i.playerid][j.playerid] != get.distance(i, j)) {
+						bool = true;
+					}
+				}
+			}
+			lib.skill.clangaojin.updateDistanceMap();
+			return bool;
+		},
+		init:() => lib.skill.clangaojin.updateDistanceMap(),
+		trigger: {
+			global: ["logSkill", "useSkillAfter", "useCardAfter", "respondAfter"],
+		},
+		forced:true,
+		filter(event, player){
+			return lib.skill.clangaojin.hasDistanceChanged();
+		},
+		async content(event, trigger, player){
+			await player.draw();
+		},
+		group: "clangaojin_buff",
+		subSkill: {
+			buff: {
+				audio: "clangaojin",
+				trigger: {
+					global: ["phaseBefore","roundStart"],
+					player: ["enterGame"],
+				},
+				filter(event, player, name) {
+					return event.name != "phase" || game.phaseNumber == 0;
+				},
+				forced: true,
+				async content(event, trigger, player) {
+					player.addMark(event.name, player.getHandcardLimit(), false);
+				},
+				mod: {
+					globalFrom(from, to, current) {
+						return current - from.countMark("clangaojin_buff");
+					},
+				},
+				intro: {
+					content: "计算与其他角色的距离-#",
+				},
+			}
+		}
+	},
+	clanpoxi: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget(_, player, target){
+			if (target.countDiscardableCards("he") <= 0) {
+				return false;
+			}
+			return get.distance(player, target) <= 1;
+		},
+		mod: {
+			globalFrom(from, to, current) {
+				return current + from.countMark("clanpoxi");
+			},
+		},
+		intro: {
+			content: "计算与其他角色的距离+#",
+		},
+		async content(event, trigger, player){
+			const { target } = event;
+			const { result: { cards } } = await player.discardPlayerCard(target, true)
+				.set("ai", function(card){
+					if (!["basic", "equip"].includes(get.type(cards))) {
+						return 0;
+					}
+					return Math.random();
+				});
+			if (["basic", "equip"].includes(get.type(cards[0]))) {
+				await player.chooseUseTarget({name:"sha", cards: cards});
+			}
+		},
+		group: ["clanpoxi_directHit", "clanpoxi_check"],
+		subSkill: {
+			directHit: {
+				direct:true,
+				trigger: {
+					player: "useCard",
+				},
+				filter(event, player){
+					return event.getParent(2).name == "clanpoxi";
+				},
+				async content(event, trigger, player){
+					const { result: { bool } } = await player.chooseBool("破袭：是否令此牌不可被响应？");
+					if (bool) {
+						trigger.directHit.addArray(trigger.targets);
+					}
+ 				},
+			},
+			check: {
+				silent: true,
+				trigger: {
+					source: "damageSource",
+				},
+				filter(event, player){
+					return event.getParent(4).name == "clanpoxi";
+				},
+				async content(event, trigger, player){
+					player.addMark("clanpoxi", 1, false);
+ 				},
+			},
+		},
+		ai: {
+			order: 7,
+			result: {
+				player: 2,
+				target: -1,
+			},
+		}
+	},
 	//族王沈
 	clananran: {
 		audio: 2,
