@@ -37,7 +37,7 @@ const skills = {
 		},
 		init:() => lib.skill.clangaojin.updateDistanceMap(),
 		trigger: {
-			global: ["logSkill", "useSkillAfter", "useCardAfter", "respondAfter"],
+			global: ["logSkill", "useSkillAfter", "useCardAfter", "respondAfter", "changeHp"],
 		},
 		forced:true,
 		filter(event, player){
