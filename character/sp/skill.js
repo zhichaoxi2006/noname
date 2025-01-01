@@ -220,7 +220,7 @@ const skills = {
 					filterCard: true,
 					selectCard() {
 						const player = get.player();
-						const count = player.getRoundHistory("useSkill", evt => evt.skill == "olzonghu").length + 1;
+						const count = player.countMark("olzonghu_round") + 1;
 						return [count, count];
 					},
 					lose: false,
@@ -235,12 +235,12 @@ const skills = {
 					log: false,
 					async precontent(event, trigger, player) {
 						player.addTempSkill("olzonghu_round", {global: "roundStart"});
-						player.addMark("olzonghu_round");
+						player.addMark("olzonghu_round", 1, false);
 						const {
 							result: { cards },
 						} = event;
 						delete event.result.cards;
-						const { result } = await player.chooseTarget(`将${get.translation(cards)}交给一名其他角色`, lib.filter.notMe).set("filterTarget", function(card, player, target){
+						const { result } = await player.chooseTarget(`将${get.translation(cards)}交给一名其他角色`, lib.filter.notMe, true).set("filterTarget", function(card, player, target){
 							if (target.hasSkillTag("nogain")) return 0;
 							if (ui.selected.cards.length && ui.selected.cards[0].name == "du") {
 								return target.hasSkillTag("nodu") ? 0 : -10;

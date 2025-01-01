@@ -20,8 +20,8 @@ const skills = {
 					attackRange(player, num) {
 						return num + player.countMark("hm_zhong_heart_skill_buff");
 					},
-					cardUsable(card, player, num) {
-						if (card.name == "sha") return num + player.countMark("hm_zhong_heart_skill_buff");
+					targetInRange: function(card){
+						if(card.name == "sha") return true;
 					},
 				},
 			},
