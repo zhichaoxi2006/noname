@@ -60,12 +60,13 @@ const skills = {
 			player.storage[event.name] = gainMap;
 			const cards = Array.from(gainMap.keys());
 			const cardPile = ui.cardPile.childNodes;
+			game.log(cards);
 			for (let index = 0; index < cards.length; index++) {
 				const card = cards[index];
 				const next = player.lose([card], ui.cardPile);
 				next.insert_index = function () {
 					const { length } = cardPile;
-					const num = Math.max(3 * index, length);
+					const num = Math.min(3 * index, length);
 					return ui.cardPile.childNodes[num];
 				};
 				await next;
@@ -121,11 +122,7 @@ const skills = {
 						return false;
 					}
 					const cards = [];
-					if(event.name == "gain"){
-						cards.addArray(event.getg());
-					} else {
-						cards.addArray(event.cards);
-					}
+					cards.addArray(event.cards);
 					for (const card of cards){
 						if (storage.has(card)) {
 							return true;
@@ -135,11 +132,7 @@ const skills = {
 				async content(event, trigger, player) {
 					const { sbjingce: storage } = player.storage;
 					const cards = [];
-					if(trigger.name == "gain"){
-						cards.addArray(trigger.getg());
-					} else {
-						cards.addArray(trigger.cards);
-					}
+					cards.addArray(trigger.cards);
 					for (const card of cards){
 						if (storage.has(card)) {
 							if (storage.get(card)[0] == trigger.player) {
