@@ -28,7 +28,7 @@ const skills = {
 			await target.showCards([card2]);
 			await player.gain(
 				get.cardPile(function (card) {
-					return get.type(card) === get.type(card2);
+					return get.type(card) === get.type(card1);
 				}),
 				"gain2"
 			);
