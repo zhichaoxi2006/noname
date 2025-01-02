@@ -6,7 +6,7 @@ const skills = {
 	//距离变化后神将
 	clangaojin: {
 		audio: 2,
-		updateDistanceMap(){
+		updateDistanceMap() {
 			const obj = {};
 			for (const i of game.players) {
 				if (!obj[i.playerid]) {
@@ -19,7 +19,7 @@ const skills = {
 			}
 			_status.playerDistanceMap = obj;
 		},
-		hasDistanceChanged(player){
+		hasDistanceChanged(player) {
 			const map = _status.playerDistanceMap;
 			if (!map) {
 				lib.skill.clangaojin.updateDistanceMap();
@@ -33,15 +33,15 @@ const skills = {
 			lib.skill.clangaojin.updateDistanceMap();
 			return bool;
 		},
-		init:() => lib.skill.clangaojin.updateDistanceMap(),
+		init: () => lib.skill.clangaojin.updateDistanceMap(),
 		trigger: {
 			global: ["logSkill", "useSkillAfter", "dieAfter", "changeHp", "equipAfter", "changeSkillsAfter"],
 		},
-		forced:true,
-		filter(event, player){
+		forced: true,
+		filter(event, player) {
 			return lib.skill.clangaojin.hasDistanceChanged(player);
 		},
-		async content(event, trigger, player){
+		async content(event, trigger, player) {
 			await player.draw();
 		},
 		group: "clangaojin_buff",
@@ -49,7 +49,7 @@ const skills = {
 			buff: {
 				audio: "clangaojin",
 				trigger: {
-					global: ["phaseBefore","roundStart"],
+					global: ["phaseBefore", "roundStart"],
 					player: ["enterGame"],
 				},
 				filter(event, player, name) {
@@ -67,14 +67,14 @@ const skills = {
 				intro: {
 					content: "计算与其他角色的距离-#",
 				},
-			}
-		}
+			},
+		},
 	},
 	clanpoxi: {
 		audio: 2,
 		enable: "phaseUse",
 		usable: 1,
-		filterTarget(_, player, target){
+		filterTarget(_, player, target) {
 			if (target.countDiscardableCards("he") <= 0) {
 				return false;
 			}
@@ -88,47 +88,50 @@ const skills = {
 		intro: {
 			content: "计算与其他角色的距离+#",
 		},
-		async content(event, trigger, player){
+		async content(event, trigger, player) {
 			const { target } = event;
-			const { result: { cards } } = await player.discardPlayerCard(target, true)
-				.set("ai", function(button){
-					if (!["basic", "equip"].includes(get.type(button.link))) {
-						return 0;
-					}
-					return Math.random();
-				});
+			const {
+				result: { cards },
+			} = await player.discardPlayerCard(target, true).set("ai", function (button) {
+				if (!["basic", "equip"].includes(get.type(button.link))) {
+					return 0;
+				}
+				return Math.random();
+			});
 			if (["basic", "equip"].includes(get.type(cards[0]))) {
-				await player.chooseUseTarget({name:"sha", isCard: true}, cards);
+				await player.chooseUseTarget({ name: "sha", isCard: true }, cards);
 			}
 		},
 		group: ["clanpoxi_directHit", "clanpoxi_check"],
 		subSkill: {
 			directHit: {
-				direct:true,
+				direct: true,
 				trigger: {
 					player: "useCard",
 				},
-				filter(event, player){
+				filter(event, player) {
 					return event.getParent(2).name == "clanpoxi";
 				},
-				async content(event, trigger, player){
-					const { result: { bool } } = await player.chooseBool("破袭：是否令此牌不可被响应？");
+				async content(event, trigger, player) {
+					const {
+						result: { bool },
+					} = await player.chooseBool("破袭：是否令此牌不可被响应？");
 					if (bool) {
 						trigger.directHit.addArray(trigger.targets);
 					}
- 				},
+				},
 			},
 			check: {
 				silent: true,
 				trigger: {
 					source: "damageSource",
 				},
-				filter(event, player){
+				filter(event, player) {
 					return event.getParent(4).name == "clanpoxi";
 				},
-				async content(event, trigger, player){
+				async content(event, trigger, player) {
 					player.addMark("clanpoxi", 1, false);
- 				},
+				},
 			},
 		},
 		ai: {
@@ -137,7 +140,7 @@ const skills = {
 				player: 2,
 				target: -1,
 			},
-		}
+		},
 	},
 	//族王沈
 	clananran: {
@@ -1361,7 +1364,7 @@ const skills = {
 				return true;
 			return false;
 		},
-		async contentBefore(event, trigger, player){
+		async contentBefore(event, trigger, player) {
 			player.addTempSkill("clanhuanghan_used");
 			player.addMark("clanhuanghan_used");
 		},
@@ -1389,7 +1392,7 @@ const skills = {
 			used: {
 				charlotte: true,
 				onremove: true,
-			}
+			},
 		},
 	},
 	//族钟会
