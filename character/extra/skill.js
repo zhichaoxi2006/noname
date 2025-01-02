@@ -491,7 +491,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
-					game.log(player, "击伤了", target, "的#y天冲");
+					game.log(player, "击伤了", target, "的", "#y天冲");
 					if (target.getHp() > 0) {
 						await target.loseHp(target.getHp());
 						if (
@@ -518,7 +518,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
-					game.log(player, "击伤了", target, "的#y力烽");
+					game.log(player, "击伤了", target, "的", "#y力烽");
 					const cardx = target.getDiscardableCards(target, "h");
 					const num = Math.ceil(cardx.length / 2);
 					if (cardx.length) await target.discard(cardx.randomGets(num));
@@ -537,7 +537,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
-					game.log(player, "击伤了", target, "的#y地机");
+					game.log(player, "击伤了", target, "的", "#y地机");
 					target.addTip("new_dclieqiong_leg", "裂穹 地机");
 					target
 						.when({
@@ -562,7 +562,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
-					game.log(player, "击伤了", target, "的#y中枢");
+					game.log(player, "击伤了", target, "的", "#y中枢");
 					target.addTip("new_dclieqiong_chest", "裂穹 中枢");
 					target
 						.when({
@@ -590,7 +590,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
-					game.log(player, "击伤了", target, "的#y气海");
+					game.log(player, "击伤了", target, "的", "#y气海");
 					target.addTempSkill("new_dclieqiong_abdomen", { player: "phaseEnd" });
 				},
 			},
