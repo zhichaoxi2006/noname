@@ -61,7 +61,22 @@ const skills = {
 				}
 				const {
 					result: { links: cards },
-				} = await target.chooseButton(dialog, true);
+				} = await target.chooseButton(dialog, true)
+					.set("filterButton", button => {
+						const { link: card } = button;
+						const juedou = get.autoViewAs(
+							{
+								name: "juedou",
+							},
+							[card]
+						);
+						return game.hasPlayer(function (current) {
+							if (current == player) {
+								return false;
+							}
+							return target.canUse(juedou, current);
+						});
+					})
 				await player
 					.chooseUseTarget({ name: "juedou", isCard: true }, cards)
 					.set("targetx", player)
