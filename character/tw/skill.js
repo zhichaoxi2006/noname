@@ -2,6 +2,93 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//幻黄盖
+	twfenxian: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget: true,
+		async content(event, trigger, player){
+			const { target } = event;
+			let bool = false;
+			for (const i of  [player, target]) {
+				const equip = i.getCards("ej");
+				if (equip.some(card => {
+					const juedou = get.autoViewAs(
+						{
+							name: "juedou",
+						},
+						[card]
+					);
+					return game.hasPlayer(function (current) {
+						if (current == player) {
+							return false;
+						}
+						return target.canUse(juedou, current);
+					});
+				})) {
+					bool = true;
+				}
+			}
+			console.log(bool);
+			const { result: { links } } = bool ? await target.chooseButton(
+				[
+					"焚险：请选择一项",
+					[
+						[
+							["juedou", `将${get.translation(player)}或你场上的一张牌当做【决斗】对一名除${get.translation(player)}以外的角色使用`],
+							["huogong", `${get.translation(player)}视为对你使用一张【火攻】`],
+						],
+						"textbutton",
+					],
+				],
+				true,
+			) : { result: { links: ["huogong"] } };
+			if (links[0] === "huogong") {
+				await player.chooseUseTarget("huogong", [target], true);
+			} else {
+				const dialog = [
+					`将${get.translation(player)}或你场上的一张牌当做【决斗】对一名除${get.translation(player)}以外的角色使用`,
+				];
+				for (const i of [player, target].unique()) {
+					if (i.countCards("ej") > 0) {
+						dialog.addArray([						
+							`${get.translation(i)}场上的牌`,
+							i.getCards("ej"),
+						]);
+					}
+				}
+				const { result: { links: cards } } = await target.chooseButton(
+					dialog,
+					true,
+				);
+				await player.chooseUseTarget({name:"juedou", isCard: true}, cards)
+					.set("targetx", player)
+					.set("filterTarget", function(card, player, target){
+						const evt = get.event();
+						if (evt.targetx == target) {
+							return false;
+						}
+						return lib.filter.filterTarget(card, player, target);
+					});
+			}
+		},
+	},
+	twjuyan: {
+		audio: 2,
+		trigger: {
+			source: "damageSource",
+		},
+		filter(event, player){
+			return event.hasNature("fire");
+		},
+		forced: true,
+		locked: true,
+		async content(event, trigger, player){
+			await player.draw();
+			await trigger.player.loseMaxHp();
+		},
+	},
 	//幻曹昂
 	twchihui: {
 		audio: 2,

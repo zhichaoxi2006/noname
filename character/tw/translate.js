@@ -779,6 +779,13 @@ const translates = {
 	twliyuan_info: "你可将一张与你已废除的装备栏对应副类别的装备牌当【杀】使用或打出（无距离和次数限制）。然后你摸两张牌。",
 	twjifa: "冀筏",
 	twjifa_info: "锁定技，当你进入濒死状态时，你减X点体力上限（X为你上次发动〖赴曦〗选择的项数），保留〖煌烛〗或〖离渊〗直到下次入幻， 然后退幻：将体力值回复至体力上限。",
+	huan_huanggai: "幻黄盖",
+	huan_huanggai_prefix: "幻",
+	twfenxian: "焚险",
+	twfenxian_info: "出牌阶段限一次， 你可令一名角色选择一项：1、其将你或其场上的一张牌当做【决斗】对一名除你以外的角色使用；2、你视为对其使用一张【火攻】。",
+	twjuyan: "炬湮",
+	twjuyan_info: "当你对一名角色造成火焰伤害后，你摸1张牌，然后令其减1点体力上限。",
+
 	old_jiakui: "TW贾逵",
 	old_jiakui_prefix: "TW",
 	tw_sunluban: "TW孙鲁班",
