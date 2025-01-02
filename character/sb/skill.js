@@ -5842,6 +5842,7 @@ const skills = {
 			},
 			backup: function (links, player) {
 				return {
+					audio: "sblongdan",
 					viewAs: {
 						name: links[0][2],
 						nature: links[0][3],
@@ -5903,7 +5904,7 @@ const skills = {
 			player.removeSkill("sblongdan_mark");
 		},
 		subSkill: {
-			backup: { audio: "sblongdan" },
+			backup: {},
 			mark: { charlotte: true },
 			draw: {
 				charlotte: true,
