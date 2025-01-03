@@ -63,7 +63,6 @@ const skills = {
 			player.storage[event.name] = gainMap;
 			const cards = Array.from(gainMap.keys());
 			const cardPile = ui.cardPile.childNodes;
-			game.log(cards);
 			for (let index = 0; index < cards.length; index++) {
 				const card = cards[index];
 				const next = player.lose([card], ui.cardPile);
@@ -95,30 +94,31 @@ const skills = {
 					const { sbjingce: storage } = player.storage;
 					if (storage) {
 						while (true) {
+							if (storage.size == 0) {
+								break;
+							}
 							const index = Array.from(storage.keys())[0];
 							const arr = storage.get(index);
 							if (arr[0] == "none") {
 								await player.draw(arr[1]);
 							}
 							storage.delete(index);
-							if (storage.size == 0) {
-								break;
-							}
 						}
 					}
 					const cards = get.cards(3);
 					const next = player.addToExpansion(cards, player);
+					next.set("animate", "draw");
 					next.gaintag.add("sbjingce_expansions");
 					await next;
 					delete player.storage.sbjingce;
 				},
 			},
 			check: {
-				audio: 2,
+				audio: "sbjingce",
 				trigger: {
 					global: ["equipAfter", "addJudgeAfter", "gainAfter", "addToExpansionAfter"],
 				},
-				silent: true,
+				forced:true,
 				filter(event, player) {
 					const { sbjingce: storage } = player.storage;
 					if (!storage) {
@@ -128,7 +128,7 @@ const skills = {
 					cards.addArray(event.cards);
 					for (const card of cards) {
 						if (storage.has(card)) {
-							return true;
+							return storage.get(card)[0] == event.player;
 						}
 					}
 				},
