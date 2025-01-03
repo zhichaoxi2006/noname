@@ -8560,13 +8560,13 @@ const skills = {
 		trigger: { player: "phaseZhunbeiBegin" },
 		filter(event, player) {
 			const bool = player.hasCard(card => card.hasGaintag("sbguanxing"), "s");
-			return bool || 7 - 3 * player.countMark("sbguanxingx") > 0;
+			return bool || 7 - 2 * player.countMark("sbguanxingx") > 0;
 		},
 		async content(event, trigger, player) {
 			player.addMark("sbguanxingx", 1, false);
 			const cards = player.getCards("s", card => card.hasGaintag("sbguanxing"));
 			if (cards.length) player.loseToDiscardpile(cards);
-			const num = Math.max(0, 7 - 3 * (player.countMark("sbguanxingx") - 1));
+			const num = Math.max(0, 7 - 2 * (player.countMark("sbguanxingx") - 1));
 			if (num) {
 				const cards2 = get.cards(num);
 				player.$gain2(cards2, false);
