@@ -583,18 +583,6 @@ const translates = {
 	dcpingzhi_info: "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，阳：你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用；阴：其使用此牌，若造成伤害则此技能视为未使用。",
 	dcgangjian: "刚简",
 	dcgangjian_info: "锁定技，每个回合结束时，若你本回合未受到过伤害，你摸X张牌。（X为本回合展示过的牌数至多为5）。",
-	one_dc_sp_machao: "新杀SP马超",
-	one_dc_sp_machao_prefix: "新杀SP",
-	onedcspzhuiji: "追击",
-	onedcspzhuiji_info: "出牌阶段结束时，你可以选择一名此阶段你对其造成过伤害的角色，视为对其使用X张【杀】(X为此阶段你对其造成的伤害值)。",
-	onedcspshichou: "誓仇",
-	onedcspshichou_info: "你使用【杀】若没有造成伤害，则你可以将一张牌当【决斗】对相同的目标使用。",
-	two_dc_sp_machao: "新杀SP马超",
-	two_dc_sp_machao_prefix: "新杀SP",
-	twodcspzhuiji: "追击",
-	twodcspzhuiji_info: "锁定技，你对其他角色使用牌结算后，本回合你计算与其距离视为1。",
-	twodcspshichou: "誓仇",
-	twodcspshichou_info: "出牌阶段，你可将一张牌当不计次数的【杀】使用。若此牌为红色，目标需弃置一张装备牌才可响应此【杀】；若此牌为黑色，目标需弃置一张黑色手牌才可响应此【杀】。每种颜色每回合各限一次，且必须指定同一个目标。",
 };
 
 export default translates;

@@ -1,4 +1,6 @@
 const characters = {
+	two_dc_sp_machao: ["male", "qun", 4, ["twodcspzhuiji", "twodcspshichou"]],
+	one_dc_sp_machao: ["male", "qun", 4, ["onedcspzhuiji", "onedcspshichou"]],
 	sunba: ["male", "wu", 3, ["dcjiedang", "dcjidi"]],
 	v_sunquan: ["male", "wu", 4, ["dcwoheng", "dcjizheng"]],
 	moqiongshu: ["female", "wei", 3, ["dcwanchan", "dcjiangzhi"]],

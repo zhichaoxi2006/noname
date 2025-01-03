@@ -1,6 +1,4 @@
 const characters = {
-	two_dc_sp_machao: ["male", "qun", 4, ["twodcspzhuiji", "twodcspshichou"]],
-	one_dc_sp_machao: ["male", "qun", 4, ["onedcspzhuiji", "onedcspshichou"]],
 	panghong: ["male", "shu", 3, ["dcpingzhi", "dcgangjian"]],
 	yue_zhouyu: ["male", "wu", 3, ["dcguyin", "dcpinglu"]],
 	yue_diaochan: ["female", "qun", 3, ["dctanban", "dcdiou"], ["name:null|null"]],
