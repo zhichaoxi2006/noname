@@ -2,6 +2,122 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//手杀薛综
+	mbfunan: {
+		audio: 2,
+		trigger: {
+			global: ["respond","useCard"],
+		},
+		filter: function (event, player) {
+			if (!event.respondTo) return false;
+			if (event.player == player) return false;
+			if (player != event.respondTo[0]) return false;
+			return event.cards.filterInD("od").length > 0;
+		},
+		check(event, player) {
+			return event.cards.filterInD("od").reduce((acc, card) => {
+				return acc + get.value(card);
+			}, 0);
+		},
+		frequent: true,
+		logTarget: "player",
+		async content(event, trigger, player) {
+			if (player.storage.mbfunan_rewrite) {
+				const cards = trigger.cards.filterInD("od");
+				const next = player.gain(cards, "log", "gain2");
+				next.gaintag.add("mbfunan");
+			} else {
+				const cards = trigger.cards.filterInD("od");
+				await player.gain(cards, "log", "gain2");
+			}
+		},
+		group: "mbfunan_check",
+		subSkill: {
+			rewrite: {
+				charlotte: true,
+				init: (player, skill) => player.storage[skill] = true,
+			},
+			check: {
+				silent:true,
+				trigger: {
+					player: "useCardAfter",
+				},
+				filter(event, player){
+					if (!player.hasHistory('lose',function(evt){
+						if(evt.getParent()!=event) return false;
+						for(var i in evt.gaintag_map){
+							if(evt.gaintag_map[i].includes('mbfunan')) return true;
+						}
+						return false;
+					})) {
+						return false;
+					}
+					return !game.hasPlayer2(function (current) {
+						return (
+							current != player &&
+							(current.hasHistory("useCard", function (evt) {
+								if (!evt.respondTo) {
+									return true;
+								}
+								return evt.respondTo && evt.respondTo[1] == event.card;
+							}) ||
+								current.hasHistory("respond", function (evt) {
+									if (!evt.respondTo) {
+										return true;
+									}
+									return evt.respondTo && evt.respondTo[1] == event.card;
+								}))
+						);
+					});
+				},
+				async content(event, trigger, player){
+					await player.draw();
+				},
+			},
+		},
+	},
+	mbjiexun: {
+		audio: 2,
+		trigger: {
+			player: "phaseJieshuBegin",
+		},
+		async cost(event, trigger, player){
+			const { result } = await player.chooseControl(lib.suit.slice(), "cancel2");
+			if (result.control != "cancel2") {
+				event.result = {
+					bool: true,
+					cost_data: result.control,
+				};
+			}
+		},
+		async content(event, trigger, player){
+			const { cost_data } = event;
+			let num = 0;
+			player.addSkill("mbjiexun_used");
+			player.addMark("mbjiexun_used", 1, false);
+			game.filterPlayer().forEach(p => {
+				num += p.countCards("ej", function(card){
+					return get.suit(card) == cost_data;
+				})
+			});
+			const { result: { targets:[target] } } = await player.chooseTarget(lib.filter.notMe)
+				.set("ai", function(target){
+					return get.attitude(get.player(), target) > 0;
+				});
+			await target.draw(num);
+			await target.chooseToDiscard(true, player.countMark("mbjiexun_used"));
+			if (target.countCards("h") === 0) {
+				player.addSkill("mbfunan_rewrite");
+			}
+		},
+		subSkill: {
+			used: {
+				init(player, skill){
+					player.storage[skill] = 0;
+				},
+			}
+		},
+	},
 	//势太史慈 --- by 刘巴
 	potzhanlie: {
 		audio: 2,

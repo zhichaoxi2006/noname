@@ -1,4 +1,5 @@
 const characters = {
+	mb_xuezong: ["male", "wu", 3, ["mbfunan", "mbjiexun"]],
 	pot_taishici: ["male", "wu", 4, ["pothanzhan", "potzhanlie", "potzhenfeng"]],
 	mb_ganfuren: ["female", "shu", 3, ["mbzhijie", "mbshushen"]],
 	mb_sp_zhenji: ["female", "qun", 3, ["mbbojian", "mbjiwei"]],
