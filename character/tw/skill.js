@@ -125,7 +125,6 @@ const skills = {
 					bool = true;
 				}
 			}
-			console.log(bool);
 			const {
 				result: { links },
 			} = bool
