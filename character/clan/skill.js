@@ -2,6 +2,146 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//族吴懿
+	//距离变化后神将
+	clangaojin: {
+		audio: 2,
+		updateDistanceMap() {
+			const obj = {};
+			for (const i of game.players) {
+				if (!obj[i.playerid]) {
+					obj[i.playerid] = {};
+				}
+				for (const j of game.players) {
+					//i到j的距离
+					obj[i.playerid][j.playerid] = get.distance(i, j);
+				}
+			}
+			_status.playerDistanceMap = obj;
+		},
+		hasDistanceChanged(player) {
+			const map = _status.playerDistanceMap;
+			if (!map) {
+				lib.skill.clangaojin.updateDistanceMap();
+			}
+			let bool = false;
+			for (const i of game.players) {
+				if (map[player.playerid][i.playerid] != get.distance(player, i)) {
+					bool = true;
+				}
+			}
+			lib.skill.clangaojin.updateDistanceMap();
+			return bool;
+		},
+		init: () => lib.skill.clangaojin.updateDistanceMap(),
+		trigger: {
+			global: ["logSkill", "useSkillAfter", "dieAfter", "changeHp", "equipAfter", "changeSkillsAfter"],
+		},
+		forced: true,
+		filter(event, player) {
+			return lib.skill.clangaojin.hasDistanceChanged(player);
+		},
+		async content(event, trigger, player) {
+			await player.draw();
+		},
+		group: "clangaojin_buff",
+		subSkill: {
+			buff: {
+				audio: "clangaojin",
+				trigger: {
+					global: ["phaseBefore", "roundStart"],
+					player: ["enterGame"],
+				},
+				filter(event, player, name) {
+					return event.name != "phase" || game.phaseNumber == 0;
+				},
+				forced: true,
+				async content(event, trigger, player) {
+					player.addMark(event.name, player.getHandcardLimit(), false);
+				},
+				mod: {
+					globalFrom(from, to, current) {
+						return current - from.countMark("clangaojin_buff");
+					},
+				},
+				intro: {
+					content: "计算与其他角色的距离-#",
+				},
+			},
+		},
+	},
+	clanpoxi: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget(_, player, target) {
+			if (target.countDiscardableCards("he") <= 0) {
+				return false;
+			}
+			return get.distance(player, target) <= 1;
+		},
+		mod: {
+			globalFrom(from, to, current) {
+				return current + from.countMark("clanpoxi");
+			},
+		},
+		intro: {
+			content: "计算与其他角色的距离+#",
+		},
+		async content(event, trigger, player) {
+			const { target } = event;
+			const {
+				result: { cards },
+			} = await player.discardPlayerCard(target, true).set("ai", function (button) {
+				if (!["basic", "equip"].includes(get.type(button.link))) {
+					return 0;
+				}
+				return Math.random();
+			});
+			if (["basic", "equip"].includes(get.type(cards[0]))) {
+				await player.chooseUseTarget({ name: "sha", isCard: true }, cards);
+			}
+		},
+		group: ["clanpoxi_directHit", "clanpoxi_check"],
+		subSkill: {
+			directHit: {
+				direct: true,
+				trigger: {
+					player: "useCard",
+				},
+				filter(event, player) {
+					return event.getParent(2).name == "clanpoxi";
+				},
+				async content(event, trigger, player) {
+					const {
+						result: { bool },
+					} = await player.chooseBool("破袭：是否令此牌不可被响应？");
+					if (bool) {
+						trigger.directHit.addArray(trigger.targets);
+					}
+				},
+			},
+			check: {
+				silent: true,
+				trigger: {
+					source: "damageSource",
+				},
+				filter(event, player) {
+					return event.getParent(4).name == "clanpoxi";
+				},
+				async content(event, trigger, player) {
+					player.addMark("clanpoxi", 1, false);
+				},
+			},
+		},
+		ai: {
+			order: 7,
+			result: {
+				player: 2,
+				target: -1,
+			},
+		},
+	},
 	//族王沈
 	clananran: {
 		audio: 2,
@@ -1224,12 +1364,15 @@ const skills = {
 				return true;
 			return false;
 		},
-		content() {
-			"step 0";
-			player.draw(get.cardNameLength(trigger.card));
-			if (player.isDamaged()) player.chooseToDiscard(player.getDamagedHp(), "he", true);
-			"step 1";
-			if (player.getHistory("useSkill", evt => evt.skill == "clanhuanghan").length > 1 && player.hasSkill("clanbaozu", null, false, false) && player.awakenedSkills.includes("clanbaozu")) {
+		async contentBefore(event, trigger, player) {
+			player.addTempSkill("clanhuanghan_used");
+			player.addMark("clanhuanghan_used");
+		},
+		async content(event, trigger, player) {
+			const num = player.countMark("clanhuanghan_used");
+			await player.draw(get.cardNameLength(trigger.card));
+			if (player.isDamaged()) await player.chooseToDiscard(player.getDamagedHp(), "he", true);
+			if (num > 1 && player.hasSkill("clanbaozu", null, false, false) && player.awakenedSkills.includes("clanbaozu")) {
 				player.restoreSkill("clanbaozu");
 				player.popup("保族");
 				game.log(player, "恢复了技能", "#g【保族】");
@@ -1243,6 +1386,12 @@ const skills = {
 					let num = get.cardNameLength(card) - target.getDamagedHp();
 					if (num > 0) return [1, 0.8 * num + 0.1];
 				},
+			},
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
 			},
 		},
 	},

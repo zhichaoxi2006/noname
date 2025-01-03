@@ -535,7 +535,7 @@ const skills = {
 	olsbbingcai: {
 		audio: 2,
 		trigger: {
-			player: "useCard",
+			global: "useCard",
 		},
 		filter(event, player) {
 			if (!player.countCards("he", { type: ["trick", "delay"] })) return false;
@@ -2263,12 +2263,19 @@ const skills = {
 				audio: "olsbliwen",
 				trigger: {
 					global: "phaseBefore",
-					player: ["useCardAfter", "enterGame"],
+					player: ["useCardAfter", "respondAfter", "enterGame"],
 				},
 				filter(event, player) {
 					if (player.countMark("olsbliwen") >= 5) return false;
-					if (event.name !== "useCard") return event.name !== "phase" || game.phaseNumber === 0;
-					let history = player.getAllHistory("useCard");
+					if (!["respond", "useCard"].includes(event.name)) return event.name !== "phase" || game.phaseNumber === 0;
+					if (event.name === "useCard") {
+						let history = player.getAllHistory("useCard");
+						if (history.length <= 1) return false;
+						const evt = history[history.length - 2];
+						if (!evt || !evt.card) return false;
+						return get.suit(evt.card) == get.suit(event.card) || get.type2(evt.card) == get.type2(event.card);
+					}
+					let history = player.getAllHistory("respond");
 					if (history.length <= 1) return false;
 					const evt = history[history.length - 2];
 					if (!evt || !evt.card) return false;
@@ -2277,7 +2284,7 @@ const skills = {
 				forced: true,
 				locked: false,
 				content() {
-					player.addMark("olsbliwen", trigger.name === "useCard" ? 1 : Math.min(3, 5 - player.countMark("olsbliwen")));
+					player.addMark("olsbliwen", ["useCard", "respond"].include(trigger.name)  ? 1 : Math.min(3, 5 - player.countMark("olsbliwen")));
 				},
 				mod: {
 					aiOrder(player, card, num) {

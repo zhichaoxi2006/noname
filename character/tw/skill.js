@@ -2,6 +2,207 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//幻丁尚涴
+	twshshiyi: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget: function (card, player, target) {
+			if (player == target) {
+				return false;
+			}
+			return target.countCards("h") > 0;
+		},
+		async content({ target }, trigger, player) {
+			const {
+				result: {
+					links: [card1],
+				},
+			} = await player.choosePlayerCard("h", target).set("forced", true).set("visible", true);
+			const {
+				result: {
+					links: [card2],
+				},
+			} = await target.choosePlayerCard("h", player).set("forced", true).set("visible", true);
+			await player.showCards([card1]);
+			await target.showCards([card2]);
+			await player.gain(
+				get.cardPile(function (card) {
+					return get.type(card) === get.type(card1);
+				}),
+				"gain2"
+			);
+			await target.gain(
+				get.cardPile(function (card) {
+					return get.type(card) === get.type(card2);
+				}),
+				"gain2"
+			);
+			if (get.type(card1) === get.type(card2)) {
+				await game.asyncDraw([player, target], 2);
+			} else {
+				await player.gain(
+					get.cardPile(function (card) {
+						return get.type(card) === get.type(card1);
+					}),
+					"gain2"
+				);
+				await target.gain(
+					get.cardPile(function (card) {
+						return get.type(card) === get.type(card2);
+					}),
+					"gain2"
+				);
+			}
+		},
+		ai: {
+			order: 7,
+			result: {
+				player: 1,
+				target: 1,
+			}
+		}
+	},
+	twchunhui: {
+		audio: 2,
+		trigger: {
+			global: "useCardToTargeted",
+		},
+		usable: 1,
+		filter: function (event, player) {
+			if (!get.tag(event.card, "damage") || get.type2(event.card) != "trick") {
+				return false;
+			}
+			if (player.hp < event.target.hp) return false;
+			if (event.target == player) return false;
+			return get.distance(player, event.target) <= 1 && event.target.isIn();
+		},
+		check: function (event, player) {
+			return get.attitude(player, event.target) >= 0;
+		},
+		async content(event, trigger, player){
+			const { target } = trigger;
+			trigger.getParent().set("twchunhui_actived", true);
+			await target.gainPlayerCard("h", player).set("forced", true).set("visible", true);
+			player.when({global: "useCardAfter"}).filter(function(evt){
+				return evt.twchunhui_actived;
+			}).step(async function() {
+				if (target.getHistory("damage", function(evt){
+					return evt.getParent(2) === trigger;
+				}).length === 0) {
+					await player.draw();
+				}
+			});
+		},
+	},
+	//幻黄盖
+	twfenxian: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filterTarget: true,
+		async content(event, trigger, player) {
+			const { target } = event;
+			let bool = false;
+			for (const i of [player, target]) {
+				const equip = i.getCards("ej");
+				if (
+					equip.some(card => {
+						const juedou = get.autoViewAs(
+							{
+								name: "juedou",
+							},
+							[card]
+						);
+						return game.hasPlayer(function (current) {
+							if (current == player) {
+								return false;
+							}
+							return target.canUse(juedou, current);
+						});
+					})
+				) {
+					bool = true;
+				}
+			}
+			console.log(bool);
+			const {
+				result: { links },
+			} = bool
+				? await target.chooseButton(
+						[
+							"焚险：请选择一项",
+							[
+								[
+									["juedou", `将${get.translation(player)}或你场上的一张牌当做【决斗】对一名除${get.translation(player)}以外的角色使用`],
+									["huogong", `${get.translation(player)}视为对你使用一张【火攻】`],
+								],
+								"textbutton",
+							],
+						],
+						true
+				  )
+				: { result: { links: ["huogong"] } };
+			if (links[0] === "huogong") {
+				await player.chooseUseTarget("huogong", [target], true);
+			} else {
+				const dialog = [`将${get.translation(player)}或你场上的一张牌当做【决斗】对一名除${get.translation(player)}以外的角色使用`];
+				for (const i of [player, target].unique()) {
+					if (i.countCards("ej") > 0) {
+						dialog.addArray([`${get.translation(i)}场上的牌`, i.getCards("ej")]);
+					}
+				}
+				const {
+					result: { links: cards },
+				} = await target.chooseButton(dialog, true).set("filterButton", button => {
+					const { link: card } = button;
+					const juedou = get.autoViewAs(
+						{
+							name: "juedou",
+						},
+						[card]
+					);
+					return game.hasPlayer(function (current) {
+						if (current == player) {
+							return false;
+						}
+						return target.canUse(juedou, current);
+					});
+				});
+				await player
+					.chooseUseTarget({ name: "juedou", isCard: true }, cards)
+					.set("targetx", player)
+					.set("filterTarget", function (card, player, target) {
+						const evt = get.event();
+						if (evt.targetx == target) {
+							return false;
+						}
+						return lib.filter.filterTarget(card, player, target);
+					});
+			}
+		},
+		ai: {
+			order: 7,
+			result: {
+				target: -1,
+			}
+		}
+	},
+	twjuyan: {
+		audio: 2,
+		trigger: {
+			source: "damageSource",
+		},
+		filter(event, player) {
+			return event.hasNature("fire");
+		},
+		forced: true,
+		locked: true,
+		async content(event, trigger, player) {
+			await player.draw();
+			await trigger.player.loseMaxHp();
+		},
+	},
 	//幻曹昂
 	twchihui: {
 		audio: 2,

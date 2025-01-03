@@ -20,8 +20,8 @@ const skills = {
 					attackRange(player, num) {
 						return num + player.countMark("hm_zhong_heart_skill_buff");
 					},
-					cardUsable(card, player, num) {
-						if (card.name == "sha") return num + player.countMark("hm_zhong_heart_skill_buff");
+					targetInRange: function(card){
+						if(card.name == "sha") return true;
 					},
 				},
 			},
@@ -207,6 +207,8 @@ const skills = {
 		filterTarget: lib.filter.notMe,
 		selectTarget: 2,
 		targetprompt: ["展示手牌", "摸牌"],
+		complexTarget: true,
+		multitarget: true,
 		async content(event, trigger, player) {
 			const { targets } = event;
 			player.awakenSkill("hm_wenchen");
@@ -220,7 +222,7 @@ const skills = {
 				if (!list.some(c => targets[0].canUse(c, targets[1], true))) {
 					break;
 				}
-				const next2 = targets[0].chooseCardButton(list);
+				const next2 = targets[0].chooseCardButton(list, true);
 				next2.set("prompt", `选择一张牌使用对${get.translation(targets[1].name)}使用`);
 				next2.set("target", targets[0]);
 				next2.set("filterButton", function (button) {
@@ -339,7 +341,8 @@ const skills = {
 		async content(event, trigger, player) {
 			const { cards, targets } = event;
 			await player.showCards(cards);
-			player.give(cards, targets[0]);
+			await player.give(cards, targets[0]);
+			await player.draw(cards.length);
 			const list = [].concat(cards);
 			while (true) {
 				if (!list.some(c => targets[0].hasUseTarget(c, true))) {
@@ -708,6 +711,7 @@ const skills = {
 		filterCard: true,
 		selectCard: [1, Infinity],
 		position: "he",
+		discard: false,
 		prompt: "重铸任意张牌，然后令一名其他角色重铸等量张手牌",
 		filterTarget: lib.filter.notMe,
 		async content(event, trigger, player) {
@@ -722,8 +726,8 @@ const skills = {
 				if (cardname.includes("sha")) {
 					await target.damage("fire", player);
 				}
-				if (cardname.includes("shan")) {
-					const next2 = player.chooseTarget("选择使用【杀】的目标");
+				if (cardname.includes("shan") && target.hasUseTarget({ name: "sha", isCard: true })) {
+					const next2 = player.chooseTarget("选择使用【杀】的目标", true);
 					next2.set("filterTarget", function (card, player, targetx) {
 						return lib.filter.filterTarget({ name: "sha", isCard: true }, target, targetx);
 					});
@@ -880,7 +884,7 @@ const skills = {
 			if (bool) {
 				if (triggername == "damageBegin4" && event.source) {
 					const playerSkillNum = lib.skill.hm_shice.countSkill(player);
-					const sourceSkillNum = lib.skill.hm_shice.countSkill(player);
+					const sourceSkillNum = lib.skill.hm_shice.countSkill(event.source);
 					return event.hasNature() && playerSkillNum <= sourceSkillNum;
 				}
 			} else {
@@ -907,7 +911,7 @@ const skills = {
 	},
 	hm_podai: {
 		trigger: {
-			global: ["phaseBeginStart", "phaseAfter"],
+			global: ["phaseBeginStart", "phaseEnd"],
 		},
 		infoTranslationIncludesString: function (skill, list) {
 			const text = get.skillInfoTranslation(skill);
@@ -956,6 +960,13 @@ const skills = {
 					],
 				];
 				const next = player.chooseButton(dialog);
+				next.set("ai", function (button) {
+					const { link } = button;
+					if (link == "disable") {
+						return -(get.threaten(trigger.player, player) * get.attitude(player, trigger.player));
+					}
+					return 3 * (get.damageEffect(trigger.player, player, player, "fire") + get.attitude(trigger.player, player));
+				});
 				next.set("filterButton", function (button) {
 					const skill = lib.skill.hm_podai.getSkills(trigger.player);
 					if (!skill.length && button.link === "disable") {
@@ -1901,11 +1912,11 @@ const skills = {
 			const targets = game.filterPlayer(p => p.isMinHandcard());
 			for (const i of targets) {
 				const next = i.chooseCard("将一张牌置于牌堆顶，否则按“取消”从牌堆底摸一张牌", "he");
-				next.set("ai", function(card){
-					if (get.attitude(i, player) < 0){
+				next.set("ai", function (card) {
+					if (get.attitude(i, player) < 0) {
 						return 0;
 					}
-					if(get.suit(card) == suit.replace("lukai_", "")){
+					if (get.suit(card) == suit.replace("lukai_", "")) {
 						return 8 - get.value(card);
 					}
 					return 6 - get.value(card);
@@ -10547,15 +10558,15 @@ const skills = {
 	//龙庞德
 	dragtaiguan: {
 		enable: "phaseUse",
-		usable(skill, player){
+		usable(skill, player) {
 			return Math.max(1, player.getDamagedHp());
 		},
-		filterCard:true,
-		filterTarget(card, player, target){
+		filterCard: true,
+		filterTarget(card, player, target) {
 			return player.inRange(target) && target.countDiscardableCards("he");
 		},
-		async content(event, trigger, player){
-			const target = event.targets[0]
+		async content(event, trigger, player) {
+			const target = event.targets[0];
 			const { result } = await target.chooseToDiscard("he", true);
 			if (result.cards[0].name != "sha" && player.getHp() <= target.getHp()) {
 				await player.chooseUseTarget("juedou", true, [target]);

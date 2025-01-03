@@ -1,4 +1,5 @@
 const characters = {
+	sunba: ["male", "wu", 3, ["dcjiedang", "dcjidi"]],
 	v_sunquan: ["male", "wu", 4, ["dcwoheng", "dcjizheng"]],
 	moqiongshu: ["female", "wei", 3, ["dcwanchan", "dcjiangzhi"]],
 	v_zhangliao: ["male", "qun", 4, ["dcyuxi", "dcporong"]],
@@ -33,7 +34,7 @@ const characters = {
 	wu_guanyu: ["male", "shu", 5, ["dcjuewu", "dcwuyou", "dcyixian"]],
 	caofang: ["male", "wei", 4, ["dczhimin", "dcjujian"], ["zhu"]],
 	dc_sb_simayi: ["male", "wei", 3, ["dcsbquanmou", "dcsbpingliao"], ["name:司马|懿"]],
-	chendong: ["male", "wu", 4, ["dcduanxie", "fenming"], ['name:陈|武-董|袭']],
+	chendong: ["male", "wu", 4, ["dcduanxie", "fenming"], ["name:陈|武-董|袭"]],
 	lvfan: ["male", "wu", 3, ["diaodu", "diancai"]],
 	cuimao: ["male", "wei", 3, ["zhengbi", "fengying"], ["name:崔|琰-毛|玠"]],
 	huzun: ["male", "wei", 4, ["dczhantao", "dcanjing"]],
@@ -69,14 +70,14 @@ const characters = {
 	dc_mifuren: ["female", "shu", 3, ["dcguixiu", "dccunsi"], ["name:糜|null", "die:mifuren"]],
 	wanglang: ["male", "wei", 3, ["regushe", "rejici"]],
 	ruanji: ["male", "wei", 3, ["dczhaowen", "dcjiudun"]],
-	wu_zhugeliang: ["male", "shu", "4/7", ["dcjincui", "dcqingshi", "dczhizhe"], ['name:诸葛|亮']],
+	wu_zhugeliang: ["male", "shu", "4/7", ["dcjincui", "dcqingshi", "dczhizhe"], ["name:诸葛|亮"]],
 	duanqiaoxiao: ["female", "wei", 3, ["dccaizhuang", "dchuayi"]],
 	zhangjinyun: ["female", "shu", 3, ["dchuizhi", "dcjijiao"]],
 	huanfan: ["male", "wei", 3, ["dcjianzheng", "dcfumou"]],
 	chentai: ["male", "wei", 4, ["dcctjiuxian", "dcchenyong"]],
 	sunyu: ["male", "wu", 3, ["dcquanshou", "dcshexue"]],
 	xizheng: ["male", "shu", 3, ["dcdanyi", "dcwencan"]],
-	dc_ruiji: ["female", "wu", 4, ["dcwangyuan", "dclingyin", "dcliying"], ['name:芮|null']],
+	dc_ruiji: ["female", "wu", 4, ["dcwangyuan", "dclingyin", "dcliying"], ["name:芮|null"]],
 	zerong: ["male", "qun", 4, ["dccansi", "dcfozong"]],
 	xielingyu: ["female", "wu", 3, ["dcyuandi", "dcxinyou"]],
 	dc_yangbiao: ["male", "qun", 3, ["dczhaohan", "dcjinjie", "dcjue"]],
@@ -87,7 +88,7 @@ const characters = {
 	dc_zhouxuān: ["male", "wei", 3, ["dcwumei", "dczhanmeng"]],
 	chengbing: ["male", "wu", 3, ["dcjingzao", "dcenyu"]],
 	dongguiren: ["female", "qun", 3, ["dclianzhi", "dclingfang", "dcfengying"], ["name:董|null"]],
-	yuanji: ["female", "wu", 3, ["dcfangdu", "dcjiexing"], ['name:袁|null']],
+	yuanji: ["female", "wu", 3, ["dcfangdu", "dcjiexing"], ["name:袁|null"]],
 	zhujianping: ["male", "qun", 3, ["dcxiangmian", "dctianji"]],
 	zhaozhi: ["male", "shu", 3, ["dctongguan", "dcmengjie"]],
 	dc_liuye: ["male", "wei", 3, ["dcpoyuan", "dchuace"]],
@@ -127,7 +128,7 @@ const characters = {
 	gexuan: ["male", "wu", 3, ["gxlianhua", "zhafu"]],
 	leitong: ["male", "shu", 4, ["kuiji"]],
 	wulan: ["male", "shu", 4, ["wlcuorui"]],
-	lvju: ["male", "wu", 4, ["dczhengyue"]]
+	lvju: ["male", "wu", 4, ["dczhengyue"]],
 };
 
 export default characters;

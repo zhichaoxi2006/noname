@@ -2,6 +2,117 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//神庞统
+	//复活神将
+	luansuo: {
+		audio: 2,
+		locked: true,
+		silent: true,
+		trigger: {
+			player: "phaseBegin",
+		},
+		async content(event, trigger, player) {
+			for (const i of game.players) {
+				i.addTempSkill("luansuo_debuff", { global: ["phaseBeginStart", "phaseAfter"] });
+			}
+		},
+		subSkill: {
+			debuff: {
+				mod: {
+					cardname(card, player) {
+						const suit = _status.discarded.map(item => get.suit(item));
+						const cards = player.getCards("h");
+						const first = cards[0],
+							last = cards[cards.length - 1];
+						if (![first, last].includes(card)) return;
+						if (!suit.includes(get.suit(first)) && !suit.includes(get.suit(last))) {
+							return "tiesuo";
+						}
+					},
+					cardDiscardable(card, player) {
+						if (get.position(card) == "h") return false;
+					},
+					canBeDiscarded(card, player) {
+						if (get.position(card) == "h") return false;
+					},
+					aiOrder(player, card, num) {
+						if (num > 0 && get.name(card, player) == "huogong") return 0;
+					},
+					aiValue(player, card, num) {
+						if (num > 0 && get.name(card, player) == "huogong") return 0.01;
+					},
+					aiUseful(player, card, num) {
+						if (num > 0 && get.name(card, player) == "huogong") return 0;
+					},
+				},
+				ai: {
+					noSortCard: true,
+				},
+			},
+		},
+	},
+	fengliao: {
+		audio: 2,
+		zhuanhuanji: true,
+		forced: true,
+		mark: true,
+		marktext: "☯",
+		init: function (player, skill) {
+			player.storage[skill] = true;
+		},
+		intro: {
+			content: function (storage, player, skill) {
+				if (Boolean(player.storage[skill])) {
+					return "你使用牌指定唯一目标后，你令其摸一张牌。";
+				}
+				return "你使用牌指定唯一目标后，你对其造成一点火焰伤害。";
+			},
+		},
+		trigger: {
+			player: "useCardToPlayered",
+		},
+		logTarget: "target",
+		filter(event, player) {
+			return event.targets.length == 1;
+		},
+		async content(event, trigger, player) {
+			const { target } = trigger;
+			if (Boolean(player.storage["fengliao"])) {
+				await target.draw();
+			} else {
+				await target.damage("fire", player);
+			}
+			player.changeZhuanhuanji("fengliao");
+		},
+	},
+	kunyu: {
+		audio: 2,
+		trigger: {
+			player: "dieBegin",
+		},
+		filter(event, player) {
+			const card = get.cardPile(function (c) {
+				if (get.natureList(c).includes("fire")) {
+					return true;
+				}
+				return get.translation(`${c.name}_info`).includes("火属性") && get.tag(c, "damage");
+			}, "cardPile");
+			return Boolean(card);
+		},
+		forced: true,
+		async content(event, trigger, player) {
+			const card = get.cardPile(function (c) {
+				if (get.natureList(c).includes("fire")) {
+					return true;
+				}
+				return get.translation(`${c.name}_info`).includes("火属性") && get.tag(c, "damage");
+			}, "cardPile");
+			await game.cardsGotoSpecial(card);
+			game.log(player, "将", card, "移出游戏");
+			trigger.cancel();
+			await player.recoverTo(1);
+		},
+	},
 	//神黄忠
 	//丁真神将，赤矢神将，爆头神将，吃人神将
 	dclieqiong: {
@@ -380,7 +491,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
-					game.log(player, "击伤了", target, "的#y天冲");
+					game.log(player, "击伤了", target, "的", "#y天冲");
 					if (target.getHp() > 0) {
 						await target.loseHp(target.getHp());
 						if (
@@ -407,7 +518,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
-					game.log(player, "击伤了", target, "的#y力烽");
+					game.log(player, "击伤了", target, "的", "#y力烽");
 					const cardx = target.getDiscardableCards(target, "h");
 					const num = Math.ceil(cardx.length / 2);
 					if (cardx.length) await target.discard(cardx.randomGets(num));
@@ -426,7 +537,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
-					game.log(player, "击伤了", target, "的#y地机");
+					game.log(player, "击伤了", target, "的", "#y地机");
 					target.addTip("new_dclieqiong_leg", "裂穹 地机");
 					target
 						.when({
@@ -451,7 +562,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
-					game.log(player, "击伤了", target, "的#y中枢");
+					game.log(player, "击伤了", target, "的", "#y中枢");
 					target.addTip("new_dclieqiong_chest", "裂穹 中枢");
 					target
 						.when({
@@ -479,7 +590,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const { target, position } = event;
-					game.log(player, "击伤了", target, "的#y气海");
+					game.log(player, "击伤了", target, "的", "#y气海");
 					target.addTempSkill("new_dclieqiong_abdomen", { player: "phaseEnd" });
 				},
 			},

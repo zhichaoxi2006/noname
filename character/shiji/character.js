@@ -1,4 +1,5 @@
 const characters = {
+	sp_dongzhao: ["male", "wei", 3, ["spmiaolve", "spyingjia"], ["character:tw_dongzhao"]],
 	liuba: ["male", "shu", 3, ["duanbi", "tongduo"]],
 	sp_zhujun: ["male", "qun", 4, ["xinyangjie", "xinjuxiang", "houfeng"]],
 	sp_huangfusong: ["male", "qun", 4, ["spzhengjun", "spshiji", "sptaoluan"], ["name:皇甫|嵩"]],

@@ -120,6 +120,7 @@ window.noname_character_rank = {
 		"mb_sp_zhenji",
 	],
 	a: [
+		"shen_pangtong",
 		"olsbchoulie",
 		"scl_caoying",
 		"scl_luotong",
@@ -764,6 +765,8 @@ window.noname_character_rank = {
 		"yue_zhouyu",
 	],
 	bp: [
+		"huan_dingshangwan",
+		"sp_ol_liubei",
 		"drag_pangde",
 		"ol_sb_zhaoyun",
 		"ol_sb_zhangfei",
@@ -1325,6 +1328,12 @@ window.noname_character_rank = {
 		"ol_jsrg_lvbu",
 	],
 	b: [
+		"huan_huanggai",
+		"clan_wuyi",
+		"sb_guohuai",
+		"ol_yuanhuan",
+		"sunba",
+		"ol_liuzhang",
 		"ol_liaohua",
 		"ol_sb_jushou",
 		"ol_xuelingyun",
@@ -1700,6 +1709,7 @@ window.noname_character_rank = {
 		"ol_wuguotai",
 	],
 	bm: [
+		"sp_dongzhao",
 		"panghong",
 		"star_dingfeng",
 		"yy_gongsunzan",

@@ -2,6 +2,152 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	// 谋郭淮
+	sbjingce: {
+		audio: 2,
+		trigger: {
+			player: "phaseEnd",
+		},
+		async cost(event, trigger, player) {
+			const cards = player.getExpansions("sbjingce_expansions");
+			const gainMap = new Map();
+			let i = 0;
+			while (true) {
+				if (gainMap.size >= 3) {
+					break;
+				}
+				const dialog = ["请选择一张牌预测（按取消重置预测）", [cards, "card"]];
+				const next = player.chooseButton(dialog).set("filterButton", button => {
+					return !gainMap.has(button.link);
+				});
+				const {
+					result: { links, bool },
+				} = await next;
+				if (bool) {
+					const {
+						result: { control },
+					} = await player
+						.chooseControl(["被一名角色获得", "不被任何角色获得"])
+						.set("prompt", `预测${get.translation(links[0])}的去向`)
+						.set("ai", function () {
+							const { controls } = get.event();
+							return controls.randomGet();
+						});
+					i++;
+					if (control === "被一名角色获得") {
+						const {
+							result: {
+								targets: [target],
+							},
+						} = await player
+							.chooseTarget(`预测${get.translation(links[0])}被谁获得`)
+							.set("forced", true)
+							.set("ai", function (card, player, target) {
+								return Math.random();
+							});
+						gainMap.set(links[0], [target, i]);
+					} else {
+						gainMap.set(links[0], ["none", i]);
+					}
+				} else {
+					gainMap.clear();
+				}
+			}
+			event.result = {
+				bool: true,
+				cost_data: gainMap,
+			};
+		},
+		async content(event, trigger, player) {
+			const { cost_data: gainMap } = event;
+			player.storage[event.name] = gainMap;
+			const cards = Array.from(gainMap.keys());
+			const cardPile = ui.cardPile.childNodes;
+			game.log(cards);
+			for (let index = 0; index < cards.length; index++) {
+				const card = cards[index];
+				const next = player.lose([card], ui.cardPile);
+				next.insert_index = function () {
+					const { length } = cardPile;
+					const num = Math.min(3 * index, length);
+					return ui.cardPile.childNodes[num];
+				};
+				await next;
+			}
+		},
+		group: ["sbjingce_expansions", "sbjingce_check"],
+		subSkill: {
+			expansions: {
+				audio: "sbjingce",
+				trigger: {
+					player: "phaseBegin",
+				},
+				mark: true,
+				intro: {
+					content: "expansion",
+					markcount: "expansion",
+				},
+				filter(event, player) {
+					return player.getExpansions("sbjingce_expansions").length == 0;
+				},
+				forced: true,
+				async content(event, trigger, player) {
+					const { sbjingce: storage } = player.storage;
+					if (storage) {
+						while (true) {
+							const index = Array.from(storage.keys())[0];
+							const arr = storage.get(index);
+							if (arr[0] == "none") {
+								await player.draw(arr[1]);
+							}
+							storage.delete(index);
+							if (storage.size == 0) {
+								break;
+							}
+						}
+					}
+					const cards = get.cards(3);
+					const next = player.addToExpansion(cards, player);
+					next.gaintag.add("sbjingce_expansions");
+					await next;
+					delete player.storage.sbjingce;
+				},
+			},
+			check: {
+				audio: 2,
+				trigger: {
+					global: ["equipAfter", "addJudgeAfter", "gainAfter", "addToExpansionAfter"],
+				},
+				silent: true,
+				filter(event, player) {
+					const { sbjingce: storage } = player.storage;
+					if (!storage) {
+						return false;
+					}
+					const cards = [];
+					cards.addArray(event.cards);
+					for (const card of cards) {
+						if (storage.has(card)) {
+							return true;
+						}
+					}
+				},
+				async content(event, trigger, player) {
+					const { sbjingce: storage } = player.storage;
+					const cards = [];
+					cards.addArray(trigger.cards);
+					for (const card of cards) {
+						if (storage.has(card)) {
+							if (storage.get(card)[0] == trigger.player) {
+								await player.draw(storage.get(card)[1]);
+							}
+							storage.delete(card);
+						}
+					}
+				},
+			},
+		},
+	},
 	// 谋张辽
 	sbtuxi: {
 		audio: 2,
@@ -5696,6 +5842,7 @@ const skills = {
 			},
 			backup: function (links, player) {
 				return {
+					audio: "sblongdan",
 					viewAs: {
 						name: links[0][2],
 						nature: links[0][3],
@@ -5757,7 +5904,7 @@ const skills = {
 			player.removeSkill("sblongdan_mark");
 		},
 		subSkill: {
-			backup: { audio: "sblongdan" },
+			backup: {},
 			mark: { charlotte: true },
 			draw: {
 				charlotte: true,

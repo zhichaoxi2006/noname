@@ -1519,11 +1519,11 @@ const skills = {
 							const evt = event.getParent();
 							if (!["useCard", "respond"].includes(evt?.name) && !target.isIn()) return false;
 							if (event.name == "lose") {
-								if (target !== event.player) return false;
+								if (target !== event.player || event.refuman_active) return false;
 								return Object.values(event.gaintag_map).flat().includes("refuman");
 							}
 							return target.hasHistory("lose", evt => {
-								if (event !== evt.getParent()) return false;
+								if (event !== evt.getParent() || evt.refuman_active) return false;
 								return Object.values(evt.gaintag_map).flat().includes("refuman");
 							});
 						})
@@ -1537,6 +1537,7 @@ const skills = {
 						evt = trigger.getParent();
 					if (["useCard", "respond"].includes(evt?.name)) game.asyncDraw([target, player]);
 					else target.draw();
+					trigger.refuman_active = true;
 				},
 			},
 		},
@@ -12583,12 +12584,12 @@ const skills = {
 			if (result.bool) {
 				if (cards.length) player.gain(cards, "gain2");
 				//game.cardsDiscard(cards2);
-				player.addTempSkill("new_reluoyi2", { player: "phaseBefore" });
+				player.addTempSkill("new_reluoyi_buff", { player: "phaseBefore" });
 				trigger.changeToZero();
 			}
 			//else game.cardsDiscard(cards);
 		},
-		subSkill: { new_reluoyi2: { inherit: "reluoyi2", sourceSkill: "new_reluoyi" }, },
+		subSkill: { buff: { inherit: "reluoyi2", sourceSkill: "new_reluoyi" }, },
 	},
 	new_rewusheng: {
 		mod: {

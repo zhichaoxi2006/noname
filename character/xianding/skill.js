@@ -3,6 +3,83 @@ import cards from "../sp2/card.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//孙霸
+	dcjiedang: {
+		audio: 2,
+		mark: true,
+		intro: {
+			markcount: "expansion",
+			content: "expansion",
+		},
+		onremove(player, skill) {
+			var cards = player.getExpansions(skill);
+			if (cards.length) player.loseToDiscardpile(cards);
+		},
+		trigger: {
+			player: "phaseBegin",
+		},
+		async content(event, trigger, player) {
+			for (const i of get.players()) {
+				const {
+					result: { bool, cards },
+				} = await i.chooseToDiscard("chooseonly", [1, Infinity]).set("prompt", `将任意张牌置于${get.translation(player)}的武将牌上`);
+				if (bool) {
+					const next = player.addToExpansion(cards, player);
+					next.gaintag.add("dcjiedang");
+					await next;
+					await i.draw();
+				}
+			}
+		},
+		group: "dcjiedang_lose",
+		subSkill: {
+			lose: {
+				trigger: {
+					player: ["phaseUseBegin", "phaseJieshuBegin", "dying"],
+				},
+				forced: true,
+				filter(event, player) {
+					return player.getExpansions("dcjiedang").length > 0;
+				},
+				async content(event, trigger, player) {
+					const cards = player.getExpansions("dcjiedang");
+					const list = cards.map(c => get.type(c)).unique();
+					const dialog = ui.create.dialog();
+					dialog.addText("移去一种类型的牌");
+					dialog.addAuto(cards);
+					const {
+						result: { control },
+					} = await player.chooseControl(list).set("dialog", dialog);
+					const lose = cards.filter(c => get.type(c) == control);
+					await player.loseToDiscardpile(lose);
+					await player.draw(lose.length);
+				},
+			},
+		},
+	},
+	dcjidi: {
+		audio: 2,
+		trigger: {
+			player: "damageBegin4",
+		},
+		forced: true,
+		filter(event, player) {
+			const { source } = event;
+			if (!source) {
+				return false;
+			}
+			return source.getHp() > player.getHp() || source.countCards("h") > player.countCards("h");
+		},
+		async content(event, trigger, player) {
+			const { source } = trigger;
+			if (source.getHp() > player.getHp()) {
+				await source.loseHp();
+			}
+			if (source.countCards("h") > player.countCards("h")) {
+				await source.randomDiscard(2);
+			}
+		},
+	},
 	//威孙权
 	dcwoheng: {
 		trigger: {
@@ -10,17 +87,33 @@ const skills = {
 		},
 		enable: "phaseUse",
 		filterTarget: true,
+		mark: true,
+		intro: {
+			markcount(_, player) {
+				const num = player.countMark("dcwoheng_used");
+				return num + 1;
+			},
+			content(storage, player) {
+				const num = player.countMark("dcwoheng_used");
+				return `令一名角色摸或弃置${num + 1}张牌`;
+			},
+		},
 		prompt(event) {
 			const { player } = event;
-			const num = player.getRoundHistory("useSkill", evt => evt.skill == "dcwoheng").length;
+			const num = player.countMark("dcwoheng_used");
 			return `令一名角色摸或弃置${num + 1}张牌`;
 		},
 		async cost(event, trigger, player) {
-			const num = player.getRoundHistory("useSkill", evt => evt.skill == "dcwoheng").length;
+			const num = player.countMark("dcwoheng_used");
 			event.result = await player.chooseTarget(`令一名角色摸或弃置${num + 1}张牌`).forResult();
 		},
+		async contentBefore(event, trigger, player) {
+			player.addTempSkill("dcwoheng_used", { global: "roundStart" });
+			player.addMark("dcwoheng_used");
+		},
 		async content(event, trigger, player) {
-			const num = player.getRoundHistory("useSkill", evt => evt.skill == "dcwoheng").length;
+			const num = player.countMark("dcwoheng_used");
+			player.addTip("dcwoheng", `斡衡：${num}`);
 			const [target] = event.targets;
 			const str1 = "摸" + get.cnNumber(num, true);
 			const str2 = "弃" + get.cnNumber(num, true);
@@ -48,6 +141,12 @@ const skills = {
 			if (target == player || player.countCards("h") !== target.countCards("h")) {
 				player.tempBanSkill("dcwoheng");
 			}
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+			},
 		},
 	},
 	dcjizheng: {
@@ -1942,6 +2041,7 @@ const skills = {
 					const card = {
 						name: get.name(button.link),
 						suit: get.suit(button.link),
+						nature: get.nature(button.link),
 						nature: button.link.nature,
 						isCard: true,
 					};
@@ -1952,6 +2052,7 @@ const skills = {
 					const card = {
 						name: get.name(button.link),
 						suit: get.suit(button.link),
+						nature: get.nature(button.link),
 						isCard: true,
 					};
 					return player.getUseValue(card);
@@ -1961,6 +2062,7 @@ const skills = {
 				const card = {
 					name: get.name(result.links[0]),
 					suit: get.suit(result.links[0]),
+					nature: get.nature(result.links[0]),
 					isCard: true,
 				};
 				await player.chooseUseTarget(card, true, false);
