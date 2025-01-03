@@ -74,7 +74,7 @@ const skills = {
 			},
 		},
 	},
-	olsbzhunjiao: {
+	olsbzhuijiao: {
 		audio: 2,
 		trigger: {
 			player: "useCard",
@@ -93,10 +93,10 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			await player.draw();
-			trigger.olsbzhunjiao = true;
+			trigger.olsbzhuijiao = true;
 			trigger.baseDamage++;
 		},
-		group: "olsbzhunjiao_debuff",
+		group: "olsbzhuijiao_debuff",
 		subSkill: {
 			debuff: {
 				trigger: {
@@ -105,7 +105,7 @@ const skills = {
 				forced: true,
 				silent: true,
 				filter(event, player) {
-					if (!event.olsbzhunjiao) return false;
+					if (!event.olsbzhuijiao) return false;
 					return !player.getHistory("sourceDamage", evt => {
 						return evt.card == event.card;
 					}).length;

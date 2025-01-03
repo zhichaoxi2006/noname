@@ -1340,7 +1340,7 @@ window.noname_character_rank = {
 		"ol_sb_jushou",
 		"ol_xuelingyun",
 		"hm_guigu",
-		"hm_bozi",
+		"hm_bosi",
 		"hm_nanhualaoxian",
 		"hm_yudu",
 		"hm_taosheng",

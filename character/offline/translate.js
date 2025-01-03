@@ -22,7 +22,7 @@ const translates = {
 	hm_nanhualaoxian: "汉末南华老仙",
 	hm_nanhualaoxian_prefix: "汉末",
 	hm_guigu: "珪固",
-	hm_bozi: "卜巳",
+	hm_bosi: "卜巳",
 	hm_yudu: "于毒",
 	hm_taosheng: "陶升",
 	hm_fuyun: "浮云",
