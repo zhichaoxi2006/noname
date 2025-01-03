@@ -75,7 +75,7 @@ const skills = {
 					return target != player;
 				})
 				.set("ai", function (target) {
-					return get.attitude(player, target);
+					return get.attitude(get.player(), target);
 				})
 				.forResult();
 		},
@@ -2637,11 +2637,13 @@ const skills = {
 		audio: 2,
 		trigger: { player: "damageEnd" },
 		filter(event, player) {
-			return player.hasCard(card => lib.filter.cardDiscardable(card, player), "he");
+			return player.hasCard(card => lib.filter.cardRecastable(card, player), "he");
 		},
 		forced: true,
 		async content(event, trigger, player) {
-			const { result } = await player.chooseToDiscard("he", true, "chooseonly").set("prompt", "请重铸一张牌");
+			const { result } = await player.chooseToDiscard("he", true, "chooseonly")
+				.set("filterCard", lib.filter.cardRecastable)
+				.set("prompt", "请重铸一张牌");
 			await player.recast(result.cards);
 			const source = trigger.source;
 			if (source?.isIn()) {

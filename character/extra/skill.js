@@ -76,13 +76,13 @@ const skills = {
 			return event.targets.length == 1;
 		},
 		async content(event, trigger, player) {
+			player.changeZhuanhuanji("fengliao");
 			const { target } = trigger;
 			if (Boolean(player.storage["fengliao"])) {
 				await target.draw();
 			} else {
 				await target.damage("fire", player);
 			}
-			player.changeZhuanhuanji("fengliao");
 		},
 	},
 	kunyu: {
@@ -92,20 +92,14 @@ const skills = {
 		},
 		filter(event, player) {
 			const card = get.cardPile(function (c) {
-				if (get.natureList(c).includes("fire")) {
-					return true;
-				}
-				return get.translation(`${c.name}_info`).includes("火属性") && get.tag(c, "damage");
+				return get.tag(c, "fireDamage");;
 			}, "cardPile");
 			return Boolean(card);
 		},
 		forced: true,
 		async content(event, trigger, player) {
 			const card = get.cardPile(function (c) {
-				if (get.natureList(c).includes("fire")) {
-					return true;
-				}
-				return get.translation(`${c.name}_info`).includes("火属性") && get.tag(c, "damage");
+				return get.tag(c, "fireDamage");
 			}, "cardPile");
 			await game.cardsGotoSpecial(card);
 			game.log(player, "将", card, "移出游戏");
