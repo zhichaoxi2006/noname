@@ -244,16 +244,19 @@ const skills = {
 							result: { cards },
 						} = event;
 						delete event.result.cards;
-						const { result } = await player.chooseTarget(`将${get.translation(cards)}交给一名其他角色`, lib.filter.notMe, true).set("filterTarget", function (card, player, target) {
-							if (target.hasSkillTag("nogain")) return 0;
-							if (ui.selected.cards.length && ui.selected.cards[0].name == "du") {
-								return target.hasSkillTag("nodu") ? 0 : -10;
-							}
-							if (target.hasJudge("lebu")) return 0;
-							const nh = target.countCards("h");
-							const np = player.countCards("h");
-							return Math.max(1, 5 - nh);
-						});
+						const { result } = await player
+							.chooseTarget(`将${get.translation(cards)}交给一名其他角色`, true)
+							.set("filterTarget", lib.filter.notMe)
+							.set("ai", function (card, player, target) {
+								if (target.hasSkillTag("nogain")) return 0;
+								if (ui.selected.cards.length && ui.selected.cards[0].name == "du") {
+									return target.hasSkillTag("nodu") ? 0 : -10;
+								}
+								if (target.hasJudge("lebu")) return 0;
+								const nh = target.countCards("h");
+								const np = player.countCards("h");
+								return Math.max(1, 5 - nh);
+							});
 						await player.give(cards, result.targets[0], false);
 						player.logSkill("olzonghu");
 						player.addTempSkill("olzonghu_used");
@@ -2641,9 +2644,7 @@ const skills = {
 		},
 		forced: true,
 		async content(event, trigger, player) {
-			const { result } = await player.chooseToDiscard("he", true, "chooseonly")
-				.set("filterCard", lib.filter.cardRecastable)
-				.set("prompt", "请重铸一张牌");
+			const { result } = await player.chooseToDiscard("he", true, "chooseonly").set("filterCard", lib.filter.cardRecastable).set("prompt", "请重铸一张牌");
 			await player.recast(result.cards);
 			const source = trigger.source;
 			if (source?.isIn()) {
