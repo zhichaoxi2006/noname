@@ -2,59 +2,167 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//SP马超二号
+	twodcspzhuiji: {
+		trigger: {
+			player: "useCardAfter",
+		},
+		forced: true,
+		filter(event, player) {
+			if (!event.targets) {
+				return false;
+			}
+			return event.targets.length > 0;
+		},
+		async content(event, trigger, player) {
+			player.addTempSkill("twodcspzhuiji_buff");
+			player.markAuto("twodcspzhuiji_buff", trigger.targets);
+		},
+		subSkill: {
+			buff: {
+				charlotte: true,
+				mark: true,
+				mod: {
+					globalFrom: function (from, to) {
+						if (from.getStorage("twodcspzhuiji").includes(to)) return -Infinity;
+					},
+				},
+			},
+		},
+	},
+	twodcspshichou: {
+		audio: 2,
+		enable: "phaseUse",
+		viewAs: {
+			name: "sha",
+		},
+		position: "hes",
+		viewAsFilter(player) {
+			return (
+				player.countCards("hes", function (card) {
+					return lib.skill.twodcspshichou.filterCard(card, player);
+				}) > 0
+			);
+		},
+		filterCard: function (card, player) {
+			const color = player.getStorage("twodcspshichou_used", [[], []])[0];
+			return !color.includes(get.color(card));
+		},
+		filterTarget(card, player, target) {
+			const targetsx = player.getStorage("twodcspshichou_used", [[], []])[1];
+			if (targetsx.length > 0 && !targetsx.includes(target)) return false;
+			return lib.filter.filterTarget(card, player, target);
+		},
+		log: false,
+		async precontent(event, trigger, player) {
+			const { result } = event;
+			player.logSkill("twodcspshichou");
+			event.getParent().addCount = false;
+			player.addTempSkill("twodcspshichou_used");
+			const storage = player.getStorage("twodcspshichou_used");
+			storage[0].add(get.color(result.card));
+			storage[1].addArray(result.targets);
+		},
+		group: "twodcspshichou_directHit",
+		subSkill: {
+			used: {
+				init(player, skill) {
+					player.storage[skill] = [[], []];
+				},
+			},
+			directHit: {
+				audio: "twodcspshichou",
+				trigger: {
+					player: "useCardToPlayered",
+				},
+				filter(event, trigger, player) {
+					return event.skill == "twodcspshichou";
+				},
+				forced: true,
+				async content(event, trigger, player) {
+					const { card } = trigger;
+					let func, prompt;
+					if (get.color(card) == "red") {
+						prompt = "弃置一张装备牌，否则无法响应此【杀】";
+						func = function (card) {
+							return get.type(card) == "equip";
+						};
+					} else if (get.color(card) == "black") {
+						prompt = "弃置一张黑色手牌，否则无法响应此【杀】";
+						func = function (card) {
+							return get.color(card) == "black" && get.position(card) == "h";
+						};
+					}
+					const {
+						result: { bool },
+					} = await trigger.target.chooseToDiscard("he", func, prompt);
+					if (!bool) {
+						trigger.getParent().directHit.add(trigger.target);
+					}
+				},
+			},
+		},
+	},
 	//SP马超一号
 	onedcspzhuiji: {
 		audio: 2,
 		trigger: {
 			player: "phaseUseEnd",
 		},
-		filter(event, player){
-			return player.getHistory("sourceDamage", evt => {
-				return evt.getParent("phaseUse") === event;
-			}).length > 0;
+		filter(event, player) {
+			return (
+				player.getHistory("sourceDamage", evt => {
+					return evt.getParent("phaseUse") === event;
+				}).length > 0
+			);
 		},
-		async cost(event, trigger, player){
-			const { result } = await player.chooseTarget("选择一名此阶段你对其造成过伤害的角色")
+		async cost(event, trigger, player) {
+			const { result } = await player
+				.chooseTarget("选择一名此阶段你对其造成过伤害的角色")
 				.set("filterTarget", (card, player, target) => {
-					return player.getHistory("sourceDamage", evt => {
-						return evt.player === target && evt.getParent("phaseUse") === trigger;
-					}).length > 0;
-				})
-				.set("ai", function(card, player, target){
-					const sha = get.autoViewAs(
-						{
-							name: "sha",
-						},
+					return (
+						player.getHistory("sourceDamage", evt => {
+							return evt.player === target && evt.getParent("phaseUse") === trigger;
+						}).length > 0
 					);
+				})
+				.set("ai", function (card, player, target) {
+					const sha = get.autoViewAs({
+						name: "sha",
+					});
 					return get.effect(target, sha, player);
 				});
 			event.result = result;
 		},
 		async content(event, trigger, player) {
-			const { targets: [target] } = event;
+			const {
+				targets: [target],
+			} = event;
 			let i = 0;
 			const numx = player.getHistory("sourceDamage", evt => {
 				return evt.player === target && evt.getParent("phaseUse") === trigger;
 			}).length;
-			while(i < numx) {
+			while (i < numx) {
 				await player.chooseUseTarget("sha", [target], "nodistance", false);
 				i++;
 			}
-		}
+		},
 	},
 	onedcspshichou: {
 		audio: 2,
 		trigger: {
 			player: "useCardAfter",
 		},
-		filter(event, player){
+		filter(event, player) {
 			if (event.card.name != "sha") return false;
-			return player.getHistory("sourceDamage", evt => {
-				return evt.card === event.card;
-			}).length == 0;
+			return (
+				player.getHistory("sourceDamage", evt => {
+					return evt.card === event.card;
+				}).length == 0
+			);
 		},
-		direct:true,
-		async content(event, trigger, player){
+		direct: true,
+		async content(event, trigger, player) {
 			const { targets } = trigger;
 			const next = player.chooseToUse();
 			next.set(
@@ -90,16 +198,16 @@ const skills = {
 				check: function (card) {
 					return 7 - get.value(card);
 				},
-			}
-		}
+			},
+		},
 	},
 	//庞宏
 	dcpingzhi: {
-		zhuanhuanji:true,
+		zhuanhuanji: true,
 		marktext: "☯",
-		usable:1,
+		usable: 1,
 		enable: "phaseUse",
-		filterTarget(card, player, target){
+		filterTarget(card, player, target) {
 			return target.countCards("h");
 		},
 		intro: {
@@ -108,7 +216,7 @@ const skills = {
 				return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，其使用此牌，若造成伤害则此技能视为未使用。";
 			},
 		},
-		async content(event, trigger, player){
+		async content(event, trigger, player) {
 			const target = event.targets[0];
 			player.changeZhuanhuanji("dcpingzhi");
 			const { result } = await target.chooseCard("请选择一张手牌展示", true);
@@ -126,7 +234,7 @@ const skills = {
 				trigger: {
 					global: "useCardAfter",
 				},
-				filter(event, player){
+				filter(event, player) {
 					if (player.storage.dcpingzhi) {
 						return (
 							event.getParent(2).name == "dcpingzhi" &&
@@ -134,7 +242,7 @@ const skills = {
 							!game.hasPlayer2(current => {
 								return current.hasHistory("damage", evtx => evtx.card === event.card);
 							})
-						)
+						);
 					} else {
 						return (
 							event.getParent(2).name == "dcpingzhi" &&
@@ -142,24 +250,24 @@ const skills = {
 							game.hasPlayer2(current => {
 								return current.hasHistory("damage", evtx => evtx.card === event.card);
 							})
-						)
+						);
 					}
 				},
-				charlotte:true,
-				silent:true,
-				async content(event, trigger, player){
+				charlotte: true,
+				silent: true,
+				async content(event, trigger, player) {
 					const stat = player.getStat("skill");
 					delete stat.dcpingzhi;
 				},
 			},
-		}
+		},
 	},
 	dcgangjian: {
 		trigger: {
 			global: "phaseAfter",
 		},
-		forced:true,
-		filter(event, player){
+		forced: true,
+		filter(event, player) {
 			if (player.getHistory("damage").length) return false;
 			let num = 0;
 			game.getGlobalHistory("everything", evt => {
@@ -167,9 +275,9 @@ const skills = {
 			}).forEach(evt => {
 				num += evt.cards.length;
 			});
-			return num > 0
+			return num > 0;
 		},
-		async content(event, trigger, player){
+		async content(event, trigger, player) {
 			let num = 0;
 			game.getGlobalHistory("everything", evt => {
 				return evt.name == "showCards" && evt.cards.length;
@@ -177,7 +285,7 @@ const skills = {
 				num += evt.cards.length;
 			});
 			await player.draw(Math.min(num, 5));
-		}
+		},
 	},
 	//乐周瑜
 	dcguyin: {
@@ -1040,8 +1148,8 @@ const skills = {
 						"张牌"
 					);
 				},
-				async contentBefore(event, trigger, player){
-					player.addTempSkill("dcjigu_used", {global: "roundStart"});
+				async contentBefore(event, trigger, player) {
+					player.addTempSkill("dcjigu_used", { global: "roundStart" });
 					player.addMark("dcjigu_used");
 				},
 				async content(event, trigger, player) {
