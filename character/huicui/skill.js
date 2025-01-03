@@ -20,6 +20,14 @@ const skills = {
 						return evt.player === target && evt.getParent("phaseUse") === trigger;
 					}).length > 0;
 				})
+				.set("ai", function(card, player, target){
+					const sha = get.autoViewAs(
+						{
+							name: "sha",
+						},
+					);
+					return get.effect(target, sha, player);
+				});
 			event.result = result;
 		},
 		async content(event, trigger, player) {
@@ -78,7 +86,7 @@ const skills = {
 				filterTarget: function (card, player, target) {
 					return _status.event.targets && _status.event.targets.includes(target) && lib.filter.filterTarget.apply(this, arguments);
 				},
-				prompt: "将一张手当顺手牵羊使用",
+				prompt: "将一张牌当决斗使用",
 				check: function (card) {
 					return 7 - get.value(card);
 				},
