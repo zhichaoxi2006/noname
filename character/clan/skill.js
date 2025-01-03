@@ -149,7 +149,7 @@ const skills = {
 			player: ["phaseUseBegin", "damageBegin"],
 		},
 		async cost(event, trigger, player) {
-			const count = player.countMark("clananran_used") + 1;
+			const count = Math.min(4, player.countMark("clananran_used") + 1);
 			const { result } = await player.chooseButton([
 				get.prompt2("clananran"),
 				[
