@@ -2,6 +2,89 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//SP马超一号
+	onedcspzhuiji: {
+		audio: 2,
+		trigger: {
+			player: "phaseUseEnd",
+		},
+		filter(event, player){
+			return player.getHistory("sourceDamage", evt => {
+				return evt.getParent("phaseUse") === event;
+			}).length > 0;
+		},
+		async cost(event, trigger, player){
+			const { result } = await player.chooseTarget("选择一名此阶段你对其造成过伤害的角色")
+				.set("filterTarget", (card, player, target) => {
+					return player.getHistory("sourceDamage", evt => {
+						return evt.player === target && evt.getParent("phaseUse") === trigger;
+					}).length > 0;
+				})
+			event.result = result;
+		},
+		async content(event, trigger, player) {
+			const { targets: [target] } = event;
+			let i = 0;
+			const numx = player.getHistory("sourceDamage", evt => {
+				return evt.player === target && evt.getParent("phaseUse") === trigger;
+			}).length;
+			while(i < numx) {
+				await player.chooseUseTarget("sha", [target], "nodistance", false);
+				i++;
+			}
+		}
+	},
+	onedcspshichou: {
+		audio: 2,
+		trigger: {
+			player: "useCardAfter",
+		},
+		filter(event, player){
+			if (event.card.name != "sha") return false;
+			return player.getHistory("sourceDamage", evt => {
+				return evt.card === event.card;
+			}).length == 0;
+		},
+		direct:true,
+		async content(event, trigger, player){
+			const { targets } = trigger;
+			const next = player.chooseToUse();
+			next.set(
+				"targets",
+				game.filterPlayer(function (current) {
+					return targets.includes(current) && trigger.targets.includes(current);
+				})
+			);
+			next.set("openskilldialog", get.prompt2("onedcspshichou"));
+			next.set("norestore", true);
+			next.set("_backupevent", "onedcspshichou_backup");
+			next.set("custom", {
+				add: {},
+				replace: { window: function () {} },
+			});
+			next.backup("onedcspshichou_backup");
+			await next;
+		},
+		subSkill: {
+			backup: {
+				audio: "onedcspshichou",
+				filterCard: function (card) {
+					return get.itemtype(card) == "card";
+				},
+				position: "hes",
+				viewAs: {
+					name: "juedou",
+				},
+				filterTarget: function (card, player, target) {
+					return _status.event.targets && _status.event.targets.includes(target) && lib.filter.filterTarget.apply(this, arguments);
+				},
+				prompt: "将一张手当顺手牵羊使用",
+				check: function (card) {
+					return 7 - get.value(card);
+				},
+			}
+		}
+	},
 	//庞宏
 	dcpingzhi: {
 		zhuanhuanji:true,
