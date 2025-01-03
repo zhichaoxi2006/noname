@@ -11,7 +11,7 @@ const skills = {
 			if (player == target) {
 				return false;
 			}
-			return target.countCards("h") > 1;
+			return target.countCards("h") > 0;
 		},
 		async content(event, trigger, player) {
 			const { target } = event;
