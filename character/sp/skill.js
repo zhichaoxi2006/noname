@@ -2238,6 +2238,7 @@ const skills = {
 			const { player: target } = trigger,
 				num = target.maxHp;
 			player.awakenSkill(event.name);
+			player.changeSkin({ characterName: "sp_ol_caocao" }, "sp_ol_caocao_shadow");
 			await player.changeSkills(["spolzhubei"], ["spolxixiang"]);
 			if (player.countCards("h") < num) await player.drawTo(num);
 			if (player.getHp() < num) await player.recoverTo(num);
