@@ -55,6 +55,13 @@ const skills = {
 				);
 			}
 		},
+		ai: {
+			order: 7,
+			result: {
+				player: 1,
+				target: 1,
+			}
+		}
 	},
 	twchunhui: {
 		audio: 2,
@@ -174,6 +181,12 @@ const skills = {
 					});
 			}
 		},
+		ai: {
+			order: 7,
+			result: {
+				target: -1,
+			}
+		}
 	},
 	twjuyan: {
 		audio: 2,
