@@ -1,4 +1,9 @@
 export default {
+	"#starzhongyan1": "千夫诺诺，不如一士谔谔。",
+	"#starzhongyan2": "忠言如药，苦口而利身。",
+	"#starjinglun1": "腹有珠玑，可坠在殿之玉盘。",
+	"#starjinglun2": "胸纳百川，当汇凌日之沧海。",
+	"#star_zhangzhao:die": "曹公虎豹也，不如以礼早降。",
 	"#starzhiji1": "筹谋部划，知天机，行人事。",
 	"#starzhiji2": "渊孤军出寨，可一鼓击之。",
 	"#staranji1": "兵法谙熟于胸，今乃施为之时。",
