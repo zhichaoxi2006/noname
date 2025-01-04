@@ -589,7 +589,7 @@ const skills = {
 				audio: "olsiqi",
 				trigger: {
 					player: "loseAfter",
-					global: ["loseAsyncAfter", "cardsDiscardAfter"],
+					global: ["loseAsyncAfter", "cardsDiscardAfter", "equipAfter", "addJudgeAfter", "addToExpansionAfter"],
 				},
 				filter(event, player) {
 					return event.getd(player).some(i => get.color(i, player) === "red");
