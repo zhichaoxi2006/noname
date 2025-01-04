@@ -123,7 +123,7 @@ const characters = {
 	tw_dongzhao: ["male", "wei", 3, ["twmiaolve", "twyingjia"]],
 	tw_gexuan: ["male", "qun", 3, ["twdanfa", "twlingbao", "twsidao"]],
 	tw_beimihu: ["female", "qun", 3, ["zongkui", "guju", "baijia", "bingzhao"], ["zhu", "name:null|null"]],
-	nashime: ["male", "qun", 3, ["chijie", "waishi", "renshe"], ["name:难升|米"]],
+	nashime: ["male", "qun", 3, ["chijie", "waishi", "renshe"], ["name:null|null"]],
 	tw_xiahouba: ["male", "shu", 4, ["twyanqin", "twbaobian"], ["name:夏侯|霸"]],
 	tw_zumao: ["male", "wu", 4, ["twtijin"]],
 	tw_caoang: ["male", "wei", 4, ["twxiaolian"]],
