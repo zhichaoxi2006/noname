@@ -1373,7 +1373,7 @@ const skills = {
 			},
 		},
 	},
-	olzhibing: {
+	olzhibin: {
 		audio: 6,
 		getNum(player) {
 			let num = 0;
@@ -1388,17 +1388,17 @@ const skills = {
 			player: "phaseZhunbeiBegin",
 		},
 		filter(event, player) {
-			const num = get.info("olzhibing").getNum(player);
-			return get.info("olzhibing").filterx(player, num) || get.info("olzhibing").filtery(player, num) || get.info("olzhibing").filterz(player, num);
+			const num = get.info("olzhibin").getNum(player);
+			return get.info("olzhibin").filterx(player, num) || get.info("olzhibin").filtery(player, num) || get.info("olzhibin").filterz(player, num);
 		},
 		filterx(player, num) {
-			return num >= 3 && !game.getAllGlobalHistory("everything", evt => evt.name == "gainMaxHp" && evt.player == player && evt.getParent().name == "olzhibing").length;
+			return num >= 3 && !game.getAllGlobalHistory("everything", evt => evt.name == "gainMaxHp" && evt.player == player && evt.getParent().name == "olzhibin").length;
 		},
 		filtery(player, num) {
-			return num >= 6 && !player.hasSkill("dcfencheng", null, null, false) && !game.getAllGlobalHistory("everything", evt => evt.name == "changeSkills" && evt.player == player && evt.getParent().name == "olzhibing" && evt.addSkill.includes("dcfencheng")).length;
+			return num >= 6 && !player.hasSkill("dcfencheng", null, null, false) && !game.getAllGlobalHistory("everything", evt => evt.name == "changeSkills" && evt.player == player && evt.getParent().name == "olzhibin" && evt.addSkill.includes("dcfencheng")).length;
 		},
 		filterz(player, num) {
-			return num >= 9 && !player.hasSkill("benghuai", null, null, false) && !game.getAllGlobalHistory("everything", evt => evt.name == "changeSkills" && evt.player == player && evt.getParent().name == "olzhibing" && evt.addSkill.includes("benghuai")).length;
+			return num >= 9 && !player.hasSkill("benghuai", null, null, false) && !game.getAllGlobalHistory("everything", evt => evt.name == "changeSkills" && evt.player == player && evt.getParent().name == "olzhibin" && evt.addSkill.includes("benghuai")).length;
 		},
 		zhuSkill: true,
 		forced: true,
