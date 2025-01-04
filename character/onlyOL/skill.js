@@ -770,7 +770,7 @@ const skills = {
 		async content(event, trigger, player) {
 			trigger.getParent().excluded.add(player);
 			player.addTempSkill("olsbguliang_debuff");
-			player.storage.olsbguliang_debuff = trigger.player;
+			player.markAuto("olsbguliang_debuff", trigger.player);
 		},
 		subSkill: {
 			debuff: {
@@ -781,7 +781,7 @@ const skills = {
 				},
 				silent: true,
 				filter(event, player) {
-					return event.player == player.storage.olsbguliang_debuff;
+					return player.getStorage("olsbguliang_debuff").includes(event.player);
 				},
 				async content(event, trigger, player) {
 					trigger.getParent().directHit.add(player);
