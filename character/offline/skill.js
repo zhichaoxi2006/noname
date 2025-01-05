@@ -1373,7 +1373,7 @@ const skills = {
 		enable: "phaseUse",
 		filterCard: card => get.color(card) == "red",
 		filter(event, player) {
-			return player.countCards("he", { color: "red" }) > 1;
+			return player.countCards("he", { color: "red" }) > 1 && player.hasUseTarget("juedou");
 		},
 		selectCard: 2,
 		position: "he",
@@ -1787,7 +1787,7 @@ const skills = {
 		enable: "phaseUse",
 		filterCard: card => get.color(card) == "black",
 		filter(event, player) {
-			return player.countCards("he", { color: "black" }) > 1;
+			return player.countCards("he", { color: "black" }) > 1 && player.hasUseTarget("sha");
 		},
 		selectCard: 2,
 		position: "he",
