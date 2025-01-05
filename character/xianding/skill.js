@@ -300,17 +300,15 @@ const skills = {
 		prompt(event) {
 			const { player } = event;
 			const num = player.countMark("dcwoheng_used");
-			return `令一名角色摸或弃置${num + 1}张牌`;
+			return `斡衡：令一名角色摸或弃置${num + 1}张牌`;
 		},
 		async cost(event, trigger, player) {
 			const num = player.countMark("dcwoheng_used");
-			event.result = await player.chooseTarget(`令一名角色摸或弃置${num + 1}张牌`).forResult();
-		},
-		async contentBefore(event, trigger, player) {
-			player.addTempSkill("dcwoheng_used", { global: "roundStart" });
-			player.addMark("dcwoheng_used");
+			event.result = await player.chooseTarget(`斡衡：令一名角色摸或弃置${num + 1}张牌`).forResult();
 		},
 		async content(event, trigger, player) {
+			player.addTempSkill("dcwoheng_used", { global: "roundStart" });
+			player.addMark("dcwoheng_used");
 			const num = player.countMark("dcwoheng_used");
 			player.addTip("dcwoheng", `斡衡：${num}`);
 			const [target] = event.targets;
