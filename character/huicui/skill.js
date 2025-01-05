@@ -949,11 +949,9 @@ const skills = {
 						"张牌"
 					);
 				},
-				async contentBefore(event, trigger, player) {
+				async content(event, trigger, player) {
 					player.addTempSkill("dcjigu_used", { global: "roundStart" });
 					player.addMark("dcjigu_used");
-				},
-				async content(event, trigger, player) {
 					await player.draw(
 						Array.from({ length: 5 })
 							.map((_, i) => i + 1)
