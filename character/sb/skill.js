@@ -67,7 +67,6 @@ const skills = {
 			player.storage[event.name] = gainMap;
 			const cards = Array.from(gainMap.keys());
 			const cardPile = ui.cardPile.childNodes;
-			game.log(cards);
 			for (let index = 0; index < cards.length; index++) {
 				const card = cards[index];
 				const next = player.lose([card], ui.cardPile);
@@ -99,6 +98,9 @@ const skills = {
 					const { sbjingce: storage } = player.storage;
 					if (storage) {
 						while (true) {
+							if (storage.size == 0) {
+								break;
+							}
 							const index = Array.from(storage.keys())[0];
 							const arr = storage.get(index);
 							if (arr[0] == "none") {
@@ -107,13 +109,10 @@ const skills = {
 								await player.draw(arr[1]);
 							}
 							storage.delete(index);
-							if (storage.size == 0) {
-								break;
-							}
 						}
 					}
 					const cards = get.cards(3);
-					const next = player.addToExpansion(cards, player);
+					const next = player.addToExpansion(cards, player, "draw");
 					next.gaintag.add("sbjingce_expansions");
 					await next;
 					delete player.storage.sbjingce;
