@@ -60,8 +60,8 @@ const skills = {
 			result: {
 				player: 1,
 				target: 1,
-			}
-		}
+			},
+		},
 	},
 	twchunhui: {
 		audio: 2,
@@ -80,19 +80,24 @@ const skills = {
 		check: function (event, player) {
 			return get.attitude(player, event.target) >= 0;
 		},
-		async content(event, trigger, player){
+		async content(event, trigger, player) {
 			const { target } = trigger;
 			trigger.getParent().set("twchunhui_actived", true);
 			await target.gainPlayerCard("h", player).set("forced", true).set("visible", true);
-			player.when({global: "useCardAfter"}).filter(function(evt){
-				return evt.twchunhui_actived;
-			}).step(async function() {
-				if (target.getHistory("damage", function(evt){
-					return evt.getParent(2) === trigger;
-				}).length === 0) {
-					await player.draw();
-				}
-			});
+			player
+				.when({ global: "useCardAfter" })
+				.filter(function (evt) {
+					return evt.twchunhui_actived;
+				})
+				.step(async function () {
+					if (
+						target.getHistory("damage", function (evt) {
+							return evt.getParent(2) === trigger;
+						}).length === 0
+					) {
+						await player.draw();
+					}
+				});
 		},
 	},
 	//幻黄盖
@@ -185,8 +190,8 @@ const skills = {
 			order: 7,
 			result: {
 				target: -1,
-			}
-		}
+			},
+		},
 	},
 	twjuyan: {
 		audio: 2,
@@ -13982,34 +13987,65 @@ const skills = {
 			compare: {
 				audio: "twchaofeng",
 				trigger: { player: "phaseUseBegin" },
-				direct: true,
-				content: function () {
-					"step 0";
-					player
+				async cost(event, trigger, player) {
+					event.result = await player
 						.chooseTarget(get.prompt("twchaofeng"), "选择至多三名角色共同拼点。赢的角色视为对所有没赢的角色使用一张火【杀】", [1, 3], (card, player, target) => {
 							return player.canCompare(target);
 						})
 						.set("ai", function (target) {
-							var player = _status.event.player,
-								targets = _status.event.getTrigger().targets;
-							var num = 0,
-								card = { name: "sha", nature: "fire", isCard: true };
-							if (target.hasSkill("twlvren")) num += 2 * (ui.selected.targets.length + 1);
-							if (target.hasSkill("twchuanshu_effect")) num += 3;
-							var hs = player.getCards("h").sort((a, b) => get.number(b) - get.number(a));
-							var ts = target.getCards("h").sort((a, b) => get.number(b) - get.number(a));
-							if (get.number(hs[0]) <= Math.min(13, get.number(ts[0]) + num)) {
-								return 6 + get.effect(player, card, target, target);
+							const player = _status.event.player,
+								targets = ui.selected.targets.concat([target]),
+								hs = get.event("max");
+							let card = { name: "sha", nature: "fire", isCard: true },
+								cache = ai.getTargetPoints(target, player, null, "10"),
+								max = cache.max,
+								tar = target,
+								eff = -get.attitude(player, target);
+							if (target.hasSkill("twlvren")) max += 2 * (ui.selected.targets.length + 1);
+							if (target.hasSkill("twchuanshu_effect")) max += 3;
+							max = Math.min(13, max);
+							cache.max = max;
+							for (const cur of ui.selected.targets) {
+								const temp = ai.getTargetPoints(cur, player);
+								if (temp.max > max) {
+									max = temp.max;
+									tar = cur;
+								}
 							}
-							return get.effect(target, { name: "guohe_copy2" }, player, player) / 2 + get.effect(target, card, player, player);
-						});
-					"step 1";
-					if (result.bool) {
-						event.targets = result.targets;
-						player.logSkill("twchaofeng_compare", event.targets);
-						player.chooseToCompare(event.targets).setContent("chooseToCompareMeanwhile");
-					}
-					"step 2";
+							if (hs > max) {
+								return (
+									(player.canUse(card, target, false) ? get.effect(target, card, player, player) : 0) +
+									eff -
+									5 +
+									ui.selected.targets.reduce((acc, p) => {
+										return acc + (player.canUse(card, p, false) ? get.effect(p, card, player, player) : 0) - get.attitude(player, p);
+									}, 0)
+								);
+							}
+							return (
+								(tar.canUse(card, player, false) ? get.effect(player, card, tar, player) : 0) +
+								eff -
+								5 +
+								ui.selected.targets.reduce((acc, p) => {
+									return acc + (tar.canUse(card, p, false) ? get.effect(p, card, tar, player) : 0) - get.attitude(player, p);
+								}, 0)
+							);
+						})
+						.set(
+							"max",
+							(() => {
+								const max = player.getCards("h").reduce((res, card) => {
+									const number = get.number(card);
+									return Math.max(res, number);
+								}, 0);
+								if (player.hasSkill("twchuanshu_effect")) return Math.min(13, max + 3);
+								return max;
+							})()
+						)
+						.forResult();
+				},
+				async content(event, trigger, player) {
+					const result = await player.chooseToCompare(event.targets).setContent("chooseToCompareMeanwhile").forResult();
 					if (result.winner) {
 						var targets = [player].addArray(event.targets).sortBySeat(player);
 						targets.remove(result.winner);
@@ -14029,21 +14065,40 @@ const skills = {
 		limited: true,
 		skillAnimation: true,
 		animationColor: "qun",
-		direct: true,
-		content: function () {
-			"step 0";
-			player.chooseTarget(get.prompt2("twchuanshu")).set("ai", target => get.attitude(_status.event.player, target));
-			"step 1";
-			if (result.bool) {
-				player.awakenSkill("twchuanshu");
-				var target = result.targets[0];
-				player.logSkill("twchuanshu", target);
-				target.addMark("twchuanshu_mark", 1, false);
-				target.addSkill("twchuanshu_effect");
-				target.markAuto("twchuanshu_effect", [player]);
-				player.addSkill("twchuanshu_clear");
-				player.markAuto("twchuanshu_clear", [target]);
-			}
+		async cost(event, trigger, player) {
+			event.result = await player
+				.chooseTarget(get.prompt2("twchuanshu"))
+				.set("ai", target => {
+					if (!get.event("bool")) return 0;
+					let val = get.attitude(_status.event.player, target);
+					if (target.hasSkill("twchaofeng")) val += ai.getTargetPoints(target).max;
+					return val * get.threaten(target);
+				})
+				.set("bool", (() => {
+					const fs =
+						game.findPlayer(cur => {
+							return get.attitude(player, cur) > 2 && (cur.hasSkill("twchaofwng") || get.threaten(cur) > player.getHp());
+						}) || player;
+					return (
+						game.countPlayer(cur => {
+							let eff = 0;
+							if (get.attitude(player, cur) < 0) eff = get.effect(cur, { name: "sha", nature: "fire", isCard: true }, player, player);
+							if (fs.hasSkill("twchaofeng")) eff *= 2 - 1 / ai.getTargetPoints(fs, player).max;
+							return Math.max(0, eff);
+						}) >
+						10 * player.getHp()
+					);
+				})())
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			player.awakenSkill("twchuanshu");
+			const target = event.targets[0];
+			target.addMark("twchuanshu_mark", 1, false);
+			target.addSkill("twchuanshu_effect");
+			target.markAuto("twchuanshu_effect", [player]);
+			player.addSkill("twchuanshu_clear");
+			player.markAuto("twchuanshu_clear", [target]);
 		},
 		subSkill: {
 			mark: {
