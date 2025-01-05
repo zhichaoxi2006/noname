@@ -1151,7 +1151,7 @@ const skills = {
 			const choiceList = [`视为对${get.translation(list[0])}使用一张【杀】`, `弃置${get.translation(list[0])}场上一张牌`];
 			if (list[1].canUse("sha", list[0], false)) choices.push("选项一");
 			else choiceList[0] = '<span style="opacity:0.5">' + choiceList[0] + "</span>";
-			if (list[0].countDiscardableCards(list[1], "ej")) choices.push("选项二");
+			if (list[0].countGainableCards(list[1], "ej")) choices.push("选项二");
 			else choiceList[1] = '<span style="opacity:0.5">' + choiceList[1] + "</span>";
 			if (!choices.length) return;
 			const control =
@@ -1171,7 +1171,7 @@ const skills = {
 							.set("target", list[0])
 							.forResultControl();
 			if (control == "选项一") await list[1].useCard(sha, list[0], false, "noai");
-			else await list[1].discardPlayerCard(list[0], "ej", true);
+			else await list[1].gainPlayerCard(list[0], "ej", true);
 		},
 	},
 	mbdingfa: {
