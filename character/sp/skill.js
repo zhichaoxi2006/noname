@@ -2333,7 +2333,7 @@ const skills = {
 		ai: {
 			order: 2,
 			result: {
-				player(player, target) {
+				player(player, target, cardx) {
 					return (
 						1 +
 						Math.max.apply(
