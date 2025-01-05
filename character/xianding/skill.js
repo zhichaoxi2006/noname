@@ -221,7 +221,7 @@ const skills = {
 			for (const i of get.players()) {
 				const {
 					result: { bool, cards },
-				} = await i.chooseToDiscard("chooseonly", [1, Infinity]).set("prompt", `将任意张牌置于${get.translation(player)}的武将牌上`);
+				} = await i.chooseToDiscard("chooseonly", [1, Infinity], "he").set("prompt", `将任意张牌置于${get.translation(player)}的武将牌上`);
 				if (bool) {
 					const next = player.addToExpansion(cards, player);
 					next.gaintag.add("dcjiedang");
