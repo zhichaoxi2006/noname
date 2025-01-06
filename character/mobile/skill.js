@@ -100,7 +100,7 @@ const skills = {
 					return get.suit(card) == cost_data;
 				})
 			});
-			const { result: { targets:[target] } } = await player.chooseTarget(lib.filter.notMe)
+			const { result: { targets:[target] } } = await player.chooseTarget(lib.filter.notMe, true)
 				.set("ai", function(target){
 					return get.attitude(get.player(), target) > 0;
 				});
