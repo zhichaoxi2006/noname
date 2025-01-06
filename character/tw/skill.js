@@ -168,7 +168,7 @@ const skills = {
 						return target.canUse(juedou, current);
 					});
 				});
-				await player
+				await target
 					.chooseUseTarget({ name: "juedou", isCard: true }, cards)
 					.set("targetx", player)
 					.set("filterTarget", function (card, player, target) {
