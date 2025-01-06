@@ -8371,6 +8371,7 @@ export class Game extends GameCompatible {
 			if (parseInt(value.dataset.position) >= position) value.dataset.position = parseInt(value.dataset.position) + 1;
 		});
 		const player = ui.create.player(ui.arena).addTempClass("start");
+		player.getId();
 		if (character) player.init(character, character2);
 		game.players.push(player);
 		player.dataset.position = position;
