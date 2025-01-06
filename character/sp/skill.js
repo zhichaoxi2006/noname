@@ -247,7 +247,7 @@ const skills = {
 						const { result } = await player
 							.chooseTarget(`将${get.translation(cards)}交给一名其他角色`, true)
 							.set("filterTarget", lib.filter.notMe)
-							.set("ai", function (card, player, target) {
+							.set("ai", function (target) {
 								if (target.hasSkillTag("nogain")) return 0;
 								if (ui.selected.cards.length && ui.selected.cards[0].name == "du") {
 									return target.hasSkillTag("nodu") ? 0 : -10;
