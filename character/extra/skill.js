@@ -60,9 +60,9 @@ const skills = {
 		intro: {
 			content: function (storage, player, skill) {
 				if (Boolean(player.storage[skill])) {
-					return "你使用牌指定唯一目标后，你令其摸一张牌。";
+					return "你使用牌指定唯一目标后，你对其造成一点火焰伤害。";
 				}
-				return "你使用牌指定唯一目标后，你对其造成一点火焰伤害。";
+				return "你使用牌指定唯一目标后，你令其摸一张牌。";
 			},
 		},
 		trigger: {
