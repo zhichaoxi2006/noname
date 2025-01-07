@@ -3389,9 +3389,6 @@ export class Player extends HTMLDivElement {
 			if (this == game.me && ui.fakeme && fakeme !== false) {
 				ui.fakeme.style.backgroundImage = node.style.backgroundImage;
 			}
-			if (this == game.me && ui.fakeme && fakeme !== false) {
-				ui.fakeme.style.backgroundImage = node.style.backgroundImage;
-			}
 			if (video != false) {
 				game.addVideo("setAvatar", this, [name, name2]);
 			}
