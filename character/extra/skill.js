@@ -57,9 +57,6 @@ const skills = {
 		forced: true,
 		mark: true,
 		marktext: "☯",
-		init: function (player, skill) {
-			player.storage[skill] = true;
-		},
 		intro: {
 			content: function (storage, player, skill) {
 				if (Boolean(player.storage[skill])) {
