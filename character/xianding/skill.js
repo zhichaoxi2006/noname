@@ -221,7 +221,16 @@ const skills = {
 			for (const i of get.players()) {
 				const {
 					result: { bool, cards },
-				} = await i.chooseToDiscard("chooseonly", [1, Infinity], "he").set("prompt", `将任意张牌置于${get.translation(player)}的武将牌上`);
+				} = await i.chooseCard([1, Infinity], "he")
+					.set("ai", function(card){
+						const  { targetx, player } = get.event();
+						if (!ui.selected.cards.length || player == targetx) {
+							return 6 - get.value(card);
+						}
+						return 0;
+					})
+					.set("targetx", player)
+					.set("prompt", `将任意张牌置于${get.translation(player)}的武将牌上`);
 				if (bool) {
 					const next = player.addToExpansion(cards, player);
 					next.gaintag.add("dcjiedang");
@@ -242,7 +251,7 @@ const skills = {
 				},
 				async content(event, trigger, player) {
 					const cards = player.getExpansions("dcjiedang");
-					const list = cards.map(c => get.type(c)).unique();
+					const list = cards.map(c => get.type2(c)).unique();
 					const dialog = ui.create.dialog();
 					dialog.addText("移去一种类型的牌");
 					dialog.addAuto(cards);
