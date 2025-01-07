@@ -868,7 +868,7 @@ const skills = {
 		audio: 2,
 		trigger: { player: "useCardToPlayer" },
 		filter(event, player) {
-			return event.name === "sha" && event.isFirstTarget && event.targets.length === 1;
+			return event.card.name === "sha" && event.isFirstTarget && event.targets.length === 1;
 		},
 		forced: true,
 		logTarget: "target",
