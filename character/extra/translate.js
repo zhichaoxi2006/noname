@@ -411,7 +411,7 @@ const translates = {
 	shen_pangtong: "神庞统",
 	shen_pangtong_prefix: "神",
 	luansuo: "鸾锁",
-	luansuo_info: "锁定技，你的回合内，所有角色不能整理、弃置手牌且与本回合进入弃牌堆的牌花色均不同的两侧手牌视为【铁索连环】。",
+	luansuo_info: "锁定技，你的回合内，所有角色不能弃置手牌且当前手牌与本回合进入弃牌堆的牌花色均不同的牌视为【铁索连环】。",
 	fengliao: "凤燎",
 	fengliao_info: "锁定技，转换技，你使用牌指定唯一目标后，阳：你令其摸一张牌；阴：你对其造成一点火焰伤害。",
 	kunyu: "鹍浴",

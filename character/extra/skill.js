@@ -20,14 +20,8 @@ const skills = {
 			debuff: {
 				mod: {
 					cardname(card, player) {
-						const suit = _status.discarded.map(item => get.suit(item));
-						const cards = player.getCards("h");
-						const first = cards[0],
-							last = cards[cards.length - 1];
-						if (![first, last].includes(card)) return;
-						if (!suit.includes(get.suit(first)) && !suit.includes(get.suit(last))) {
-							return "tiesuo";
-						}
+						const suits = _status.discarded.map(item => get.suit(item));
+						if(!suits.includes(get.suit(card))) return "tiesuo";
 					},
 					cardDiscardable(card, player) {
 						if (get.position(card) == "h") return false;
@@ -44,9 +38,6 @@ const skills = {
 					aiUseful(player, card, num) {
 						if (num > 0 && get.name(card, player) == "huogong") return 0;
 					},
-				},
-				ai: {
-					noSortCard: true,
 				},
 			},
 		},
