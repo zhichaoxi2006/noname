@@ -1815,6 +1815,7 @@ const skills = {
 							.getGlobalHistory("changeHp", function (evt) {
 								return evt.getParent().name == "recover" && evt.player == event.player;
 							})
+							.map(evt => evt.getParent())
 							.indexOf(event) === 0
 					);
 				},
