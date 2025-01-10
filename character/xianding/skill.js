@@ -127,11 +127,11 @@ const skills = {
 						}).length > 0
 					);
 				})
-				.set("ai", function (card, player, target) {
+				.set("ai", function (target) {
 					const sha = get.autoViewAs({
 						name: "sha",
 					});
-					return get.effect(target, sha, player);
+					return get.effect(target, sha, get.player());
 				});
 			event.result = result;
 		},

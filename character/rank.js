@@ -766,8 +766,8 @@ window.noname_character_rank = {
 	],
 	bp: [
 		"ol_wujing",
-		"twodcspzhuiji",
-		"onedcspzhuiji",
+		"twodcspmachao",
+		"onedcspmachao",
 		"mb_xuezong",
 		"huan_dingshangwan",
 		"sp_ol_liubei",
