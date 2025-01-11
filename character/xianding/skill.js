@@ -294,7 +294,7 @@ const skills = {
 			player: "damageEnd",
 		},
 		enable: "phaseUse",
-		filterTarget: true,
+		filterTarget: lib.filter.notMe,
 		mark: true,
 		intro: {
 			markcount(_, player) {
@@ -303,23 +303,30 @@ const skills = {
 			},
 			content(storage, player) {
 				const num = player.countMark("dcwoheng_used");
-				return `令一名角色摸或弃置${num + 1}张牌`;
+				return `令一名其他角色摸或弃置${get.cnNumber(num + 1)}张牌`;
 			},
 		},
 		prompt(event) {
 			const { player } = event;
 			const num = player.countMark("dcwoheng_used");
-			return `斡衡：令一名角色摸或弃置${num + 1}张牌`;
+			return `斡衡：令一名其他角色摸或弃置${get.cnNumber(num + 1)}张牌`;
 		},
 		async cost(event, trigger, player) {
 			const num = player.countMark("dcwoheng_used");
-			event.result = await player.chooseTarget(`斡衡：令一名角色摸或弃置${num + 1}张牌`).forResult();
+			event.result = await player.chooseTarget(`斡衡：令一名角色摸或弃置${get.cnNumber(num + 1)}张牌`, lib.filter.notMe).forResult();
+		},
+		onremove(player, skill){
+			player.removeTip(skill);
 		},
 		async content(event, trigger, player) {
-			player.addTempSkill("dcwoheng_used", { global: "roundStart" });
-			player.addMark("dcwoheng_used");
-			const num = player.countMark("dcwoheng_used");
-			player.addTip("dcwoheng", `斡衡：${num}`);
+			if (player.hasSkill("dcwoheng")) {
+				player.addTempSkill("dcwoheng_used", { global: "roundStart" });
+				player.addMark("dcwoheng_used");
+			}
+			const num = player.hasSkill("dcwoheng") ? player.countMark("dcwoheng_used") : 1;
+			if (player.hasSkill("dcwoheng")) {
+				player.addTip("dcwoheng", `斡衡：${get.cnNumber(num)}`);
+			}
 			const [target] = event.targets;
 			const str1 = "摸" + get.cnNumber(num, true);
 			const str2 = "弃" + get.cnNumber(num, true);
@@ -344,87 +351,77 @@ const skills = {
 			} else {
 				await target.chooseToDiscard(num, true, "he");
 			}
-			if (target == player || player.countCards("h") !== target.countCards("h")) {
+			if (player.countMark("dcwoheng_used") >= 5 || player.countCards("h") !== target.countCards("h")) {
+				await player.draw(2);
 				player.tempBanSkill("dcwoheng");
+			}
+		},
+		ai: {
+			order: 7,
+			result: {
+				target: 1,
 			}
 		},
 		subSkill: {
 			used: {
 				charlotte: true,
-				onremove: true,
+				onremove(player, skill){
+					player.removeTip("dcwoheng");
+					delete player.storage[skill];
+				},
 			},
 		},
 	},
-	dcjizheng: {
-		feedPigSkill: true,
-		zhuSkill: true,
-		unique: true,
-		audio: 2,
-		global: "dcjizheng_global",
+	dcyuhui: {
+		trigger: {
+			player: "phaseJieshuBegin",
+		},
+		async cost(event, trigger, player) {
+			event.result = await player.chooseTarget(`御麾：选择任意名其他吴势力角色`, [1, Infinity])
+				.set("filterTarget", (_, player, target) => {
+					if(target == player) return false;
+					return target.group == "wu";
+				})
+				.set("ai", function(target) {
+					return get.attitude(get.player(), target);
+				})
+				.forResult();
+		},
+		async content(event, trigger, player){
+			const { targets } = event;
+			for (const target of targets) {
+				target.addSkill("dcyuhui_buff");
+				target.markAuto("dcyuhui_buff", [player]);
+			}
+		},
 		subSkill: {
-			global: {
-				enable: "phaseUse",
-				discard: false,
-				lose: false,
-				delay: false,
-				line: true,
-				log: false,
-				prepare: function (cards, player, targets) {
-					targets[0].logSkill("dcjizheng");
-				},
-				prompt: function () {
-					var player = _status.event.player;
-					var list = game.filterPlayer(function (target) {
-						return target != player && target.hasZhuSkill("dcjizheng", player);
-					});
-					var str = "将一张牌交给" + get.translation(list);
-					if (list.length > 1) str += "中的一人";
-					return str;
-				},
-				filter: function (event, player) {
-					if (player.countCards("h", lib.skill.dcjizheng_global.filterCard) == 0) return false;
-					return game.hasPlayer(function (target) {
-						return target != player && target.hasZhuSkill("dcjizheng", player) && !target.hasSkill("dcjizheng_blocker");
-					});
-				},
-				filterCard: function (card) {
-					return true;
-				},
-				visible: true,
-				filterTarget: function (card, player, target) {
-					return target != player && target.hasZhuSkill("dcjizheng", player) && !target.hasSkill("dcjizheng_blocker");
-				},
-				async content(event, trigger, player) {
-					const { cards, targets } = event;
-					await player.give(cards, targets[0]);
-					targets[0].addTempSkill("dcjizheng_blocker", "phaseUseEnd");
-					if (player.group == "wu") {
-						player.addTempSkill("dcjizheng_buff");
-					} else {
-						player.addTempSkill("dcjizheng_buff", { player: "useCardAfter" });
-					}
-				},
-				ai: {
-					expose: 0.3,
-					order: 13,
-					result: {
-						player: 1,
-						target: 5,
-					},
-				},
-			},
-			blocker: {
-				charlotte: true,
-				onremove: true,
-			},
 			buff: {
 				charlotte: true,
-				mod: {
-					targetInRange: function (card, player) {
-						return true;
-					},
+				trigger: {
+					player: "phaseUseBegin",
 				},
-			},
+				init:(player, skill) => player.storage[skill] = [],
+				getIndex(event, player, name){
+					const { dcyuhui_buff: storage } = player.storage;
+					return storage.length;
+				},
+				async cost(event, trigger, player, target) {
+					const { dcyuhui_buff: storage } = player.storage;
+					const { result } = await player.chooseToGive(storage[0], card => {
+						return get.color(card) == "red" && get.type(card) == "basic";
+					});
+					storage.shift();
+					if (!storage.length) {
+						player.removeSkill("dcyuhui_buff");
+					}
+					if (result.bool) {
+						const { result: targets } =  await player.chooseTarget(`斡衡：令一名角色摸或弃置一张牌`, lib.filter.notMe);
+						await player.useSkill("dcwoheng", targets);
+					}
+					event.result = {bool: true};
+				},
+				async content(event, trigger, player) {},
+			}
 		},
 	},
 	//吕据
