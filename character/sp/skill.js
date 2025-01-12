@@ -445,7 +445,7 @@ const skills = {
 			for (const card of cardPile) {
 				if (get.color(card) == "red") {
 					redCards.push(card);
-					if (redCards.length >= 5) break;
+					if (redCards.length >= 4) break;
 				} else break;
 			}
 			const { result } = await player
@@ -488,7 +488,7 @@ const skills = {
 					.chooseCardButton(cards, true, "思泣：请选择要使用的牌")
 					.set("filterButton", button => {
 						const card = button.link;
-						if (["tao", "jiu", "wuzhong"].includes(card.name) || get.type(card) == "equip") return game.hasPlayer(target => lib.filter.targetEnabled2(card, get.player(), target));
+						if (["tao", "wuzhong"].includes(card.name) || get.type(card) == "equip") return game.hasPlayer(target => lib.filter.targetEnabled2(card, get.player(), target));
 						return false;
 					})
 					.set("ai", button => {
