@@ -620,6 +620,12 @@ const translates = {
 	stardangchen_info: "出牌阶段开始时，你可以令一名角色交给你任意张牌，然后你本回合使用基本牌或普通锦囊牌时，可以进行一次判定，若判定的点数为其他角色此次其交给你牌的数量的倍数，则此牌额外结算一次。",
 	starjianyu: "翦羽",
 	starjianyu_info: "锁定技，其他角色在你回合内失去装备区的牌后，你摸一张牌。",
+	star_wenchou: "星文丑",
+	star_wenchou_prefix: "星",
+	starlianzhan: "连战",
+	starlianzhan_info: "当你使用伤害牌指定唯一目标时，你可以选择一项:1、多选择1个目标；2、此牌额外结算一次。然后，若你对目标角色造成伤害的次数为2，你可以回复1点体力(满体力改为摸两张牌)；为0，目标角色视为对你使用同名牌。",
+	starwenming: "威名",
+	starwenming_info: "锁定技，体力值小于你或本轮受到过你造成伤害的其他角色对你使用牌时，随机弃置一张手牌，若皆满足，则你摸一张牌。",
 };
 
 export default translates;

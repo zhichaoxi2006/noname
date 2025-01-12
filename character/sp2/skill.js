@@ -2,6 +2,126 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//文丑
+	starlianzhan: {
+		trigger: {
+			player: "useCardToPlayer"
+		},
+		filter(event, player){
+			if (event.targets.length !== 1) {
+				return false;
+			}
+			return get.tag(event.card, "damage") > 0.5;
+		},
+		filterx(event, player) {
+			const info = get.info(event.card);
+			if (info.allowMultiple == false) return false;
+			if (event.targets && !info.multitarget) {
+				if (
+					game.hasPlayer(function (current) {
+						return lib.filter.targetEnabled2(event.card, player, current) && !event.targets.includes(current);
+					})
+				) {
+					return true;
+				}
+			}
+			return false;
+		},
+		async cost(event, trigger, player) {
+			const { result } = await player.chooseButton(
+				[
+					"请选择一项",
+					[
+						[
+							["extraTarget", `使${get.translation(trigger.card)}增加一个目标`],
+							["extraEffect", `令${get.translation(trigger.card)}额外结算一次`],
+						],
+						"textbutton",
+					]
+				]
+			).set("filterButton", button => {
+				if (button.link == "extraTarget") {
+					return lib.skill.starlianzhan.filterx(trigger, get.player());
+				}
+				return true;
+			})
+			event.result = {
+				bool: result.bool,
+				cost_data: result.links
+			};
+		},
+		async content(event, trigger, player) {
+			const { cost_data } = event;
+			if (cost_data[0] == "extraTarget") {
+				const { result } = await player
+				.chooseTarget("请选择" + get.translation(trigger.card) + "的额外目标", true, function (card, player, target) {
+					var player = _status.event.player;
+					if (_status.event.targets.includes(target)) return false;
+					return lib.filter.targetEnabled2(_status.event.card, player, target);
+				})
+				.set("targets", trigger.targets)
+				.set("card", trigger.card)
+				.set("ai", function (target) {
+					var trigger = _status.event.getTrigger();
+					var player = _status.event.player;
+					return get.effect(target, trigger.card, player, player);
+				});
+				player.line(result.targets);
+           		trigger.targets.addArray(result.targets);
+			} else {
+				trigger.getParent().effectCount++;
+			}
+		},
+		group: "starlianzhan_check",
+		subSkill: {
+			check: {
+				trigger: {
+					player: "useCardAfter",
+				},
+				forced:true,
+				filter(event, player){
+					const history = player.getHistory("sourceDamage", evt => {
+						return event.targets.includes(evt.player) && evt.card == event.card;
+					});
+					return [0, 2].includes(history.length);
+				},
+				async content(event, trigger, player) {
+					const history = player.getHistory("sourceDamage", evt => {
+						return trigger.targets.includes(evt.player) && evt.card == trigger.card;
+					});
+					if (history.length == 0) {
+						for (const i of trigger.targets) {
+							await i.chooseUseTarget(trigger.card.name, true);
+						}
+					} else if(history.length == 2) {
+						const prompt = player.isDamaged() ? "回复1点体力" : "摸两张牌";
+						const { result } = await player.chooseBool(`连战：是否${prompt}？`);
+						const next = player.isDamaged() ? player.recover() : player.draw(2);
+						await next;
+					}
+				}
+			},
+		}
+	},
+	starwenming: {
+		trigger: {
+			target: "useCardToPlayer"
+		},
+		forced:true,
+		filter(event, player){
+			return event.player.getHp() < player.getHp() || player.getRoundHistory("sourceDamage", evt => {
+				return event.player == evt.player;
+			}).length > 0;
+		},
+		async content(event, trigger, player) {
+			trigger.player.randomDiscard();
+			if (trigger.player.getHp() < player.getHp() && player.getRoundHistory("sourceDamage", evt => {
+				return trigger.player == evt.player;
+			}).length > 0) {
+				await player.draw();
+			}
+		}
+	},
 	//丁奉
 	stardangchen: {
 		audio: 2,

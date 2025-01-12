@@ -24,7 +24,7 @@ const characterSort = {
 	sp2_kaiyang: ["star_sunjian"],
 	sp2_yaoguang: ["star_sunshangxiang", "star_dingfeng"],
 	sp2_tianxuan: ["star_xunyu", "star_fazheng"],
-	sp2_waitforsort: ["caobuxing", "re_maliang", "dc_jikang"],
+	sp2_waitforsort: ["caobuxing", "re_maliang", "dc_jikang", "star_wenchou"],
 };
 
 const characterSortTranslate = {
