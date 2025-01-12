@@ -476,7 +476,7 @@ const skills = {
 			while (cards.length) {
 				if (
 					cards.every(card => {
-						const name = ["tao", "jiu", "wuzhong"];
+						const name = ["tao", "wuzhong"];
 						if (name.includes(card.name) || get.type(card) == "equip") {
 							return !game.hasPlayer(target => lib.filter.targetEnabled2(card, player, target));
 						}
