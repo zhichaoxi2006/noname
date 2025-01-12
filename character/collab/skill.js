@@ -1424,20 +1424,22 @@ const skills = {
 				const solve = function (resolve, reject) {
 					return function (result, player) {
 						if (result && result.control && !answer_ok) {
-							resolve();
 							answered.remove(player);
 							if (result.control == sentences[0].split("，")[1 - goon]) {
+								resolve();
 								player.popup("回答正确", "wood");
 								game.log(player, "回答正确");
 								answer_ok = player;
 								gaifa.remove(player);
 							} else {
+								reject();
 								player.popup("回答错误", "fire");
 								game.log(player, "回答错误");
 							}
 						} else reject();
 					};
 				};
+				//等待第一位回答正确（兑现Promise）的玩家，若回答错误（Promise被拒绝）则继续等待
 				await Promise.any(
 					humans.map(current => {
 						return new Promise(async (resolve, reject) => {
