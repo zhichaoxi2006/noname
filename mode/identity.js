@@ -4294,6 +4294,7 @@ export default () => {
 				},
 				position: "he",
 				filterTarget: true,
+				prompt: "弃置一张非基本牌，对一名角色造成1点伤害",
 				check(card) {
 					return 7 - get.value(card);
 				},
@@ -4349,6 +4350,7 @@ export default () => {
 				viewAs: {
 					name: "tao",
 				},
+				prompt: "将一张牌当【桃】使用",
 				check(card) {
 					if (get.tag(card, "recover")) return 0;
 					return 9 - get.value(card);
