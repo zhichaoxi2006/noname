@@ -1754,7 +1754,7 @@ const skills = {
 		forced: true,
 		locked: false,
 		filter(event, player) {
-			if (player.getExpansions("sbqingjian").length >= Math.max(1, player.getHp() - 1)) return false;
+			if (player.getExpansions("sbqingjian").length >= Math.max(1, player.getHp() + 1)) return false;
 			if (event.name !== "cardsDiscard") {
 				if (event.position !== ui.discardPile) return false;
 				if (
@@ -1773,7 +1773,7 @@ const skills = {
 		group: "sbqingjian_give",
 		async content(event, trigger, player) {
 			let cards = trigger.cards.filterInD("od").slice();
-			const maxNum = Math.max(1, player.getHp() - 1);
+			const maxNum = Math.max(1, player.getHp() + 1);
 			const myLen = player.getExpansions("sbqingjian").length,
 				cardsLen = trigger.cards.length;
 			const num = Math.min(cardsLen, maxNum - myLen);
