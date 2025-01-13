@@ -11,7 +11,7 @@ const skills = {
 			if (event.targets.length !== 1) {
 				return false;
 			}
-			return get.tag(event.card, "damage") > 0.5;
+			return get.tag(event.card, "damage");
 		},
 		filterx(event, player) {
 			const info = get.info(event.card);
@@ -27,6 +27,7 @@ const skills = {
 			}
 			return false;
 		},
+		logTarget: "player",
 		async cost(event, trigger, player) {
 			const { result } = await player.chooseButton(
 				[
@@ -52,6 +53,7 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			const { cost_data } = event;
+			trigger.getParent().starlianzhan_check = true;
 			if (cost_data[0] == "extraTarget") {
 				const { result } = await player
 				.chooseTarget("请选择" + get.translation(trigger.card) + "的额外目标", true, function (card, player, target) {
@@ -80,6 +82,7 @@ const skills = {
 				},
 				forced:true,
 				filter(event, player){
+					if (!event.starlianzhan_check) return false;
 					const history = player.getHistory("sourceDamage", evt => {
 						return event.targets.includes(evt.player) && evt.card == event.card;
 					});
