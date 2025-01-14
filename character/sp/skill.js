@@ -94,6 +94,7 @@ const skills = {
 			name: "jiu",
 			isCard: true,
 		},
+		position: "hes",
 		viewAsFilter(player) {
 			const num = player.countUsed({ name: "jiu" }, true) + 1;
 			return player.countCards("hes", { suit: "club" }) >= num;
