@@ -2,6 +2,95 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//OL杨奉
+	oljiawei: {
+		trigger: {
+			global: "phaseEnd",
+		},
+		filter(event, player) {
+			if (!player.storage.oljiawei_targets) return false;
+			return player.countCards("h") > 0;
+		},
+		direct: true,
+		async content(event, trigger, player) {
+			const { targets } = trigger;
+			const next = player.chooseToUse();
+			next.set("targets", player.getStorage("oljiawei_targets"));
+			next.set("openskilldialog", get.prompt2("oljiawei"));
+			next.set("norestore", true);
+			next.set("_backupevent", "oljiawei_backup");
+			next.set("custom", {
+				add: {},
+				replace: { window: function () {} },
+			});
+			next.backup("oljiawei_backup");
+			await next;
+		},
+		group: ["oljiawei_check", "oljiawei_round"],
+		subSkill: {
+			round: {
+				trigger: {
+					source: "damageSource",
+				},
+				round: 1,
+				filter(event, player) {
+					return event.getParent(4).name == "oljiawei";
+				},
+				async cost(event, trigger, player) {
+					event.result = await player
+						.chooseTarget()
+						.set("prompt", `是否令你${player == _status.currentPhase ? `` : `或${get.translation(_status.currentPhase)}`}将手牌摸至手牌上限？（至多摸至5）`)
+						.set("filterTarget", function (_, player, target) {
+							return [_status.currentPhase, player].includes(target);
+						})
+						.set("ai", function(target) {
+							if (target.countCards("h") == 5 || target.countCards("h") == target.getHandcardLimit()) return 0;
+							if (target.hasSkillTag("nogain")) return 0;
+							return get.attitude(get.player(), target);
+						})
+						.forResult();
+				},
+				async content(event, trigger, player) {
+					const {
+						targets: [target],
+					} = event;
+					await target.drawTo(Math.min(5, target.getHandcardLimit()));
+				},
+			},
+			targets: {
+				charlotte: true,
+				onremove: true,
+			},
+			check: {
+				trigger: {
+					global: "shaMiss",
+				},
+				silent: true,
+				async content(event, trigger, player) {
+					player.addTempSkill("oljiawei_targets");
+					player.markAuto("oljiawei_targets", [trigger.target]);
+				},
+			},
+			backup: {
+				audio: "oljiawei",
+				filterCard: function (card) {
+					return get.itemtype(card) == "card";
+				},
+				position: "hs",
+				selectCard: [1, Infinity],
+				viewAs: {
+					name: "juedou",
+				},
+				filterTarget: function (card, player, target) {
+					return _status.event.targets && _status.event.targets.includes(target) && lib.filter.filterTarget.apply(this, arguments);
+				},
+				prompt: "将任意张牌当决斗使用",
+				check: function (card) {
+					return 7 - get.value(card);
+				},
+			},
+		},
+	},
 	//OL袁涣
 	olderu: {
 		audio: 2,

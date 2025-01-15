@@ -765,6 +765,7 @@ window.noname_character_rank = {
 		"yue_zhouyu",
 	],
 	bp: [
+		"olyangfeng",
 		"star_wenchou",
 		"ol_wujing",
 		"twodcspmachao",

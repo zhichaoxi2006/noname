@@ -14,16 +14,13 @@ const skills = {
 			if (_status.connectMode && player.countCards("h") > 0) return true;
 			return player.hasSha() || player.hasUsableCard("juedou");
 		},
-		async content (event, trigger, player) {
+		async content(event, trigger, player) {
 			await player
-				.chooseToUse(
-					function (card, player, event) {
-						var name = get.name(card);
-						if (name != "sha" && name != "juedou") return false;
-						return lib.filter.cardEnabled.apply(this, arguments);
-					},
-					"合击：是否对" + get.translation(trigger.targets[0]) + "使用一张【杀】或【决斗】？"
-				)
+				.chooseToUse(function (card, player, event) {
+					var name = get.name(card);
+					if (name != "sha" && name != "juedou") return false;
+					return lib.filter.cardEnabled.apply(this, arguments);
+				}, "合击：是否对" + get.translation(trigger.targets[0]) + "使用一张【杀】或【决斗】？")
 				.set("logSkill", "olheji")
 				.set("complexSelect", true)
 				.set("filterTarget", function (card, player, target) {
@@ -56,12 +53,12 @@ const skills = {
 					return (
 						num +
 						0.6 *
-						(_status.event.name == "chooseToUse" &&
+							(_status.event.name == "chooseToUse" &&
 							player.hasHistory("useCard", function (evt) {
 								return evt.card.name == "sha" && evt.cards.length == 1;
 							})
-							? 1
-							: -1)
+								? 1
+								: -1)
 					);
 			},
 		},
@@ -83,7 +80,7 @@ const skills = {
 					.indexOf(event) == 0
 			);
 		},
-		async content (event, trigger, player) {
+		async content(event, trigger, player) {
 			game.log(player, "将", trigger.card, "的花色改为", "#y♦");
 			trigger.card.suit = "diamond";
 			trigger.card.color = "red";
@@ -2396,7 +2393,7 @@ const skills = {
 				forced: true,
 				locked: false,
 				content() {
-					player.addMark("olsbliwen", ["useCard", "respond"].includes(trigger.name)  ? 1 : Math.min(3, 5 - player.countMark("olsbliwen")));
+					player.addMark("olsbliwen", ["useCard", "respond"].includes(trigger.name) ? 1 : Math.min(3, 5 - player.countMark("olsbliwen")));
 				},
 				mod: {
 					aiOrder(player, card, num) {

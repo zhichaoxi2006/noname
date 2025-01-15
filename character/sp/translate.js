@@ -1466,6 +1466,10 @@ const translates = {
 	olderu_info: "出牌阶段限一次，你可以猜测一名其他角色手牌中的基本牌牌名，若你:有猜对，你回复1点体力;有猜错，随机获得其一张基本牌:全部猜对，你将手牌摸至体力值。",
 	ollinjie: "临节",
 	ollinjie_info: "锁定技，你受到伤害后，来源弃置一张手牌，若为【杀】，你摸一张牌。",
+	ol_yangfeng: "OL杨奉",
+	ol_yangfeng_prefix: "OL",
+	oljiawei: "假威",
+	oljiawei_info: "【杀】被抵消的回合结束时，你可将任意张手牌当【决斗】对本回合抵消过【杀】的一名角色使用。每轮限一次，若此【决斗】造成伤害，你可令你或当前回合角色将手牌摸至手牌上限(至多摸至5)。",
 };
 
 export default translates;
