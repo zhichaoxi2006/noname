@@ -1715,7 +1715,7 @@ window.noname_character_rank = {
 		"ol_wuguotai",
 	],
 	bm: [
-		"sp_dongzhao",
+		"pot_dongzhao",
 		"panghong",
 		"star_dingfeng",
 		"yy_gongsunzan",
