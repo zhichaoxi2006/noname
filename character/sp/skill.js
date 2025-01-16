@@ -1072,7 +1072,20 @@ const skills = {
 			}
 		},
 		filter(event, player) {
-			return player.hasCard(card => get.info?.("olliyong")?.filterCard(card, player), "hes");
+			return player.hasCard(card => get.info?.("olliyong")?.filterCardx(card, player), "hes");
+		},
+		selectCard() {
+			const player = get.player();
+			if (!player.storage["olliyong"]) return [1, 1];
+			return [-1, -1];
+		},
+		filterCardx(card, player) {
+			const suits = get.event().olliyong_suits;
+			if (!player.storage["olliyong"]) {
+				if (suits.includes(get.suit(card))) return false;
+				return game.hasPlayer(target => player.canUse(get.autoViewAs({ name: "juedou" }, [card]), target));
+			}
+			return game.hasPlayer(target => target.canUse(new lib.element.VCard({ name: "juedou" }), player));
 		},
 		filterCard(card, player) {
 			const suits = get.event().olliyong_suits;
@@ -1080,8 +1093,7 @@ const skills = {
 				if (suits.includes(get.suit(card))) return false;
 				return game.hasPlayer(target => player.canUse(get.autoViewAs({ name: "juedou" }, [card]), target));
 			}
-			if (!suits.includes(get.suit(card)) || get.position(card) === "s" || !lib.filter.cardDiscardable(card, player)) return false;
-			return game.hasPlayer(target => target.canUse(new lib.element.VCard({ name: "juedou" }), player));
+			return false;
 		},
 		filterTarget(孩子们这就是武庙, player, target) {
 			if (!player.storage["olliyong"]) return player.canUse(get.autoViewAs({ name: "juedou" }, ui.selected.cards), target);
@@ -1109,7 +1121,9 @@ const skills = {
 			if (player.storage[event.name]) {
 				await player.useCard(get.autoViewAs({ name: "juedou" }, cards), target).set("cards", cards);
 			} else {
-				await player.discard(cards);
+				const suits = get.event().getParent("chooseToUse").olliyong_suits;
+				const card = get.cardPile(c => suits.includes(get.suit(c)), "cardPile");
+				await player.gain([card]);
 				await game.delay(0.5);
 				await target.useCard(new lib.element.VCard({ name: "juedou" }), player, "noai");
 			}
