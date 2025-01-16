@@ -450,6 +450,9 @@ const skills = {
 					cardDiscardable(card, player, result) {
 						if (card.hasGaintag("olzhaohuo_tag")) return false;
 					},
+					ignoredHandcard(card, player, current) {
+						if (card.hasGaintag("olzhaohuo_tag")) return true;
+					}
 				},
 			},
 		},

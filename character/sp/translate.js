@@ -1441,7 +1441,7 @@ const translates = {
 	ol_taoqian: "OL陶谦",
 	ol_taoqian_prefix: "OL",
 	olzhaohuo: "招祸",
-	olzhaohuo_info: "锁定技，一名角色于你的回合内首次受到伤害后，其须交给你一张手牌。本回合你不能使用、打出或弃置这些牌。",
+	olzhaohuo_info: "锁定技，一名角色于你的回合内首次受到伤害后，其须交给你一张手牌你不能使用、打出或弃置这些牌，且不计入手牌上限直到回合结束。",
 	olwenren: "温仁",
 	olwenren_info: "出牌阶段限一次，你可以选择任意名角色，其每满足一项便摸一张牌：1.没有手牌；2.手牌数小于等于你。",
 	olzongluan: "纵乱",
