@@ -739,6 +739,14 @@ const skills = {
 		forced: true,
 		async content(event, trigger, player) {
 			let num = 1;
+			let emptySlot = 0;
+			for (const i of [1, 2, 3, 4, 5]) {
+				emptySlot += player.countEmptySlot(i);
+			}
+			if (emptySlot == 0) {
+				event.finish();
+				return;
+			}
 			while (true) {
 				if (event.cards == undefined) event.cards = [];
 				const judgeEvent = player.judge();
@@ -751,7 +759,7 @@ const skills = {
 				} = await judgeEvent;
 				event.cards.push(card);
 				num++;
-				if (num > Math.max(player.countCards("e"), 1)) {
+				if (num > emptySlot) {
 					const color = event.cards
 						.map(c => get.color(c))
 						.unique()
@@ -839,15 +847,23 @@ const skills = {
 				forced: true,
 				async content(event, trigger, player) {
 					player.removeSkill(event.name);
-					player.addTempSkill("oljiaoyu_debuff");
+					for(const i of game.filterPlayer(c => player != c)) {
+						i.addTempSkill("oljiaoyu_debuff", {
+							global: ["phaseBeginStart", "phaseAfter"],
+							player: ["damageEnd"]
+						});
+						i.storage["oljiaoyu_debuff"] = player;
+					}
 					trigger.phaseList.splice(trigger.num, 0, "phaseUse|oljiaoyu");
 				},
 			},
 			debuff: {
 				charlotte: true,
+				onremove: true,
 				mod: {
 					cardEnabled(card, player) {
-						if (get.color(card) !== player.storage.oljiaoyu) {
+						const owner = player.storage.oljiaoyu_debuff;
+						if (owner.countCards("e", cardx => get.color(card) === get.color(cardx)) > 0) {
 							const event = get.event().getParent("phaseUse");
 							if (event?._extraPhaseReason === "oljiaoyu") return false;
 						}
