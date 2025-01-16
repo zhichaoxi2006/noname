@@ -119,7 +119,10 @@ const skills = {
 			player: "phaseBegin",
 		},
 		async cost(event, trigger, player) {
-			const { result } = await player.chooseTarget(lib.filter.notMe, get.prompt2("olsbchoulie"));
+			const { result } = await player.chooseTarget(lib.filter.notMe, get.prompt2("olsbchoulie"))
+				.set("ai", function(target) {
+					return get.effect(target, {name: "sha"}, player);
+				})
 			event.result = result;
 		},
 		async content(event, trigger, player) {
