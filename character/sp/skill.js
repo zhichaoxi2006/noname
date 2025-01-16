@@ -30,7 +30,7 @@ const skills = {
 		subSkill: {
 			round: {
 				trigger: {
-					source: "damageSource",
+					global: "damageSource",
 				},
 				round: 1,
 				filter(event, player) {
