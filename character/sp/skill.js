@@ -254,7 +254,6 @@ const skills = {
 			const { result: result2 } = await player.draw(result.control);
 			player.addGaintag(result2, "olfengwei");
 			player.addTempSkill(["olfengwei_buff", "olfengwei_debuff"], { global: "roundStart" });
-			player.addMark("olfengwei_debuff", result.control, false);
 		},
 		subSkill: {
 			debuff: {
@@ -264,11 +263,10 @@ const skills = {
 					player: "damageBegin1",
 				},
 				filter(event, player) {
-					return player.countMark("olfengwei_debuff") > 0;
+					return player.countCards("hs", card => card.hasGaintag("olfengwei")) > 0;
 				},
 				async content(event, trigger, player) {
 					trigger.num++;
-					player.removeMark("olfengwei_debuff", 1, false);
 				},
 			},
 			buff: {
@@ -320,8 +318,7 @@ const skills = {
 				return {
 					filterCard: true,
 					selectCard() {
-						const player = get.player();
-						const count = player.countMark("olzonghu_round") + 1;
+						const count = Math.min(3, game.roundNumber);
 						return [count, count];
 					},
 					lose: false,
@@ -335,8 +332,6 @@ const skills = {
 					},
 					log: false,
 					async precontent(event, trigger, player) {
-						player.addTempSkill("olzonghu_round", { global: "roundStart" });
-						player.addMark("olzonghu_round", 1, false);
 						const {
 							result: { cards },
 						} = event;
@@ -394,10 +389,6 @@ const skills = {
 			},
 		},
 		subSkill: {
-			round: {
-				charlotte: true,
-				onremove: true,
-			},
 			used: {
 				charlotte: true,
 				mark: true,

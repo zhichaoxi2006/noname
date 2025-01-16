@@ -1451,7 +1451,7 @@ const translates = {
 	olfengwei: "奉蔚",
 	olfengwei_info: "锁定技，每轮开始时，你摸一至四张牌（这些牌本轮不计入手牌上限），然后当你本轮前等量次受到伤害时，此伤害+1。",
 	olzonghu: "宗护",
-	olzonghu_info: "每回合限一次，当你需要使用【杀】或【闪】时，你可以将X张牌交给一名其他角色（X为本轮发动此技能的次数），视为使用之。",
+	olzonghu_info: "每回合限一次，当你需要使用【杀】或【闪】时，你可以将X张牌交给一名其他角色（X为本轮发动此技能的次数，至多为3），视为使用之。",
 	sp_ol_liubei: "SP刘备",
 	sp_ol_liubei_prefix: "SP",
 	spolxudai: "虚待",
