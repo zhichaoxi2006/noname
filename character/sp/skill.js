@@ -151,9 +151,10 @@ const skills = {
 		audio: 2,
 		limited: true,
 		trigger: {
-			player: ["useCard", "respond"],
+			player: ["useCard", "respond", "damageEnd"],
 		},
 		filter(event, player) {
+			if(event.name == "damage") return true;
 			if (!event.respondTo) return false;
 			return true;
 		},
@@ -186,15 +187,21 @@ const skills = {
 		position: "hes",
 		viewAsFilter(player) {
 			const num = player.countUsed({ name: "jiu" }, true) + 1;
-			return player.countCards("hes", { suit: "club" }) >= num;
+			return player.countCards("hes") >= num;
 		},
-		filterCard(card) {
-			return get.suit(card) == "club";
-		},
+		filterCard: true,
 		selectCard() {
 			const player = get.player();
 			const num = player.countUsed({ name: "jiu" }, true) + 1;
 			return [num, num];
+		},
+		async precontent(event, trigger, player) {
+			const { result } = event;
+			for (const i of result.cards) {
+				if (get.suit(i) !== "club") {
+					player.tempBanSkill("spolzhujiu");
+				}
+			}
 		},
 	},
 	spoljinglei: {
