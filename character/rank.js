@@ -765,11 +765,11 @@ window.noname_character_rank = {
 		"yue_zhouyu",
 	],
 	bp: [
-		"olyangfeng",
+		"ol_yangfeng",
 		"star_wenchou",
 		"ol_wujing",
-		"twodcspmachao",
-		"onedcspmachao",
+		"two_dc_sp_machao",
+		"one_dc_sp_machao",
 		"mb_xuezong",
 		"huan_dingshangwan",
 		"sp_ol_liubei",
@@ -1334,6 +1334,7 @@ window.noname_character_rank = {
 		"ol_jsrg_lvbu",
 	],
 	b: [
+		"wu_lukang",
 		"huan_huanggai",
 		"clan_wuyi",
 		"sb_guohuai",
