@@ -53,7 +53,7 @@ const skills = {
 				.forResult();
 			if (show) await target.showCards(show.cards);
 			if (numberx != 13) player.markAuto(event.name + "_used", target);
-			player.when({ global: "roundStart" }).then(() => (player.storage.dcjiduan_used = []));
+			player.when({ global: ["phaseBeginStart", "phaseEnd"] }).then(() => (player.storage.dcjiduan_used = []));
 			if (get.number(show.cards[0]) >= numberx) return;
 			const result = await player
 				.chooseControlList(get.prompt(event.name), ["令" + get.translation(target) + "摸手牌中没有的花色各一张牌", "令" + get.translation(target) + "弃置每种花色的手牌各一张"], true)
@@ -63,7 +63,7 @@ const skills = {
 				})
 				.set("target", target)
 				.forResult();
-			let suitx = [...new Set(target.getDiscardableCards(target, "h").map(item => get.suit(item, target)))];
+			let suitx = [...new Set(target.getCards("h").map(item => get.suit(item, target)))];
 			if (result.index == 0) {
 				let suits = lib.suit.filter(c => !suitx.includes(c));
 				let gains = [];
@@ -74,16 +74,18 @@ const skills = {
 				if (gains.length) await player.gain(gains, "gain2");
 			} else {
 				let num = target.getDiscardableCards(target, "h").length;
-				if (num)
+				if (num) {
 					await target
 						.chooseToDiscard("h", Math.min(suitx.length, num), true)
 						.set("filterCard", (card, player) => !ui.selected.cards.length || !ui.selected.cards.some(i => get.suit(i, player) === get.suit(card, player)))
 						.set("prompt", "请弃置不同花色的牌")
 						.set("complexCard", true)
 						.set("ai", function (card) {
-							if (!get.player().hasValueTarget(card)) return 5;
+							const player = get.player();
+							if (!player.hasValueTarget(card)) return 5;
 							return 5 - get.value(card);
 						});
+				}
 			}
 		},
 	},
