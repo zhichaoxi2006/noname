@@ -319,6 +319,7 @@ const skills = {
 						player.awakenSkill("potzhenfeng");
 						if (get.info(event.name).item === "recover") {
 							player.logSkill("potzhenfeng");
+							player.changeSkin({ characterName: "pot_taishici" }, "pot_taishici_shadow1");
 							await player.recover(2);
 						} else {
 							let dialog = [],
@@ -352,11 +353,25 @@ const skills = {
 								.forResult();
 							if (result?.bool && result.links?.length) {
 								player.logSkill("potzhenfeng", null, null, null, [get.rand(3, 4)]);
+								let changeList = [];
 								for (const link of result.links) {
 									const [change, skill] = link.split("|");
+									changeList.push(change);
 									player.storage[skill] = change;
 									player.popup(skill);
 									game.log(player, "修改", "#g【" + get.translation(skill) + "】", "的", "#yX", "为", "#g" + list.find(item => item[0] === change)[1]);
+								}
+								if (changeList.length > 1 && changeList[0] === changeList[1]) {
+									switch (changeList[0]) {
+										case "hp":
+											player.changeSkin({ characterName: "pot_taishici" }, "pot_taishici_shadow2");
+											break;
+										case "damagedHp":
+											player.changeSkin({ characterName: "pot_taishici" }, "pot_taishici_shadow3");
+											break;
+										case "countplayer":
+											player.changeSkin({ characterName: "pot_taishici" }, "pot_taishici_shadow4");
+									}
 								}
 							}
 						}

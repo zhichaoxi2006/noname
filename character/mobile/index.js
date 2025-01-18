@@ -41,6 +41,12 @@ game.import("character", function () {
 			scs_duangui: [["scs_duangui_dead", ["die:scs_duangui"]]],
 			scs_guosheng: [["scs_guosheng_dead", ["die:scs_guosheng"]]],
 			scs_gaowang: [["scs_gaowang_dead", ["die:scs_gaowang"]]],
+			pot_taishici: [
+				["pot_taishici_shadow1", ["die:pot_taishici"]],
+				["pot_taishici_shadow2", ["die:pot_taishici"]],
+				["pot_taishici_shadow3", ["die:pot_taishici"]],
+				["pot_taishici_shadow4", ["die:pot_taishici"]],
+			],
 		},
 		card: { ...cards },
 		skill: { ...skills },
