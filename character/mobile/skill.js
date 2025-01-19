@@ -168,10 +168,10 @@ const skills = {
 			return true;
 		},
 		async content(event, trigger, player) {
-			if(game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames("friend_zhugeliang"))) {
+			if(game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames(c, "friend_zhugeliang"))) {
 				player.storage[event.name].push("zhugeliang");
 			}
-			if(game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames("friend_pangtong"))) {
+			if(game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames(c, "friend_pangtong"))) {
 				player.storage[event.name].push("pangtong");
 			}
 		},
@@ -218,7 +218,7 @@ const skills = {
 		},
 		round: 1,
 		init(player, skill){
-			let bool = player.hasSkill("friendzhugelianggongli") && game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames("friend_pangtong"));
+			let bool = player.hasSkill("friendzhugelianggongli") && game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames(c, "friend_pangtong"));
 			player.storage[skill] = [
 				bool ? 4 : 3, 
 				null,
@@ -344,7 +344,7 @@ const skills = {
 						func(trigger.card) == i ||
 						(
 							player.hasSkill("friendzhugelianggongli") &&
-							game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames("friend_xushu")) &&
+							game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames(c, "friend_xushu")) &&
 							record.length === 0
 						)
 					) {
