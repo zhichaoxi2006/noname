@@ -926,6 +926,14 @@ const translates = {
 	spmiaolve_info: "游戏开始时，你获得两张【瞒天过海】；当你受到伤害后，你可以选择一项：1：摸两张牌；2：从牌堆或弃牌堆中获得一张智囊。",
 	spyingjia: "迎驾",
 	spyingjia_info: "限定技，一名角色的回合结束后，若你本回合使用了大于等于两张同名锦囊牌，你可以弃置一张手牌，令一名角色执行一个额外的回合，此额外回合开始时，其摸两张牌。",
+	friend_zhugeliang: "友诸葛亮",
+	friend_zhugeliang_prefix: "友",
+	friendyance: "演策",
+	friendyance_info: "每轮限一次，首轮开始时，或准备阶段，你可以选择一项：1：从牌堆中随机获得一张锦囊牌；2：执行“卧龙演策”。",
+	friendfangqiu: "方遒",
+	friendfangqiu_info: `限定技，当你执行“卧龙演策”后，你可以展示你的“卧龙演策”预测，若如此做，本次”卧龙演策”的预测全部验证后，执行效果的值均+1：若预测全部正确，复原此技能。`,
+	friendzhugelianggongli: "共砺",
+	friendzhugelianggongli_info: "锁定技，若友庞统在场且确认与你阵营一致，你执行“卧龙演策”初始可预测的牌数+1；若友徐庶在场且确认与你阵营一致你本局游戏“卧龙演策”预测的第一张牌的结果始终视为正确。",
 };
 
 export default translates;

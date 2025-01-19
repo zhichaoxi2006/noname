@@ -2,6 +2,214 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//牢又寄 —— 诸葛亮
+	friendyance: {
+		trigger: {
+			global: "roundStart",
+			player: "phaseZhunbeiBegin",
+		},
+		filter(event, player, name) {
+			if(name == "roundStart") return game.roundNumber === 1;
+			return true;
+		},
+		round: 1,
+		init(player, skill){
+			let bool = player.hasSkill("friendzhugelianggongli") && game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames("friend_pangtong"));
+			player.storage[skill] = [
+				bool ? 4 : 3, 
+				null,
+				[]
+			];
+		},
+		async cost(event, trigger, player) {
+			const { result } = await player.chooseButton([
+				"请选择一项",
+				[
+					[
+						["trick", `从牌堆中随机获得一张锦囊牌`],
+						["minigame", `执行“卧龙演策”`]
+					],
+					"textbutton"
+				]
+			]);
+			event.result = {
+				bool: result.bool,
+				cost_data: result,
+			};
+		},
+		async content(event, trigger, player) {
+			const { cost_data: { links: [choice] } } = event;
+			if (choice === "trick") {
+				const card = get.cardPile2(c=>get.type2(c) === "trick");
+				if (card) {
+					await player.gain(card, "draw");
+				} else {
+					player.chat("一无所获");
+				}
+			} else {
+				await lib.skill.friendyance.minigame(event, trigger, player);
+			}
+		},
+		/**
+		 * 卧龙演策
+		 * @param { GameEvent } event 
+		 * @param { GameEvent } trigger 
+		 * @param { Player } player 
+		 */
+		async minigame(event, trigger, player) {
+			const storage = player.getStorage("friendyance", [0, null, []]);
+			if(storage[0] === 0) {
+				return;
+			}
+			const { result: { control } } = await player.chooseControl("颜色预测", "类型预测")
+				.set("prompt", "请选择预测方式");
+			const type = lib.inpile.map(c=>get.type2(c)).unique();
+			const color = Object.keys(lib.color);
+			const list = [];
+			if (control === "颜色预测") {
+				list.addArray(color);
+				storage[1] = "color";
+			} else {
+				list.addArray(type);
+				storage[1] = "type";
+			};
+			const dialog = [];
+			for(const i of Array.from({length:storage[0]}, (_, k) => k)) {
+				const button = list.map(c=>[`${c}_${i}`, get.translation(c)]);
+				dialog.push(`第${get.cnNumber(i+1, true)}张牌的预测`);
+				dialog.push([
+					button,
+					"tdnodes"
+				]);
+			}
+			const { result: { links } } = await player.chooseButton(dialog, get.select(storage[0]))
+				.set("forced", true)
+				.set("filterButton", button => {
+					const { link } = button;
+					const list = [];
+					ui.selected.buttons.forEach(b=>{
+						const str = b.link;
+						const end = str.at(-1);
+						list.addArray(end)
+					});
+					if (list.includes(link.at(-1))) {
+						return false;
+					}
+					return true;
+				});
+			player.addSkill("friendyance_record");
+			for (const i of links) {
+				const index = i.at(-1);
+				const content = i.replace(`_${index}`, "");
+				storage[2][index] = content;
+				const record = player.getStorage("friendyance_record");
+				record[1].add(content);
+			}
+			await event.trigger("friendyance_minigame");
+		},
+		group: "friendyance_check",
+		subSkill: {
+			record: {
+				charlotte: true,
+				onremove: true,
+				init(player, skill) {
+					player.storage[skill] = [[], []];
+				},
+			},
+			check: {
+				trigger: {
+					global: "useCard",
+				},
+				forced: true,
+				filter(event, player){
+					const storage = player.getStorage("friendyance", [0, null, []]);
+					return storage[2].length;
+				},
+				async content(event, trigger, player) {
+					const storage = player.getStorage("friendyance", [0, null, []]);
+					let func, num = player.hasSkill("friendfangqiu_used") ? 1 : 0;
+					if (storage[1] === "color") {
+						func = get.color;
+					} else if(storage[1] === "type") {
+						func = get.type2;
+					}
+					const i = storage[2].shift();
+					const record = player.getStorage("friendyance_record");
+					if (
+						func(trigger.card) == i ||
+						(
+							player.hasSkill("friendzhugelianggongli") &&
+							game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames("friend_xushu")) &&
+							record.length === 0
+						)
+					) {
+						game.log(player, "预测","#y正确");
+						record[0].push(true);
+						if (record.filter(b=>b===true).length <= 5) {
+							await player.draw();
+						}
+					} else {
+						game.log(player, "预测","#r错误");
+						record[0].push(false);
+					}
+					if (storage[2].length === 0) {
+						const trueArr = record[0].filter(b=>b===true);
+						if (trueArr.length === 0) {
+							await player.loseHp(1 + num);
+							if(storage[0] > 0) {
+								storage[0] -= 1 + num;
+							}
+						} else if(trueArr.length * 2 < record.length) {
+							await player.chooseToDiscard(get.select(1 + num), true);
+						} else {
+							const { result: { control } } = await player.chooseControl(record[1])
+								.set("prompt", `请选择获得的牌`);
+							const card = get.cardPile2(c=>{
+								let func;
+								if (storage[1] === "color") {
+									func = get.color;
+								} else if(storage[1] === "type") {
+									func = get.type2;
+								}
+								return func(c) === control;
+							});
+							await player.gain([card], "draw");
+							if(trueArr.length === storage[0]) {
+								await player.draw(2 + num);
+								if (storage[0] < 7) {
+									storage[0]++;
+								}
+								if(player.hasSkill("friendfangqiu_used")) {
+									player.restoreSkill("friendfangqiu");
+								}
+							}
+						}
+						player.removeSkill("friendfangqiu");
+					}
+				},
+			},
+		}
+	},
+	friendfangqiu: {
+		limited: true,
+		trigger: {
+			player: "friendyance_minigame",
+		},
+		async content(event, trigger, player) {
+			const storage = player.getStorage("friendyance");
+			game.log(player, "的预测为：", ...storage[2].map(c=>[`#y${c}`, "、"]).flat());
+			player.addSkill("friendfangqiu_used");
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+			}
+		},
+	},
+	friendzhugelianggongli: {
+		locked: true,
+	},
 	//势董昭
 	spmiaolve: {
 		audio: 2,

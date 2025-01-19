@@ -1,4 +1,5 @@
 const characters = {
+	friend_zhugeliang: ["male", "qun", 3, ["friendyance", "friendfangqiu", "friendzhugelianggongli"]],
 	pot_dongzhao: ["male", "wei", 3, ["spmiaolve", "spyingjia"], ["character:tw_dongzhao"]],
 	mb_xuezong: ["male", "wu", 3, ["mbfunan", "mbjiexun"]],
 	pot_taishici: ["male", "wu", 4, ["pothanzhan", "potzhanlie", "potzhenfeng"]],
