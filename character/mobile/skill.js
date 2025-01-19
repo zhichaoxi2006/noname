@@ -4,6 +4,7 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 const skills = {
 	//牢又寄 —— 诸葛亮
 	friendyance: {
+		audio: 2,
 		trigger: {
 			global: "roundStart",
 			player: "phaseZhunbeiBegin",
@@ -117,6 +118,7 @@ const skills = {
 				},
 			},
 			check: {
+				audio: "friendyance",
 				trigger: {
 					global: "useCard",
 				},
@@ -191,6 +193,7 @@ const skills = {
 		}
 	},
 	friendfangqiu: {
+		audio: 2,
 		limited: true,
 		trigger: {
 			player: "friendyance_minigame",
