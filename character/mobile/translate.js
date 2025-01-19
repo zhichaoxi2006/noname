@@ -934,6 +934,18 @@ const translates = {
 	friendfangqiu_info: `限定技，当你执行“卧龙演策”后，你可以展示你的“卧龙演策”预测，若如此做，本次”卧龙演策”的预测全部验证后，执行效果的值均+1：若预测全部正确，复原此技能。`,
 	friendzhugelianggongli: "共砺",
 	friendzhugelianggongli_info: "锁定技，若友庞统在场且确认与你阵营一致，你执行“卧龙演策”初始可预测的牌数+1；若友徐庶在场且确认与你阵营一致你本局游戏“卧龙演策”预测的第一张牌的结果始终视为正确。",
+	friend_xushu: "友徐庶",
+	friend_xushu_prefix: "友",
+	friendxiaxing: "侠行",
+	friendxiaxing_info: "游戏开始时，你获得并使用【玄剑】；当【玄剑】进入弃牌堆时，你可以移除1个“启诲”标记并获得之。",
+	friendqihui: "启诲",
+	friendqihui_info: "锁定技，当你使用牌时，若你没有此牌对应类别的标记、你获得1个对应类别的“启诲”标记，若你拥有3个“启诲”标记，你移除2个“启诲”标记并选择一项：1：你回复1点体力并重铸一张牌；2：你摸两张牌，你使用的下一张牌不计入次数且无次数限制。",
+	friendxushugongli: "共砺",
+	friendxushugongli_info: "锁定技，若友诸葛亮在场且确认与你阵营一致，你本局游戏发动玄剑改为将一张手牌当【杀】使用；若友庞统在场且确认与你阵营一致、你本局游戏发动玄剑使用的【杀】无距离限制。",
+	xuanjian: "玄剑",
+	xuanjian_info: "你可以将一种花色的牌当作【杀】使用。",
+	xuanjian_skill: "玄剑",
+	xuanjian_skill_info: "你可以将一种花色的牌当作【杀】使用。",
 };
 
 export default translates;

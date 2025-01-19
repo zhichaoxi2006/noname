@@ -195,5 +195,26 @@ const cards = {
 		},
 		skills: ["dagongche_defend_skill", "mbquchong_effect"],
 	},
+	xuanjian: {
+		derivation: "friend_xushu",
+		distance: {
+			attackFrom: -2,
+		},
+		fullskin: true,
+		type: "equip",
+		subtype: "equip1",
+		ai: {
+			equipValue: function (card, player) {
+				return 4;
+			},
+			basic: {
+				equipValue: 5,
+			},
+			tag: {
+				valueswap: 1,
+			},
+		},
+		skills: ["xuanjian_skill"],
+	},
 };
 export default cards;

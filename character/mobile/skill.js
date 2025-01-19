@@ -2,6 +2,209 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//牢又寄 —— 徐庶
+	friendxiaxing: {
+		audio: 2,
+		trigger: {
+			global: "phaseBefore",
+			player: "enterGame",
+		},
+		filter(event, player) {
+			if(event.name === "phase") return game.phaseNumber === 0;
+			return true;
+		},
+		forced: true,
+		locked: true,
+		async content(event, trigger, player) {
+			const card = game.createCard2("xuanjian");
+			await player.gain([card], "gain2");
+			await player.chooseUseTarget(card, true);
+		},
+		group: "friendxiaxing_gain",
+		subSkill: {
+			gain: {
+				audio: "friendxiaxing",
+				trigger: {
+					global: ["loseEnd","equipEnd","addJudgeEnd","gainEnd","loseAsyncEnd","addToExpansionEnd"],
+				},
+				filter: function (event, player) {
+					const storage = player.getStorage("friendqihui");
+					if(storage.length === 0) return false;
+					const cards = event.getd();
+					if (cards) return cards.some(i => i.name == "xuanjian");
+					return false;
+				},
+				async cost(event, trigger, player) {
+					const storage = player.getStorage("friendqihui");
+					const { result: { links, bool } } = await player.chooseButton(
+						[
+							"选择你要移除的“启诲”标记",
+							[
+								storage.map(c=>[c, get.translation(c)]),
+								"tdnodes",
+							]
+						],
+					)
+					if (bool) {
+						storage.removeArray(links);	
+					}
+					event.result = {
+						bool: bool,
+					};
+				},
+				async content(event, trigger, player) {
+					const cards = trigger.getd(); 
+					const card = cards.find(i => i.name == "xuanjian");
+					await player.gain([card], "gain2");
+				},
+			}
+		},
+	},
+	friendqihui: {
+		audio: 2,
+		trigger: {
+			player: "useCard",
+		},
+		forced: true,
+		mark: true,
+		intro: {
+			content: "已记录：$",
+		},
+		init:(player, skill) => player.storage[skill] = [],
+		filter(event, player) {
+			const storage = player.getStorage("friendqihui");
+			return !storage.includes(get.type2(event.card));
+		},
+		async content(event, trigger, player) {
+			const storage = player.getStorage("friendqihui");
+			storage.add(get.type2(trigger.card));
+			player.updateMark("friendqihui");
+			if (storage.length === 3) {
+				const { result: { links } } = await player.chooseButton(
+					[
+						"选择你要移除的“启诲”标记",
+						[
+							storage.map(c=>[c, get.translation(c)]),
+							"tdnodes",
+						]
+					],
+					[2, 2],
+					true
+				)
+				storage.removeArray(links);
+				player.updateMark("friendqihui");
+				const { result } = await player.chooseButton(
+					[
+						"执行一项",
+						[
+							[
+								["recover", "回复1点体力并重铸一张牌"],
+								["draw", "摸两张牌，你使用的下一张牌不计入次数且无次数限制"],
+							],
+							"textbutton"
+						]
+					],
+					true,
+				);
+				if (result.bool) {
+					switch (result.links[0]) {
+						case "recover":
+							await player.recover();
+							const { result: { cards } } = await player.chooseCard()
+								.set("prompt", "请重铸一张牌")
+								.set("forced", true)
+							await player.recast(cards);
+							break;
+						case "draw":
+							await player.draw(2);
+							player.addSkill("friendqihui_unlimit");
+					}
+				}
+			}
+		},
+		subSkill: {
+			unlimit: {
+				charlotte: true,
+				mod: {
+					cardUsable: (card, player, target) => {
+						return true;
+					},
+				},
+				trigger: {
+					player: "useCard1",
+				},
+				forced: true,
+				popup: false,
+				silent: true,
+				firstDo: true,
+				content: function () {
+					player.removeSkill("friendqihui_unlimit");
+					var card = trigger.card;
+					if (!card.storage) card.storage = {};
+					card.storage.oltuishi = true;
+					if (trigger.addCount !== false) {
+						trigger.addCount = false;
+						player.getStat("card")[card.name]--;
+					}
+				},
+				mark: true,
+				intro: {
+					content: "使用的下一张牌不计入次数且无次数限制",
+				},
+			},
+		}
+	},
+	friendxushugongli: {
+		audio: 2,
+		trigger: {
+			global: "phaseBefore",
+			player: "enterGame",
+		},
+		init(player, skill) {
+			player.storage[skill] = [];
+		},
+		filter(event, player) {
+			if(event.name === "phase") return game.phaseNumber === 0;
+			return true;
+		},
+		async content(event, trigger, player) {
+			if(game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames("friend_zhugeliang"))) {
+				player.storage[event.name].push("zhugeliang");
+			}
+			if(game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames("friend_pangtong"))) {
+				player.storage[event.name].push("pangtong");
+			}
+		},
+	},
+	xuanjian_skill: {
+		enable: "chooseToUse",
+		mod: {
+			targetInRange(card, player, target) {
+				const evt = get.event();
+				const storage = player.getStorage("friendxushugongli");
+				if(storage.includes("pangtong") && evt.skill === "xuanjian_skill") {
+					return true;
+				}
+			},
+		},
+		viewAs: {
+			name: "sha",
+		},
+		filterCard(card) {
+			if(ui.selected.cards.length) {
+				return get.suit(card) === get.suit(ui.selected.cards[0]);
+			}
+			return true;
+		},
+		selectCard() {
+			const player = get.player();
+			const storage = player.getStorage("friendxushugongli");
+			if(ui.selected.cards.length && !storage.includes("zhugeliang")) {
+				return -1;
+			}
+			return 1;
+		},
+	},
 	//牢又寄 —— 诸葛亮
 	friendyance: {
 		audio: 2,
