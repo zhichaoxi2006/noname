@@ -2,6 +2,176 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//牢又寄 —— 庞统
+	friendmanjuan: {
+		audio: 2,
+		trigger: {
+			player: "gainAfter",
+			global: "loseAsyncAfter",
+		},
+		filter: function (event, player) {
+			if ( event.getg(player).length < 2) return false;
+			return event.getParent(2).name != "friendmanjuan";
+		},
+		async cost(event, trigger, player) {
+			const cards = trigger.getg(player);
+			const { result: {bool, moved} } = await player.chooseToMove("漫卷：将任意张牌以任意顺序置于牌堆顶")
+				.set("list", [
+						["牌堆顶", []],
+						[["本次获得的牌"], cards],
+					])
+			event.result = {
+				bool: Boolean(moved?.[0]?.length),
+				cost_data: moved,
+			}
+		},
+		async content(event, trigger, player) {
+			const cards = event.cost_data[0];
+			await player.lose(cards, ui.cardPile, "insert");
+			const list = [];
+			for (const i of cards) {
+				const card = get.cardPile(c=>{
+					if (list.includes(c)) return false;
+					return get.type2(c) != get.type2(i);
+				}, "discardPile");
+				if(list.length < 5) {
+					list.add(card);
+				}
+			}
+			await player.gain(list, "gain2");
+		},
+	},
+	friendyangming: {
+		trigger: {
+			player: "phaseUseEnd",
+		},
+		filter(event, player) {
+			return player.hasSkill("friendyangming_mark");
+		},
+		async content(event, trigger, player) {
+			let num = player.getStorage("friendpangtonggongli").includes("zhugeliang") ? 1 : 0;
+			num += _status.discarded.map(c=>get.suit(c)).unique().length;
+			const cards = get.cards(num);
+			let backup = cards.slice();
+			await player.showCards(cards);
+			while (cards.length) {
+				if (
+					cards.every(card => {
+						return !game.hasPlayer(target => lib.filter.targetEnabled2(card, player, target));
+					})
+				)
+					break;
+				const { result: result2 } = await player
+					.chooseCardButton(cards, true, "养名：请选择要使用的牌")
+					.set("filterButton", button => {
+						const card = button.link;
+						return game.hasPlayer(target => lib.filter.targetEnabled2(card, get.player(), target));
+					})
+					.set("ai", button => {
+						return get.player().getUseValue(button.link);
+					});
+				if (result2.bool) {
+					const card = result2.links[0];
+					game.broadcastAll(card => {
+						lib.skill.friendyangming_backup.viewAs = card;
+						lib.skill.friendyangming_backup.viewAs.cards = [card];
+					}, card);
+					const next = player.chooseToUse();
+					next.set("openskilldialog", `养名：是否使用${get.translation(card)}？`);
+					next.set("forced", true);
+					next.set("norestore", true);
+					next.set("_backupevent", "friendyangming_backup");
+					next.set("custom", {
+						add: {},
+						replace: { window: function () {} },
+					});
+					next.backup("friendyangming_backup");
+					next.set("addCount", false);
+					player
+						.when("chooseToUseBegin")
+						.filter(evt => evt === next)
+						.then(() => (trigger.filterCard = () => false));
+					const { result: result3 } = await next;
+					if (result3.bool) {
+						cards.remove(card);
+						continue;
+					}
+				}
+				break;
+			}
+			if (player.getStorage("friendpangtonggongli").includes("xushu")) {
+				let suit = lib.suit.slice();
+				player.getHistory("useCard").forEach(evt => {
+					suit.remove(get.suit(evt.card));
+				});
+				if (suit.length) {
+					const { result } = player.chooseCardButton(backup)
+						.set("filterButton", button => {
+							const { link } = button;
+							return !get.event("suit").includes(get.suit(link));
+						})
+						.set("suit", suit);
+					await player.gain(result.links, "gain2");
+				}
+			}
+		},
+		group: "friendyangming_check",
+		subSkill: {
+			backup: {
+				filterCard: () => false,
+				selectCard: -1,
+				filterTarget: lib.filter.targetEnabled2,
+				precontent() {
+					delete event.result.skill;
+					const name = event.result.card.name,
+						cards = event.result.card.cards.slice(),
+						rcard = cards[0];
+					event.result.cards = cards;
+					event.result.card = get.autoViewAs(rcard.name == name ? rcard : { name, isCard: true });
+				},
+			},
+			mark: {
+				charlotte:true,
+			},
+			check: {
+				trigger: {
+					player: "loseAfter",
+					global: ["equipAfter","addJudgeAfter","gainAfter","loseAsyncAfter","addToExpansionAfter"],
+				},
+				filter(event, player) {
+					if (!player.isPhaseUsing()) return false;
+					const evt = event.getl(player);
+					return evt && evt.cards2 && evt.cards2.length > 0 && player.countCards("h") === 0;
+				},
+				silent: true,
+				async content(event, trigger, player) {
+					player.addSkill("friendyangming_mark");
+				},
+			}
+		}
+	},
+	friendpangtonggongli: {
+		audio: 2,
+		trigger: {
+			global: "phaseBefore",
+			player: "enterGame",
+		},
+		init(player, skill) {
+			player.storage[skill] = [];
+		},
+		filter(event, player) {
+			if(event.name === "phase") return game.phaseNumber === 0;
+			return true;
+		},
+		async content(event, trigger, player) {
+			if(game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames(c, "friend_xushu"))) {
+				player.storage[event.name].push("friend_xushu");
+			}
+			if(game.hasPlayer(c=>c.isFriendOf(player) && get.is.playerNames(c, "friend_zhugeliang"))) {
+				player.storage[event.name].push("zhugeliang");
+			}
+		},
+	},
 	//牢又寄 —— 徐庶
 	friendxiaxing: {
 		audio: 2,

@@ -1336,6 +1336,7 @@ window.noname_character_rank = {
 		"ol_jsrg_lvbu",
 	],
 	b: [
+		"friend_pangtong",
 		"wu_lukang",
 		"huan_huanggai",
 		"clan_wuyi",

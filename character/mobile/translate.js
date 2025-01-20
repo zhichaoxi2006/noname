@@ -946,6 +946,14 @@ const translates = {
 	xuanjian_info: "你可以将一种花色的牌当作【杀】使用。",
 	xuanjian_skill: "玄剑",
 	xuanjian_skill_info: "你可以将一种花色的牌当作【杀】使用。",
+	friend_pangtong: "友庞统",
+	friend_pangtong_prefix: "友",
+	friendmanjuan: "漫卷",
+	friendmanjuan_info: "当你不因本技能一次性获得至少两张牌后，你可以将这些牌中的任意张牌以任意顺序置于牌堆顶。若如此做，你每放置一张牌，便从弃牌堆中随机获得一张与此牌类别不同的牌（单次至多获得五张）。",
+	friendyangming: "养名",
+	friendyangming_info: "出牌阶段结束时，若你本阶段失去过所有手牌，你可以亮出牌堆顶的X张牌(X为本回合进入过弃牌堆的牌的花色数)，使用其中任意张花色各不相同的牌（无次数限制）。",
+	friendpangtonggongli: "共砺",
+	friendpangtonggongli_info: "锁定技，若友诸葛亮在场且确认与你阵营一致，你本局游戏发动“养名”亮出牌的张数+1；若友徐庶在场且确认与你阵营一致，你本局游戏发动“养名”后，获得一张本次亮出牌中未使用过的花色的牌。",
 };
 
 export default translates;
