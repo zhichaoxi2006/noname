@@ -594,6 +594,7 @@ const skills = {
 		skillAnimation: true,
 		animationColor: "soil",
 		audio: "xinfuli",
+		limited: true,
 		enable: "chooseToUse",
 		locked: true,
 		init: function (player, skill) {
