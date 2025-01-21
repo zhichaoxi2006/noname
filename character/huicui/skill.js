@@ -13,20 +13,22 @@ const skills = {
 		},
 		intro: {
 			content(storage) {
-				if (!storage) return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用";
-				return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，其使用此牌，若造成伤害则此技能视为未使用。";
+				if (!storage) return "转换技，出牌阶段限一次，你可观看一名角色的手牌并选择一张牌，你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用";
+				return "转换技，出牌阶段限一次，你可观看一名角色的手牌并选择一张牌，其使用此牌，若造成伤害则此技能视为未使用。";
 			},
 		},
 		async content(event, trigger, player) {
 			const target = event.targets[0];
 			player.changeZhuanhuanji("dcpingzhi");
-			const { result } = await target.chooseCard("请选择一张手牌展示", true);
-			await target.showCards(result.cards);
+			const { result } = await player.choosePlayerCard(target)
+				.set("prompt", "请选择一张手牌展示")
+				.set("visible", true)
+				.set("forced", true);
 			if (player.storage.dcpingzhi) {
-				await target.discard(result.cards).set("discarder", player);
+				await target.discard(result.links).set("discarder", player);
 				await target.chooseUseTarget("huogong", [player], true);
 			} else {
-				await target.chooseUseTarget(result.cards[0]);
+				await target.chooseUseTarget(result.links[0]).set("forced", true);
 			}
 		},
 		group: "dcpingzhi_check",
