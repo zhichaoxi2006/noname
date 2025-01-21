@@ -1,4 +1,11 @@
 export default {
+	"#oljieyan1": "父高居殿陛，德当配其位。",
+	"#oljieyan2": "君子慎行，阿耶固君子，应有所不为。",
+	"#oljinghua1": "白驹失蹄，踏断谁家黄花？",
+	"#oljinghua2": "镜中花败，万般皆是虚影。",
+	"#olshuiyue1": "灵犀失乌角，奔于野，触山壁。",
+	"#olshuiyue2": "水中捧明月，月碎万点星光。",
+	"#ol_yuanji:die": "空捧冰心抱玉壶。",
 	"#spolxixiang1": "挥剑断浮云，诸君共西向！",
 	"#spolxixiang2": "西望故都，何忍君父辱于匹夫之手！",
 	"#spolaige1": "奈何力不齐，踌躇而雁行。",

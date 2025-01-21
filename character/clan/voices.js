@@ -1,4 +1,11 @@
 export default {
+	"#clananran1": "此身伟岸，何惧悠悠之口。",
+	"#clananran2": "天时在彼，何故抱残守缺。",
+	"#clangaobian1": "帝髦召甲士带兵，欲图不轨。",
+	"#clangaobian2": "晋公何在？君上欲谋反作乱！",
+	"#clanzhongliu_clan_wangshen1": "活水驱沧海，天下大势不可违。",
+	"#clanzhongliu_clan_wangshen2": "志随中流之水，可济沧海之云帆。",
+	"#clan_wangshen:die": "我有从龙之志，何惧万世骂名。",
 	"#clankaiji1": "开济国朝之心，可曰昭昭。",
 	"#clankaiji2": "开大胜之世，匡大魏之朝。",
 	"#clanzhongliu_clan_wangchang1": "吾族以国为重，故可为之中流。",
