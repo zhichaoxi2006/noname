@@ -20,8 +20,8 @@ const skills = {
 					attackRange(player, num) {
 						return num + player.countMark("hm_zhong_heart_skill_buff");
 					},
-					targetInRange: function(card){
-						if(card.name == "sha") return true;
+					targetInRange: function (card) {
+						if (card.name == "sha") return true;
 					},
 				},
 			},
@@ -222,18 +222,21 @@ const skills = {
 				if (!list.some(c => targets[0].canUse(c, targets[1], true))) {
 					break;
 				}
-				const next2 = targets[0].chooseCardButton(list, true);
-				next2.set("prompt", `选择一张牌使用对${get.translation(targets[1].name)}使用`);
-				next2.set("target", targets[0]);
-				next2.set("filterButton", function (button) {
-					const evt = _status.event;
-					return evt.target.canUse(button, targets[1], true);
-				});
+				const next2 = await targets[0]
+					.chooseToUse(function (card, player, event) {
+						let bool = get.tag(card, "damage");
+						if (!bool) return false;
+						return lib.filter.cardEnabled.apply(this, arguments);
+					}, "违谶：对" + get.translation(targets[1]) + "使用一张伤害牌")
+					.set("complexSelect", true)
+					.set("filterTarget", function (card, player, target) {
+						if (target != _status.event.sourcex && !ui.selected.targets.includes(_status.event.sourcex)) return false;
+						return lib.filter.targetEnabled.apply(this, arguments);
+					})
+					.set("sourcex", targets[1])
+					.set("forced", true)
 				const result2 = await next2.forResult();
-				if (result2.bool) {
-					list.removeArray(result2.links);
-					await targets[0].chooseUseTarget(result2.links[0], targets[1]);
-				} else {
+				if (!result2.bool) {
 					break;
 				}
 			}
@@ -1370,7 +1373,7 @@ const skills = {
 		enable: "phaseUse",
 		filterCard: card => get.color(card) == "red",
 		filter(event, player) {
-			return player.countCards("he", { color: "red" }) > 1;
+			return player.countCards("he", { color: "red" }) > 1 && player.hasUseTarget("juedou");
 		},
 		selectCard: 2,
 		position: "he",
@@ -1784,7 +1787,7 @@ const skills = {
 		enable: "phaseUse",
 		filterCard: card => get.color(card) == "black",
 		filter(event, player) {
-			return player.countCards("he", { color: "black" }) > 1;
+			return player.countCards("he", { color: "black" }) > 1 && player.hasUseTarget("sha");
 		},
 		selectCard: 2,
 		position: "he",

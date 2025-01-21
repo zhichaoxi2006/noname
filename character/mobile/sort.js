@@ -16,7 +16,8 @@ const characterSort = {
 	mobile_xlqk4: ["nanhualaoxian", "shichangshi", "sunhanhua"],
 	mobile_xlqk5: ["mb_zhangfen"],
 	mobile_longxue: ["mb_simafu", "mb_wenqin", "mb_simazhou", "mb_sp_guanqiujian", "mb_caomao", "chengji", "lizhaojiaobo", "mb_wangjing", "mb_jiachong"],
-	mobile_bingshiPack: ["pot_taishici"], //potential--潜在, 潜力, 可能, 电位, 潜能, 势
+	mobile_bingshiPack: ["pot_taishici", "pot_dongzhao"], //potential--潜在, 潜力, 可能, 电位, 潜能, 势
+	mobile_laoyouji: ["friend_zhugeliang", "friend_xushu", "friend_pangtong"],
 	mobile_standard: ["xin_xiahoudun", "xin_zhangfei", "old_yuanshu"],
 	mobile_shenhua_feng: ["re_xiaoqiao", "xin_zhoutai"],
 	mobile_shenhua_huo: ["re_pangtong", "re_sp_zhugeliang", "re_xunyu", "re_dianwei", "re_yanwen", "xin_yuanshao"],
@@ -29,7 +30,7 @@ const characterSort = {
 	mobile_yijiang3: ["re_liru", "xin_jianyong", "xin_zhuran", "xin_guohuai", "xin_panzhangmazhong", "xin_fuhuanghou", "re_yufan"],
 	mobile_yijiang4: ["xin_zhoucang", "xin_caifuren", "xin_guyong", "xin_sunluban", "xin_caozhen", "xin_jushou", "xin_wuyi", "xin_zhuhuan", "re_chenqun"],
 	mobile_yijiang5: ["xin_zhangyi", "xin_sunxiu", "xin_quancong", "xin_zhuzhi", "xin_caoxiu"],
-	mobile_yijiang7: ["re_jikang"],
+	mobile_yijiang7: ["re_jikang", "mb_xuezong"],
 	mobile_changshi: ["scs_zhangrang", "scs_zhaozhong", "scs_sunzhang", "scs_bilan", "scs_xiayun", "scs_hankui", "scs_lisong", "scs_duangui", "scs_guosheng", "scs_gaowang"],
 };
 
@@ -65,6 +66,7 @@ const characterSortTranslate = {
 	mobile_xlqk5: "袖里乾坤·组5",
 	mobile_longxue: "龙血玄黄",
 	mobile_bingshiPack: "兵势篇",
+	mobile_laoyouji: "老友季",
 	mobile_others: "其他",
 	mobile_changshi: "十常侍单体",
 };

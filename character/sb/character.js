@@ -7,7 +7,7 @@ const characters = {
 	sb_handang: ["male", "wu", 4, ["sbgongqi", "sbjiefan"]],
 	sb_gongsunzan: ["male", "qun", 4, ["sbyicong", "sbqiaomeng"], ["name:公孙|瓒"]],
 	sb_gaoshun: ["male", "qun", 4, ["sbxianzhen", "sbjinjiu"]],
-	sb_xiahoudun: ["male", "wei", 4, ["sbganglie", "sbqingjian"], ["name:夏侯|惇"]],
+	sb_xiahoudun: ["male", "wei", "4/4/1", ["sbganglie", "sbqingjian"], ["name:夏侯|惇"]],
 	sb_xunyu: ["male", "wei", 3, ["sbquhu", "sbjieming"]],
 	sb_caopi: ["male", "wei", 3, ["sbxingshang", "sbfangzhu", "sbsongwei"], ["zhu"]],
 	sb_guanyu: ["male", "shu", 4, ["sbwusheng", "sbyijue"]],

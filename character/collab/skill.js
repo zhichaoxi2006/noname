@@ -204,6 +204,9 @@ const skills = {
 			},
 		},
 		hiddenCard(player, name) {
+			if (get.type(name) !== "basic") {
+				return false;
+			}
 			return (
 				lib.inpile.includes(name) &&
 				player.hasCard(card => {

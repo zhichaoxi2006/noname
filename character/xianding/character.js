@@ -1,6 +1,9 @@
 const characters = {
+	wu_lukang: ["male", "wu", 4, ["dckegou", "dcjiduan", "dcdixian"]],
+	two_dc_sp_machao: ["male", "qun", 4, ["twodcspzhuiji", "twodcspshichou"]],
+	one_dc_sp_machao: ["male", "qun", 4, ["onedcspzhuiji", "onedcspshichou"]],
 	sunba: ["male", "wu", 3, ["dcjiedang", "dcjidi"]],
-	v_sunquan: ["male", "wu", 4, ["dcwoheng", "dcjizheng"]],
+	v_sunquan: ["male", "wu", 4, ["dcwoheng", "dcyuhui"]],
 	moqiongshu: ["female", "wei", 3, ["dcwanchan", "dcjiangzhi"]],
 	v_zhangliao: ["male", "qun", 4, ["dcyuxi", "dcporong"]],
 	pangfengyi: ["female", "shu", 3, ["dcyitong", "dcpeiniang"]],

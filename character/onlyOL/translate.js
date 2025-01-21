@@ -5,8 +5,8 @@ const translates = {
 	ol_sb_zhangxiu_prefix: "OL谋",
 	olsbchoulie: "仇猎",
 	olsbchoulie_info: "限定技，回合开始时，你可选择一名其他角色。本回合你的每个阶段开始时，你可弃置一张牌视为对其使用一张无视防具的【杀】。 其可弃置一张基本牌或武器牌令此【杀】无效。",
-	olsbzhunjiao: "追剿",
-	olsbzhunjiao_info: "锁定技，你使用【杀】时，若你使用的上一张牌未造成伤害，则你摸一张牌并令此【杀】伤害+1,此【杀】结算后，若仍未造成伤害，你弃置一张牌。",
+	olsbzhuijiao: "追剿",
+	olsbzhuijiao_info: "锁定技，你使用【杀】时，若你使用的上一张牌未造成伤害，则你摸一张牌并令此【杀】伤害+1,此【杀】结算后，若仍未造成伤害，你弃置一张牌。",
 	ol_sb_zhaoyun: "OL谋赵云",
 	ol_sb_zhaoyun_prefix: "OL谋",
 	olsbnilan: "逆澜",
@@ -213,6 +213,12 @@ const translates = {
 	olsbjiaodi_info: "锁定技。①你的攻击范围视为你的体力值。②当你使用【杀】指定唯一目标时，若其攻击范围：小于等于你，你令此牌造成的伤害+1，获得其一张手牌；大于等于你，你弃置其区域一张牌，选择一名角色作为此牌的额外目标。",
 	olsbbaojing: "保京",
 	olsbbaojing_info: "出牌阶段限一次，你可以令一名其他角色的攻击范围+1或-1（至多减至1）直到你的下个出牌阶段开始。",
+	ol_wujing: "OL吴景",
+	ol_wujing_prefix: "OL",
+	olheji: "合击",
+	olheji_info: " 当一名角色使用红色的【杀】或【决斗】结算结束后，若此牌目标数为1，你可以对相同的目标使用一张【杀】或【决斗】，若你使用的牌不为转化牌，你从牌堆里获得一张红色牌。",
+	olliubing: "流兵",
+	olliubing_info: "锁定技，你每回合使用的第一张非虚拟 【杀】花色视为♦️。其他角色于其出牌阶段使用非黑色【杀】结算结束后，若此【杀】未造成过伤害，你获得之。",
 };
 
 export default translates;

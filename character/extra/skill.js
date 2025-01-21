@@ -20,14 +20,8 @@ const skills = {
 			debuff: {
 				mod: {
 					cardname(card, player) {
-						const suit = _status.discarded.map(item => get.suit(item));
-						const cards = player.getCards("h");
-						const first = cards[0],
-							last = cards[cards.length - 1];
-						if (![first, last].includes(card)) return;
-						if (!suit.includes(get.suit(first)) && !suit.includes(get.suit(last))) {
-							return "tiesuo";
-						}
+						const suits = _status.discarded.map(item => get.suit(item));
+						if(!suits.includes(get.suit(card))) return "tiesuo";
 					},
 					cardDiscardable(card, player) {
 						if (get.position(card) == "h") return false;
@@ -45,9 +39,6 @@ const skills = {
 						if (num > 0 && get.name(card, player) == "huogong") return 0;
 					},
 				},
-				ai: {
-					noSortCard: true,
-				},
 			},
 		},
 	},
@@ -57,15 +48,12 @@ const skills = {
 		forced: true,
 		mark: true,
 		marktext: "☯",
-		init: function (player, skill) {
-			player.storage[skill] = true;
-		},
 		intro: {
 			content: function (storage, player, skill) {
 				if (Boolean(player.storage[skill])) {
-					return "你使用牌指定唯一目标后，你令其摸一张牌。";
+					return "你使用牌指定唯一目标后，你对其造成一点火焰伤害。";
 				}
-				return "你使用牌指定唯一目标后，你对其造成一点火焰伤害。";
+				return "你使用牌指定唯一目标后，你令其摸一张牌。";
 			},
 		},
 		trigger: {
@@ -76,13 +64,13 @@ const skills = {
 			return event.targets.length == 1;
 		},
 		async content(event, trigger, player) {
+			player.changeZhuanhuanji("fengliao");
 			const { target } = trigger;
 			if (Boolean(player.storage["fengliao"])) {
 				await target.draw();
 			} else {
 				await target.damage("fire", player);
 			}
-			player.changeZhuanhuanji("fengliao");
 		},
 	},
 	kunyu: {
@@ -92,25 +80,42 @@ const skills = {
 		},
 		filter(event, player) {
 			const card = get.cardPile(function (c) {
-				if (get.natureList(c).includes("fire")) {
-					return true;
-				}
-				return get.translation(`${c.name}_info`).includes("火属性") && get.tag(c, "damage");
+				return get.tag(c, "fireDamage");;
 			}, "cardPile");
 			return Boolean(card);
 		},
 		forced: true,
 		async content(event, trigger, player) {
 			const card = get.cardPile(function (c) {
-				if (get.natureList(c).includes("fire")) {
-					return true;
-				}
-				return get.translation(`${c.name}_info`).includes("火属性") && get.tag(c, "damage");
+				return get.tag(c, "fireDamage");
 			}, "cardPile");
 			await game.cardsGotoSpecial(card);
 			game.log(player, "将", card, "移出游戏");
 			trigger.cancel();
 			await player.recoverTo(1);
+		},
+		group: "kunyu_debuff",
+		subSkill: {
+			debuff: {
+				trigger: {
+					global: "phaseBefore",
+					player: ["gainMaxHpBegin", "loseMaxHpBegin", "enterGame"],
+				},
+				forced: true,
+				filter(event, player) {
+					let bool = player.maxHp !== 1;
+					if (event.name === "phase") return bool && game.phaseNumber === 0;
+					return bool;
+				},
+				async content(event, trigger, player) {
+					if(["gainMaxHp", "loseMaxHp"].includes(trigger.name)) {
+						trigger.cancel();
+					} else {
+						player.maxHp = 1;
+						player.update();
+					}
+				},
+			},
 		},
 	},
 	//神黄忠

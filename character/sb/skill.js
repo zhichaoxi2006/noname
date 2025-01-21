@@ -4,10 +4,14 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 const skills = {
 	// 谋郭淮
 	sbjingce: {
-		audio: 2,
+		init: function (player, skill) {
+			player.storage.sbjingceCount = 0;
+		},
+		audio: 9,
 		trigger: {
 			player: "phaseEnd",
 		},
+		logAudio: index => (typeof index === "number" ? "sbjingce" + index + ".mp3" : 2),
 		async cost(event, trigger, player) {
 			const cards = player.getExpansions("sbjingce_expansions");
 			const gainMap = new Map();
@@ -63,7 +67,6 @@ const skills = {
 			player.storage[event.name] = gainMap;
 			const cards = Array.from(gainMap.keys());
 			const cardPile = ui.cardPile.childNodes;
-			game.log(cards);
 			for (let index = 0; index < cards.length; index++) {
 				const card = cards[index];
 				const next = player.lose([card], ui.cardPile);
@@ -78,7 +81,7 @@ const skills = {
 		group: ["sbjingce_expansions", "sbjingce_check"],
 		subSkill: {
 			expansions: {
-				audio: "sbjingce",
+				audio: ["sbjingce1.mp3", "sbjingce2.mp3"],
 				trigger: {
 					player: "phaseBegin",
 				},
@@ -95,30 +98,32 @@ const skills = {
 					const { sbjingce: storage } = player.storage;
 					if (storage) {
 						while (true) {
-							const index = Array.from(storage.keys())[0];
-							const arr = storage.get(index);
-							if (arr[0] == "none") {
-								await player.draw(arr[1]);
-							}
-							storage.delete(index);
 							if (storage.size == 0) {
 								break;
 							}
+							const index = Array.from(storage.keys())[0];
+							const arr = storage.get(index);
+							if (arr[0] == "none") {
+								player.storage.sbjingceCount++;
+								player.logSkill("sbjingce", null, null, null, player.storage.sbjingceCount >=6 ? [get.rand(7, 8)] : [get.rand(3, 4)]);
+								await player.draw(arr[1]);
+							}
+							storage.delete(index);
 						}
 					}
 					const cards = get.cards(3);
-					const next = player.addToExpansion(cards, player);
+					const next = player.addToExpansion(cards, player, "draw");
 					next.gaintag.add("sbjingce_expansions");
 					await next;
 					delete player.storage.sbjingce;
 				},
 			},
 			check: {
-				audio: 2,
 				trigger: {
 					global: ["equipAfter", "addJudgeAfter", "gainAfter", "addToExpansionAfter"],
 				},
-				silent: true,
+				forced: true,
+				popup: false,
 				filter(event, player) {
 					const { sbjingce: storage } = player.storage;
 					if (!storage) {
@@ -139,7 +144,12 @@ const skills = {
 					for (const card of cards) {
 						if (storage.has(card)) {
 							if (storage.get(card)[0] == trigger.player) {
+								player.storage.sbjingceCount++;
+								player.logSkill("sbjingce", null, null, null, player.storage.sbjingceCount >=6 ? [get.rand(7, 8)] : [get.rand(3, 4)]);
 								await player.draw(storage.get(card)[1]);
+							} else {
+								player.logSkill("sbjingce", null, null, null, player.storage.sbjingceCount >=7 ? [9] : [get.rand(5, 6)]);
+								player.storage.sbjingceCount = 0;
 							}
 							storage.delete(card);
 						}
@@ -1744,7 +1754,7 @@ const skills = {
 		forced: true,
 		locked: false,
 		filter(event, player) {
-			if (player.getExpansions("sbqingjian").length >= Math.max(1, player.getHp() - 1)) return false;
+			if (player.getExpansions("sbqingjian").length >= Math.max(1, player.getHp() + 1)) return false;
 			if (event.name !== "cardsDiscard") {
 				if (event.position !== ui.discardPile) return false;
 				if (
@@ -1763,7 +1773,7 @@ const skills = {
 		group: "sbqingjian_give",
 		async content(event, trigger, player) {
 			let cards = trigger.cards.filterInD("od").slice();
-			const maxNum = Math.max(1, player.getHp() - 1);
+			const maxNum = Math.max(1, player.getHp() + 1);
 			const myLen = player.getExpansions("sbqingjian").length,
 				cardsLen = trigger.cards.length;
 			const num = Math.min(cardsLen, maxNum - myLen);

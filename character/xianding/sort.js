@@ -12,7 +12,7 @@ const characterSort = {
 	sp2_yuxiu: ["dongguiren", "dc_tengfanglan", "zhangjinyun", "zhoubuyi", "dc_xujing", "guanyue", "zhugejing"],
 	sp2_qifu: ["dc_guansuo", "xin_baosanniang", "dc_zhaoxiang", "xurong", "zhangqiying"],
 	sp2_gaoshan: ["wanglang", "liuhui", "zhangjian"],
-	sp2_wumiao: ["wu_zhugeliang", "wu_luxun", "wu_guanyu", "wu_huangfusong"],
+	sp2_wumiao: ["wu_zhugeliang", "wu_luxun", "wu_guanyu", "wu_huangfusong", "wu_lukang"],
 	sp2_mouding: ["dc_sb_jiaxu", "dc_sb_lusu", "dc_sb_zhouyu", "dc_sb_simayi"],
 	sp2_zhonghu: ["dc_jiangji", "dc_wangling", "dc_simashi", "dc_caoshuang"],
 	sp2_zijing: ["dc_sb_zhugejin", "dc_sb_guanping"],
@@ -21,7 +21,7 @@ const characterSort = {
 	sp2_qizuo: ["dc_sb_jushou", "dc_sb_chenlin"],
 	sp2_weizhen_shu: ["v_zhangliao"],
 	sp2_weizhen_jun: ["v_sunquan"],
-	sp2_waitingforsort: [],
+	sp2_waitingforsort: ["onedcspzhuiji", "twodcspzhuiji"],
 };
 
 const characterSortTranslate = {

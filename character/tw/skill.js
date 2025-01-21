@@ -130,7 +130,6 @@ const skills = {
 					bool = true;
 				}
 			}
-			console.log(bool);
 			const {
 				result: { links },
 			} = bool
@@ -174,7 +173,7 @@ const skills = {
 						return target.canUse(juedou, current);
 					});
 				});
-				await player
+				await target
 					.chooseUseTarget({ name: "juedou", isCard: true }, cards)
 					.set("targetx", player)
 					.set("filterTarget", function (card, player, target) {

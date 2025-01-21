@@ -761,7 +761,6 @@ const skills = {
 							}
 							return false;
 						},
-						1
 					).length > 0
 				);
 			});

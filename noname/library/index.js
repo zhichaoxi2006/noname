@@ -14198,6 +14198,13 @@ export class Library {
 			},
 		],
 		[
+			"友",
+			{
+				color: "#AAABFF",
+				nature: "black",
+			},
+		],
+		[
 			"九鼎",
 			{
 				showName: "鼎",

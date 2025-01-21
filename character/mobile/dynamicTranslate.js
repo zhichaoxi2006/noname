@@ -67,5 +67,9 @@ const dynamicTranslates = {
 				}[player.storage.pothanzhan]
 		);
 	},
+	mbfunan(player){
+		if(player.storage.mbfunan_rewrite) return `其他角色使用或打出牌响应你使用的牌时，你可以获得其使用或打出的牌，且你使用以此法获得的牌结算结束后，若没有其他角色响应此牌，你摸一张牌。`;
+		return `其他角色使用或打出牌响应你使用的牌时，你可以获得其使用或打出的牌。`;
+	},
 };
 export default dynamicTranslates;

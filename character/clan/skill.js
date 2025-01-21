@@ -149,7 +149,7 @@ const skills = {
 			player: ["phaseUseBegin", "damageBegin"],
 		},
 		async cost(event, trigger, player) {
-			const count = player.countMark("clananran_used") + 1;
+			const count = Math.min(4, player.countMark("clananran_used") + 1);
 			const { result } = await player.chooseButton([
 				get.prompt2("clananran"),
 				[
@@ -1364,11 +1364,9 @@ const skills = {
 				return true;
 			return false;
 		},
-		async contentBefore(event, trigger, player) {
+		async content(event, trigger, player) {
 			player.addTempSkill("clanhuanghan_used");
 			player.addMark("clanhuanghan_used");
-		},
-		async content(event, trigger, player) {
 			const num = player.countMark("clanhuanghan_used");
 			await player.draw(get.cardNameLength(trigger.card));
 			if (player.isDamaged()) await player.chooseToDiscard(player.getDamagedHp(), "he", true);
