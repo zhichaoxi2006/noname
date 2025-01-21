@@ -94,6 +94,29 @@ const skills = {
 			trigger.cancel();
 			await player.recoverTo(1);
 		},
+		group: "kunyu_debuff",
+		subSkill: {
+			debuff: {
+				trigger: {
+					global: "phaseBefore",
+					player: ["gainMaxHpBegin", "loseMaxHpBegin", "enterGame"],
+				},
+				forced: true,
+				filter(event, player) {
+					let bool = player.maxHp !== 1;
+					if (event.name === "phase") return bool && game.phaseNumber === 0;
+					return bool;
+				},
+				async content(event, trigger, player) {
+					if(["gainMaxHp", "loseMaxHp"].includes(trigger.name)) {
+						trigger.cancel();
+					} else {
+						player.maxHp = 1;
+						player.update();
+					}
+				},
+			},
+		},
 	},
 	//神黄忠
 	//丁真神将，赤矢神将，爆头神将，吃人神将
