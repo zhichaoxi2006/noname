@@ -1120,6 +1120,7 @@ const skills = {
 		popup: false,
 		logTarget: (event, player) => game.filterPlayer(target => target != player).sortBySeat(),
 		async content(event, trigger, player) {
+			player.changeSkin({ characterName: "ol_sb_dongzhuo" }, "ol_sb_dongzhuo_shadow1");
 			const suit = get.suit(event.cards[0]);
 			for (const target of event.targets) {
 				const bool = await target
@@ -1291,7 +1292,6 @@ const skills = {
 		zhuSkill: true,
 		forced: true,
 		async content(event, trigger, player) {
-			player.changeSkin({ characterName: "ol_sb_dongzhuo" }, "ol_sb_dongzhuo_shadow1");
 			const skillName = event.name,
 				num = get.info(skillName).getNum(player);
 			if (get.info(skillName).filterx(player, num)) {
