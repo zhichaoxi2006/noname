@@ -4294,6 +4294,7 @@ export default () => {
 				},
 				position: "he",
 				filterTarget: true,
+				prompt: "弃置一张非基本牌，对一名角色造成1点伤害",
 				check(card) {
 					return 7 - get.value(card);
 				},
@@ -4349,6 +4350,7 @@ export default () => {
 				viewAs: {
 					name: "tao",
 				},
+				prompt: "将一张牌当【桃】使用",
 				check(card) {
 					if (get.tag(card, "recover")) return 0;
 					return 9 - get.value(card);
@@ -4392,28 +4394,31 @@ export default () => {
 						.chooseToDiscard("he", 2, get.prompt("sixiang_qinglong"), info)
 						.set("logSkill", "sixiang_qinglong")
 						.set("ai", function (card) {
-							if (_status.event.goon) return 7 - get.value(card);
+							const goon = get.event("goon");
+							if (goon) return goon - get.value(card);
 							return 0;
 						})
 						.set(
 							"goon",
 							(() => {
 								if (player.hasSkillTag("rejudge") && player.countCards("j") < 2) return false;
-								return player.hasCard(card => {
+								const cards = player.getCards("j", card => {
 									const name = card.viewAs || card.name;
-									if (name !== "lebu" || name !== "bingliang") return false;
-									return (
-										get.effect(
-											player,
-											{
-												name,
-												cards: [card],
-											},
-											player,
-											player
-										) < 0
+									return name !== "lebu" || name !== "bingliang";
+								});
+								return cards.reduce((acc, card) => {
+									const eff = get.effect(
+										player,
+										{
+											name: card.viewAs || card.name,
+											cards: [card],
+										},
+										player,
+										player
 									);
-								}, "j");
+									if (eff < 0) return Math.max(acc, Math.sqrt(-eff));
+									return acc;
+								}, 0);
 							})()
 						)
 						.forResult();
@@ -4504,6 +4509,9 @@ export default () => {
 						prompt: "将一张牌当【闪】使用或打出",
 						check(card) {
 							return 5 - get.value(card);
+						},
+						precontent() {
+							player.removeSkill("sixiang_baihu");
 						},
 						ai: {
 							respondShan: true,
