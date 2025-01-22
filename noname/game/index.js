@@ -1973,8 +1973,8 @@ export class Game extends GameCompatible {
 		let noEval = false;
 		if (typeof object == "function") {
 			if (isClass(object)) {
-				const filters = object.filter();
-				if (filters) object = new object();
+				const filters = object.filter?.();
+				if (filters ?? true) object = new object();
 				else return;
 			} else {
 				object = await (gnc.is.generatorFunc(object) ? gnc.of(object) : object)(lib, game, ui, get, ai, _status);
