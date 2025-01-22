@@ -71,7 +71,7 @@ const skills = {
 					const card = get.cardPile(card => get.suit(card) === suit && !gains.includes(card));
 					if (card) gains.push(card);
 				}
-				if (gains.length) await player.gain(gains, "gain2");
+				if (gains.length) await target.gain(gains, "gain2");
 			} else {
 				let num = target.getDiscardableCards(target, "h").length;
 				if (num) {
@@ -184,6 +184,7 @@ const skills = {
 				init(player, skill) {
 					player.storage[skill] = [[], []];
 				},
+				onremove: true,
 			},
 			directHit: {
 				audio: "twodcspshichou",

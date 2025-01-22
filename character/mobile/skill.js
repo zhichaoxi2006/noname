@@ -11,7 +11,7 @@ const skills = {
 		},
 		filter: function (event, player) {
 			if ( event.getg(player).length < 2) return false;
-			return event.getParent(2).name != "friendmanjuan";
+			return event.getParent().name != "friendmanjuan";
 		},
 		async cost(event, trigger, player) {
 			const cards = trigger.getg(player);
@@ -559,7 +559,7 @@ const skills = {
 								}
 							}
 						}
-						player.removeSkill("friendfangqiu");
+						player.removeSkill("friendfangqiu_used");
 					}
 				},
 			},
@@ -572,6 +572,7 @@ const skills = {
 			player: "friendyance_minigame",
 		},
 		async content(event, trigger, player) {
+			player.awakenSkill("friendfangqiu");
 			const storage = player.getStorage("friendyance");
 			game.log(player, "的预测为：", ...storage[2].map(c=>[`#y${c}`, "、"]).flat());
 			player.addSkill("friendfangqiu_used");
@@ -706,7 +707,7 @@ const skills = {
 	},
 	//手杀薛综
 	mbfunan: {
-		audio: 2,
+		audio: "funan",
 		trigger: {
 			global: ["respond","useCard"],
 		},
@@ -779,7 +780,7 @@ const skills = {
 		},
 	},
 	mbjiexun: {
-		audio: 2,
+		audio: "jiexun",
 		trigger: {
 			player: "phaseJieshuBegin",
 		},

@@ -293,10 +293,7 @@ const skills = {
 		audio: 2,
 		enable: "chooseToUse",
 		filter: function (event, player) {
-			const count = player.countMark("olzonghu_round") + 1;
-			if (player.countCards("he") < count) {
-				return false;
-			}
+			if (player.countCards("he") < Math.min(3, game.roundNumber)) return false;
 			if (event.type == "wuxie" || player.hasSkill("olzonghu_used")) return false;
 			for (var name of ["sha", "shan"]) {
 				if (event.filterCard({ name: name, isCard: true }, player, event)) return true;
@@ -3271,6 +3268,7 @@ const skills = {
 	},
 	//OL袁姬 —— by 刘巴
 	oljieyan: {
+		audio: 2,
 		trigger: {
 			global: ["equipAfter", "addJudgeAfter", "loseAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
 		},
@@ -3319,6 +3317,7 @@ const skills = {
 		},
 	},
 	oljinghua: {
+		audio: 2,
 		trigger: {
 			global: "roundStart",
 			player: "phaseBegin",
@@ -3348,6 +3347,7 @@ const skills = {
 		},
 	},
 	olshuiyue: {
+		audio: 2,
 		group: "olshuiyue_roundEnd",
 		trigger: {
 			player: "phaseEnd",
@@ -3367,7 +3367,7 @@ const skills = {
 				forced: true,
 				filter: (event, player) => player.hasCard(c => c.hasGaintag("olshuiyue"), "hej"),
 				async content(event, trigger, player) {
-					let cards = player.getCards("hej").filter(c => c.hasGaintag("olhuiyue"));
+					let cards = player.getCards("hej").filter(c => c.hasGaintag("olshuiyue"));
 					if (cards.length > 1) {
 						const { result } = await player
 							.chooseToMove("水月：将牌按顺序置于牌堆顶(左为上)", true)
