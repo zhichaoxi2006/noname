@@ -29,7 +29,7 @@ const skills = {
 					{ card, player } = event;
 				player.markAuto("dcmurui", [card])
 			}).set("addCount", false).set("logSkill", event.name).forResult()
-			event.trigger("dcmurui");
+			await event.trigger("dcmurui");
 		},
 	},
 	dcaoren: {
