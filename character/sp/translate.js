@@ -1470,6 +1470,12 @@ const translates = {
 	ol_yangfeng_prefix: "OL",
 	oljiawei: "假威",
 	oljiawei_info: "【杀】被抵消的回合结束时，你可将任意张手牌当【决斗】对本回合抵消过【杀】的一名角色使用。每轮限一次，若此【决斗】造成伤害，你可令你或当前回合角色将手牌摸至手牌上限(至多摸至5)。",
+	ol_wujing: "OL吴景",
+	ol_wujing_prefix: "OL",
+	olheji: "合击",
+	olheji_info: " 当一名角色使用红色的【杀】或【决斗】结算结束后，若此牌目标数为1，你可以对相同的目标使用一张【杀】或【决斗】，若你使用的牌不为转化牌，你从牌堆里获得一张红色牌。",
+	olliubing: "流兵",
+	olliubing_info: "锁定技，你每回合使用的第一张非虚拟 【杀】花色视为♦️。其他角色于其出牌阶段使用非黑色【杀】结算结束后，若此【杀】未造成过伤害，你获得之。",
 };
 
 export default translates;

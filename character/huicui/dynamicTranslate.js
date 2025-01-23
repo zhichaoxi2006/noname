@@ -54,6 +54,18 @@ const dynamicTranslates = {
 	dcpingzhi(player){
 		if (!player.storage.dcpingzhi) return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，<span class = 'bluetext'>阳：你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用</span>；阴：其使用此牌，若造成伤害则此技能视为未使用。";
 		return "转换技，出牌阶段限一次，你可令一名角色展示一张手牌，阳：你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用；<span class = 'bluetext'>阴：其使用此牌，若造成伤害则此技能视为未使用。</span>";
-	}
+	},
+	dcmurui: (player) => {
+		let filters = [
+			{ key: "roundStart", text: "1、每轮开始时;" },
+			{ key: "phaseAfter", text: "2、有角色死亡的回合结束后;" },
+			{ key: "phaseBegin", text: "3、你的回合开始时。" }
+		];
+
+		let storage = player.getStorage("dcmurui_filter");
+		let str = filters.filter(f => !storage.includes(f.key)).map(f => f.text).join('');
+
+		return `你可于以下时机点使用一张牌:${str || "无时机。"}若此牌造成了伤害，则你摸两张牌并删除对应选项。`;
+	},
 };
 export default dynamicTranslates;

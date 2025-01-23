@@ -2,6 +2,86 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//食岑昏
+	dcbaoshi: {
+		audio: 2,
+		trigger: {
+			player: "phaseDrawEnd",
+		},
+		async content(event, trigger, player) {
+			let num = 0, cards = []
+			while (true) {
+				let card = num == 0 ? get.cards(2) : get.cards();
+				num++
+				await game.cardsGotoOrdering(card);
+				await player.showCards(get.translation(player) + "亮出的牌", card).set("delay_time", 4);
+				game.log(player, "亮出了牌堆顶的", card)
+				let numx = cards.concat(card).filter(c => !["tao", "jiu"].includes(get.name(c, player))).reduce((sum, card) => sum + get.cardNameLength(card), 0)
+				if (numx > 10) return
+
+				cards = cards.concat(card)
+				await player.showCards(get.translation(player) + "已亮出的牌", cards).set("delay_time", 4);
+				const result = await player
+					.chooseControlList(
+						get.translation(event.name) + "：请选择一项已亮出牌名字数之和为" + numx + ")",
+						["获得" + get.translation(cards), "再亮出一张牌"], true)
+					.set("ai", () => {
+						if (numx > 7) return 0;
+						else return 1;
+					}).set("numx", numx).forResult();
+				if (result.index == 0) {
+					await player.gain(cards, "gain2")
+					return
+				}
+			}
+		},
+	},
+	dcxinggong: {
+		audio: 2,
+		enable: "phaseUse",
+		usable: 1,
+		filter: () => get.discarded().length,
+		onChooseToUse(event) {
+			if (game.online) return;
+			event.set("dcshixinggong_cards", get.discarded());
+		},
+		chooseButton: {
+			dialog(event, player) {
+				return ui.create.dialog("兴功：请选择要从弃牌堆获得的牌", event.dcshixinggong_cards, "hidden");
+			},
+			select: [1, Infinity],
+			check(button) {
+				const card = button.link
+				return get.value(card);
+			},
+			backup(links, player) {
+				return {
+					audio: "dcshixinggong",
+					card: links,
+					async content(event, trigger, player) {
+						const card = lib.skill.dcxinggong_backup.card;
+						await player.gain(card, "gain2")
+						const num = card.length - player.getHp()
+						if (num <= 0) return
+						for (let i = 0; i < num; i++) await player.damage(1, player)
+					},
+				};
+			},
+			prompt(links, player) {
+				return "兴功：是否获得" + get.translation(links) + "？";
+			},
+		},
+		ai: {
+			order: 15,
+			threaten: 2,
+			result: {
+				player: 10,
+			},
+		},
+		subSkill: {
+			backup: {},
+		},
+	},
 	//战神吕布
 	olfengzhu: {
 		audio: 1,

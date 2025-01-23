@@ -2,6 +2,52 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//张翼
+	dcmurui: {//direct打赢复活赛力
+		audio: 2,
+		trigger: {
+			global: ["roundStart", "phaseAfter"],
+			player: "phaseBegin",
+		},
+		filter(event, player, name) {
+			if (player.getStorage("dcmurui_filter").includes(name)) return false
+			return (name === "phaseAfter" && game.getGlobalHistory("everything", evt => evt.name == "die").length) || ["phaseBegin", "roundStart"].includes(name)
+		},
+		direct: true,
+		async content(event, trigger, player) {
+			let name = event.triggername
+			player.when({ player: ["useCardAfter", "dcmurui"], }).filter((evt, player, namex) => {
+				return namex === "dcmurui" || (player.getStorage("dcmurui").includes(evt.card) && ["sourceDamage", "damage"].some(type => game.hasPlayer2(current => current.hasHistory(type, evtx => evt.card === evtx.card))))
+			}).assign({ firstDo: true, }).then(() => {
+				if (event.triggername === "dcmurui") return
+				if (name === "roundStart") evtxx.set("dcaoren", true);
+				player.draw(2)
+				player.markAuto("dcmurui_filter", name)
+			}).vars({ name: name, evtxx: trigger })
+			const result = await player.chooseToUse("使用一张牌，若造成伤害则不能再于此时用牌").set("oncard", () => {
+				const event = get.event(),
+					{ card, player } = event;
+				player.markAuto("dcmurui", [card])
+			}).set("addCount", false).set("logSkill", event.name).forResult()
+			event.trigger("dcmurui");
+		},
+	},
+	dcaoren: {
+		audio: 2,
+		trigger: {
+			player: "useCardAfter",
+		},
+		filter: (event, player) => player.countMark("dcaoren_used") < player.getStorage("dcmurui_filter").length && get.type(event.card) === "basic" && event.cards.filterInD().length,
+		async content(event, trigger, player) {
+			await player.gain(trigger.cards.filterInD(), "gain2")
+			player.addMark("dcaoren_used", 1, false);
+			player.when({ global: "roundStart" }).assign({ firstDo: true, }).then(() => {
+				let num = player.countMark("dcaoren_used")
+				if (trigger.dcaoren && player.countMark("dcaoren_used")) num--
+				if (num > 0) player.removeMark("dcaoren_used", num)
+			})
+		},
+	},
 	//庞宏
 	dcpingzhi: {
 		zhuanhuanji: true,

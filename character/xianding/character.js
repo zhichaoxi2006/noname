@@ -1,4 +1,5 @@
 const characters = {
+	v_lvbu: ["male", "qun", 5, ["dcxiaowu", "dcbaguan"], []],
 	wu_lukang: ["male", "wu", 4, ["dckegou", "dcjiduan", "dcdixian"]],
 	two_dc_sp_machao: ["male", "qun", 4, ["twodcspzhuiji", "twodcspshichou"]],
 	one_dc_sp_machao: ["male", "qun", 4, ["onedcspzhuiji", "onedcspshichou"]],

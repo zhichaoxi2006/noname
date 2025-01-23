@@ -408,6 +408,9 @@ window.noname_character_rank = {
 		"ol_qinlang",
 	],
 	am: [
+		"v_lvbu",
+		"dc_zhangyì",
+		"shi_cenhun",
 		"v_sunquan",
 		"ol_sunxiu",
 		"clan_wangshen",
@@ -2147,6 +2150,9 @@ window.noname_character_rank = {
 			"ol_sb_dongzhuo",
 		],
 		epic: [
+			"v_lvbu",
+			"dc_zhangyì",
+			"shi_cenhun",
 			"ol_sb_zhaoyun",
 			"ol_sb_jushou",
 			"ol_guozhao",
