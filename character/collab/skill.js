@@ -231,7 +231,7 @@ const skills = {
 			return target !== player && target.countCards("h") > player.countCards("h");
 		},
 		async content(event, trigger, player) {
-			await player.gainPlayerCard(target, "h", true);
+			await player.gainPlayerCard(event.target, "h", true);
 			while (game.hasPlayer(target => get.info(event.name).filterTarget(萌新转型中, player, target)) && !player.isMaxHandcard()) {
 				const result = await player
 					.chooseTarget("是否继续获得手牌数大于你的一名角色的一张手牌？", get.info(event.name).filterTarget)
@@ -285,7 +285,7 @@ const skills = {
 			const [card] = event.cards;
 			player.addTempSkill("olyinhu_used", "phaseUseAfter");
 			player.markAuto("olyinhu_used", [[get.translation(get.type2(card)), "", card.name]]);
-			const next = target.damage();
+			const next = event.target.damage();
 			await next;
 			if (
 				game.getGlobalHistory("everything", evt => {
@@ -318,6 +318,9 @@ const skills = {
 	olmaotu: {
 		audio: true,
 		trigger: { global: "dyingAfter" },
+		filter(event, player) {
+			return !player.hasSkill("olmaotu_effect", null, false, false);
+		},
 		forced: true,
 		content() {
 			player.addTempSkill("olmaotu_effect", { player: "phaseBegin" });
@@ -358,7 +361,7 @@ const skills = {
 				num = result.numbers?.[0];
 			if (num) {
 				await player.loseHp(num);
-				await target.damage();
+				await event.target.damage(num);
 			}
 		},
 		ai: {
