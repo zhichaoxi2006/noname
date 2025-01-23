@@ -335,7 +335,7 @@ export const extensionMenu = function (connectMenu) {
 					var ext = {};
 					for (var i in dash4.content) {
 						try {
-							if (["arenaReady", "content", "precontent"].includes(i)) {
+							if (["arenaReady", "content", "prepare", "precontent"].includes(i)) {
 								ext[i] = security.exec2(`return (${dash4.content[i]});`).return;
 								if (typeof ext[i] != "function") {
 									throw "err";
@@ -2419,6 +2419,7 @@ export const extensionMenu = function (connectMenu) {
 					} else {
 						dashes.arenaReady.node.code = "function(){\n    \n}\n\n/*\n函数执行时机为界面创建之后\n导出时本段代码中的换行、缩进以及注释将被清除\n*/";
 						dashes.content.node.code = "function(config,pack){\n    \n}\n\n/*\n函数执行时机为游戏数据加载之后、界面加载之前\n参数1扩展选项（见选项代码）；参数2为扩展定义的武将、卡牌和技能等（可在此函数中修改）\n导出时本段代码中的换行、缩进以及注释将被清除\n*/";
+						dashes.prepare.node.code = "function(){\n    \n}\n\n/*\n函数执行时机玩游戏扩展加载之后\n导出时本段代码中的换行、缩进以及注释将被清除\n*/";
 						dashes.precontent.node.code = "function(){\n    \n}\n\n/*\n函数执行时机为游戏数据加载之前，联机模式亦可加载\n除添加模式外请慎用\n导出时本段代码中的换行、缩进以及注释将被清除\n*/";
 						dashes.config.node.code = 'config={\n    \n}\n\n/*\n示例：\nconfig={\n    switcher_example:{\n    name:"示例列表选项",\n        init:"3",\n        item:{"1":"一","2":"二","3":"三"}\n    },\n    toggle_example:{\n        name:"示例开关选项",\n        init:true\n    }\n}\n此例中传入的主代码函数的默认参数为{switcher_example:"3",toggle_example:true}\n导出时本段代码中的换行、缩进以及注释将被清除\n*/';
 						dashes.help.node.code = 'help={\n    \n}\n\ns/*\n示例：\nhelp={\n    "帮助条目":"<ul><li>列表1-条目1<li>列表1-条目2</ul><ol><li>列表2-条目1<li>列表2-条目2</ul>"\n}\n帮助内容将显示在菜单－选项－帮助中\n导出时本段代码中的换行、缩进以及注释将被清除\n*/';
@@ -2442,7 +2443,7 @@ export const extensionMenu = function (connectMenu) {
 							code = container.textarea.value;
 						}
 						try {
-							if (["arenaReady", "content", "precontent"].includes(link)) {
+							if (["arenaReady", "content", "prepare", "precontent"].includes(link)) {
 								var { func } = security.exec2(`func = ${code}`);
 								if (typeof func != "function") {
 									throw "err";
@@ -2532,6 +2533,14 @@ export const extensionMenu = function (connectMenu) {
 					clickCode,
 					"content",
 					"function(config,pack){\n    \n}\n\n/*\n函数执行时机为游戏数据加载之后、界面加载之前\n参数1扩展选项（见选项代码）；参数2为扩展定义的武将、卡牌和技能等（可在此函数中修改）\n导出时本段代码中的换行、缩进以及注释将被清除\n*/"
+				);
+				createCode(
+					"预",
+					"预备代码",
+					page,
+					clickCode,
+					"prepare",
+					"function(){\n    \n}\n\n/*\n函数执行时机为游戏扩展全部加载之后\n导出时本段代码中的换行、缩进以及注释将被清除\n*/"
 				);
 				createCode(
 					"启",
