@@ -1,5 +1,5 @@
 const characters = {
-	shi_cenhun: ["male", "wu", 3, ["dcxinggong", "dcbaoshi"], []],
+	shi_cenhun: ["male", "wu", 3, ["dcxinggong", "dcbaoshi"], ["name:岑|昏"]],
 	ol_jsrg_lvbu: ["male", "qun", 5, ["olfengzhu", "olyuyu", "ollbzhiji", "oljiejiu"], ["character:jsrg_lvbu", "name:吕|布"]],
 	weiqing: ["male", "qun", 3, ["dcbeijin"]],
 	liuxiecaojie: ["male", "qun", 2, ["dcjuanlv", "dcqixin"], ["name:刘|协-曹|节"]],
