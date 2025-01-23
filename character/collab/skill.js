@@ -224,6 +224,9 @@ const skills = {
 		enable: "phaseUse",
 		usable: 1,
 		selectTarget: 1,
+		filter(event, player) {
+			return game.hasPlayer(target => get.info("olzishu").filterTarget(萌新转型中, player, target));
+		},
 		filterTarget(card, player, target) {
 			return target !== player && target.countCards("h") > player.countCards("h");
 		},
@@ -279,8 +282,9 @@ const skills = {
 		},
 		position: "he",
 		async content(event, trigger, player) {
+			const [card] = event.cards;
 			player.addTempSkill("olyinhu_used", "phaseUseAfter");
-			player.markAuto("olyinhu_used", [[get.translation(get.type2(cards[0])), "", cards[0].name]]);
+			player.markAuto("olyinhu_used", [[get.translation(get.type2(card)), "", card.name]]);
 			const next = target.damage();
 			await next;
 			if (
