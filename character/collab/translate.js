@@ -162,6 +162,18 @@ const translates = {
 	oljiejiu: "戒酒",
 	oljiejiu_info: "锁定技。①你不能使用【酒】。②你可以将【酒】除【酒】外的任意基本牌使用。③游戏开始时，你令所有其他女性角色将其武将牌上随机一个技能替换为〖离间〗。",
 	ol_nianshou: "年兽",
+	ol_zishu: "子鼠",
+	ol_chouniu: "丑牛",
+	ol_yinhu: "寅虎",
+	ol_maotu: "卯兔",
+	ol_chenlong: "辰龙",
+	ol_sishe: "巳蛇",
+	ol_wuma: "午马",
+	ol_weiyang: "未羊",
+	ol_shenhou: "申猴",
+	ol_youji: "酉鸡",
+	ol_xugou: "戌狗",
+	ol_haizhu: "亥猪",
 	olsuichong: "岁崇",
 	get olsuichong_info() {
 		let cost;
