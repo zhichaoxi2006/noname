@@ -1096,7 +1096,7 @@ const skills = {
 			for (const owner of [player, target]) {
 				owner.addTempSkill("twniwo_block");
 				owner.addGaintag(
-					result.links.filter(i => get.owner(i) == owner),
+					result.links?.filter(i => get.owner(i) == owner),
 					"twniwo"
 				);
 			}
