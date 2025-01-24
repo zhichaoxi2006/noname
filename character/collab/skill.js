@@ -179,6 +179,7 @@ const skills = {
 										const list = ["摸牌数", "体力上限", "手牌上限"];
 										return get.event().controls.sort((a, b) => list.indexOf(a) - list.indexOf(b))[0];
 									})
+									.set("prompt", "兽魂：请选择一个数值项最小的选项，令其数值+1")
 									.forResult()
 							: { control: list[choices[0]] };
 					const choice = result?.control;
@@ -452,10 +453,12 @@ const skills = {
 		audio: true,
 		enable: "phaseUse",
 		filter(event, player) {
+			if (!player.hasCard(card => lib.filter.cardDiscardable(card, player), "he")) return false;
 			return game.hasPlayer(target => target.isDamaged());
 		},
 		filterCard(card, player) {
-			return !ui.selected.cards?.some(card => get.type2(card) === get.type2(ui.selected.cards[i]));
+			if (!lib.filter.cardDiscardable(card, player)) return false;
+			return !ui.selected.cards?.some(cardx => get.type2(card) === get.type2(cardx));
 		},
 		selectCard: [1, Infinity],
 		position: "he",
