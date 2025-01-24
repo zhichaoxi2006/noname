@@ -341,14 +341,10 @@ const skills = {
 	},
 	olchenlong: {
 		audio: true,
-		skillAnimation: true,
-		animationColor: "fire",
-		mark: true,
-		limited: true,
 		enable: "phaseUse",
 		filterTarget: lib.filter.notMe,
+		usable: 1,
 		async content(event, trigger, player) {
-			player.awakenSkill("olchenlong");
 			player.addTempSkill("olchenlong_temp");
 			const result = await player
 					.chooseNumbers(get.translation(event.name), [{ prompt: "请选择你要失去的体力值", min: 1, max: 2 }], true)
