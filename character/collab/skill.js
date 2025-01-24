@@ -13,7 +13,7 @@ const skills = {
 			if (!get.info("olsuichong").derivation.some(skill => !player.hasSkill(skill, null, false, false))) return false;
 			if (event.name !== "phaseZhunbei") return event.name !== "phase" || game.phaseNumber === 0;
 			if (!_status.connectMode && game.changeCoin && lib.config.coin < Math.max(10, game.countPlayer() + 1)) return false;
-			return player.getAllHistory("useSkill", evt => evt.skill === "olsuichong" && evt._trigger?.name === "phaseZhunbei").length < 3;
+			return game.getAllGlobalHistory("everything", evt => evt.name === "olsuichong" && evt.player === player && evt._trigger?.name === "phaseZhunbei").length < 3;
 		},
 		prompt2(event, player) {
 			const cost = !_status.connectMode && game.changeCoin;
