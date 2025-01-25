@@ -3641,7 +3641,7 @@ const skills = {
 		intro: {
 			content(storage, player) {
 				if (storage) return "你的回合外，一名角色使用或打出牌结算完成后，若此牌与“任”类别相同，则你可以令至多两名角色各摸两张牌。";
-				return "出牌阶段限一次，你可以弃置一张与“任”颜色相同的牌并对攻击范围内的一名角色造成1点伤害。";
+				return "出牌阶段限一次，你可以弃置与攻击范围内的一名角色体力值之差张与“任”颜色相同的牌（至少一张），对其造成1点伤害。";
 			},
 		},
 		trigger: { global: ["useCardAfter", "respondAfter"] },
@@ -3665,10 +3665,13 @@ const skills = {
 				return get.type2(event.card) == get.type2(cards[0]);
 			}
 		},
+		selectCard: [1, Infinity],
+		complexSelect: true,
+		complexCard: true,
 		filterTarget(card, player, target) {
-			return player.inRange(target);
+			return player.inRange(target) && ui.selected.cards.length == Math.max(1, Math.abs(player.getHp() - target.getHp()));
 		},
-		prompt: "弃置一张与“任”颜色相同的牌，对其造成1点伤害",
+		prompt: "弃置与攻击范围内的一名角色体力值之差张与“任”颜色相同的牌（至少一张），对其造成1点伤害",
 		subSkill: { used: { charlotte: true } },
 	},
 	//小乔
