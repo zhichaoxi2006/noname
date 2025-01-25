@@ -3,6 +3,84 @@ import cards from "../sp2/card.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//徐馨
+	dcyuxian: {
+		group: "dcyuxian_draw",
+		intro: {
+			content: (_, player) => "已记录花色:" + get.translation(player.getStorage("dcyuxian")),
+			markcount: (_, player) => player.getStorage("dcyuxian").length,
+			onunmark: true,
+		},
+		audio: 2,
+		trigger: {
+			player: "useCard",
+		},
+		filter: (event, player) => player.isPhaseUsing() && event.player === player && player.getStorage("dcyuxian").length < 4 && get.suit(event.card, player) !== "none",
+		forced: true,
+		locked: false,
+		content() {
+			player.storage[event.name] = player.getStorage(event.name).concat([get.suit(trigger.card, player)])
+			player.markSkill(event.name)
+			player.when({ player: "phaseUseBegin" }).then(() => {
+				player.storage.dcyuxian = []
+				player.unmarkSkill("dcyuxian")
+			}
+			)
+		},
+		subSkill: {
+			draw: {
+				trigger: {
+					global: "useCard",
+				},
+				audio: "dcyuxian",
+				filter: (event, player) => {
+					if (_status.currentPhase !== event.player || event.player === player) return false
+					const num = event.player.getHistory("useCard").indexOf(event)
+					return player.getStorage("dcyuxian")[num] === get.suit(event.card, event.player)
+				},
+				check: (event, player) => get.attitude(player, event.player) > 0,
+				prompt: (event, player) => "是否与" + get.translation(event.player) + "各摸一张牌",
+				async content(event, trigger, player) {
+					await game.asyncDraw([player, trigger.player])
+				},
+			},
+		},
+	},
+	dcminshan: {
+		audio: 2,
+		trigger: {
+			player: "damageEnd",
+		},
+		filter(event, player) {
+			return get.itemtype(event.cards) == "cards"
+		},
+		async cost(event, trigger, player) {
+			event.result = player.chooseTarget("你可令一名角色获得两张" + get.translation(get.suit(trigger.card, player)) + "牌").set('ai', (target) => {
+				let att = get.attitude(get.player(), target);
+				if (target.hasSkillTag('nogain')) att /= 6;
+				if (att > 0 && target.countCards("h", { name: 'tao' }) + target.getHp() < 3 && ["heart", "diamond"].includes(get.event("suit"))) return att * 2
+				return att;
+			}).set("suit", get.suit(trigger.card, player)).forResult();
+		},
+		async content(event, trigger, player) {
+			let cards = [];
+			for (let i = 0; i < 2; i++) {
+				let card = get.cardPile2((card) => get.suit(card, player) === get.suit(trigger.card, player) && !cards.includes(card));
+				if (card) cards.push(card);
+			}
+			if (cards.length) await event.targets[0].gain(cards, "draw");
+		},
+		ai: {
+			maixie: true,
+			"maixie_hp": true,
+			effect: {
+				target(card, player, target) {
+					if (player.hasSkillTag("jueqing", false, target)) return [1, -1];
+					if (get.tag(card, "damage")) return [1, 0.55];
+				},
+			},
+		},
+	},
 	//威吕布
 	dcbaguan: {
 		audio: 2,

@@ -1,4 +1,5 @@
 const characters = {
+	hanshiwuhu: ["male", "wei", 5, ["oljuejue", "olpimi"]],
 	ol_wujing: ["male", "wu", 4, ["olheji", "olliubing"]],
 	ol_yangfeng: ["male", "qun", 4, ["oljiawei"]],
 	ol_yuanhuan: ["male", "qun", 3, ["olderu", "ollinjie"]],
