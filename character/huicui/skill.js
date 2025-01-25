@@ -30,26 +30,31 @@ const skills = {
 		async content(event, trigger, player) {
 			player.addTempSkill(event.name + "_used", "roundStart");
 			player.markAuto(event.name + "_used", trigger.name)
+			const mark = player.getCards("h")
 			const result = await player.gainPlayerCard(event.targets[0], [1, 2], 'he', true).forResult();
-			player.addGaintag(result.cards.filter(c => get.type(c) === "basic"), "dcxianniang_tag")
+			const cardmark = result.cards.filter(c => !mark.includes(c))
+			if (cardmark.length) player.addMark(event.name + "_gain", cardmark.length, false)
+			player.addTempSkill(event.name + "_gain", "roundStart")
+			if (player.countMark(event.name + "_gain") > 2) await player.loseHp()
+			player.addGaintag(cardmark.filter(c => get.type(c) === "basic"), "Erudapr_dcxianniang_tag")
 			if (player.countCards('h')) {
 				const num = result.cards.length
 				const { result: { bool, cards, targets } } = await player.chooseCardTarget({
-					prompt: "献酿：你可将至多" + get.cnNumber(num) + "张牌交给一名其他角色",
+					prompt: "献酿：你可将至多" + get.cnNumber(num) + "张牌交给另一名其他角色",
 					filterCard: true,
 					position: 'he',
 					selectCard: [1, num],
 					filterTarget: (card, player, target) => ![player, event.targets[0]].includes(target),
 					ai1(card) {
 						if (card.name == 'du') return 10;
-						var player = _status.event.player;
+						let player = _status.event.player;
 						if (!game.hasPlayer(current => {
 							return get.attitude(player, current) > 0 && !current.hasSkillTag('nogain');
 						})) return 0;
 						return 1 / Math.max(0.1, get.value(card));
 					},
 					ai2(target) {
-						var player = _status.event.player, att = get.attitude(player, target);
+						let player = _status.event.player, att = get.attitude(player, target);
 						if (ui.selected.cards[0].name == 'du') return -att;
 						if (target.hasSkillTag('nogain')) att /= 6;
 						return att;
@@ -58,7 +63,7 @@ const skills = {
 				if (bool) {
 					player.line(targets[0]);
 					await targets[0].gain(cards, player, 'giveAuto');
-					targets[0].addGaintag(cards.filter(c => get.type(c) === "basic"), "dcxianniang_tag")
+					targets[0].addGaintag(cards.filter(c => get.type(c) === "basic"), "Erudapr_dcxianniang_tag")
 				}
 			}
 		},
@@ -94,6 +99,10 @@ const skills = {
 				},
 			},
 			used: {
+				charlotte: true,
+				onremove: true,
+			},
+			gain:{
 				charlotte: true,
 				onremove: true,
 			},

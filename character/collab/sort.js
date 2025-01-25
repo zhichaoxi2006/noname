@@ -5,8 +5,8 @@ const characterSort = {
 	collab_decade: ["libai", "xiaoyuehankehan", "zhutiexiong", "wu_zhutiexiong"],
 	collab_remake: ["dc_caocao", "dc_liubei", "dc_sunquan", "nezha", "dc_sunce", "dc_zhaoyun", "dc_wuyi"],
 	collab_duanwu_2024: ["quyuan"],
-	collab_dcdoudizhui: ["dc_noname", "xin_sunquan", "liuxiecaojie", "weiqing"],
-	collab_oldoudizhu: ["wuhujiang", "ol_jsrg_caocao", "ol_jsrg_lvbu", "shi_cenhun"],
+	collab_dcdoudizhui: ["dc_noname", "xin_sunquan", "liuxiecaojie", "weiqing", "shi_cenhun"],
+	collab_oldoudizhu: ["wuhujiang", "ol_jsrg_caocao", "ol_jsrg_lvbu"],
 	collab_anime: ["jiangziya", "shengongbao", "nanjixianweng"],
 };
 

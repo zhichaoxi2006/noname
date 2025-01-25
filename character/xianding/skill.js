@@ -188,7 +188,7 @@ const skills = {
 		enable: "phaseUse",
 		content() {
 			player.addSkill("dcxiaowu_effect");
-			var card = get.cardPile2((card) => {
+			let card = get.cardPile2((card) => {
 				return card.name == 'sha' || lib.skill.shencai.getStr(card).includes("【杀】");
 			});
 			if (card) player.gain(card, "draw").gaintag.add("dcxiaowu")
