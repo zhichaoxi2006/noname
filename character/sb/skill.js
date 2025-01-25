@@ -3665,13 +3665,10 @@ const skills = {
 				return get.type2(event.card) == get.type2(cards[0]);
 			}
 		},
-		selectCard: [1, Infinity],
-		complexSelect: true,
-		complexCard: true,
 		filterTarget(card, player, target) {
-			return player.inRange(target) && ui.selected.cards.length == Math.max(1, Math.abs(player.getHp() - target.getHp()));
+			return player.inRange(target);
 		},
-		prompt: "弃置与攻击范围内的一名角色体力值之差（至少为1）张与“任”颜色相同的牌，对其造成1点伤害",
+		prompt: "弃置一张与“任”颜色相同的牌，对其造成1点伤害",
 		subSkill: { used: { charlotte: true } },
 	},
 	//小乔
