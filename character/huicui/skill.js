@@ -119,7 +119,7 @@ const skills = {
 				if (event.triggername === "dcmurui") return
 				player.draw(2)
 				player.markAuto("dcmurui_filter", name)
-			})
+			}).vars({ name: name})
 			const result = await player.chooseToUse("使用一张牌，若造成伤害则不能再于此时用牌").set("oncard", () => {
 				const event = get.event(),
 					{ card, player } = event;

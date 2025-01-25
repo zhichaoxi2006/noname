@@ -37,7 +37,7 @@ const skills = {
 		},
 		async cost(event, trigger, player) {
 			let result, str = "的一张牌使此牌伤害或回复值+1且不计入次数限制，若使用者的手牌最多或最少，你摸一张牌且此技能本回合失效。"
-			if (player === trigger.player) result = player.chooseToDiscard("he", get.prompt2("olpimi") + "弃置" + get.translation(trigger.player) + str).set("ai", (card) => {
+			if (player === trigger.player) result = player.chooseToDiscard("he", get.prompt("olpimi") + "弃置" + get.translation(trigger.player) + str).set("ai", (card) => {
 				let player = get.player();
 				let val = player.getUseValue(card);
 				const att = get.attitude(player, trigger.targets[0]);
