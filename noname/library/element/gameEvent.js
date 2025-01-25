@@ -725,7 +725,6 @@ export class GameEvent {
 				let toadds = [];
 				if (typeof info.getIndex === "function") {
 					const indexedResult = info.getIndex(evt, player, evt.triggername);
-					game.print(indexedResult);
 					if (Array.isArray(indexedResult)) {
 						indexedResult.forEach(indexedData => {
 							toadds.push({
