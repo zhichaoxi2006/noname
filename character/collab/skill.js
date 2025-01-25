@@ -226,14 +226,14 @@ const skills = {
 		usable: 1,
 		selectTarget: 1,
 		filter(event, player) {
-			return game.hasPlayer(target => get.info("olzishu").filterTarget(萌新转型中, player, target));
+			return game.hasPlayer(target => get.info("olzishu").filterTarget(null, player, target));
 		},
-		filterTarget(card, player, target) {
+		filterTarget(萌新转型中, player, target) {
 			return target !== player && target.countCards("h") > player.countCards("h");
 		},
 		async content(event, trigger, player) {
 			await player.gainPlayerCard(event.target, "h", true);
-			while (game.hasPlayer(target => get.info(event.name).filterTarget(萌新转型中, player, target)) && !player.isMaxHandcard()) {
+			while (game.hasPlayer(target => get.info(event.name).filterTarget(null, player, target)) && !player.isMaxHandcard()) {
 				const result = await player
 					.chooseTarget("是否继续获得手牌数大于你的一名角色的一张手牌？", get.info(event.name).filterTarget)
 					.set("ai", function (target) {
