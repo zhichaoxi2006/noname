@@ -2094,6 +2094,7 @@ export class Game extends GameCompatible {
 			extensionPack.code = {
 				arenaReady,
 				content,
+				prepare,
 				precontent,
 				help,
 				config: objectConfig,
