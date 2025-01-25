@@ -98,6 +98,7 @@ window.noname_character_rank = {
 		"mb_chengui",
 		"jsrg_guozhao",
 		"sb_caopi",
+		"tw_sb_caopi",
 		"xia_yuzhenzi",
 		"dc_simashi",
 		"dc_sb_simayi",
@@ -359,6 +360,7 @@ window.noname_character_rank = {
 		"malingli",
 		"caoyi",
 		"sb_sp_zhugeliang",
+		"tw_sb_sp_zhugeliang",
 		"sb_zhugeliang",
 		"ol_jianyong",
 		"ol_sb_jiangwei",
@@ -1943,6 +1945,8 @@ window.noname_character_rank = {
 	d: ["chendong", "lvmeng", "huaxiong", "gongsunzan", "xuzhu", "old_huaxiong", "chengpu", "zhangwen", "dingyuan", "xin_chengpu", "sunshao", "tadun", "zangba", "junk_zhangrang", "junk_simayi", "key_youta", "old_chenqun", "duanwei", "wangxiang", "duji", "bianxi", "clan_wuban", "wangjun", "xin_wuyi", "xin_zhuzhi", "tw_guanqiujian", "tw_xiahouen", "tw_yl_luzhi", "junk_huangyueying", "junk_liubei", "new_caoren", "old_handang", "old_zhoutai", "tengfanglan", "junk_lidian", "junk_duanwei", "std_panfeng", "qianzhao"],
 	rarity: {
 		legend: [
+			"tw_sb_sp_zhugeliang",
+			"tw_sb_caopi",
 			"ol_nianshou",
 			"shen_taishici",
 			"pot_taishici",

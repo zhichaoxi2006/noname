@@ -14249,6 +14249,15 @@ export class Library {
 				nature: "purplemm",
 			},
 		],
+		[
+			"TW谋",
+			{
+				/**
+				 * @returns {string}
+				 */
+				getSpan: () => `${get.prefixSpan("TW")}${get.prefixSpan("谋")}`,
+			},
+		],
 	]);
 	groupnature = {
 		shen: "shen",
