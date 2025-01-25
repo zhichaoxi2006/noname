@@ -228,7 +228,7 @@ const skills = {
 		filter(event, player) {
 			return game.hasPlayer(target => get.info("olzishu").filterTarget(null, player, target));
 		},
-		filterTarget(萌新转型中, player, target) {
+		filterTarget(card, player, target) {
 			return target !== player && target.countCards("h") > player.countCards("h");
 		},
 		async content(event, trigger, player) {
