@@ -36,7 +36,7 @@ const skills = {
 			if (cardmark.length) player.addMark(event.name + "_gain", cardmark.length, false)
 			player.addTempSkill(event.name + "_gain", "roundStart")
 			if (player.countMark(event.name + "_gain") > 2) await player.loseHp()
-			player.addGaintag(cardmark.filter(c => get.type(c) === "basic"), "Erudapr_dcxianniang_tag")
+			player.addGaintag(cardmark.filter(c => get.type(c) === "basic"), "dcxianniang_tag")
 			if (player.countCards('h')) {
 				const num = result.cards.length
 				const { result: { bool, cards, targets } } = await player.chooseCardTarget({
@@ -63,7 +63,7 @@ const skills = {
 				if (bool) {
 					player.line(targets[0]);
 					await targets[0].gain(cards, player, 'giveAuto');
-					targets[0].addGaintag(cards.filter(c => get.type(c) === "basic"), "Erudapr_dcxianniang_tag")
+					targets[0].addGaintag(cards.filter(c => get.type(c) === "basic"), "dcxianniang_tag")
 				}
 			}
 		},
