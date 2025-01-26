@@ -2643,7 +2643,7 @@ const skills = {
 		filter(event, player) {
 			return (
 				player.hasSkill("mbpanxiang", null, false, false) &&
-				player.hasHistory("useSkill", evt => {
+				player.hasAllHistory("useSkill", evt => {
 					return evt.skill === "mbpanxiang" && evt.targets.includes(event.player);
 				})
 			);
