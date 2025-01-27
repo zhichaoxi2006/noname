@@ -11627,7 +11627,7 @@ export class Library {
 			},
 			content: function () {
 				"step 0";
-				player._groupChosen = true;
+				player._groupChosen = "double";
 				player.chooseControl(get.is.double(player.name1, true)).set("prompt", "请选择你的势力");
 				"step 1";
 				player.changeGroup(result.control);

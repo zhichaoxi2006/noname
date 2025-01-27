@@ -1044,7 +1044,7 @@ const skills = {
 			}
 			await player.loseHp();
 			const num = player.getDamagedHp();
-			if (num) await player.draw(num);
+			if (num) await player.draw(Math.min(2, num));
 		},
 	},
 	twfuxi: {
@@ -1281,17 +1281,25 @@ const skills = {
 		},
 		position: "hes",
 		precontent() {
-			player
-				.when({ player: ["useCard", "respond"] })
-				.filter(evt => evt.skill == "twliyuan")
-				.then(() => player.draw(2));
 			event.getParent().addCount = false;
+			player.addTempSkill("twliyuan_effect");
 		},
 		prompt: "将一张与你已废除的装备栏对应副类别的装备牌当【杀】使用或打出",
 		check(card) {
 			const val = get.value(card);
 			if (_status.event.name == "chooseToRespond") return 1 / Math.max(0.1, val);
 			return 6 - val;
+		},
+		subSkill: {
+			effect: {
+				trigger: { player: ["useCard", "respond"] },
+				filter: evt => evt.skill == "twliyuan",
+				forced: true,
+				popup: false,
+				content() {
+					player.draw();
+				},
+			},
 		},
 	},
 	twjifa: {

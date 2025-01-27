@@ -21,7 +21,7 @@ const skills = {
 				mod: {
 					cardname(card, player) {
 						const suits = _status.discarded.map(item => get.suit(item));
-						if(!suits.includes(get.suit(card))) return "tiesuo";
+						if (!suits.includes(get.suit(card))) return "tiesuo";
 					},
 					cardDiscardable(card, player) {
 						if (get.position(card) == "h") return false;
@@ -80,7 +80,7 @@ const skills = {
 		},
 		filter(event, player) {
 			const card = get.cardPile(function (c) {
-				return get.tag(c, "fireDamage");;
+				return get.tag(c, "fireDamage");
 			}, "cardPile");
 			return Boolean(card);
 		},
@@ -108,7 +108,7 @@ const skills = {
 					return bool;
 				},
 				async content(event, trigger, player) {
-					if(["gainMaxHp", "loseMaxHp"].includes(trigger.name)) {
+					if (["gainMaxHp", "loseMaxHp"].includes(trigger.name)) {
 						trigger.cancel();
 					} else {
 						player.maxHp = 1;
@@ -1181,10 +1181,39 @@ const skills = {
 				if (player.countMark("xinrenjie_used") >= 4) return false;
 			},
 		},
+		group: "xinrenjie_change",
 		subSkill: {
 			used: {
 				charlotte: true,
 				onremove: true,
+			},
+			change: {
+				audio: "xinrenjie",
+				trigger: {
+					global: "phaseBefore",
+					player: "enterGame",
+				},
+				filter(event, player) {
+					if (event.name === "phase" && game.phaseNumber > 0) return false;
+					if (!lib.group.some(group => group !== "shen")) return false;
+					return player.group === "shen" && player._groupChosen !== "kami";
+				},
+				async cost(event, trigger, player) {
+					const groups = lib.group.filter(group => group !== "shen");
+					const result = (event.result = await player
+						.chooseControl(groups, "cancel2")
+						.set("ai", () => {
+							const groups = get.event().controls.filter(group => !["wei", "shu", "wu", "qun"].includes(group));
+							return groups.length ? group.randomGet() : "cancel2";
+						})
+						.set("prompt", get.translation("xinrenjie") + "：是否变更势力？")
+						.forResult());
+					event.result.bool = typeof result.control === "string" && result.control !== "cancel2";
+					event.result.cost_data = result.control;
+				},
+				content() {
+					player.changeGroup(event.cost_data);
+				},
 			},
 		},
 	},

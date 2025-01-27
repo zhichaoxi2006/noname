@@ -306,7 +306,7 @@ const translates = {
 	sb_zhugejin: "谋诸葛瑾",
 	sb_zhugejin_prefix: "谋",
 	sbhuanshi: "缓释",
-	sbhuanshi_info: "一名角色的判定牌生效前，你可以观看牌堆顶的一张牌，然后可以用此牌或手牌中的一张牌替换之。",
+	sbhuanshi_info: "一名角色的判定牌生效前，你可以观看牌堆顶的一张牌，然后可以用此牌代替之或用一张手牌替换之。",
 	sbhuanshi_tag: "牌堆顶",
 	sbhongyuan: "弘援",
 	sbhongyuan_info: "蓄力技（1/3）。你一次性获得至少两张牌时，可以消耗1点蓄力值并令至多两名角色各摸一张牌；一名其他角色一次性失去至少两张牌时，你可以消耗1点蓄力值令其摸两张牌。",

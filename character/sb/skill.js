@@ -526,6 +526,7 @@ const skills = {
 				.set("judging", trigger.player.judging[0])
 				.set("pile", cardsx);
 
+			const gain = bool && cards?.[0] && !cards[0].hasGaintag("sbhuanshi_tag");
 			cardsx = player.getCards("s", card => card.hasGaintag("sbhuanshi_tag"));
 			if (cardsx.length) {
 				if (cards) {
@@ -551,9 +552,10 @@ const skills = {
 			event.result = {
 				bool: bool,
 				cards: cards,
-				skill_popup: false,
+				cost_data: gain,
 			};
 		},
+		popup: false,
 		async content(event, trigger, player) {
 			const cards = event.cards;
 			await player.respond(cards, "sbhuanshi", "highlight", "noOrdering");
@@ -566,7 +568,8 @@ const skills = {
 				}, trigger.player.judging[0]);
 				game.addVideo("deletenode", player, get.cardsInfo([trigger.player.judging[0].clone]));
 			}
-			game.cardsDiscard(trigger.player.judging[0]);
+			if (event.cost_data) await player.gain(trigger.player.judging, "gain2");
+			else await game.cardsDiscard(trigger.player.judging);
 			trigger.player.judging[0] = cards[0];
 			trigger.orderingCards.addArray(cards);
 			game.log(trigger.player, "的判定牌改为", cards[0]);
