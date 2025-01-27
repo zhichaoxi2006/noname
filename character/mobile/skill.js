@@ -872,13 +872,14 @@ const skills = {
 				filter: (event, player) => player.hasUseTarget(new lib.element.VCard({ name: "sha" }), false),
 				direct: true,
 				content() {
-					player.chooseUseTarget("###" + get.prompt("potzhanlie") + "？###移去所有“烈”，视为使用一张无次数限制的【杀】", new lib.element.VCard({ name: "sha" }), false).set("oncard", () => {
+					const str = player.hasMark("potzhanlie_lie") ? "移去所有“烈”，" : "";
+					player.chooseUseTarget("###" + get.prompt("potzhanlie") + "###" + str +"视为使用一张无次数限制的【杀】", new lib.element.VCard({ name: "sha" }), false).set("oncard", () => {
 						const event = get.event(),
 							{ player } = event,
 							num = player.countMark("potzhanlie_lie");
 						player.addTempSkill("potzhanlie_buff");
 						player.clearMark("potzhanlie_lie");
-						event.set("potzhanlie", Math.floor(num / 2));
+						event.set("potzhanlie", Math.floor(num / 3));
 					}).logSkill = "potzhanlie";
 				},
 				marktext: "烈",
