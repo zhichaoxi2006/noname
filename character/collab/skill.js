@@ -331,11 +331,11 @@ const skills = {
 				charlotte: true,
 				mod: {
 					targetEnabled(card, player, target) {
-						if (player !== target && player.countCards("h") >= target.countCards("h")) return false;
+						if (player !== target && player.getHp() >= target.getHp()) return false;
 					},
 				},
 				mark: true,
-				intro: { content: "不能成为手牌数大于等于你的角色使用牌的目标" },
+				intro: { content: "不能成为体力值大于等于你的其他角色使用牌的目标" },
 			},
 		},
 	},

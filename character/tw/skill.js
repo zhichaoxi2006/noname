@@ -220,7 +220,7 @@ const skills = {
 			{
 				cost: 1,
 				prompt: () => "令一名其他角色于手牌中只能使用基本牌直到其回合结束",
-				filter: player => game.hasPlayer(target => target != player && !target.getStorage("twfangzhu_ban").includes("basic")),
+				filter: player => get.mode() != "doudizhu" && game.hasPlayer(target => target != player && !target.getStorage("twfangzhu_ban").includes("basic")),
 				filterTarget: (card, player, target) => target != player && !target.getStorage("twfangzhu_ban").includes("basic"),
 				async content(player, target) {
 					target.addTempSkill("twfangzhu_ban", { player: "phaseEnd" });
@@ -256,7 +256,7 @@ const skills = {
 			{
 				cost: 3,
 				prompt: () => "令一名其他角色于手牌中只能使用装备牌直到其回合结束",
-				filter: player => /*get.mode() != "doudizhu" && */ game.hasPlayer(target => target != player && !target.getStorage("twfangzhu_ban").includes("equip")),
+				filter: player => get.mode() != "doudizhu" && game.hasPlayer(target => target != player && !target.getStorage("twfangzhu_ban").includes("equip")),
 				filterTarget: (card, player, target) => target != player && !target.getStorage("twfangzhu_ban").includes("equip"),
 				async content(player, target) {
 					target.addTempSkill("twfangzhu_ban", { player: "phaseEnd" });
@@ -274,7 +274,7 @@ const skills = {
 			{
 				cost: 2,
 				prompt: () => "令一名其他角色的非Charlotte技能失效直到其回合结束",
-				filter: player => /*get.mode() != "doudizhu" && */ game.hasPlayer(target => target != player),
+				filter: player => get.mode() != "doudizhu" && game.hasPlayer(target => target != player),
 				filterTarget: lib.filter.notMe,
 				async content(player, target) {
 					target.addTempSkill("twfangzhu_baiban", { player: "phaseEnd" });
@@ -306,7 +306,7 @@ const skills = {
 			{
 				cost: 3,
 				prompt: () => "令一名其他角色将武将牌翻面",
-				filter: player => /*get.mode() != "doudizhu" && */ game.hasPlayer(target => target != player),
+				filter: player => game.hasPlayer(target => target != player),
 				filterTarget: lib.filter.notMe,
 				async content(player, target) {
 					await target.turnOver();
