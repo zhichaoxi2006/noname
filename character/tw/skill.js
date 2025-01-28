@@ -1343,7 +1343,7 @@ const skills = {
 						shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count"),
 						att = get.attitude(player, target);
 					if (shas > 0) eff += get.effect(player, { name: "losehp" }, player, player);
-					else if (att <= 0) eff += get.effect(player, { name: "draw" }, player, player) * 2;
+					else if (att <= 0) eff += get.effect(player, { name: "draw" }, player, player);
 					return eff;
 				})
 				.forResult();
@@ -1354,7 +1354,7 @@ const skills = {
 			if (!player.canUse(juedou, target)) return;
 			await player.useCard(target, juedou);
 			if (target.hasHistory("damage", evt => evt.getParent(3) == event)) {
-				await player.draw(2);
+				await player.draw();
 				const targetsx = game.filterPlayer(current => {
 					if (!player.canUse({ name: "juedou", isCard: true }, current)) return false;
 					return !player
@@ -1376,17 +1376,15 @@ const skills = {
 						let eff = get.effect(target, { name: "juedou" }, player, player),
 							shas = target.mayHaveSha(player, "respond", null, "count") - player.mayHaveSha(player, "respond", null, "count"),
 							att = get.attitude(player, target);
-						const num = player.getRoundHistory("useCard", evt => evt.card?.storage?.twchenxun).length + 1;
-						if (shas > 0) eff += get.effect(player, { name: "losehp" }, player, player) * num;
-						else if (att <= 0) eff += get.effect(player, { name: "draw" }, player, player) * 2;
+						if (shas > 0) eff += get.effect(player, { name: "losehp" }, player, player);
+						else if (att <= 0) eff += get.effect(player, { name: "draw" }, player, player);
 						return eff;
 					})
 					.set("targetsx", targetsx)
 					.forResultTargets();
 				if (targets?.length) await player.useSkill("twchenxun", targets);
 			} else {
-				const num = player.getRoundHistory("useCard", evt => evt.card?.storage?.twchenxun).length;
-				if (num) await player.loseHp(num);
+				await player.loseHp();
 			}
 		},
 	},
@@ -5329,7 +5327,7 @@ const skills = {
 			var target = trigger.target;
 			event.target = target;
 			var list = ["cancel2"];
-			var choiceList = ["令此【杀】可以额外指定一个目标", "弃置" + get.translation(target) + "一张手牌，若此【杀】造成伤害，则你摸一张牌且本阶段可以额外使用一张【杀】"];
+			var choiceList = ["令此【杀】可以额外指定一个目标", "弃置" + get.translation(target) + "一张手牌，若此【杀】造成伤害，则你本阶段可以额外使用一张【杀】"];
 			if (target.countCards("h")) list.unshift("其弃置");
 			else choiceList[1] = '<span style="opacity:0.5">' + choiceList[1] + "</span>";
 			if (game.hasPlayer(targetx => !trigger.targets.includes(targetx) && player.canUse(trigger.card, targetx))) list.unshift("多指");
@@ -5388,7 +5386,6 @@ const skills = {
 						.filter(evt => evt == trigger.getParent())
 						.then(() => {
 							if (player.getHistory("sourceDamage", evt => evt.card == trigger.card).length) {
-								player.draw();
 								player.addTempSkill("twhuzhong_sha", "phaseUseAfter");
 								player.addMark("twhuzhong_sha", 1, false);
 							}
