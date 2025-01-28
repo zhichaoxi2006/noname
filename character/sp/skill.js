@@ -45,7 +45,7 @@ const skills = {
 				if (get.name(card) === "sha" && player.getUseValue(card) > 0) val += 5;
 				return 20 - val;
 			})
-			else result = player.discardPlayerCard(trigger.player, "he", get.prompt("olpimi") + "弃置" + get.translation(trigger.player) + str, "chooseonly").set("ai", (card) => {
+			else result = player.discardPlayerCard("he", trigger.player).set("chooseonly", true).set("prompt", get.prompt("olpimi") + "弃置" + get.translation(trigger.player) + str).set("ai", (card) => {
 				if (((player.countCards("h", { name: "shan" }) < 2 && get.name(trigger.card) === "sha") || (get.tag(trigger.card, "damage") > 0.5 && player.countCards("h", { name: "wuxie" }) < 2 && player.getHp() < 3))) return false
 			});
 			event.result = result.forResult()

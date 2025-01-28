@@ -167,6 +167,7 @@ const skills = {
 	},
 	//庞宏
 	dcpingzhi: {
+		audio: 2,
 		zhuanhuanji: true,
 		marktext: "☯",
 		usable: 1,
@@ -229,6 +230,7 @@ const skills = {
 		},
 	},
 	dcgangjian: {
+		audio: 2,
 		trigger: {
 			global: "phaseAfter",
 		},

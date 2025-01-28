@@ -639,6 +639,7 @@ const skills = {
 	},
 	//威孙权
 	dcwoheng: {
+		audio: 2,
 		trigger: {
 			player: "damageEnd",
 		},
@@ -722,6 +723,7 @@ const skills = {
 		},
 	},
 	dcyuhui: {
+		audio: 2,
 		trigger: {
 			player: "phaseJieshuBegin",
 		},
