@@ -14735,7 +14735,7 @@ const skills = {
 								targets = ui.selected.targets.concat([target]),
 								hs = get.event("max");
 							let card = { name: "sha", nature: "fire", isCard: true },
-								cache = ai.getTargetPoints(target, player, null, "10"),
+								cache = ai.guessTargetPoints(target, player, null, "10"),
 								max = cache.max,
 								tar = target,
 								eff = -get.attitude(player, target);
@@ -14744,7 +14744,7 @@ const skills = {
 							max = Math.min(13, max);
 							cache.max = max;
 							for (const cur of ui.selected.targets) {
-								const temp = ai.getTargetPoints(cur, player);
+								const temp = ai.guessTargetPoints(cur, player);
 								if (temp.max > max) {
 									max = temp.max;
 									tar = cur;
@@ -14809,7 +14809,7 @@ const skills = {
 				.set("ai", target => {
 					if (!get.event("bool")) return 0;
 					let val = get.attitude(_status.event.player, target);
-					if (target.hasSkill("twchaofeng")) val += ai.getTargetPoints(target).max;
+					if (target.hasSkill("twchaofeng")) val += ai.guessTargetPoints(target).max;
 					return val * get.threaten(target);
 				})
 				.set(
