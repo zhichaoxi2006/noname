@@ -5,9 +5,9 @@ const skills = {
 	//文丑
 	starlianzhan: {
 		trigger: {
-			player: "useCardToPlayer"
+			player: "useCardToPlayer",
 		},
-		filter(event, player){
+		filter(event, player) {
 			if (event.targets.length !== 1) {
 				return false;
 			}
@@ -29,8 +29,8 @@ const skills = {
 		},
 		logTarget: "player",
 		async cost(event, trigger, player) {
-			const { result } = await player.chooseButton(
-				[
+			const { result } = await player
+				.chooseButton([
 					"请选择一项",
 					[
 						[
@@ -38,17 +38,17 @@ const skills = {
 							["extraEffect", `令${get.translation(trigger.card)}额外结算一次`],
 						],
 						"textbutton",
-					]
-				]
-			).set("filterButton", button => {
-				if (button.link == "extraTarget") {
-					return lib.skill.starlianzhan.filterx(trigger, get.player());
-				}
-				return true;
-			})
+					],
+				])
+				.set("filterButton", button => {
+					if (button.link == "extraTarget") {
+						return lib.skill.starlianzhan.filterx(trigger, get.player());
+					}
+					return true;
+				});
 			event.result = {
 				bool: result.bool,
-				cost_data: result.links
+				cost_data: result.links,
 			};
 		},
 		async content(event, trigger, player) {
@@ -56,20 +56,20 @@ const skills = {
 			trigger.getParent().starlianzhan_check = true;
 			if (cost_data[0] == "extraTarget") {
 				const { result } = await player
-				.chooseTarget("请选择" + get.translation(trigger.card) + "的额外目标", true, function (card, player, target) {
-					var player = _status.event.player;
-					if (_status.event.targets.includes(target)) return false;
-					return lib.filter.targetEnabled2(_status.event.card, player, target);
-				})
-				.set("targets", trigger.targets)
-				.set("card", trigger.card)
-				.set("ai", function (target) {
-					var trigger = _status.event.getTrigger();
-					var player = _status.event.player;
-					return get.effect(target, trigger.card, player, player);
-				});
+					.chooseTarget("请选择" + get.translation(trigger.card) + "的额外目标", true, function (card, player, target) {
+						var player = _status.event.player;
+						if (_status.event.targets.includes(target)) return false;
+						return lib.filter.targetEnabled2(_status.event.card, player, target);
+					})
+					.set("targets", trigger.targets)
+					.set("card", trigger.card)
+					.set("ai", function (target) {
+						var trigger = _status.event.getTrigger();
+						var player = _status.event.player;
+						return get.effect(target, trigger.card, player, player);
+					});
 				player.line(result.targets);
-           		trigger.targets.addArray(result.targets);
+				trigger.targets.addArray(result.targets);
 			} else {
 				trigger.getParent().effectCount++;
 			}
@@ -80,8 +80,8 @@ const skills = {
 				trigger: {
 					player: "useCardAfter",
 				},
-				forced:true,
-				filter(event, player){
+				forced: true,
+				filter(event, player) {
 					if (!event.starlianzhan_check) return false;
 					const history = player.getHistory("sourceDamage", evt => {
 						return event.targets.includes(evt.player) && evt.card == event.card;
@@ -96,34 +96,40 @@ const skills = {
 						for (const i of trigger.targets) {
 							await i.chooseUseTarget(trigger.card.name, true);
 						}
-					} else if(history.length == 2) {
+					} else if (history.length == 2) {
 						const prompt = player.isDamaged() ? "回复1点体力" : "摸两张牌";
 						const { result } = await player.chooseBool(`连战：是否${prompt}？`);
 						const next = player.isDamaged() ? player.recover() : player.draw(2);
 						await next;
 					}
-				}
+				},
 			},
-		}
+		},
 	},
 	starwenming: {
 		trigger: {
-			target: "useCardToPlayer"
+			target: "useCardToPlayer",
 		},
-		forced:true,
-		filter(event, player){
-			return event.player.getHp() < player.getHp() || player.getRoundHistory("sourceDamage", evt => {
-				return event.player == evt.player;
-			}).length > 0;
+		forced: true,
+		filter(event, player) {
+			return (
+				event.player.getHp() < player.getHp() ||
+				player.getRoundHistory("sourceDamage", evt => {
+					return event.player == evt.player;
+				}).length > 0
+			);
 		},
 		async content(event, trigger, player) {
 			trigger.player.randomDiscard();
-			if (trigger.player.getHp() < player.getHp() && player.getRoundHistory("sourceDamage", evt => {
-				return trigger.player == evt.player;
-			}).length > 0) {
+			if (
+				trigger.player.getHp() < player.getHp() &&
+				player.getRoundHistory("sourceDamage", evt => {
+					return trigger.player == evt.player;
+				}).length > 0
+			) {
 				await player.draw();
 			}
-		}
+		},
 	},
 	//丁奉
 	stardangchen: {
@@ -11609,6 +11615,7 @@ const skills = {
 			player.awakenSkill("yinju");
 			player.storage.yinju2 = target;
 			player.addTempSkill("yinju2");
+			target.addTempSkill("yinju2_target");
 		},
 		ai: {
 			result: {
@@ -11649,27 +11656,35 @@ const skills = {
 		logTarget: function (event) {
 			return event[event.name == "damage" ? "player" : "target"];
 		},
-		content: function () {
-			"step 0";
-			if (trigger.name == "damage") {
+		async content(event, trigger, player) {
+			if (trigger.name === "damage") {
 				trigger.cancel();
-				trigger.player.recover(trigger.num);
-				event.finish();
+				await trigger.player.recover(trigger.num);
 			} else {
-				game.asyncDraw([player, trigger.target]);
+				await game.asyncDraw([player, trigger.target]);
+				await game.delayx();
 			}
-			"step 1";
-			game.delayx();
 		},
 		ai: {
 			effect: {
 				player_use: function (card, player, target) {
-					if (target != player.storage.yinju2) return;
-					if (card.name == "lebu") return;
+					if (target !== player.storage.yinju2) return;
+					if (card.name === "lebu") return;
 					return [1, 0.6, 1, 0.6];
 				},
-				player(card, player, target) {
-					if (card.name !== "huogong" && get.tag(card, "damage") && target.isDamaged()) [1, 0, 0, 2];
+			},
+		},
+		subSkill: {
+			target: {
+				charlotte: true,
+				ai: {
+					effect: {
+						target(card, player, target) {
+							if (!player || target !== player.storage.yinju2) return;
+							if (card.name !== "huogong" && get.tag(card, "damage")) return [0, target.isDamaged() ? 2.5 : 0.6, 0, 1];
+							return [1, 0.6, 1, 1];
+						},
+					},
 				},
 			},
 		},

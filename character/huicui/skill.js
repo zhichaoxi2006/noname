@@ -190,9 +190,9 @@ const skills = {
 				.set("forced", true);
 			if (player.storage.dcpingzhi) {
 				await target.discard(result.links).set("discarder", player);
-				await target.chooseUseTarget("huogong", [player], true);
+				await target.chooseUseTarget("huogong", [player], true, false);
 			} else {
-				await target.chooseUseTarget(result.links[0]).set("forced", true);
+				await target.chooseUseTarget(result.links[0], true, false);
 			}
 		},
 		group: "dcpingzhi_check",
@@ -9266,9 +9266,9 @@ const skills = {
 				target.addSkill("dcyongbi_eff1");
 			}
 			if (list.length >= 3) {
-				player.addMark("dcyongbi_eff2", 1, false);
+				player.addMark("dcyongbi_eff2", 2, false);
 				player.addSkill("dcyongbi_eff2");
-				target.addMark("dcyongbi_eff2", 1, false);
+				target.addMark("dcyongbi_eff2", 2, false);
 				target.addSkill("dcyongbi_eff2");
 			}
 		},
