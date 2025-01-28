@@ -170,7 +170,7 @@ const skills = {
 			return event.getg(player).length;
 		},
 		get usable() {
-			return 1 + get.mode() === "identity";
+			return get.mode() == "identity" ? 2 : 1;
 		},
 		async cost(event, trigger, player) {
 			const cards = trigger.getg(player).filter(i => get.owner(i) == player);
@@ -592,7 +592,7 @@ const skills = {
 	sbhongyuan: {
 		audio: 2,
 		trigger: {
-			global: ["gainAfter", "loseAsyncAfter"],
+			global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
 		},
 		chargeSkill: 3,
 		getIndex(event, player) {
