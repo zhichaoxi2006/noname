@@ -110,7 +110,7 @@ const skills = {
 	},
 	//张翼
 	dcmurui: {//direct打赢复活赛力
-		audio: 2,
+		audio: 2,		
 		trigger: {
 			global: ["roundStart", "phaseAfter"],
 			player: "phaseBegin",
@@ -128,6 +128,7 @@ const skills = {
 				if (event.triggername === "dcmurui") return
 				player.draw(2)
 				player.markAuto("dcmurui_filter", name)
+				player.markSkill("dcaoren");
 			}).vars({ name: name})
 			const result = await player.chooseToUse("使用一张牌，若造成伤害则不能再于此时用牌").set("oncard", () => {
 				const event = get.event(),
@@ -139,6 +140,15 @@ const skills = {
 	},
 	dcaoren: {
 		audio: 2,
+		intro: {
+          markcount: (_, player) =>
+            player.getStorage("dcmurui_filter").length -
+            player.countMark("dcaoren_used"),
+           content: (_, player) =>
+             "当前剩余发动次数：" +
+               (player.getStorage("dcmurui_filter").length -
+                 player.countMark("dcaoren_used")),
+        },
 		trigger: {
 			player: "useCardAfter",
 		},
