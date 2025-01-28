@@ -14073,21 +14073,24 @@ const skills = {
 					if (target.hasSkill("twchaofeng")) val += ai.guessTargetPoints(target).max;
 					return val * get.threaten(target);
 				})
-				.set("bool", (() => {
-					const fs =
-						game.findPlayer(cur => {
-							return get.attitude(player, cur) > 2 && (cur.hasSkill("twchaofwng") || get.threaten(cur) > player.getHp());
-						}) || player;
-					return (
-						game.countPlayer(cur => {
-							let eff = 0;
-							if (get.attitude(player, cur) < 0) eff = get.effect(cur, { name: "sha", nature: "fire", isCard: true }, player, player);
-							if (fs.hasSkill("twchaofeng")) eff *= 2 - 1 / ai.guessTargetPoints(fs, player).max;
-							return Math.max(0, eff);
-						}) >
-						10 * player.getHp()
-					);
-				})())
+				.set(
+					"bool",
+					(() => {
+						const fs =
+							game.findPlayer(cur => {
+								return get.attitude(player, cur) > 2 && (cur.hasSkill("twchaofwng") || get.threaten(cur) > player.getHp());
+							}) || player;
+						return (
+							game.countPlayer(cur => {
+								let eff = 0;
+								if (get.attitude(player, cur) < 0) eff = get.effect(cur, { name: "sha", nature: "fire", isCard: true }, player, player);
+								if (fs.hasSkill("twchaofeng")) eff *= 2 - 1 / ai.getTargetPoints(fs, player).max;
+								return Math.max(0, eff);
+							}) >
+							10 * player.getHp()
+						);
+					})()
+				)
 				.forResult();
 		},
 		async content(event, trigger, player) {
