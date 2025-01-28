@@ -2621,6 +2621,7 @@ const skills = {
 			const { player: target, source } = trigger;
 			if (!player.storage.mbpanxiang) player.storage.mbpanxiang = {};
 			player.storage.mbpanxiang[target.playerid] = control;
+			player.markAuto("mbpanxiang_mark", [trigger.player]);
 			if (control === "减伤") {
 				trigger.num--;
 				game.log(player, "令此伤害", "#y-1");
@@ -2630,6 +2631,16 @@ const skills = {
 				game.log(player, "令此伤害", "#y+1");
 				await target.draw(3);
 			}
+		},
+		subSkill: {
+			mark: {
+				mark: true,
+				marktext: "襄",
+				charlotte: true,
+				intro: {
+					content: "已对$发动过〖蹒襄〗",
+				},
+			},
 		},
 	},
 	mbchenjie: {
