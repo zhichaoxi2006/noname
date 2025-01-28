@@ -14823,7 +14823,7 @@ const skills = {
 							game.countPlayer(cur => {
 								let eff = 0;
 								if (get.attitude(player, cur) < 0) eff = get.effect(cur, { name: "sha", nature: "fire", isCard: true }, player, player);
-								if (fs.hasSkill("twchaofeng")) eff *= 2 - 1 / ai.getTargetPoints(fs, player).max;
+								if (fs.hasSkill("twchaofeng")) eff *= 2 - 1 / ai.guessTargetPoints(fs, player).max;
 								return Math.max(0, eff);
 							}) >
 							10 * player.getHp()
