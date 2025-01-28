@@ -10,7 +10,7 @@ const skills = {
 			global: "loseAsyncAfter",
 		},
 		filter: function (event, player) {
-			if ( event.getg(player).length < 2) return false;
+			if (event.getg(player).length < 2) return false;
 			return event.getParent().name != "friendmanjuan";
 		},
 		async cost(event, trigger, player) {

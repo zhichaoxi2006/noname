@@ -80,8 +80,8 @@ const skills = {
 		},
 		subSkill: {
 			backup: {},
-    },
-  },
+    	},
+  	},
 	//年兽
 	olsuichong: {
 		audio: 2,
