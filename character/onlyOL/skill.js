@@ -119,10 +119,9 @@ const skills = {
 			player: "phaseBegin",
 		},
 		async cost(event, trigger, player) {
-			const { result } = await player.chooseTarget(lib.filter.notMe, get.prompt2("olsbchoulie"))
-				.set("ai", function(target) {
-					return get.effect(target, {name: "sha"}, player);
-				})
+			const { result } = await player.chooseTarget(lib.filter.notMe, get.prompt2("olsbchoulie")).set("ai", function (target) {
+				return get.effect(target, { name: "sha" }, player);
+			});
 			event.result = result;
 		},
 		async content(event, trigger, player) {
@@ -1841,60 +1840,73 @@ const skills = {
 			return player.getStorage("olsbjinming").length;
 		},
 		async cost(event, trigger, player) {
-			let choiceList = ["1.回复过1点体力", "2.造成过2点伤害", "3.使用过三种类型的牌", "4.弃置过四张牌"];
-			let list = ["回复体力", "造成伤害", "使用牌", "弃置牌"].filter((key, index) => {
-				return player.getStorage("olsbjinming").includes(index + 1);
-			});
+			let choiceList = ["1.回复过1点体力", "2.弃置过两张牌", "3.使用过三种类型的牌", "4.造成过4点伤害"];
 			for (let i = 0; i < choiceList.length; i++) {
 				if (!player.getStorage("olsbjinming").includes(i + 1)) {
 					choiceList[i] = `<span style="text-decoration: line-through;">${choiceList[i]}</span>`;
 				}
 			}
-			list.push("cancel2");
-			const result = await player
-				.chooseControl(list)
-				.set("choiceList", choiceList)
-				.set("prompt", get.prompt2("olsbjinming"))
-				.set(
-					"chosen",
-					(function () {
-						if (
-							list.includes("使用牌") &&
-							["trick", "equip"].every(type => {
-								return player.countCards("h", card => get.type2(card) == type && player.getUseValue(card) > 0);
-							})
-						)
-							return "使用牌";
-						return list.randomGet();
-					})()
-				)
-				.set("ai", () => get.event("chosen"))
-				.forResult();
-			event.result = {
-				bool: result.control != "cancel2",
-				cost_data: choiceList.find(i => i.indexOf(result.control.slice(0, 2)) != -1),
-			};
+			const result = (event.result = await player
+				.chooseButton([get.prompt2("olsbjinming"), [choiceList.slice(0, 2), "tdnodes"], [choiceList.slice(2, 4), "tdnodes"]])
+				.set("filterButton", button => {
+					const player = get.player();
+					return player.getStorage("olsbjinming").includes(parseInt(button.link.slice(0, 1)));
+				})
+				.set("ai", button => parseInt(button.link.slice(0, 1)))
+				.forResult());
+			if (result?.links?.length) event.result.cost_data = result.links[0];
 		},
 		async content(event, trigger, player) {
 			const choice = event.cost_data;
+			player.addSkill("olsbjinming_used");
 			player.addTempSkill("olsbjinming_target");
-			player.storage.olsbjinming_target = choice;
+			player.storage.olsbjinming_used = player.storage.olsbjinming_target = choice;
+			player.markSkill("olsbjinming_used");
 			player.markSkill("olsbjinming_target");
 		},
 		subSkill: {
-			target: {
-				onremove: true,
-				trigger: {
-					player: "phaseEnd",
-				},
+			used: {
 				charlotte: true,
-				forced: true,
+				onremove(player, skill) {
+					delete player.storage[skill];
+					player.removeSkill("olsbjinming_target");
+				},
+				marktext: "玺",
 				intro: {
+					name: "玉玺",
 					markcount(storage, player) {
 						if (!storage) return null;
 						return parseInt(storage.slice(0, 1));
 					},
 					content(storage, player) {
+						if (!storage) return "当前未发动过〖矜名〗";
+						return `最后一次发动〖矜名〗所选选项为${storage.slice(0, 1)}`;
+					},
+				},
+			},
+			target: {
+				charlotte: true,
+				onremove: true,
+				audio: "olsbjinming",
+				trigger: {
+					player: "phaseEnd",
+				},
+				forced: true,
+				async content(event, trigger, player) {
+					const choice = player.storage[event.name],
+						num = parseInt(choice.slice(0, 1));
+					await player.draw(num);
+					if (lib.skill.olsbjinming_target.checkTarget(player, num)) {
+						player.popup("成功", "wood");
+						return;
+					}
+					player.popup("失败", "fire");
+					player.storage.olsbjinming.remove(num);
+					game.log(player, "删除了", "#g【矜名】", "的选项", `#y${choice.slice(2)}`);
+				},
+				intro: {
+					markcount: () => null,
+					content(storage) {
 						if (!storage) return "本回合没有〖矜名〗目标";
 						return `本回合需要${storage.slice(2)}`;
 					},
@@ -1909,8 +1921,8 @@ const skills = {
 							break;
 						}
 						case 2: {
-							player.getHistory("sourceDamage", evt => {
-								if (evt.num > 0) num += evt.num;
+							player.getHistory("lose", evt => {
+								if (evt.type == "discard" && evt.cards2?.length) num += evt.cards2.length;
 							});
 							break;
 						}
@@ -1924,26 +1936,13 @@ const skills = {
 							break;
 						}
 						case 4: {
-							player.getHistory("lose", evt => {
-								if (evt.type == "discard" && evt.cards2?.length) num += evt.cards2.length;
+							player.getHistory("sourceDamage", evt => {
+								if (evt.num > 0) num += evt.num;
 							});
 							break;
 						}
 					}
 					return num >= key;
-				},
-				async content(event, trigger, player) {
-					const choice = player.storage[event.name],
-						num = parseInt(choice.slice(0, 1));
-					await player.draw(num);
-					if (lib.skill.olsbjinming_target.checkTarget(player, num)) {
-						player.popup("成功", "wood");
-						return;
-					}
-					player.popup("失败", "fire");
-					await player.loseHp();
-					player.storage.olsbjinming.remove(num);
-					game.log(player, "删除了", "#g【矜名】", "的选项", `#y${choice}`);
 				},
 			},
 		},
@@ -1953,22 +1952,17 @@ const skills = {
 		trigger: {
 			player: "useCard2",
 		},
-		usable: 1,
 		filter(event, player) {
-			if (!player.isPhaseUsing() || !player.storage.olsbjinming_target) return false;
+			if (!player.isPhaseUsing() || player.getStorage("olsbxiaoshi_used").includes(event.getParent("phaseUse")) || !player.storage.olsbjinming_used) return false;
 			if (!["trick", "basic"].includes(get.type(event.card))) return false;
-			const num = parseInt(player.storage.olsbjinming_target.slice(0, 1));
-			return game.hasPlayer(current => {
-				if (current.getAttackRange() != num) return false;
-				return !event.targets.includes(current) && lib.filter.targetEnabled2(event.card, player, current);
-			});
+			const num = parseInt(player.storage.olsbjinming_used.slice(0, 1));
+			return game.hasPlayer(current => !event.targets.includes(current) && lib.filter.targetEnabled2(event.card, player, current));
 		},
 		async cost(event, trigger, player) {
-			const num = parseInt(player.storage.olsbjinming_target.slice(0, 1));
+			const num = parseInt(player.storage.olsbjinming_used.slice(0, 1));
 			event.result = await player
-				.chooseTarget(get.prompt("olsbxiaoshi"), `令一名攻击范围为${num}的角色成为此牌额外目标并摸${num}张牌`, function (card, player, target) {
+				.chooseTarget(get.prompt2("olsbxiaoshi"), function (card, player, target) {
 					const trigger = get.event().getTrigger();
-					if (target.getAttackRange() != get.event("num")) return false;
 					if (trigger.targets.includes(target)) return false;
 					return lib.filter.targetEnabled2(trigger.card, get.player(), target);
 				})
@@ -1977,14 +1971,57 @@ const skills = {
 					const trigger = get.event().getTrigger();
 					const eff1 = get.effect(target, trigger.card, trigger.player, get.player());
 					const eff2 = get.effect(target, { name: "draw" }, get.player(), get.player());
-					if (eff1 + eff2 * get.event("num") <= 0) return 0;
-					return eff1 + eff2;
+					return eff1 + eff2 * get.event("num");
 				})
 				.forResult();
 		},
 		async content(event, trigger, player) {
+			player.addTempSkill("olsbxiaoshi_used");
+			player.markAuto("olsbxiaoshi_used", [trigger.getParent("phaseUse")]);
+			player.addTempSkill("olsbxiaoshi_effect");
+			player.markAuto("olsbxiaoshi_effect", [trigger]);
 			trigger.targets.addArray(event.targets);
-			for (let target of event.targets) await target.draw(target.getAttackRange());
+			game.log(event.targets, "成为了", trigger.card, "的额外目标");
+		},
+		subSkill: {
+			used: {
+				charlotte: true,
+				onremove: true,
+			},
+			effect: {
+				charlotte: true,
+				onremove: true,
+				audio: "olsbxiaoshi",
+				trigger: { player: "useCardAfter" },
+				filter(event, player) {
+					return player.getStorage("olsbxiaoshi_effect").includes(event) && !player.hasHistory("sourceDamage", evt => evt.card === event.card);
+				},
+				async cost(event, trigger, player) {
+					const num = parseInt(player.storage.olsbjinming_used.slice(0, 1));
+					event.result = await player
+						.chooseTarget(
+							get.translation("olsbxiaoshi") + "：请选择一项",
+							(card, player, target) => {
+								const trigger = get.event().getTrigger();
+								return trigger.targets?.includes(target);
+							},
+							"令其中一个目标摸" + get.cnNumber(num) + "张牌，或失去1点体力"
+						)
+						.set("ai", target => {
+							const player = get.player();
+							let eff = get.effect(target, { name: "draw" }, player, player);
+							if (eff < 0) eff -= get.effect(player, { name: "losehp" }, player, player);
+							return eff;
+						})
+						.set("num", num)
+						.forResult();
+					event.result.bool = true;
+				},
+				content() {
+					if (event.targets?.length) event.targets[0].draw(parseInt(player.storage.olsbjinming_used.slice(0, 1)));
+					else player.loseHp();
+				},
+			},
 		},
 	},
 	olsbyanliang: {

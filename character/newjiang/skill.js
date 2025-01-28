@@ -221,7 +221,18 @@ const skills = {
 				async content(event, trigger, player) {
 					let suits = ["spade", "heart", "diamond", "club"];
 					const result = await player
-						.chooseButton(['###传械：请选择一个花色###<div class="text center">传械花色顺序：' + suits.slice().map(suit => get.translation(suit)).join("|") + "</div>", [suits.map(i => ["", "", "lukai_" + i]), "vcard"]], true)
+						.chooseButton(
+							[
+								'###传械：请选择一个花色###<div class="text center">传械花色顺序：' +
+									suits
+										.slice()
+										.map(suit => get.translation(suit))
+										.join("|") +
+									"</div>",
+								[suits.map(i => ["", "", "lukai_" + i]), "vcard"],
+							],
+							true
+						)
 						.set("ai", () => 1 + Math.random())
 						.forResult();
 					if (result.bool) {
@@ -748,20 +759,17 @@ const skills = {
 			return game.hasPlayer(current => {
 				if (current == player) return false;
 				return (
-					current.getHistory(
-						"lose",
-						evt => {
-							let evtx = evt.getParent();
-							if (!evtx.getg) return false;
-							var cards = evtx.getg(player);
-							if (!cards.length) return false;
-							var cards2 = evt.cards2;
-							for (var card of cards2) {
-								if (cards.includes(card)) return true;
-							}
-							return false;
-						},
-					).length > 0
+					current.getHistory("lose", evt => {
+						let evtx = evt.getParent();
+						if (!evtx.getg) return false;
+						var cards = evtx.getg(player);
+						if (!cards.length) return false;
+						var cards2 = evt.cards2;
+						for (var card of cards2) {
+							if (cards.includes(card)) return true;
+						}
+						return false;
+					}).length > 0
 				);
 			});
 		},
@@ -1358,33 +1366,32 @@ const skills = {
 	yjqimei: {
 		audio: 2,
 		enable: "phaseUse",
-		usable(skill, player) {
-			return 1 + (player.hasSkill(skill + "_rewrite", null, null, false) ? 1 : 0);
-		},
+		usable: 1,
 		filterTarget: lib.filter.notMe,
 		async content(event, trigger, player) {
 			const { target } = event;
 			await player.draw(2, "nodelay");
 			await target.draw(2);
-			const targets = [player, target].filter(current => current.countDiscardableCards(current, "he"));
+			const targets = [player, target].filter(current => current.countCards("h") > 1);
 			if (targets.length) {
-				const result = await player
-					.chooseCardOL(targets, "he", true, 2, "齐眉：请弃置两张牌", (card, player, target) => {
-						return lib.filter.cardDiscardable(card, player);
-					})
-					.forResult();
-				if (result.length == 1) targets[0].discard(result[0].cards);
-				else {
-					await game
-						.loseAsync({
-							lose_list: [
-								[targets[0], result[0].cards],
-								[targets[1], result[1].cards],
-							],
-						})
-						.setContent("discardMultiple");
-					await game.asyncDelayx();
-				}
+				const result = await player.chooseCardOL(targets, "h", true, 2, "齐眉：请展示两张手牌").forResult();
+				const videoId = lib.status.videoId++;
+				game.broadcastAll(
+					(targets, result, id, player) => {
+						const dialog = ui.create.dialog(get.translation(player) + "发动了【齐眉】");
+						dialog.videoId = id;
+						for (let i = 0; i < result.length; i++) {
+							dialog.add('<div class="text center">' + get.translation(targets[i]) + "展示</div>");
+							dialog.add(result[i].cards);
+						}
+					},
+					targets,
+					result,
+					videoId,
+					player
+				);
+				await game.delay(4);
+				game.broadcastAll("closeDialog", videoId);
 				let cards = result.reduce((list, evt) => {
 					list.addArray(evt.cards);
 					return list;
@@ -1396,7 +1403,7 @@ const skills = {
 							const card = cards.shift();
 							if (player.hasUseTarget(card)) {
 								player.$gain2(card, false);
-								await game.asyncDelayx();
+								await game.delayx();
 								await player.chooseUseTarget(true, card, false);
 							}
 						}
@@ -1409,14 +1416,17 @@ const skills = {
 						}
 						break;
 					case 3:
-						for (const current of [player, target]) {
-							if (current.isIn() && !current.isLinked()) await current.link(true);
+						for (let i = 0; i < result.length; i++) {
+							const current = targets[i],
+								cards = result[i].cards.filter(card => {
+									return get.owner(card) === current && current.canRecast(card);
+								});
+							if (cards.length) await current.recast(cards);
 						}
 						break;
 					case 4:
 						await player.draw("nodelay");
 						await target.draw();
-						player.addTempSkill("yjqimei_rewrite");
 						break;
 				}
 			}
@@ -1430,7 +1440,6 @@ const skills = {
 				},
 			},
 		},
-		subSkill: { rewrite: { charlotte: true } },
 	},
 	yjzhuiji: {
 		audio: 2,
