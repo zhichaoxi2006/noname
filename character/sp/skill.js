@@ -51,7 +51,7 @@ const skills = {
 			event.result = result.forResult()
 		},
 		async content(event, trigger, player) {
-			let next = player.discard(event.cards);
+			let next = trigger.player.discard(event.cards);
 			if (player !== trigger.player) next.notBySelf = true;
 			next.discarder = player;
 			await next
