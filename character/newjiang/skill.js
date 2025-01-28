@@ -792,6 +792,7 @@ const skills = {
 	},
 	//马钧
 	gongqiao: {
+		audio: 2,
 		enable: "phaseUse",
 		usable: 1,
 		locked: false,
@@ -892,6 +893,7 @@ const skills = {
 		},
 	},
 	jingyi: {
+		audio: 2,
 		trigger: { player: "equipAfter" },
 		forced: true,
 		filter(event, player) {

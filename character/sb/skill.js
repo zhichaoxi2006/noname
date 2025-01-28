@@ -72,7 +72,7 @@ const skills = {
 				const next = player.lose([card], ui.cardPile);
 				next.insert_index = function () {
 					const { length } = cardPile;
-					const num = Math.min(3 * index, length);
+					const num = Math.min((3 * (index + 1)) - 1, length);
 					return ui.cardPile.childNodes[num];
 				};
 				await next;
@@ -97,6 +97,7 @@ const skills = {
 				async content(event, trigger, player) {
 					const { sbjingce: storage } = player.storage;
 					if (storage) {
+						delete player.storage.sbjingce;
 						while (true) {
 							if (storage.size == 0) {
 								break;
@@ -115,7 +116,6 @@ const skills = {
 					const next = player.addToExpansion(cards, player, "draw");
 					next.gaintag.add("sbjingce_expansions");
 					await next;
-					delete player.storage.sbjingce;
 				},
 			},
 			check: {

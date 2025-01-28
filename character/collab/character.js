@@ -1,4 +1,5 @@
 const characters = {
+	shi_cenhun: ["male", "wu", 3, ["dcxinggong", "dcbaoshi"], ["name:岑|昏"]],
 	ol_zishu: ["male", "qun", 3, ["olzishu"]],
 	ol_chouniu: ["male", "qun", "1/5", ["olchouniu"]],
 	ol_yinhu: ["male", "qun", 4, ["olyinhu"]],
