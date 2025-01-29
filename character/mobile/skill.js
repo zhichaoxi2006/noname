@@ -1149,7 +1149,7 @@ const skills = {
 								dialog.push([list.map(item => [item[0] + "|" + skill, item[1]]), "tdnodes"]);
 							}
 							const result = await player
-								.chooseButton(dialog, skills.length, true)
+								.chooseButton(dialog, [1,2] , true)
 								.set("filterButton", button => {
 									return !ui.selected.buttons.some(but => but.link.split("|")[1] === button.link.split("|")[1]);
 								})
