@@ -18,11 +18,11 @@ const skills = {
 		audio: "xinfuli",
 		enable: "chooseToUse",
 		locked: true,
-		init: function (player, skill) {
+		init(player, skill) {
 			player.storage[skill] = false;
 		},
 		mark: true,
-		filter: function (event, player) {
+		filter(event, player) {
 			if (event.type != "dying") return false;
 			if (player != event.dying) return false;
 			if (player.storage.fuli) return false;
@@ -36,13 +36,13 @@ const skills = {
 		},
 		ai: {
 			save: true,
-			skillTagFilter: function (player, arg, target) {
+			skillTagFilter(player, arg, target) {
 				return player == target && player.storage.diy_fuli != true;
 			},
 			result: {
 				player: 10,
 			},
-			threaten: function (player, target) {
+			threaten(player, target) {
 				if (!target.storage.diy_fuli) return 0.9;
 			},
 		},
@@ -55,11 +55,11 @@ const skills = {
 		audio: "paoxiao",
 		trigger: { player: "shaMiss" },
 		forced: true,
-		content: function () {
+		content() {
 			player.addTempSkill("diy_paoxiao_damage");
 		},
 		mod: {
-			cardUsable: function (card, player, num) {
+			cardUsable(card, player, num) {
 				if (card.name == "sha") return Infinity;
 			},
 		},
@@ -68,11 +68,11 @@ const skills = {
 				trigger: { source: "damageBegin1" },
 				forced: true,
 				audio: "paoxiao",
-				filter: function (event, player) {
+				filter(event, player) {
 					return event.card && event.card.name == "sha";
 				},
 				onremove: true,
-				content: function () {
+				content() {
 					trigger.num++;
 					player.removeSkill("diy_paoxiao_damage");
 				},
@@ -86,7 +86,7 @@ const skills = {
 		animationColor: "soil",
 		locked: true,
 		trigger: { player: "phaseZhunbeiBegin" },
-		filter: function (event, player) {
+		filter(event, player) {
 			return player.isDamaged();
 		},
 		async content(event, trigger, player) {

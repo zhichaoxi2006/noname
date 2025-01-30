@@ -49,7 +49,7 @@ const skills = {
 		mark: true,
 		marktext: "☯",
 		intro: {
-			content: function (storage, player, skill) {
+			content(storage, player, skill) {
 				if (Boolean(player.storage[skill])) {
 					return "你使用牌指定唯一目标后，你对其造成一点火焰伤害。";
 				}
@@ -848,7 +848,7 @@ const skills = {
 				charlotte: true,
 				forced: true,
 				mod: {
-					targetInRange: function (card) {
+					targetInRange(card) {
 						if (card.name == "sha") return true;
 					},
 				},
@@ -3693,7 +3693,7 @@ const skills = {
 		forced: true,
 		popup: false,
 		sourceSkill: "twgongxin",
-		content: function () {
+		content() {
 			"step 0";
 			game.delayx();
 			"step 1";
