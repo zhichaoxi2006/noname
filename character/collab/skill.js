@@ -1225,7 +1225,7 @@ const skills = {
 		},
 		ai: {
 			result: {
-				player: function (player) {
+				player(player) {
 					var players = game.filterPlayer();
 					for (var i = 0; i < players.length; i++) {
 						if (players[i] != player && get.attitude(player, players[i]) > 1 && get.attitude(players[i], player) > 1) {
@@ -1234,7 +1234,7 @@ const skills = {
 					}
 					return 0;
 				},
-				target: function (player, target) {
+				target(player, target) {
 					if (ui.selected.targets.length) {
 						return -0.1;
 					}
