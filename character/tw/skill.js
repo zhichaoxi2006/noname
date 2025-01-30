@@ -12476,11 +12476,11 @@ const skills = {
 			},
 			effect: {
 				audio: "yinlang",
-				trigger: { global: "useCardToPlayer" },
+				trigger: { target: "useCardToTarget" },
 				charlotte: true,
 				forced: true,
 				filter: function (event, player) {
-					return event.target == player && get.tag(event.card, "damage");
+					return event.player == _status.currentPhase && get.tag(event.card, "damage");
 				},
 				logTarget: "player",
 				content: function () {

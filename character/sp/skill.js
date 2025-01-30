@@ -909,10 +909,7 @@ const skills = {
 			for (const i of [1, 2, 3, 4, 5]) {
 				emptySlot += player.countEmptySlot(i);
 			}
-			if (emptySlot == 0) {
-				event.finish();
-				return;
-			}
+			if (emptySlot == 0) return;
 			while (true) {
 				if (event.cards == undefined) event.cards = [];
 				const judgeEvent = player.judge();
@@ -1028,6 +1025,13 @@ const skills = {
 				onremove: true,
 				mod: {
 					cardEnabled(card, player) {
+						const owner = player.storage.oljiaoyu_debuff;
+						if (owner.countCards("e", cardx => get.color(card) === get.color(cardx)) > 0) {
+							const event = get.event().getParent("phaseUse");
+							if (event?._extraPhaseReason === "oljiaoyu") return false;
+						}
+					},
+					cardSavable(card, player) {
 						const owner = player.storage.oljiaoyu_debuff;
 						if (owner.countCards("e", cardx => get.color(card) === get.color(cardx)) > 0) {
 							const event = get.event().getParent("phaseUse");

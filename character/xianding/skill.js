@@ -1190,6 +1190,7 @@ const skills = {
 				if (card?.storage?.dcpeiniang) return Infinity;
 			},
 		},
+		locked: false,
 		enable: "chooseToUse",
 		filterCard(card, player) {
 			return player.getStorage("dcyitong").includes(get.suit(card));
@@ -1212,17 +1213,6 @@ const skills = {
 		ai: {
 			jiuOther: true,
 			combo: "dcyitong",
-		},
-		trigger: { source: "recoverBegin" },
-		filter(event, player) {
-			if (event.name === "chooseToUse") return player.hasCard(card => lib.skill.dcpeiniang.filterCard(card, player), "hes");
-			return event.getParent()?.name === "jiu" && event.num + event.player.hp < 1;
-		},
-		forced: true,
-		locked: false,
-		logTarget: "player",
-		content() {
-			trigger.num = 1 - trigger.player.hp;
 		},
 	},
 	//谋黄盖
