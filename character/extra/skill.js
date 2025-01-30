@@ -2445,6 +2445,7 @@ const skills = {
 		},
 		audio: 2,
 		enable: "phaseUse",
+		usable: 1,
 		filter(event, player) {
 			return _status.renku.length > 0;
 		},
