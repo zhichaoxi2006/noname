@@ -589,7 +589,6 @@ Object.defineProperty(Array.prototype, "toUniqued", {
 	 * @type { typeof Array['prototype']['toUniqued'] }
 	 */
 	value() {
-		console.warn(this, "Array的toUniqued方法已废弃，请使用Set去重");
 		return [...new Set(this)];
 	},
 });

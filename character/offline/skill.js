@@ -3376,7 +3376,7 @@ const skills = {
 			return event.card.name == "sha";
 		},
 		check(event, player) {
-			return get.attitude(player, event.target) < 0 || event.targets.some(i => get.attitude(player, target) < 0);
+			return get.attitude(player, event.target) < 0 || event.targets.some(i => get.attitude(player, i) < 0);
 		},
 		logTarget: "target",
 		content() {

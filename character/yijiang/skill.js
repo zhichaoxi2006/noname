@@ -476,38 +476,32 @@ const skills = {
 			global: "phaseJieshuBegin",
 			target: "useCardToTargeted",
 		},
-		direct: true,
-		filter: function (event, player, name) {
-			return ((name == "phaseJieshuBegin" && event.player != player && player.countCards("he") >= event.player.countCards("h")) || (event.targets && event.targets.includes(player) && ["basic", "trick"].includes(get.type(event.card, "trick")))) && !player.hasSkill("xindanshou_as");
+		filter(event, player) {
+			return ((event.name == "phaseJieshu" && event.player != player && player.countCards("he") >= event.player.countCards("h")) || (event.targets?.includes(player) && ["basic", "trick"].includes(get.type2(event.card)))) && !player.hasHistory("gain", evt => evt.getParent().name == "draw" && evt.getParent(2).name == "xindanshou");
 		},
-		content: function () {
-			"step 0";
-			if (event.triggername == "phaseJieshuBegin") {
-				var num = trigger.player.countCards("h");
+		async cost(event, trigger, player) {
+			const skillName = event.name.slice(0, -5);
+			if (trigger.name == "phaseJieshu") {
+				let next;
+				const { player: target } = trigger;
+				const num = target.countCards("h");
 				if (num > 0)
-					player
-						.chooseToDiscard(get.prompt("xindanshou", trigger.player), num, "弃置" + get.cnNumber(num) + "张牌并对" + get.translation(trigger.player) + "造成1点伤害", "he")
-						.set("logSkill", ["xindanshou", trigger.player])
-						.set("ai", function (card) {
-							if (get.damageEffect(_status.event.getTrigger().player, _status.event.player, _status.event.player) > 0) return Math.max(5.5, 8 - _status.event.selectTarget) - get.value(card);
-							return -1;
-						});
-				else
-					player.chooseBool(get.prompt("xindanshou", trigger.player), "对" + get.translation(trigger.player) + "造成1点伤害").ai = function () {
-						return get.damageEffect(trigger.player, player, player) > 0;
-					};
+					next = player.chooseToDiscard(get.prompt(skillName, target), num, `弃置${get.cnNumber(num)}张牌并对${get.translation(target)}造成1点伤害`, "he").set("ai", card => {
+						const player = get.player();
+						if (get.damageEffect(_status.event.getTrigger().player, player, player) > 0) return 6 - get.value(card);
+						return -1;
+					});
+				else next = player.chooseBool(get.prompt(skillName, target), `对${get.translation(target)}造成1点伤害`).set("choice", get.damageEffect(target, player, player) > 0);
+				event.result = await next.forResult();
+				event.result.targets = [target];
 			} else {
-				var num = 0;
-				game.countPlayer2(function (current) {
-					var history = current.getHistory("useCard");
-					for (var j = 0; j < history.length; j++) {
-						if (["basic", "trick"].includes(get.type(history[j].card, "trick")) && history[j].targets && history[j].targets.includes(player)) num++;
-					}
+				let num = 0;
+				game.countPlayer2(current => {
+					num += current.getHistory("useCard").filter(evt => ["basic", "trick"].includes(get.type2(evt.card)) && evt.targets?.includes(player)).length;
 				});
-				event.num = num;
-				player
-					.chooseBool(get.prompt("xindanshou") + "（可摸" + get.cnNumber(num) + "张牌）", get.translation("xindanshou_info"))
-					.set("ai", function () {
+				const bool = await player
+					.chooseBool(`${get.prompt(skillName)}（可摸${get.cnNumber(num)}张牌）`, get.translation(`${skillName}_info`))
+					.set("ai", () => {
 						return _status.event.choice;
 					})
 					.set(
@@ -529,17 +523,17 @@ const skills = {
 								todis = source.countCards("h") - source.needsToDiscard();
 							if (
 								todis <=
-								Math.max(
-									Math.min(
-										2 + (source.hp <= 1 ? 1 : 0),
+									Math.max(
+										Math.min(
+											2 + (source.hp <= 1 ? 1 : 0),
+											player.countCards("he", function (card) {
+												return get.value(card, player) < Math.max(5.5, 8 - todis);
+											})
+										),
 										player.countCards("he", function (card) {
-											return get.value(card, player) < Math.max(5.5, 8 - todis);
+											return get.value(card, player) <= 0;
 										})
-									),
-									player.countCards("he", function (card) {
-										return get.value(card, player) <= 0;
-									})
-								) &&
+									) &&
 								get.damageEffect(source, player, player) > 0
 							)
 								return false;
@@ -547,27 +541,27 @@ const skills = {
 							if (card.name == "sha" && !source.getCardUsable("sha")) return true;
 							return Math.random() < num / 3;
 						})()
-					);
-			}
-			"step 1";
-			if (result.bool) {
-				if (!result.cards || !result.cards.length) {
-					player.logSkill("xindanshou", trigger.player);
-				}
-				if (event.triggername == "useCardToTargeted") {
-					player.draw(num);
-					player.addTempSkill("xindanshou_as");
-				} else {
-					trigger.player.damage("nocard");
-				}
+					)
+					.forResultBool();
+				event.result = {
+					bool: bool,
+					cost_data: num,
+				};
 			}
 		},
-		subSkill: { as: { charlotte: true } },
+		async content(event, trigger, player) {
+			if (trigger.name == "phaseJieshu") await trigger.player.damage("nocard");
+			else {
+				player.addTempSkill(event.name + "_used");
+				await player.draw(event.cost_data);
+			}
+		},
+		subSkill: { used: { charlotte: true } },
 		ai: {
 			threaten: 0.6,
 			effect: {
 				target_use(card, player, target, current) {
-					if (typeof card != "object" || target.hasSkill("xindanshou_as") || !["basic", "trick"].includes(get.type(card, "trick"))) return;
+					if (typeof card != "object" || target.hasSkill("xindanshou_used") || !["basic", "trick"].includes(get.type(card, "trick"))) return;
 					var num = 0;
 					game.countPlayer2(function (current) {
 						var history = current.getHistory("useCard");
