@@ -656,11 +656,12 @@ const skills = {
 					global: "phaseBefore",
 				},
 				filter(event, player) {
+					if (!player.countCharge(true)) return false;
 					return event.name != "phase" || game.phaseNumber == 0;
 				},
 				forced: true,
 				locked: false,
-				async content(event, trigger, player) {
+				content() {
 					player.addCharge();
 				},
 			},
@@ -4026,6 +4027,7 @@ const skills = {
 				},
 				usable: 1,
 				filter: function (event, player) {
+					if (!player.countCharge(true)) return false;
 					if (event.name == "damage") return true;
 					return event.name != "phase" || game.phaseNumber == 0;
 				},
