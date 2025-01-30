@@ -5354,7 +5354,7 @@ export default () => {
 												return ai - get.value(cardx);
 											} else if (get.attitude(player, source) <= 0) return 0;
 											return 5 - get.value(cardx);
-									  },
+										},
 						});
 						if (!game.online) return;
 						_status.event._resultid = id;
@@ -5835,9 +5835,12 @@ export default () => {
 						player.addTempSkill("gztongling_used", "phaseUseAfter");
 						player.line2([target, trigger.player]);
 						target
-							.chooseToUse(function (card, player, event) {
-								return lib.filter.filterCard.apply(this, arguments);
-							}, "通令：是否对" + get.translation(trigger.player) + "使用一张牌？")
+							.chooseToUse(
+								function (card, player, event) {
+									return lib.filter.filterCard.apply(this, arguments);
+								},
+								"通令：是否对" + get.translation(trigger.player) + "使用一张牌？"
+							)
 							.set("targetRequired", true)
 							.set("complexSelect", true)
 							.set("filterTarget", function (card, player, target) {
@@ -6567,10 +6570,13 @@ export default () => {
 					var target = targets.shift();
 					if (target.isIn() && (_status.connectMode || !lib.config.skip_shan || target.hasSha())) {
 						target
-							.chooseToUse(function (card, player, event) {
-								if (get.name(card) != "sha") return false;
-								return lib.filter.filterCard.apply(this, arguments);
-							}, "是否对" + get.translation(event.target) + "使用一张【杀】？")
+							.chooseToUse(
+								function (card, player, event) {
+									if (get.name(card) != "sha") return false;
+									return lib.filter.filterCard.apply(this, arguments);
+								},
+								"是否对" + get.translation(event.target) + "使用一张【杀】？"
+							)
 							.set("targetRequired", true)
 							.set("complexSelect", true)
 							.set("addCount", false)
@@ -11177,10 +11183,13 @@ export default () => {
 					if (target.isIn()) {
 						event.target = target;
 						target
-							.chooseToUse(function (card, player, event) {
-								if (get.name(card) != "sha") return false;
-								return lib.filter.filterCard.apply(this, arguments);
-							}, "豹烈：对" + get.translation(player) + "使用一张杀，或令其弃置你的一张牌")
+							.chooseToUse(
+								function (card, player, event) {
+									if (get.name(card) != "sha") return false;
+									return lib.filter.filterCard.apply(this, arguments);
+								},
+								"豹烈：对" + get.translation(player) + "使用一张杀，或令其弃置你的一张牌"
+							)
 							.set("targetRequired", true)
 							.set("complexSelect", true)
 							.set("filterTarget", function (card, player, target) {
@@ -11404,10 +11413,13 @@ export default () => {
 				},
 				content: function () {
 					var next = player
-						.chooseToUse(function (card, player, event) {
-							if (get.name(card) != "sha") return false;
-							return lib.filter.filterCard.apply(this, arguments);
-						}, "诛害：是否对" + get.translation(trigger.player) + "使用一张杀？")
+						.chooseToUse(
+							function (card, player, event) {
+								if (get.name(card) != "sha") return false;
+								return lib.filter.filterCard.apply(this, arguments);
+							},
+							"诛害：是否对" + get.translation(trigger.player) + "使用一张杀？"
+						)
 						.set("logSkill", "gzzhuhai")
 						.set("complexSelect", true)
 						.set("filterTarget", function (card, player, target) {
@@ -19738,7 +19750,7 @@ export default () => {
 					? get.modetrans({
 							mode: lib.config.mode,
 							separatism: true,
-					  })
+						})
 					: get.cnNumber(parseInt(get.config("player_number"))) + "人" + get.translation(lib.config.mode);
 				if (game.me.identity == "ye") {
 					str2 += " - 野心家";
@@ -19967,9 +19979,7 @@ export default () => {
 							if (get.is.jun(i)) continue;
 						}
 						if (lib.character[i].hasHiddenSkill) continue;
-						const hp = lib.character[i].hp,
-							maxHp = lib.character[i].maxHp;
-						if (hp === maxHp && hp >= 3 && hp <= 5) event.list.push(i);
+						event.list.push(i);
 					}
 					_status.characterlist = event.list.slice(0);
 					_status.yeidentity = [];
