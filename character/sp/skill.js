@@ -13541,7 +13541,7 @@ const skills = {
 		content() {
 			"step 0";
 			player
-				.chooseTarget(get.prompt2("xindiaodu"), function (card, player, current) {
+				.chooseTarget(get.prompt2(event.name), function (card, player, current) {
 					return lib.skill.xindiaodu.isFriendOf(current, player) && current.countGainableCards(player, "e") > 0;
 				})
 				.setHiddenSkill(event.name).ai = function (target) {
@@ -13554,8 +13554,7 @@ const skills = {
 			"step 1";
 			if (result.bool) {
 				event.target1 = result.targets[0];
-				player.logSkill("xindiaodu", event.target1);
-				player.line(event.target1, "xindiaodu");
+				player.logSkill(event.name, event.target1);
 				player.gainPlayerCard(event.target1, "e", true);
 			} else event.finish();
 			"step 2";
@@ -19881,11 +19880,11 @@ const skills = {
 			});
 		},
 		direct: true,
-		preHidden: ["reduanbing_sha"],
+		preHidden: ["reduanbing", "reduanbing_sha"],
 		content() {
 			"step 0";
 			player
-				.chooseTarget(get.prompt("reduanbing"), "为" + get.translation(trigger.card) + "增加一个目标", function (card, player, target) {
+				.chooseTarget(get.prompt(event.name), "为" + get.translation(trigger.card) + "增加一个目标", function (card, player, target) {
 					return !_status.event.sourcex.includes(target) && get.distance(player, target) <= 1 && player.canUse(_status.event.card, target);
 				})
 				.set("sourcex", trigger.targets)
@@ -19903,7 +19902,7 @@ const skills = {
 				event.finish();
 			}
 			"step 2";
-			player.logSkill("reduanbing", event.target);
+			player.logSkill(event.name, event.target);
 			trigger.targets.push(event.target);
 		},
 		ai: {

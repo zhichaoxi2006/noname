@@ -876,7 +876,7 @@ const skills = {
 				direct: true,
 				content() {
 					const str = player.hasMark("potzhanlie_lie") ? "移去所有“烈”，" : "";
-					player.chooseUseTarget("###" + get.prompt("potzhanlie") + "###" + str +"视为使用一张无次数限制的【杀】", new lib.element.VCard({ name: "sha" }), false).set("oncard", () => {
+					player.chooseUseTarget("###" + get.prompt("potzhanlie") + '###<div class="text center">' + str + "视为使用一张无次数限制的【杀】</div>", new lib.element.VCard({ name: "sha" }), false).set("oncard", () => {
 						const event = get.event(),
 							{ player } = event,
 							num = player.countMark("potzhanlie_lie");
@@ -1007,28 +1007,27 @@ const skills = {
 				charlotte: true,
 				onremove: true,
 				audio: "potzhanlie",
-				trigger: { player: ["shaMiss", "eventNeutralized"] },
+				trigger: { player: "useCardToBegin" },
 				filter(event, player) {
-					if (event.type != "card" || !event.target?.isIn()) return false;
-					return player.getStorage("potzhanlie_guanshi").includes(event.card);
+					if (!event.target?.isIn()) return false;
+					return !event.getParent().directHit.includes(event.target) && player.getStorage("potzhanlie_guanshi").includes(event.card);
 				},
 				forced: true,
 				logTarget: "target",
 				async content(event, trigger, player) {
 					const { target } = trigger;
-					const { result } = await target.chooseToDiscard("战烈：弃置一张牌，否则" + get.translation(trigger.card) + "依然造成伤害").set("ai", card => {
-						const target = get.player(),
-							evt = get.event().getParent();
-						if (get.damageEffect(target, evt.player, target, evt.card.nature) < 0) return 8 - get.useful(card);
-						return 0;
+					const { result } = await target.chooseToDiscard("战烈：弃置一张牌，否则不可响应" + get.translation(trigger.card)).set("ai", card => {
+						const player = get.player(),
+							trigger = get.event().getTrigger();
+						if (get.effect(player, trigger.card, trigger.player, player) >= 0) return 0;
+						const num = player.countCards("hs", { name: "shan" });
+						if (num === 0) return 0;
+						if (card.name === "shan" && num <= 1) return 0;
+						return 8 - get.value(card);
 					});
 					if (!result?.bool) {
-						if (event.triggername == "shaMiss") {
-							trigger.untrigger();
-							trigger.trigger("shaHit");
-							trigger._result.bool = false;
-							trigger._result.result = null;
-						} else trigger.unneutralize();
+						trigger.set("directHit", true);
+						game.log(target, "不可响应", trigger.card);
 					}
 				},
 			},

@@ -958,11 +958,11 @@ const skills = {
 				charlotte: true,
 				mod: {
 					cardUsable(card) {
-						if (get.number(card) === "unsure" || card.cards?.some(card => card.hasGaintag("dcbeijin_buff"))) return Infinity;
+						if (get.number(card) === "unsure" || card.cards?.some(card => card.hasGaintag("dcbeijin_effect"))) return Infinity;
 					},
 					aiOrder(player, card, num) {
 						if (player.hasSkill("dcbeijin_buff") && typeof card === "object") {
-							if (get.itemtype(card) === "card" || card.cards?.some(card => card.hasGaintag("dcbeijin_buff"))) return num + 100;
+							if (get.itemtype(card) === "card" || card.cards?.some(card => card.hasGaintag("dcbeijin_effect"))) return num + 100;
 							return num / (get.tag(card, "recover") ? 1 : 1145141919810);
 						}
 					},
@@ -991,6 +991,7 @@ const skills = {
 				charlotte: true,
 				trigger: { player: ["useCard", "dcbeijinBegin"] },
 				forced: true,
+				popup: false,
 				content() {
 					player.removeSkill(event.name);
 					if (player.hasCard(card => card.hasGaintag("dcbeijin_effect"))) player.loseHp();

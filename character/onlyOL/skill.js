@@ -4037,9 +4037,9 @@ const skills = {
 			backup: {},
 			effect: {
 				charlotte: true,
-				trigger: { global: "useCardToBegin" },
+				trigger: { player: "useCardToBegin" },
 				filter(event, player) {
-					return event.skill === "olsbweilin_backup";
+					return event.target?.isIn() && event.skill === "olsbweilin_backup";
 				},
 				forced: true,
 				popup: false,
