@@ -150,16 +150,29 @@ const skills = {
 		},
 		async cost(event, trigger, player) {
 			const count = Math.min(4, player.countMark("clananran_used") + 1);
-			const { result } = await player.chooseButton([
-				get.prompt2("clananran"),
-				[
+			const { result } = await player
+				.chooseButton([
+					get.prompt2("clananran"),
 					[
-						["draw", `摸${get.cnNumber(count)}张牌`],
-						["asyncDraw", `令至多${get.cnNumber(count)}名角色摸一张牌`],
+						[
+							["draw", `摸${get.cnNumber(count)}张牌`],
+							["asyncDraw", `令至多${get.cnNumber(count)}名角色摸一张牌`],
+						],
+						"textbutton",
 					],
-					"textbutton",
-				],
-			]);
+				])
+				.set("ai", button => {
+					const player = get.player(),
+						count = Math.min(4, player.countMark("clananran_used") + 1);
+					if (button.link === "draw") return get.effect(player, { name: "draw" }, player, player) * count;
+					return game
+						.filterPlayer(target => get.effect(target, { name: "draw" }, player, player) > 0)
+						.sort((a, b) => {
+							return get.effect(b, { name: "draw" }, player, player) - get.effect(a, { name: "draw" }, player, player);
+						})
+						.slice(0, count)
+						.reduce((sum, target) => sum + get.effect(target, { name: "draw" }, player, player), 0);
+				});
 			event.result = {
 				bool: result.bool,
 				cost_data: result.links[0],
@@ -169,15 +182,19 @@ const skills = {
 			player.addSkill("clananran_used");
 			if (player.countMark("clananran_used") < 4) player.addMark("clananran_used", 1, false);
 			const count = player.countMark("clananran_used");
-			const { cost_data } = event;
+			const { cost_data } = event,
+				map = { player: "useCard1", global: "phaseAfter" };
 			if (cost_data == "draw") {
+				player.addTempSkill("clananran_tag", map);
 				await player.draw(count).set("gaintag", ["clananran_tag"]);
-				player.addTempSkill("clananran_tag", { player: "useCardAfter" });
 			} else {
-				const { result } = await player.chooseTarget(`令至多${get.cnNumber(count)}名角色摸一张牌`, [1, count]);
-				for (const i of result.targets) {
-					await i.draw().set("gaintag", ["clananran_tag"]);
-					i.addTempSkill("clananran_tag", { player: "useCardAfter" });
+				const { result } = await player.chooseTarget(`岸然：令至多${get.cnNumber(count)}名角色摸一张牌`, [1, count], true);
+				if (result.targets?.length) {
+					for (const i of result.targets.sortBySeat()) {
+						i.addTempSkill("clananran_tag", map);
+						await i.draw("nodelay").set("gaintag", ["clananran_tag"]);
+					}
+					await game.delayx();
 				}
 			}
 		},
