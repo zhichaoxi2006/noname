@@ -12753,6 +12753,7 @@ const skills = {
 		audioname2: {
 			old_guanzhang: "old_fuhun",
 			xin_zhangfei: "paoxiao_re_zhangfei",
+			old_zhangfei: "paoxiao_re_zhangfei",
 		},
 		audioname: ["re_zhangfei", "guanzhang", "xiahouba", "re_guanzhang"],
 		trigger: { player: "useCard1" },
@@ -12978,7 +12979,7 @@ const skills = {
 		},
 		//priority:1,
 		audio: 2,
-		audioname: ["sb_huaxiong"],
+		audioname: ["sb_huaxiong", "ol_huaxiong"],
 		filter(event) {
 			return event.card && event.card.name == "sha" && (get.color(event.card) != "red" || (event.source && event.source.isIn()));
 		},
