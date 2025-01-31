@@ -3783,26 +3783,25 @@ const skills = {
 		audio: 2,
 		trigger: { player: ["phaseJudgeBefore", "phaseDrawBefore", "phaseUseBefore"] },
 		usable: 1,
-		direct: true,
-		content() {
-			"step 0";
+		async cost(event, trigger, player) {
+			const skillName = event.name.slice(0, -5);
 			switch (trigger.name) {
 				case "phaseJudge":
-					player
-						.chooseTarget(get.prompt("sbqiaobian"), "失去1点体力并跳过判定阶段，将判定区里的牌移动给一名其他角色", lib.filter.notMe)
-						.set("ai", function (target) {
-							var player = _status.event.player;
+					event.result = await player
+						.chooseTarget(get.prompt(skillName), "失去1点体力并跳过判定阶段，将判定区里的牌移动给一名其他角色", lib.filter.notMe)
+						.set("ai", target => {
+							const player = get.player();
 							if (
 								player.hp +
-								player.countCards("h", function (card) {
-									var mod2 = game.checkMod(card, player, "unchanged", "cardEnabled2", player);
-									if (mod2 != "unchanged") return mod2;
-									var mod = game.checkMod(card, player, player, "unchanged", "cardSavable", player);
-									if (mod != "unchanged") return mod;
-									var savable = get.info(card).savable;
-									if (typeof savable == "function") savable = savable(card, player, player);
-									return savable;
-								}) <=
+									player.countCards("h", card => {
+										var mod2 = game.checkMod(card, player, "unchanged", "cardEnabled2", player);
+										if (mod2 != "unchanged") return mod2;
+										var mod = game.checkMod(card, player, player, "unchanged", "cardSavable", player);
+										if (mod != "unchanged") return mod;
+										var savable = get.info(card).savable;
+										if (typeof savable == "function") savable = savable(card, player, player);
+										return savable;
+									}) <=
 								1
 							)
 								return 0;
@@ -3816,56 +3815,57 @@ const skills = {
 							}
 							return eff;
 						})
-						.setHiddenSkill("sbqiaobian");
+						.setHiddenSkill(skillName)
+						.forResult();
 					break;
 				case "phaseDraw":
-					player.chooseBool(get.prompt("sbqiaobian"), "跳过摸牌阶段，于下个准备阶段摸五张牌并回复1点体力").setHiddenSkill("sbqiaobian");
+					event.result = await player.chooseBool(get.prompt(skillName), "跳过摸牌阶段，于下个准备阶段摸五张牌并回复1点体力").setHiddenSkill(skillName).forResult();
 					break;
 				case "phaseUse":
-					var num = player.countCards("h") - 6;
-					if (num <= 0) player.chooseBool(get.prompt("sbqiaobian"), "跳过出牌阶段和弃牌阶段，然后移动场上的一张牌").set("choice", player.canMoveCard(true)).setHiddenSkill("sbqiaobian");
+					let next;
+					const num = player.countCards("h") - 6;
+					if (num <= 0) next = player.chooseBool(get.prompt(skillName), "跳过出牌阶段和弃牌阶段，然后移动场上的一张牌").set("choice", player.canMoveCard(true)).setHiddenSkill(skillName);
 					else
-						player
-							.chooseToDiscard(get.prompt("sbqiaobian"), num, "弃置" + get.cnNumber(num) + "张手牌并跳过出牌阶段和弃牌阶段，然后移动场上的一张牌")
-							.set("ai", function (card) {
-								var player = _status.event.player;
+						next = player
+							.chooseToDiscard(get.prompt(skillName), num, `弃置${get.cnNumber(num)}张手牌并跳过出牌阶段和弃牌阶段，然后移动场上的一张牌`)
+							.set("ai", card => {
+								const player = get.player();
 								if (!player.canMoveCard(true) || player.countCards("hs", card => player.hasValueTarget(card)) >= 9) return 0;
 								return 7 - get.value(card);
 							})
-							.setHiddenSkill("sbqiaobian").logSkill = "sbqiaobian";
+							.setHiddenSkill(skillName);
+					event.result = await next.forResult();
 					break;
 			}
-			"step 1";
-			if (result.bool) {
-				trigger.cancel();
-				switch (trigger.name) {
-					case "phaseJudge":
-						var target = result.targets[0];
-						player.logSkill("sbqiaobian", target);
-						player.loseHp();
-						game.log(player, "跳过了判定阶段");
-						for (var card of player.getCards("j")) {
-							if (target.canAddJudge(card)) {
-								player.$give(card, target, false);
-								if (card.viewAs) target.addJudge({ name: card.viewAs }, [card]);
-								else target.addJudge(card);
-							} else player.discard(card);
-						}
-						break;
-					case "phaseDraw":
-						player.logSkill("sbqiaobian");
-						game.log(player, "跳过了摸牌阶段");
-						player.addSkill("sbqiaobian_draw");
-						break;
-					case "phaseUse":
-						if (!result.cards || !result.cards.length) player.logSkill("sbqiaobian", target);
-						player.skip("phaseDiscard");
-						game.log(player, "跳过了出牌阶段");
-						game.log(player, "跳过了弃牌阶段");
-						player.moveCard();
-						break;
-				}
-			} else player.storage.counttrigger.sbqiaobian--;
+		},
+		async content(event, trigger, player) {
+			trigger.cancel();
+			switch (trigger.name) {
+				case "phaseJudge":
+					const {
+						targets: [target],
+					} = event;
+					await player.loseHp();
+					game.log(player, "跳过了判定阶段");
+					for (const card of player.getCards("j")) {
+						if (target.canAddJudge(card)) {
+							player.$give(card, target, false);
+							if (card.viewAs) await target.addJudge({ name: card.viewAs }, [card]);
+							else await target.addJudge(card);
+						} else await player.discard(card);
+					}
+					break;
+				case "phaseDraw":
+					game.log(player, "跳过了摸牌阶段");
+					player.addSkill("sbqiaobian_draw");
+					break;
+				case "phaseUse":
+					player.skip("phaseDiscard");
+					game.log(player, "跳过了出牌阶段");
+					game.log(player, "跳过了弃牌阶段");
+					await player.moveCard();
+					break;
+			}
 		},
 		subSkill: {
 			draw: {
@@ -3876,7 +3876,7 @@ const skills = {
 				trigger: { player: "phaseZhunbeiBegin" },
 				forced: true,
 				content() {
-					player.removeSkill("sbqiaobian_draw");
+					player.removeSkill(event.name);
 					player.draw(5);
 					player.recover();
 				},
@@ -6968,32 +6968,31 @@ const skills = {
 		audio: 2,
 		trigger: { player: "damageEnd" },
 		usable: 1,
-		direct: true,
 		filter(event, player) {
 			return event.source && event.source != player && event.source.isIn();
 		},
-		content() {
-			"step 0";
-			trigger.source
-				.chooseBool("樵拾：是否令" + get.translation(player) + "回复" + trigger.num + "点体力，然后你摸两张牌？")
+		async cost(event, trigger, player) {
+			const { source, num } = trigger;
+			event.result = await source
+				.chooseBool(`樵拾：是否令${get.translation(player)}回复${num}点体力，然后你摸两张牌？`)
 				.set("ai", () => {
 					return _status.event.bool;
 				})
-				.set("bool", get.recoverEffect(player, trigger.source, trigger.source) + 2 * get.effect(trigger.source, { name: "draw" }, trigger.source) > 5);
-			"step 1";
-			if (result.bool) {
-				player.logSkill("sbqiaoshi");
-				trigger.source.line(player, "green");
-				player.recover(trigger.num);
-				trigger.source.draw(2);
-			} else player.storage.counttrigger.sbqiaoshi--;
+				.set("bool", get.recoverEffect(player, source, source) + 2 * get.effect(source, { name: "draw" }, source) > 5)
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			const { source, num } = trigger;
+			source.line(player, "green");
+			await player.recover(num);
+			await source.draw(2);
 		},
 		ai: {
 			effect: {
 				target(card, player, target) {
 					if (get.tag(card, "damage")) {
 						if (get.attitude(target, player) <= 0 || target == player) return;
-						if (target.storage.counttrigger && target.storage.counttrigger.sbqiaoshi) return;
+						if (target.storage.counttrigger?.sbqiaoshi) return;
 						if (target.hp <= 1 && !player.canSave(target)) return;
 						return [0, 0.5, 0, 0.5];
 					}

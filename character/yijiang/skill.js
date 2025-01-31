@@ -488,8 +488,7 @@ const skills = {
 				if (num > 0)
 					next = player.chooseToDiscard(get.prompt(skillName, target), num, `弃置${get.cnNumber(num)}张牌并对${get.translation(target)}造成1点伤害`, "he").set("ai", card => {
 						const player = get.player();
-						console.log(_status.event.selectTarget)
-						if (get.damageEffect(_status.event.getTrigger().player, player, player) > 0) return Math.max(5.5, 8 - _status.event.selectTarget) - get.value(card);
+						if (get.damageEffect(_status.event.getTrigger().player, player, player) > 0) return 6 - get.value(card);
 						return -1;
 					});
 				else next = player.chooseBool(get.prompt(skillName, target), `对${get.translation(target)}造成1点伤害`).set("choice", get.damageEffect(target, player, player) > 0);

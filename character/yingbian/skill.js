@@ -1334,53 +1334,52 @@ const skills = {
 		audio: 2,
 		trigger: {
 			global: "phaseBefore",
-			player: "enterGame",
+			player: ["enterGame", "useCardAfter"],
 		},
 		filter(event, player) {
+			if (event.name == "useCard") return !player.hasSkill("xuanbei_used", null, null, false) && (event.card.yingbian || get.is.yingbian(event.card)) && event.cards.someInD() && game.hasPlayer(current => player != current);
 			return event.name != "phase" || game.phaseNumber == 0;
 		},
-		forced: true,
-		locked: false,
-		content() {
-			var cards = [];
-			while (cards.length < 2) {
-				var card = get.cardPile2(function (i) {
-					return get.is.yingbian(i) && !cards.includes(i);
+		async cost(event, trigger, player) {
+			if (trigger.name == "useCard") {
+				const cards = trigger.cards.filterInD();
+				const {
+					result: { bool, targets },
+				} = await player.chooseTarget(get.prompt(event.name.slice(0, -5)), `令一名其他角色获得${get.translation(cards)}`, lib.filter.notMe).set("ai", target => {
+					let att = get.attitude(get.player(), target);
+					if (att < 3) return 0;
+					if (target.hasJudge("lebu")) att /= 2;
+					if (target.hasSkillTag("nogain")) att /= 10;
+					return att / (1 + get.distance(player, target, "absolute"));
 				});
-				if (!card) break;
-				else cards.push(card);
+				event.result = {
+					bool: bool,
+					targets: targets,
+					cost_data: cards,
+				};
+			} else {
+				event.result = {
+					bool: true,
+				};
 			}
-			if (cards.length) player.gain(cards, "gain2");
 		},
-		group: "xuanbei_give",
-		subSkill: {
-			give: {
-				trigger: { player: "useCardAfter" },
-				usable: 1,
-				filter(event, player) {
-					return (event.card.yingbian || get.is.yingbian(event.card)) && event.cards.filterInD().length > 0;
-				},
-				direct: true,
-				content() {
-					"step 0";
-					event.cards = trigger.cards.filterInD();
-					player.chooseTarget(get.prompt("xuanbei"), "令一名其他角色获得" + get.translation(event.cards), lib.filter.notMe).set("ai", function (target) {
-						var att = get.attitude(_status.event.player, target);
-						if (att < 3) return 0;
-						if (target.hasJudge("lebu")) att /= 2;
-						if (target.hasSkillTag("nogain")) att /= 10;
-						return att / (1 + get.distance(player, target, "absolute"));
-					});
-					"step 1";
-					if (result.bool) {
-						var target = result.targets[0];
-						player.logSkill("xuanbei_give", target);
-						target.gain(cards, "gain2").giver = player;
-					} else player.storage.counttrigger.xuanbei_give--;
-				},
-				ai: { expose: 0.1 },
-			},
+		async content(event, trigger, player) {
+			if (trigger.name == "useCard") {
+				player.addTempSkill(event.name + "_used");
+				const next = event.targets[0].gain(event.cost_data, "gain2");
+				next.giver = player;
+				await next;
+			} else {
+				const cards = [];
+				while (cards.length < 2) {
+					const card = get.cardPile2(i => get.is.yingbian(i) && !cards.includes(i));
+					if (!card) break;
+					else cards.push(card);
+				}
+				if (cards.length) await player.gain(cards, "gain2");
+			}
 		},
+		subSkill: { used: { charlotte: true } },
 	},
 	xianwan: {
 		audio: 2,

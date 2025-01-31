@@ -4664,44 +4664,44 @@ const skills = {
 			player: "loseAfter",
 			global: "loseAsyncAfter",
 		},
-		direct: true,
 		filter(event, player) {
 			if (event.type != "discard") return false;
-			var evt = event.getl(player);
-			return evt.cards2.filterInD("d").length > 0;
+			const evt = event.getl(player);
+			return evt?.cards2?.filterInD("d").length > 0 && game.hasPlayer(current => player != current);
 		},
-		content() {
-			"step 0";
-			var cards = trigger.getl(player).cards2;
-			player.chooseButton(["宽济：是否将一张牌交给一名其他角色？", cards.filterInD("d")]).set("ai", function (button) {
-				var player = _status.event.player;
-				if (
-					game.hasPlayer(function (current) {
-						return current != player && get.attitude(player, current) > 0;
-					})
-				)
-					return Math.abs(get.value(button.link, "raw")) + 1;
-				return -get.value(button.link, "raw");
+		async cost(event, trigger, player) {
+			const cards = trigger.getl(player).cards2;
+			const links = await player
+				.chooseButton(["宽济：是否将一张牌交给一名其他角色？", cards.filterInD("d")])
+				.set("ai", button => {
+					const player = get.player();
+					if (
+						game.hasPlayer(current => {
+							return current != player && get.attitude(player, current) > 0;
+						})
+					)
+						return Math.abs(get.value(button.link, "raw")) + 1;
+					return -get.value(button.link, "raw");
+				})
+				.forResultLinks();
+			if (!links?.length) return;
+			const card = links[0];
+			event.card = card;
+			const {
+				result: { bool, targets },
+			} = await player.chooseTarget(`将${get.translation(card)}交给一名其他角色并摸一张牌`, lib.filter.notMe, true).set("ai", target => {
+				const evt = _status.event.getParent();
+				return get.attitude(evt.player, target) * get.value(evt.card, target) * (target.hasSkillTag("nogain") ? 0.1 : 1);
 			});
-			"step 1";
-			if (result.bool) {
-				var card = result.links[0];
-				event.card = card;
-				player.chooseTarget("将" + get.translation(card) + "交给一名其他角色并摸一张牌", lib.filter.notMe, true).set("ai", function (target) {
-					var evt = _status.event.getParent();
-					return get.attitude(evt.player, target) * get.value(evt.card, target) * (target.hasSkillTag("nogain") ? 0.1 : 1);
-				});
-			} else {
-				player.storage.counttrigger.mjkuanji--;
-				event.finish();
-			}
-			"step 2";
-			if (result.bool) {
-				var target = result.targets[0];
-				player.logSkill("mjkuanji", target);
-				target.gain(card, "gain2");
-				player.draw();
-			}
+			event.result = {
+				bool: bool,
+				targets: targets,
+				cost_data: card,
+			};
+		},
+		async content(event, trigger, player) {
+			await event.targets[0].gain(event.cost_data, "gain2");
+			await player.draw();
 		},
 	},
 	mjdingyi: {
