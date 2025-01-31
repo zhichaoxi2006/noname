@@ -222,49 +222,51 @@ const skills = {
 	},
 	clangaobian: {
 		audio: 2,
-		trigger: {
-			global: "phaseAfter",
-		},
+		trigger: { global: "phaseEnd" },
 		filter(event, player) {
 			if (event.player == player) return false;
-			return (
-				game.countPlayer(target => {
-					return target.getHistory("damage").length;
-				}) === 1
-			);
+			const targets = game.filterPlayer2(target => target.hasHistory("damage"));
+			return targets.length == 1 && targets[0]?.isIn();
 		},
 		forced: true,
+		logTarget(event, player) {
+			return game.findPlayer2(target => target.hasHistory("damage"));
+		},
 		async content(event, trigger, player) {
-			const target = game.findPlayer(target => {
-				return target.getHistory("damage").length;
-			});
+			const target = game.findPlayer2(target => target.hasHistory("damage"));
 			const discarded = get.discarded().filter(c => c.name == "sha");
 			const bool = discarded.some(c => target.hasUseTarget(c));
-			const { result } = await player
-				.chooseButton([
-					"请选择一项",
-					[
-						[
-							["sha", `令${get.translation(target)}使用本回合进入弃牌堆的一张【杀】`],
-							["loseHp", `令${get.translation(target)}失去一点体力`],
-						],
-						"textbutton",
-					],
-				])
-				.set("filterButton", function (button) {
-					if (button.link == "sha") {
-						return bool;
-					}
-					return true;
-				});
+			const result = bool
+				? await target
+						.chooseButton(
+							[
+								"告变：请选择一项",
+								[
+									[
+										["sha", "使用本回合进入弃牌堆的一张【杀】"],
+										["loseHp", "失去1点体力"],
+									],
+									"textbutton",
+								],
+							],
+							true
+						)
+						.set("shas", discarded.filter(c => target.hasUseTarget(c)))
+						.set("ai", button => {
+							const { player, discarded: cards } = get.event();
+							return {
+								sha: Math.max(...cards.map(card => player.getUseValue(card))),
+								loseHp: get.effect(player, { name: "losehp" }, player, player),
+							}[button.link];
+						})
+						.forResult()
+				: { bool: true, links: ["loseHp"] };
 			if (result.links[0] == "sha") {
-				const { result: result2 } = await target.chooseCardButton(discarded).set("filterButton", button => {
-					return target.hasUseTarget(button);
-				});
-				await target.chooseUseTarget(result2.links[0], true);
-			} else {
-				await target.loseHp();
-			}
+				const result2 = await target.chooseCardButton("告变：请选择其中一张【杀】使用", discarded, true).set("filterButton", button => {
+					return get.player().hasUseTarget(button.link);
+				}).forResult();
+				if (result2?.bool && result2.links?.length) await target.chooseUseTarget(result2.links[0], true, false);
+			} else await target.loseHp();
 		},
 	},
 	// 族王昶
