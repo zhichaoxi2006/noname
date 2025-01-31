@@ -225,7 +225,8 @@ const skills = {
 		trigger: { global: "phaseEnd" },
 		filter(event, player) {
 			if (event.player == player) return false;
-			return game.findPlayer2(target => target.hasHistory("damage"))?.isIn();
+			const targets = game.filterPlayer2(target => target.hasHistory("damage"));
+			return targets.length == 1 && targets[0]?.isIn();
 		},
 		forced: true,
 		logTarget(event, player) {
