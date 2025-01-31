@@ -759,6 +759,7 @@ const skills = {
 		},
 	},
 	old_fuyin: {
+		audio: "xinfu_fuyin",
 		mod: {
 			targetEnabled(card, player, target) {
 				if ((card.name == "juedou" || card.name == "sha" || card.name == "huogong") && player != target && player.countCards("h") >= target.countCards("h") && target.hasEmptySlot(2)) return false;
