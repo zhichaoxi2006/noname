@@ -6968,32 +6968,31 @@ const skills = {
 		audio: 2,
 		trigger: { player: "damageEnd" },
 		usable: 1,
-		direct: true,
 		filter(event, player) {
 			return event.source && event.source != player && event.source.isIn();
 		},
-		content() {
-			"step 0";
-			trigger.source
-				.chooseBool("樵拾：是否令" + get.translation(player) + "回复" + trigger.num + "点体力，然后你摸两张牌？")
+		async cost(event, trigger, player) {
+			const { source, num } = trigger;
+			event.result = await source
+				.chooseBool(`樵拾：是否令${get.translation(player)}回复${num}点体力，然后你摸两张牌？`)
 				.set("ai", () => {
 					return _status.event.bool;
 				})
-				.set("bool", get.recoverEffect(player, trigger.source, trigger.source) + 2 * get.effect(trigger.source, { name: "draw" }, trigger.source) > 5);
-			"step 1";
-			if (result.bool) {
-				player.logSkill("sbqiaoshi");
-				trigger.source.line(player, "green");
-				player.recover(trigger.num);
-				trigger.source.draw(2);
-			} else player.storage.counttrigger.sbqiaoshi--;
+				.set("bool", get.recoverEffect(player, source, source) + 2 * get.effect(source, { name: "draw" }, source) > 5)
+				.forResult();
+		},
+		async content(event, trigger, player) {
+			const { source, num } = trigger;
+			source.line(player, "green");
+			await player.recover(num);
+			await source.draw(2);
 		},
 		ai: {
 			effect: {
 				target(card, player, target) {
 					if (get.tag(card, "damage")) {
 						if (get.attitude(target, player) <= 0 || target == player) return;
-						if (target.storage.counttrigger && target.storage.counttrigger.sbqiaoshi) return;
+						if (target.storage.counttrigger?.sbqiaoshi) return;
 						if (target.hp <= 1 && !player.canSave(target)) return;
 						return [0, 0.5, 0, 0.5];
 					}
