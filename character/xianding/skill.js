@@ -245,13 +245,12 @@ const skills = {
 	},
 	//武陆抗 —— by 刘巴
 	dckegou: {
-		trigger: {
-			global: "phaseEnd",
-		},
-		forced: true,
+		audio: 2,
+		trigger: { global: "phaseEnd" },
 		filter(event, player) {
 			return event.player != player && get.discarded().length > 0;
 		},
+		forced: true,
 		async content(event, trigger, player) {
 			const discardPile = get.discarded();
 			let maxNumber = Math.max(...discardPile.map(c => get.number(c)));
@@ -259,9 +258,8 @@ const skills = {
 		},
 	},
 	dcjiduan: {
-		trigger: {
-			player: "useCardToPlayered",
-		},
+		audio: 2,
+		trigger: { player: "useCardToPlayered" },
 		filter: (event, player) => event.isFirstTarget && event.targets.filter(c => !player.getStorage("dcjiduan_used").includes(c)).some(z => z.countCards("h")),
 		async cost(event, trigger, player) {
 			let targets = trigger.targets.filter(c => !player.getStorage(event.name + "_used").includes(c));
@@ -330,21 +328,26 @@ const skills = {
 		},
 	},
 	dcdixian: {
+		audio: 2,
 		enable: "phaseUse",
 		limited: true,
-		filterCard: true,
+		onChooseToUse(event) {
+			if (!game.online && !event.dcdixian) event.set("dcdixian", ui.cardPile.childNodes.length);
+		},
+		filter(event, player) {
+			if (!event.dcdixian) return false;
+			return player.hasCard(card => lib.filter.cardDiscardable(card, player), "h");
+		},
+		filterCard: lib.filter.cardDiscardable,
 		selectCard: [1, Infinity],
 		check(card) {
-			let player = _status.event.player;
-			if (get.position(card) == "e") {
-				let subs = get.subtypes(card);
-				if (subs.includes("equip2") || subs.includes("equip3")) return player.getHp() - get.value(card);
-			}
 			return 6 - get.value(card);
 		},
 		async content(event, trigger, player) {
 			player.awakenSkill(event.name);
+			player.addSkill(event.name + "_mark");
 			const cardPile = Array.from(ui.cardPile.childNodes).sort(lib.sort.number2);
+			if (!cardPile.length) return;
 			const next = player.gain(cardPile.splice(0, event.cards.length), "draw");
 			next.gaintag.add(event.name);
 			await next;
@@ -355,6 +358,19 @@ const skills = {
 				player: 1,
 			},
 			threaten: 1.5,
+		},
+		subSkill: {
+			mark: {
+				charlotte: true,
+				mod: {
+					ignoredHandcard(card, player) {
+						if (card.hasGaintag("dcdixian")) return true;
+					},
+					cardDiscardable(card, player, name) {
+						if (name === "phaseDiscard" && card.hasGaintag("dcdixian")) return false;
+					},
+				},
+			},
 		},
 	},
 	//SP马超二号
