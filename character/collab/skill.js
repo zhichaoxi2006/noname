@@ -639,7 +639,7 @@ const skills = {
 			if (event.type !== "discard" || event.getlx === false) return false;
 			return game.hasPlayer(target => {
 				if (target === player) return false;
-				return event.getl?.(player)?.cards2?.some(card => get.color(card) === "black" && get.position(card, true) === "d");
+				return event.getl?.(target)?.cards2?.some(card => get.color(card) === "black" && get.position(card, true) === "d");
 			});
 		},
 		forced: true,
@@ -653,10 +653,10 @@ const skills = {
 				game
 					.filterPlayer(target => {
 						if (target === player) return false;
-						return trigger.getl?.(player)?.cards2?.some(card => get.color(card) === "black" && get.position(card, true) === "d");
+						return trigger.getl?.(target)?.cards2?.some(card => get.color(card) === "black" && get.position(card, true) === "d");
 					})
 					.reduce((list, target) => {
-						return list.addArray(trigger.getl(player).cards2.filter(card => get.color(card) === "black" && get.position(card, true) === "d"));
+						return list.addArray(trigger.getl(target).cards2.filter(card => get.color(card) === "black" && get.position(card, true) === "d"));
 					}, []),
 				"gain2"
 			);
