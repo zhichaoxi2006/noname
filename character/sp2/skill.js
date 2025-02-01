@@ -37,8 +37,10 @@ const skills = {
 					],
 				])
 				.set("filterButton", button => {
+					const player = get.player(),
+						event = get.event().getTrigger().getParent();
 					if (button.link == "extraTarget") {
-						return lib.skill.starlianzhan.filterx(trigger.getParent(), get.player());
+						return lib.skill.starlianzhan.filterx(event, player);
 					}
 					return true;
 				})
