@@ -107,7 +107,7 @@ const skills = {
 		trigger: { player: "useCard" },
 		filter(event, player) {
 			if (event.card.name != "sha") return false;
-			const evtx = get.info("dcjianying").getLastUsed(player);
+			const evtx = get.info("dcjianying").getLastUsed(player, event);
 			if (!evtx) return false;
 			return !player.hasHistory("sourceDamage", evt => evt.card == evtx.card);
 		},
