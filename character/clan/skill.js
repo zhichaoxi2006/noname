@@ -251,7 +251,7 @@ const skills = {
 							],
 							true
 						)
-						.set("shas", discarded.filter(c => target.hasUseTarget(c)))
+						.set("discarded", discarded.filter(c => target.hasUseTarget(c)))
 						.set("ai", button => {
 							const { player, discarded: cards } = get.event();
 							return {
