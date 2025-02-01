@@ -4485,6 +4485,7 @@ const skills = {
 		},
 		subSkill: {
 			build: {
+				audio: "jsrgshacheng",
 				trigger: {
 					global: "phaseBefore",
 					player: "enterGame",
@@ -4503,43 +4504,29 @@ const skills = {
 	},
 	jsrgninghan: {
 		audio: 2,
-		init: player => {
-			game.addGlobalSkill("jsrgninghan_frozen");
-		},
-		onremove: player => {
-			if (!game.hasPlayer(current => current.hasSkill("jsrgninghan", null, null, false), true)) game.removeGlobalSkill("jsrgninghan_frozen");
-		},
 		trigger: { global: "damageEnd" },
 		filter(event, player) {
-			if (!event.hasNature("ice")) return false;
-			return event.cards && event.cards.filterInD().length;
+			return event.hasNature("ice") && event.cards?.someInD();
 		},
 		forced: true,
 		content() {
 			var cards = trigger.cards.filterInD();
 			player.addToExpansion(cards, "gain2").gaintag.add("jsrgshacheng");
 		},
+		global: "jsrgninghan_frozen",
 		subSkill: {
 			frozen: {
 				mod: {
 					cardnature(card, player) {
+						if (!game.hasPlayer(current => current.hasSkill("jsrgninghan"))) return;
 						if (card.name === "sha" && get.suit(card) === "club") return "ice";
 					},
-					aiOrder: (player, card, num) => {
+					aiOrder(player, card, num) {
+						if (!game.hasPlayer(current => current.hasSkill("jsrgninghan"))) return;
 						if (num && card.name === "sha" && game.hasNature(card, "ice")) {
-							let lg = game.findPlayer(current => current.hasSkill("jsrgninghan"));
-							if (lg) return num + 0.15 * Math.sign(get.attitude(player, lg));
+							return num + 0.15 * Math.sign(get.attitude(player, lg));
 						}
 					},
-				},
-				trigger: { player: "dieAfter" },
-				filter: (event, player) => {
-					return !game.hasPlayer(current => !current.hasSkill("jsrgninghan", null, null, false), true);
-				},
-				silent: true,
-				forceDie: true,
-				content: () => {
-					game.removeGlobalSkill("jsrgninghan_frozen");
 				},
 			},
 		},

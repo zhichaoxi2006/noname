@@ -2385,6 +2385,7 @@ const skills = {
 					viewAs: { name: links[0][2], storage: { spolxixiang: true } },
 					filterCard: true,
 					selectCard: [get.event().spolxixiang_num, Infinity],
+					filterTarget: lib.filter.targetEnabled,
 					ai1(card) {
 						if (ui.selected.cards.length) return 0;
 						return 6 - get.value(card);

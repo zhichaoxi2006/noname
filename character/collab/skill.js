@@ -53,8 +53,7 @@ const skills = {
 						const card = lib.skill.dcxinggong_backup.card;
 						await player.gain(card, "gain2");
 						const num = card.length - player.getHp();
-						if (num <= 0) return;
-						for (let i = 0; i < num; i++) await player.damage(1, player);
+						if (num > 0) await player.damage(num);
 					},
 				};
 			},
