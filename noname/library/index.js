@@ -7274,6 +7274,12 @@ export class Library {
 					},
 					restart: true,
 				},
+				single_control: {
+					name: "单人控制",
+					intro: "由玩家操作点将单挑的两名游戏角色",
+					init: false,
+					restart: true,
+				},
 				update: function (config, map) {
 					if (config.single_mode != "normal") {
 						map.enable_jin.hide();
@@ -7288,8 +7294,10 @@ export class Library {
 					if (config.single_mode != "dianjiang") {
 						map.double_character.hide();
 						map.double_hp.hide();
+						map.single_control.hide();
 					} else {
 						map.double_character.show();
+						map.single_control.show();
 						if (["double", "singble"].includes(config.double_character)) {
 							map.double_hp.show();
 						} else {
