@@ -1214,34 +1214,45 @@ const skills = {
 	// SP甘夫人
 	mbzhijie: {
 		audio: 2,
-		trigger: {
-			global: "phaseUseBegin",
-		},
-		filter(event, player, name) {
-			return event.player != player && event.player.countCards("h");
+		trigger: { global: "phaseUseBegin" },
+		filter(event, player) {
+			return event.player.countCards("h");
 		},
 		async cost(event, trigger, player) {
 			event.result = await player
-				.choosePlayerCard(trigger.player, "h", get.prompt(event.name.slice(0, -5)))
+				.choosePlayerCard(trigger.player, "h", get.prompt2(event.name.slice(0, -5)))
 				.set("ai", button => {
+					//小透不算透---by @xizifu
 					const { player, target } = get.event(),
-						att = get.attitude(player, target);
-					if (att <= 0) return 0;
-					return 1;
+						att = get.attitude(player, target),
+						type = get.type2(button.link);
+					if (att === 0) return 0;
+					const cards = target.getCards("hs", card => get.type2(card) === type && target.hasValueTarget(card));
+					return (cards.length > 0) ^ (att < 0)
+						? (() => {
+								if (att < 0) return 1 + Math.random();
+								return Math.max(...cards.map(card => target.getUseValue(card)));
+						  })()
+						: -1;
 				})
 				.forResult();
 		},
+		round: 1,
 		logTarget: "player",
 		async content(event, trigger, player) {
 			const { cards, name } = event,
 				{ player: target } = trigger;
-			player.tempBanSkill(name, "roundStart");
 			await player.showCards(cards, get.translation(player) + "对" + get.translation(target) + "发动了【智诫】");
 			target.addTempSkill(name + "_effect", "phaseUseAfter");
 			target.markAuto(name + "_effect", [[player, get.type2(cards[0])]]);
 		},
 		subSkill: {
 			effect: {
+				mod: {
+					aiOrder(player, card, num) {
+						if (num > 0) return num + 15 * (player.getStorage("mbzhijie_effect").includes(get.type2(card)) ? 1 : -1);
+					},
+				},
 				charlotte: true,
 				onremove: true,
 				intro: {
@@ -1254,9 +1265,8 @@ const skills = {
 						return infos.join("<br>");
 					},
 				},
-				trigger: {
-					player: ["useCardAfter", "phaseUseEnd"],
-				},
+				audio: "mbzhijie",
+				trigger: { player: ["useCardAfter", "phaseUseEnd"] },
 				filter(event, player) {
 					const skillName = "mbzhijie_effect",
 						storage = player.getStorage(skillName);
@@ -1266,7 +1276,6 @@ const skills = {
 					return num1 > num2 && storage.some(list => list[0].isIn());
 				},
 				forced: true,
-				popup: false,
 				async content(event, trigger, player) {
 					const { name, card } = trigger;
 					if (name == "useCard") {
