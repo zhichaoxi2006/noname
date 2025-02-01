@@ -53,8 +53,7 @@ const skills = {
 						const card = lib.skill.dcxinggong_backup.card;
 						await player.gain(card, "gain2");
 						const num = card.length - player.getHp();
-						if (num <= 0) return;
-						for (let i = 0; i < num; i++) await player.damage(1, player);
+						if (num > 0) await player.damage(num);
 					},
 				};
 			},
@@ -640,7 +639,7 @@ const skills = {
 			if (event.type !== "discard" || event.getlx === false) return false;
 			return game.hasPlayer(target => {
 				if (target === player) return false;
-				return event.getl?.(player)?.cards2?.some(card => get.color(card) === "black" && get.position(card, true) === "d");
+				return event.getl?.(target)?.cards2?.some(card => get.color(card) === "black" && get.position(card, true) === "d");
 			});
 		},
 		forced: true,
@@ -654,10 +653,10 @@ const skills = {
 				game
 					.filterPlayer(target => {
 						if (target === player) return false;
-						return trigger.getl?.(player)?.cards2?.some(card => get.color(card) === "black" && get.position(card, true) === "d");
+						return trigger.getl?.(target)?.cards2?.some(card => get.color(card) === "black" && get.position(card, true) === "d");
 					})
 					.reduce((list, target) => {
-						return list.addArray(trigger.getl(player).cards2.filter(card => get.color(card) === "black" && get.position(card, true) === "d"));
+						return list.addArray(trigger.getl(target).cards2.filter(card => get.color(card) === "black" && get.position(card, true) === "d"));
 					}, []),
 				"gain2"
 			);

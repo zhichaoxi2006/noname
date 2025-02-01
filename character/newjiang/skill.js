@@ -573,7 +573,7 @@ const skills = {
 		audio: 2,
 		trigger: { global: "phaseUseBegin" },
 		filter(event, player) {
-			return !player.getStorage("xiongjin_used").includes((event.player !== player).toString());
+			return !player.getStorage("xiongjin_used").includes((event.player === player).toString());
 		},
 		logTarget: "player",
 		prompt2(event, player) {
@@ -636,74 +636,97 @@ const skills = {
 			);
 			player.storage.zhenbian.sort((a, b) => lib.suit.indexOf(b) - lib.suit.indexOf(a));
 			player.addTip("zhenbian", get.translation("zhenbian") + player.getStorage("zhenbian").reduce((str, suit) => str + get.translation(suit), ""));
-			if (player.getStorage("zhenbian").length >= 4 && player.maxHp < 9) {
-				delete player.storage.zhenbian;
+			if (player.getStorage("zhenbian").length >= 4 && player.maxHp < 8) {
 				player.unmarkSkill("zhenbian");
-				player.removeTip("zhenbian");
 				await player.gainMaxHp();
 			}
 		},
-		intro: { content: "已记录花色$" },
+		intro: {
+			content: "已记录花色$",
+			onunmark(storage, player) {
+				delete player.storage.zhenbian;
+				player.removeTip("zhenbian");
+			},
+		},
 		mod: { maxHandcardBase: player => player.maxHp },
 		onremove: (player, skill) => player.removeTip(skill),
 	},
 	baoxi: {
 		audio: 2,
-		trigger: { global: ["loseEnd", "cardsDiscardEnd", "loseAsyncEnd"] },
-		filter(event, player) {
-			if (player.getStorage("baoxi_used").includes("juedou")) return false;
-			if (event.name.indexOf("lose") === 0 && (event.getlx === false || event.position !== ui.discardPile)) return false;
-			return event.cards.filter(card => get.type(card) === "basic").length > 1 && player.hasUseTarget(new lib.element.VCard({ name: "juedou" }));
-		},
-		async cost(event, trigger, player) {
-			event.result = await player
-				.chooseTarget(get.prompt("baoxi"), "减1点体力上限，视为对一名角色使用【决斗】", (card, player, target) => {
-					return player.canUse(new lib.element.VCard({ name: "juedou" }), target);
-				})
-				.set("ai", target => {
-					const player = get.player();
-					if (player.maxHp === 1) return 0;
-					return get.effect(target, new lib.element.VCard({ name: "juedou" }), player, player);
-				})
-				.forResult();
-		},
-		async content(event, trigger, player) {
-			player.addTempSkill("baoxi_used", "roundStart");
-			player.markAuto("baoxi_used", ["juedou"]);
-			await player.loseMaxHp();
-			await player.useCard(new lib.element.VCard({ name: "juedou" }), event.targets[0], false);
-		},
-		group: "baoxi_sha",
+		group: ["baoxi_juedou", "baoxi_sha"], //同时机沟槽技能改个翻译方便区分
 		subSkill: {
 			used: {
 				charlotte: true,
 				onremove: true,
 			},
+			backup: {
+				filterCard: card => get.itemtype(card) === "card",
+				filterTarget: lib.filter.targetEnabled,
+				check(card) {
+					const player = get.player();
+					if (player.maxHp <= 1) return 0;
+					return player.getUseValue(get.autoViewAs({ name: "juedou" }, [card]), false) - get.value(card);
+				},
+				log: false,
+				precontent() {
+					player.logSkill("baoxi");
+					player.loseMaxHp();
+					player.addTempSkill("baoxi_used", "roundStart");
+					player.markAuto("baoxi_used", [event.result.card.name]);
+				},
+			},
+			juedou: {
+				trigger: { global: ["loseAfter", "cardsDiscardAfter", "loseAsyncAfter"] },
+				filter(event, player) {
+					if (player.getStorage("baoxi_used").includes("juedou")) return false;
+					if (event.name.indexOf("lose") === 0 && (event.getlx === false || event.position !== ui.discardPile)) return false;
+					return (
+						event.cards.filter(card => get.type(card) === "basic").length > 1 &&
+						player.hasCard(card => {
+							return _status.connectMode || player.hasUseTarget(get.autoViewAs({ name: "juedou" }, [card]), false);
+						}, "h")
+					);
+				},
+				direct: true,
+				content() {
+					game.broadcastAll(() => (lib.skill.baoxi_backup.viewAs = { name: "juedou" }));
+					const next = player.chooseToUse();
+					next.set("openskilldialog", "暴袭：是否将一张手牌当作【决斗】使用？");
+					next.set("norestore", true);
+					next.set("_backupevent", "baoxi_backup");
+					next.set("custom", {
+						add: {},
+						replace: { window: function () {} },
+					});
+					next.backup("baoxi_backup");
+					next.set("addCount", false);
+				},
+			},
 			sha: {
-				audio: "baoxi",
-				trigger: { global: ["loseEnd", "cardsDiscardEnd", "loseAsyncEnd"] },
+				trigger: { global: ["loseAfter", "cardsDiscardAfter", "loseAsyncAfter"] },
 				filter(event, player) {
 					if (player.getStorage("baoxi_used").includes("sha")) return false;
 					if (event.name.indexOf("lose") === 0 && (event.getlx === false || event.position !== ui.discardPile)) return false;
-					return event.cards.filter(card => get.type(card) !== "basic").length > 1 && player.hasUseTarget(new lib.element.VCard({ name: "sha" }));
+					return (
+						event.cards.filter(card => get.type(card) !== "basic").length > 1 &&
+						player.hasCard(card => {
+							return _status.connectMode || player.hasUseTarget(get.autoViewAs({ name: "sha" }, [card]), false);
+						}, "h")
+					);
 				},
-				async cost(event, trigger, player) {
-					event.result = await player
-						.chooseTarget(get.prompt("baoxi"), "减1点体力上限，视为对一名角色使用【杀】", (card, player, target) => {
-							return player.canUse(new lib.element.VCard({ name: "sha" }), target);
-						})
-						.set("ai", target => {
-							const player = get.player();
-							if (player.maxHp === 1) return 0;
-							return get.effect(target, new lib.element.VCard({ name: "sha" }), player, player);
-						})
-						.forResult();
-				},
-				async content(event, trigger, player) {
-					player.addTempSkill("baoxi_used");
-					player.markAuto("baoxi_used", ["sha"]);
-					await player.loseMaxHp();
-					await player.useCard(new lib.element.VCard({ name: "sha" }), event.targets[0], false);
+				direct: true,
+				content() {
+					game.broadcastAll(() => (lib.skill.baoxi_backup.viewAs = { name: "juedou" }));
+					const next = player.chooseToUse();
+					next.set("openskilldialog", "暴袭：是否将一张手牌当作【杀】使用？");
+					next.set("norestore", true);
+					next.set("_backupevent", "baoxi_backup");
+					next.set("custom", {
+						add: {},
+						replace: { window: function () {} },
+					});
+					next.backup("baoxi_backup");
+					next.set("addCount", false);
 				},
 			},
 		},

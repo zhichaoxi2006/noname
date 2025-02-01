@@ -4,26 +4,22 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 const skills = {
 	//文丑
 	starlianzhan: {
-		trigger: {
-			player: "useCardToPlayer",
-		},
+		audio: 2,
+		trigger: { player: "useCardToPlayer" },
 		filter(event, player) {
-			if (event.targets.length !== 1) {
-				return false;
-			}
-			return get.tag(event.card, "damage");
+			if (event.targets.length !== 1) return false;
+			return get.tag(event.card, "damage") >= 0.5;
 		},
 		filterx(event, player) {
 			const info = get.info(event.card);
 			if (info.allowMultiple == false) return false;
 			if (event.targets && !info.multitarget) {
 				if (
-					game.hasPlayer(function (current) {
-						return lib.filter.targetEnabled2(event.card, player, current) && !event.targets.includes(current);
+					game.hasPlayer(current => {
+						return !event.targets.includes(current) && lib.filter.targetEnabled2(event.card, player, current) && lib.filter.targetInRange(event.card, player, current);
 					})
-				) {
+				)
 					return true;
-				}
 			}
 			return false;
 		},
@@ -31,7 +27,7 @@ const skills = {
 		async cost(event, trigger, player) {
 			const { result } = await player
 				.chooseButton([
-					"请选择一项",
+					get.prompt2("starlianzhan"),
 					[
 						[
 							["extraTarget", `使${get.translation(trigger.card)}增加一个目标`],
@@ -41,10 +37,23 @@ const skills = {
 					],
 				])
 				.set("filterButton", button => {
+					const player = get.player(),
+						event = get.event().getTrigger().getParent();
 					if (button.link == "extraTarget") {
-						return lib.skill.starlianzhan.filterx(trigger, get.player());
+						return lib.skill.starlianzhan.filterx(event, player);
 					}
 					return true;
+				})
+				.set("ai", button => {
+					const player = get.player(),
+						event = get.event().getTrigger().getParent();
+					if (button.link == "extraTarget") {
+						const targets = game.filterPlayer(current => {
+							return !event.targets.includes(current) && lib.filter.targetEnabled2(event.card, player, current) && lib.filter.targetInRange(event.card, player, current);
+						});
+						return Math.max(...targets.map(target => get.effect(target, event.card, player, player)));
+					}
+					return event.targets.reduce((sum, target) => sum + get.effect(target, event.card, player, player), 0);
 				});
 			event.result = {
 				bool: result.bool,
@@ -53,48 +62,62 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			const { cost_data } = event;
-			trigger.getParent().starlianzhan_check = true;
+			player.addTempSkill("starlianzhan_check");
+			trigger.getParent().set("starlianzhan_check", true);
 			if (cost_data[0] == "extraTarget") {
 				const { result } = await player
-					.chooseTarget("请选择" + get.translation(trigger.card) + "的额外目标", true, function (card, player, target) {
-						var player = _status.event.player;
-						if (_status.event.targets.includes(target)) return false;
-						return lib.filter.targetEnabled2(_status.event.card, player, target);
-					})
-					.set("targets", trigger.targets)
-					.set("card", trigger.card)
-					.set("ai", function (target) {
-						var trigger = _status.event.getTrigger();
-						var player = _status.event.player;
-						return get.effect(target, trigger.card, player, player);
+					.chooseTarget(
+						"请选择" + get.translation(trigger.card) + "的额外目标",
+						(card, player, target) => {
+							const event = get.event().getTrigger().getParent();
+							if (event.targets.includes(target)) return false;
+							return lib.filter.targetEnabled2(event.card, player, target) && lib.filter.targetInRange(event.card, player, target);
+						},
+						true
+					)
+					.set("ai", target => {
+						const player = get.player(),
+							event = get.event().getTrigger().getParent();
+						return get.effect(target, event.card, player, player);
 					});
-				player.line(result.targets);
-				trigger.targets.addArray(result.targets);
+				if (result?.bool && result.targets?.length) {
+					player.line(result.targets);
+					trigger.targets.addArray(result.targets);
+					game.log(result.targets, "成为了", trigger.card, "的额外目标");
+				}
 			} else {
 				trigger.getParent().effectCount++;
+				game.log(trigger.card, "额外结算一次");
 			}
 		},
-		group: "starlianzhan_check",
 		subSkill: {
 			check: {
-				trigger: {
-					player: "useCardAfter",
-				},
-				forced: true,
+				charlotte: true,
+				trigger: { player: "useCardAfter" },
 				filter(event, player) {
 					if (!event.starlianzhan_check) return false;
 					const history = player.getHistory("sourceDamage", evt => {
 						return event.targets.includes(evt.player) && evt.card == event.card;
 					});
-					return [0, 2].includes(history.length);
+					if (history.length == 2) return true;
+					if (history.length !== 0) return false;
+					const card = new lib.element.VCard({ name: event.card.name });
+					return event.targets?.some(target => {
+						if (!target?.isIn()) return false;
+						return target.canUse(card, player, false);
+					});
 				},
+				forced: true,
+				popup: false,
 				async content(event, trigger, player) {
 					const history = player.getHistory("sourceDamage", evt => {
 						return trigger.targets.includes(evt.player) && evt.card == trigger.card;
 					});
 					if (history.length == 0) {
-						for (const i of trigger.targets) {
-							await i.chooseUseTarget(trigger.card.name, true);
+						const card = new lib.element.VCard({ name: trigger.card.name });
+						for (const target of trigger.targets || []) {
+							if (!target?.isIn()) continue;
+							if (target.canUse(card, player, false)) await target.useCard(card, player, false);
 						}
 					} else if (history.length == 2) {
 						const prompt = player.isDamaged() ? "回复1点体力" : "摸两张牌";
@@ -107,11 +130,10 @@ const skills = {
 		},
 	},
 	starwenming: {
-		trigger: {
-			target: "useCardToPlayer",
-		},
-		forced: true,
+		audio: 2,
+		trigger: { global: "useCard" },
 		filter(event, player) {
+			if (event.player === player || !event.targets?.includes(player)) return false;
 			return (
 				event.player.getHp() < player.getHp() ||
 				player.getRoundHistory("sourceDamage", evt => {
@@ -119,16 +141,16 @@ const skills = {
 				}).length > 0
 			);
 		},
+		forced: true,
+		logTarget: "player",
 		async content(event, trigger, player) {
-			trigger.player.randomDiscard();
+			await trigger.player.randomDiscard();
 			if (
 				trigger.player.getHp() < player.getHp() &&
 				player.getRoundHistory("sourceDamage", evt => {
 					return trigger.player == evt.player;
 				}).length > 0
-			) {
-				await player.draw();
-			}
+			) await player.draw();
 		},
 	},
 	//丁奉
