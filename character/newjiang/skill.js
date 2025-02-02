@@ -1250,7 +1250,7 @@ const skills = {
 			if (!player.getStat().xvzhi) player.getStat().xvzhi = [];
 			player.getStat().xvzhi.addArray(targets);
 			if (targets.some(i => !i.countCards("h"))) return;
-			const result = await player
+			const next = await player
 				.chooseCardOL(targets, "h", true, [1, Infinity], "蓄志：选择任意张手牌并与对方交换")
 				.set("ai", card => {
 					const player = get.event("player"),
@@ -1278,8 +1278,9 @@ const skills = {
 						  )
 						: 0;
 					return 5 + 2 * get.sgn(playerEffect - targetEffect) - get.value(card);
-				})
-				.forResult();
+				});
+			next._args.remove("glow_result");
+			const result = await next.forResult();
 			await targets[0].swapHandcards(targets[1], result[0].cards, result[1].cards);
 			if (result[0].cards.length == result[1].cards.length) {
 				await player.draw(2);
@@ -1399,7 +1400,9 @@ const skills = {
 			await target.draw(2);
 			const targets = [player, target].filter(current => current.countCards("h") > 1);
 			if (targets.length) {
-				const result = await player.chooseCardOL(targets, "h", true, 2, "齐眉：请展示两张手牌").forResult();
+				const next = player.chooseCardOL(targets, "h", true, 2, "齐眉：请展示两张手牌");
+				next._args.remove("glow_result");
+				const result = await next.forResult();
 				const videoId = lib.status.videoId++;
 				game.broadcastAll(
 					(targets, result, id, player) => {
