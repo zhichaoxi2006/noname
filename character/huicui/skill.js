@@ -177,54 +177,71 @@ const skills = {
 		},
 		intro: {
 			content(storage) {
-				if (!storage) return "转换技，出牌阶段限一次，你可观看一名角色的手牌并选择一张牌，你弃置此牌，其视为对你使用【火攻】，若未造成伤害此技能视为未使用";
-				return "转换技，出牌阶段限一次，你可观看一名角色的手牌并选择一张牌，其使用此牌，若造成伤害则此技能视为未使用。";
+				return "转换技，出牌阶段限一次，你可观看一名角色的手牌并展示其中一张牌，" + (storage ? "然后其使用此牌，若此牌造成伤害" : "你弃置此牌，然后其视为对你使用一张【火攻】，若此【火攻】未造成伤害") + "则此技能视为未发动过。";
 			},
 		},
 		async content(event, trigger, player) {
 			const target = event.targets[0];
-			player.changeZhuanhuanji("dcpingzhi");
-			const { result } = await player.choosePlayerCard(target)
-				.set("prompt", "请选择一张手牌展示")
-				.set("visible", true)
-				.set("forced", true);
-			if (player.storage.dcpingzhi) {
-				await target.discard(result.links).set("discarder", player);
-				await target.chooseUseTarget("huogong", [player], true, false);
-			} else {
-				await target.chooseUseTarget(result.links[0], true, false);
+			player.changeZhuanhuanji(event.name);
+			const cards = await player
+				.choosePlayerCard(target, true, `请选择${get.translation(target)}一张手牌展示`, "visible")
+				.set("ai", button => {
+					const { player, target } = get.event(),
+						{ link } = button;
+					const att = get.attitude(player, target),
+						storage = player.storage.dcpingzhi,
+						huogong = get.autoViewAs({ name: "huogong", isCard: true });
+					if (att > 0) {
+						return storage ? 6 - get.value(link) : player.getUseValue(link);
+					}
+					return storage ? (get.value(link) + get.effect(player, huogong, target, player) < 0 && !player.hasCard(card => get.suit(card) == get.suit(link)) ? 2 : 0) : -target.getUseValue(link);
+				})
+				.forResultLinks();
+			if (!cards?.length) return;
+			player.addTempSkill(event.name + "_check", "phaseUseAfter");
+			await player.showCards(cards, `${get.translation(player)}对${get.translation(target)}发动了【评骘】`);
+			if (player.storage[event.name]) {
+				await target.discard(cards).set("discarder", player);
+				const huogong = get.autoViewAs({ name: "huogong", isCard: true });
+				if (target.canUse(huogong, player, false)) await target.useCard(huogong, player, false);
+			} else if (target.hasUseTarget(cards[0])) {
+				await target.chooseUseTarget(cards[0], true, false);
 			}
 		},
-		group: "dcpingzhi_check",
+		ai: {
+			order(item, player) {
+				const storage = player.storage.dcpingzhi;
+				if (!storage) {
+					return game.hasPlayer(current => get.effect(current, { name: "guohe_copy2" }, player, player) + get.effect(player, { name: "huogong" }, current, player) > 0) ? 10 : 1;
+				}
+				return game.hasPlayer(current => get.effect(current, { name: "guohe_copy2" }, player, player) > 0 || (current.hasCard(card => current.hasValueTarget(card) > 0, "h") && get.attitude(player, current) > 0)) ? 10 : 1;
+			},
+			result: {
+				target(player, target) {
+					const storage = player.storage.dcpingzhi;
+					if (!storage) {
+						return !player.countCards("h") || get.effect(target, { name: "guohe_copy2" }, player, player) + get.effect(player, { name: "huogong" }, target, player) > 0 ? -1 : 0;
+					}
+					return get.attitude(player, target) > 0 && target.hasCard(card => target.hasValueTarget(card) > 0, "h") ? 1 : get.effect(target, { name: "guohe_copy2" }, player, player);
+				},
+			},
+		},
 		subSkill: {
 			check: {
-				trigger: {
-					global: "useCardAfter",
-				},
+				trigger: { global: "useCardAfter" },
 				filter(event, player) {
+					if (!player.getStat().skill.dcpingzhi) return false;
 					if (player.storage.dcpingzhi) {
-						return (
-							event.getParent(2).name == "dcpingzhi" &&
-							event.player.isIn() &&
-							!game.hasPlayer2(current => {
-								return current.hasHistory("damage", evtx => evtx.card === event.card);
-							})
-						);
+						return event.getParent().name == "dcpingzhi" && !game.hasPlayer2(current => current.hasHistory("damage", evtx => evtx.card === event.card));
 					} else {
-						return (
-							event.getParent(2).name == "dcpingzhi" &&
-							event.player.isIn() &&
-							game.hasPlayer2(current => {
-								return current.hasHistory("damage", evtx => evtx.card === event.card);
-							})
-						);
+						return event.getParent(2).name == "dcpingzhi" && game.hasPlayer2(current => current.hasHistory("damage", evtx => evtx.card === event.card));
 					}
 				},
 				charlotte: true,
 				silent: true,
 				async content(event, trigger, player) {
-					const stat = player.getStat("skill");
-					delete stat.dcpingzhi;
+					delete player.getStat("skill").dcpingzhi;
+					game.log(player, "重置了", "#g【评骘】");
 				},
 			},
 		},
@@ -7718,15 +7735,13 @@ const skills = {
 		trigger: { target: "useCardToTargeted" },
 		forced: true,
 		filter(event, player) {
-			return player != event.player && get.type2(event.card) == "trick" && (event.targets.length == 1 || player.countCards("he") > 0);
+			return get.type2(event.card) == "trick" && (event.targets.length == 1 || player.countCards("he") > 0);
 		},
 		content() {
 			if (trigger.targets.length == 1) player.draw();
 			else if (player.countCards("he") > 0) player.chooseToDiscard("he", true, "存畏：请弃置一张牌");
 		},
-		ai: {
-			halfneg: true,
-		},
+		ai: { halfneg: true },
 	},
 	//刘辟
 	dcjuying: {

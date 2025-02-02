@@ -4524,7 +4524,16 @@ const skills = {
 					aiOrder(player, card, num) {
 						if (!game.hasPlayer(current => current.hasSkill("jsrgninghan"))) return;
 						if (num && card.name === "sha" && game.hasNature(card, "ice")) {
-							return num + 0.15 * Math.sign(get.attitude(player, lg));
+							return (
+								num +
+								0.15 *
+									Math.sign(
+										game.countPlayer(current => {
+											if (!current.hasSkill("jsrgninghan")) return 0;
+											return Math.sign(get.attitude(player, current));
+										})
+									)
+							);
 						}
 					},
 				},

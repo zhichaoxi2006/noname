@@ -2325,23 +2325,17 @@ const skills = {
 				filter(event, player) {
 					if (player.countMark("olsbliwen") >= 5) return false;
 					if (!["respond", "useCard"].includes(event.name)) return event.name !== "phase" || game.phaseNumber === 0;
-					if (event.name === "useCard") {
-						let history = player.getAllHistory("useCard");
-						if (history.length <= 1) return false;
-						const evt = history[history.length - 2];
-						if (!evt || !evt.card) return false;
-						return get.suit(evt.card) == get.suit(event.card) || get.type2(evt.card) == get.type2(event.card);
-					}
-					let history = player.getAllHistory("respond");
-					if (history.length <= 1) return false;
-					const evt = history[history.length - 2];
-					if (!evt || !evt.card) return false;
-					return get.suit(evt.card) == get.suit(event.card) || get.type2(evt.card) == get.type2(event.card);
+					const evts = game.getAllGlobalHistory("everything", evt => ["useCard", "respond"].includes(evt.name) && evt.player == player);
+					if (!evts.length <= 1) return false;
+					const {
+						lastItem: { card },
+					} = evts;
+					return get.suit(card) == get.suit(event.card) || get.type2(card) == get.type2(event.card);
 				},
 				forced: true,
 				locked: false,
 				content() {
-					player.addMark("olsbliwen", ["useCard", "respond"].includes(trigger.name) ? 1 : Math.min(3, 5 - player.countMark("olsbliwen")));
+					player.addMark(event.name, ["useCard", "respond"].includes(trigger.name) ? 1 : Math.min(3, 5 - player.countMark(event.name)));
 				},
 				mod: {
 					aiOrder(player, card, num) {
