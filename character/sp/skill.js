@@ -2627,7 +2627,7 @@ const skills = {
 				if (name == "phaseDiscard" && get.color(card) == "black") return false;
 			},
 			targetInRange(card, player, target) {
-				if (target.getHp() < player.getHp() && get.color(card) == "black") return true;
+				if (target.getHp() >= player.getHp() && get.color(card) == "black") return true;
 			},
 		},
 	},
