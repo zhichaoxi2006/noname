@@ -462,7 +462,7 @@ export default () => {
 				gz_bianfuren: ["female", "wei", 3, ["wanwei", "gzyuejian"], ["die:ol_bianfuren"]],
 				gz_xunyou: ["male", "wei", 3, ["gzqice", "zhiyu"], ["gzskin"]],
 				gz_lingtong: ["male", "wu", 4, ["xuanlve", "yongjin"], ["gzskin"]],
-				gz_lvfan: ["male", "wu", 3, ["xindiaodu", "gzdiancai"], ["gzskin"]],
+				gz_lvfan: ["male", "wu", 3, ["gzdiaodu_backports", "gzdiancai"], ["gzskin"]],
 				gz_masu: ["male", "shu", 3, ["gzsanyao", "gzzhiman"], ["gzskin"]],
 				gz_shamoke: ["male", "shu", 4, ["gzjili"], ["gzskin"]],
 
@@ -5678,74 +5678,187 @@ export default () => {
 			//吕范
 			gzdiaodu: {
 				audio: "diaodu",
-				trigger: { player: "phaseUseBegin" },
+				trigger: {
+					player: "phaseUseBegin",
+				},
 				filter(event, player) {
-					return game.hasPlayer(function (current) {
-						return current.isFriendOf(player) && current.countGainableCards(player, "e") > 0;
+					return game.hasPlayer(current => {
+						if (!current.isFriendOf(player)) return false;
+						return current.countGainableCards(player, "e") > 0;
 					});
 				},
-				direct: true,
 				frequent: true,
 				preHidden: true,
-				content() {
-					"step 0";
-					player
-						.chooseTarget(get.prompt2("gzdiaodu"), function (card, player, current) {
-							return current.isFriendOf(player) && current.countGainableCards(player, "e") > 0;
-						})
-						.set("ai", function (target) {
-							var num = 0;
-							if (target.hasSkill("gzxiaoji")) num += 2.5;
-							if (target.isDamaged() && target.getEquip("baiyin")) num += 2.5;
-							if (target.hasSkill("xuanlve")) num += 2;
-							return num;
-						})
-						.setHiddenSkill("gzdiaodu");
-					"step 1";
-					if (result.bool) {
-						var target = result.targets[0];
-						event.target = target;
-						player.logSkill("gzdiaodu", target);
-						player.gainPlayerCard(target, "e", true);
-					} else event.finish();
-					"step 2";
-					if (result.bool && player.getCards("h").includes(result.cards[0])) {
-						event.card = result.cards[0];
-						player
-							.chooseTarget(
-								"将" + get.translation(event.card) + "交给另一名角色",
-								function (card, player, current) {
-									return current != player && current != _status.event.target;
-								},
-								true
-							)
-							.set("target", target);
-					} else event.finish();
-					"step 3";
-					if (result.bool) {
-						var target = result.targets[0];
-						player.line(target, "green");
-						player.give(card, target);
+				async cost(event, trigger, player) {
+					const next = player.chooseTarget(get.prompt2("gzdiaodu"), (_card, player, current) => current.isFriendOf(player) && current.countGainableCards(player, "e") > 0);
+
+					next.set("ai", target => {
+						let num = 0;
+
+						if (target.hasSkill("gzxiaoji")) {
+							num += 2.5;
+						}
+						if (target.isDamaged() && target.getEquip("baiyin")) {
+							num += 2.5;
+						}
+						if (target.hasSkill("xuanlve")) {
+							num += 2;
+						}
+
+						return num;
+					});
+
+					next.setHiddenSkill("gzdiaodu");
+
+					event.result = await next.forResult();
+				},
+				logTarget: "targets",
+				async content(event, trigger, player) {
+					const target = event.targets[0];
+					const { result } = await player.gainPlayerCard(target, "e", true);
+
+					if (!result.bool) {
+						return;
+					}
+
+					const card = result.cards[0];
+					if (!player.getCards("h").includes(card)) {
+						return;
+					}
+
+					const { result: result2 } = await player.chooseTarget("将" + get.translation(card, void 0) + "交给另一名角色", (_card, player, current) => current != player && current != _status.event.target, true).set("target", target);
+
+					if (result2.bool) {
+						const target2 = result2.targets[0];
+						player.line(target2, "green");
+						await player.give(card, target2);
 					}
 				},
 				group: "gzdiaodu_use",
 				subSkill: {
 					use: {
-						trigger: { global: "useCard" },
-						filter(event, player) {
-							return get.type(event.card) == "equip" && event.player.isIn() && event.player.isFriendOf(player) && (player == event.player || player.hasSkill("gzdiaodu"));
+						audio: "diaodu",
+						trigger: {
+							global: "useCard",
 						},
-						direct: true,
-						content() {
-							"step 0";
-							var next = trigger.player.chooseBool(get.prompt("gzdiaodu"), "摸一张牌");
-							if (player.hasSkill("gzdiaodu")) next.set("frequentSkill", "gzdiaodu");
-							if (player == trigger.player) next.setHiddenSkill("gzdiaodu");
-							"step 1";
-							if (result.bool) {
-								player.logSkill("gzdiaodu", trigger.player);
-								trigger.player.draw("nodelay");
+						filter(event, player) {
+							if (get.type(event.card) !== "equip") return false;
+							if (!event.player.isIn()) return false;
+							if (!event.player.isFriendOf(player)) return false;
+							return player === event.player || player.hasSkill("gzdiaodu");
+						},
+						logTarget: "player",
+						async cost(event, trigger, player) {
+							const next = trigger.player.chooseBool(get.prompt("gzdiaodu"), "摸一张牌");
+
+							if (player.hasSkill("gzdiaodu")) {
+								next.set("frequentSkill", "gzdiaodu");
 							}
+							if (player === trigger.player) {
+								next.setHiddenSkill("gzdiaodu");
+							}
+
+							event.result = await next.forResult();
+						},
+						async content(event, trigger, player) {
+							trigger.player.draw("nodelay");
+						},
+					},
+				},
+			},
+			// 回来吧老调度
+			gzdiaodu_backports: {
+				audio: "diaodu",
+				trigger: {
+					player: "phaseUseBegin",
+				},
+				filter(event, player) {
+					return game.hasPlayer(current => {
+						if (!current.isFriendOf(player)) return false;
+						return current.countGainableCards(player, "e") > 0;
+					});
+				},
+				frequent: true,
+				preHidden: true,
+				async cost(event, trigger, player) {
+					const next = player.chooseTarget(get.prompt2("gzdiaodu_backports"), (_card, player, current) => current.isFriendOf(player) && current.countGainableCards(player, "e") > 0);
+
+					next.set("ai", target => {
+						let num = 0;
+
+						if (target.hasSkill("gzxiaoji")) {
+							num += 2.5;
+						}
+						if (target.isDamaged() && target.getEquip("baiyin")) {
+							num += 2.5;
+						}
+						if (target.hasSkill("xuanlve")) {
+							num += 2;
+						}
+
+						return num;
+					});
+
+					next.setHiddenSkill("gzdiaodu_backports");
+
+					event.result = await next.forResult();
+				},
+				logTarget: "targets",
+				async content(event, trigger, player) {
+					const target = event.targets[0];
+					const { result } = await player.gainPlayerCard(target, "e", true);
+
+					if (!result.bool) {
+						return;
+					}
+
+					const card = result.cards[0];
+					if (!player.getCards("h").includes(card)) {
+						return;
+					}
+
+					const next = player.chooseTarget(`是否将${get.translation(card)}交给一名其他角色？`);
+					next.set("filterTarget", (_card, player, current) => {
+						return current !== player && current !== _status.event.target && player.isFriendOf(current);
+					});
+					next.set("target", target);
+
+					const result2 = await next.forResult();
+
+					if (result2.bool) {
+						const target2 = result2.targets[0];
+						player.line(target2, "green");
+						await player.give(card, target2);
+					}
+				},
+				group: "gzdiaodu_backports_use",
+				subSkill: {
+					use: {
+						audio: "diaodu",
+						trigger: {
+							global: "useCard",
+						},
+						filter(event, player) {
+							if (get.type(event.card) !== "equip") return false;
+							if (!event.player.isIn()) return false;
+							if (!event.player.isFriendOf(player)) return false;
+							return player === event.player || player.hasSkill("gzdiaodu_backports");
+						},
+						logTarget: "player",
+						async cost(event, trigger, player) {
+							const next = trigger.player.chooseBool(get.prompt("gzdiaodu_backports"), "摸一张牌");
+
+							if (player.hasSkill("gzdiaodu_backports")) {
+								next.set("frequentSkill", "gzdiaodu_backports");
+							}
+							if (player === trigger.player) {
+								next.setHiddenSkill("gzdiaodu_backports");
+							}
+
+							event.result = await next.forResult();
+						},
+						async content(event, trigger, player) {
+							trigger.player.draw("nodelay");
 						},
 					},
 				},
@@ -21117,6 +21230,8 @@ export default () => {
 			//国战典藏2023
 			gzdiaodu: "调度",
 			gzdiaodu_info: "①与你势力相同的角色使用装备牌时，其可以摸一张牌。②出牌阶段开始时，你可以获得一名与你势力相同的角色的装备区里的一张牌，然后你将此牌交给另一名角色。",
+			gzdiaodu_backports: "调度",
+			gzdiaodu_backports_info: "①与你势力相同的角色使用装备牌时，其可以摸一张牌。②出牌阶段开始时，你可以获得一名与你势力相同的角色的装备区里的一张牌，然后你可以将此牌交给另一名与你势力相同的其他角色。",
 			gzqiance: "谦策",
 			gzqiance_info: "与你势力相同的角色使用锦囊牌指定第一个目标后，你可以令其中的所有大势力角色无法响应此牌。",
 			gzjujian: "举荐",
