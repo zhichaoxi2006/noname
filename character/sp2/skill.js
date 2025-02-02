@@ -3426,7 +3426,7 @@ const skills = {
 						player.chooseToUse({
 							prompt: "是否使用一张“逆击”牌？",
 							filterCard(card, player) {
-								if (get.itemtype(card) == "card" && !card.hasGaintag("dcniji")) return false;
+								if (![card].concat(card.cards || []).some(c => get.itemtype(c) == "card" && c.hasGaintag("dcniji"))) return false;
 								return lib.filter.filterCard.apply(this, arguments);
 							},
 							ai1(card) {
