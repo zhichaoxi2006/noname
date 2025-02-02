@@ -3413,7 +3413,7 @@ const skills = {
 				audio: "dcniji",
 				trigger: { global: "phaseJieshuBegin" },
 				filter(event, player) {
-					return player.hasCard(card => card.hasGaintag("dcniji") && lib.filter.cardDiscardable(card, player, "dcniji"), "h");
+					return player.hasCard(card => card.hasGaintag("dcniji"), "h");
 				},
 				forced: true,
 				locked: false,
