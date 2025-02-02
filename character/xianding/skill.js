@@ -698,7 +698,7 @@ const skills = {
 				player.addTempSkill("dcwoheng_used", "roundStart");
 				player.addMark("dcwoheng", 1, false);
 			}
-			const goon = (event.getParent(2) || {}).name !== "dcyuhui_buff";
+			const goon = event.getParent(2).name !== "dcyuhui_buff";
 			const num = goon ? player.countMark("dcwoheng") : 1;
 			if (!target?.isIn()) return;
 			const str1 = "摸" + get.cnNumber(num) + "张牌";
@@ -714,7 +714,7 @@ const skills = {
 						"choice",
 						get.effect(target, { name: "draw" }, player, player) *
 							(() => {
-								if (goon && player.countMark("dcwoheng") < 4) {
+								if (goon && player.countMark("dcwoheng") <= 3) {
 									if (target.countCards("h") + num === player.countCards("h")) return 100 * num;
 								}
 								return num;
@@ -722,7 +722,7 @@ const skills = {
 							get.effect(target, { name: "guohe_copy2" }, target, player) *
 								(() => {
 									const numx = Math.min(num, target.countDiscardableCards(target, "he"));
-									if (goon && player.countMark("dcwoheng") < 4) {
+									if (goon && player.countMark("dcwoheng") <= 3) {
 										if (target.countCards("h") - numx === player.countCards("h")) return 100 * numx;
 									}
 									return numx;
@@ -735,7 +735,7 @@ const skills = {
 			if (directcontrol) {
 				await target.draw(num);
 			} else await target.chooseToDiscard(num, true, "he");
-			if (player.countMark("dcwoheng") >= 5 || player.countCards("h") !== target.countCards("h")) {
+			if (player.countMark("dcwoheng") > 3 || player.countCards("h") !== target.countCards("h")) {
 				await player.draw(2);
 				if (player.hasSkill("dcwoheng", null, null, false)) player.tempBanSkill("dcwoheng");
 			}
@@ -765,7 +765,7 @@ const skills = {
 					return Math.max(
 						get.effect(target, { name: "draw" }, player, player) *
 							(() => {
-								if (goon && player.countMark("dcwoheng") < 4) {
+								if (goon && player.countMark("dcwoheng") < 3) {
 									if (target.countCards("h") + num === player.countCards("h")) return 100 * num;
 								}
 								return num;
@@ -773,7 +773,7 @@ const skills = {
 						get.effect(target, { name: "guohe_copy2" }, target, player) *
 							(() => {
 								const numx = Math.min(num, target.countDiscardableCards(target, "he"));
-								if (goon && player.countMark("dcwoheng") < 4) {
+								if (goon && player.countMark("dcwoheng") < 3) {
 									if (target.countCards("h") - numx === player.countCards("h")) return 100 * numx;
 								}
 								return numx;
@@ -802,7 +802,7 @@ const skills = {
 		},
 		async cost(event, trigger, player) {
 			event.result = await player
-				.chooseTarget(get.prompt2("dcyuhui"), [1, Infinity])
+				.chooseTarget(get.prompt2("dcyuhui"))
 				.set("filterTarget", (_, player, target) => {
 					if (target == player) return false;
 					return target.group === "wu";
