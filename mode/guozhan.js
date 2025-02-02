@@ -16800,24 +16800,28 @@ export default () => {
 			},
 			gzdiancai: {
 				audio: "diancai",
-				trigger: { global: "phaseUseEnd" },
+				trigger: {
+					global: "phaseUseEnd",
+				},
 				filter(event, player) {
-					if (_status.currentPhase == player) return false;
-					var num = 0;
-					player.getHistory("lose", function (evt) {
-						if (evt.cards2 && evt.getParent("phaseUse") == event) num += evt.cards2.length;
+					if (_status.currentPhase === player) return false;
+
+					let num = 0;
+
+					player.getHistory("lose", evt => {
+						if (evt.cards2 && evt.getParent("phaseUse") === event) num += evt.cards2.length;
 					});
+
 					return num >= player.hp;
 				},
 				preHidden: true,
-				content() {
-					"step 0";
-					var num = player.maxHp - player.countCards("h");
+				async content(event, trigger, player) {
+					const num = player.maxHp - player.countCards("h");
 					if (num > 0) {
-						player.draw(num);
+						await player.draw(num);
 					}
-					"step 1";
-					player.mayChangeVice();
+
+					await player.mayChangeVice();
 				},
 			},
 			xuanlve: {
