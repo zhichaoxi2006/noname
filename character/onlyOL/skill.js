@@ -2326,7 +2326,7 @@ const skills = {
 					if (player.countMark("olsbliwen") >= 5) return false;
 					if (!["respond", "useCard"].includes(event.name)) return event.name !== "phase" || game.phaseNumber === 0;
 					const evts = game.getAllGlobalHistory("everything", evt => ["useCard", "respond"].includes(evt.name) && evt.player == player);
-					if (!evts.length <= 1) return false;
+					if (evts.length <= 1) return false;
 					const {
 						lastItem: { card },
 					} = evts;
