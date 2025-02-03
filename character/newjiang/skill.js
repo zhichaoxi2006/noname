@@ -1250,7 +1250,7 @@ const skills = {
 			if (!player.getStat().xvzhi) player.getStat().xvzhi = [];
 			player.getStat().xvzhi.addArray(targets);
 			if (targets.some(i => !i.countCards("h"))) return;
-			const next = await player
+			const next = player
 				.chooseCardOL(targets, "h", true, [1, Infinity], "蓄志：选择任意张手牌并与对方交换")
 				.set("ai", card => {
 					const player = get.event("player"),
