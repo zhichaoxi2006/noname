@@ -375,34 +375,33 @@ const skills = {
 	},
 	//SP马超二号
 	twodcspzhuiji: {
-		trigger: {
-			player: "useCardAfter",
+		audio: "zhuiji",
+		trigger: { player: "useCardAfter" },
+		filter(event, player) {
+			return event.targets?.some(i => i !== player && !player.getStorage("twodcspzhuiji_buff").includes(i));
 		},
 		forced: true,
-		filter(event, player) {
-			if (!event.targets) {
-				return false;
-			}
-			return event.targets.length > 0;
+		logTarget(event, player) {
+			return event.targets.filter(i => i !== player && !player.getStorage("twodcspzhuiji_buff").includes(i));
 		},
 		async content(event, trigger, player) {
 			player.addTempSkill("twodcspzhuiji_buff");
-			player.markAuto("twodcspzhuiji_buff", trigger.targets);
+			player.markAuto("twodcspzhuiji_buff", event.targets);
 		},
 		subSkill: {
 			buff: {
 				charlotte: true,
-				mark: true,
 				mod: {
 					globalFrom(from, to) {
-						if (from.getStorage("twodcspzhuiji").includes(to)) return -Infinity;
+						if (from.getStorage("twodcspzhuiji_buff").includes(to)) return -Infinity;
 					},
 				},
+				intro: { content: "计算与$的距离视为1" },
 			},
 		},
 	},
 	twodcspshichou: {
-		audio: 2,
+		audio: "ol_shichou",
 		enable: "phaseUse",
 		viewAs: {
 			name: "sha",
@@ -424,35 +423,39 @@ const skills = {
 			if (targetsx.length > 0 && !targetsx.includes(target)) return false;
 			return lib.filter.filterTarget(card, player, target);
 		},
-		log: false,
 		async precontent(event, trigger, player) {
 			const { result } = event;
-			player.logSkill("twodcspshichou");
 			event.getParent().addCount = false;
 			player.addTempSkill("twodcspshichou_used");
 			const storage = player.getStorage("twodcspshichou_used");
 			storage[0].add(get.color(result.card));
-			storage[1].addArray(result.targets);
 		},
-		group: "twodcspshichou_directHit",
+		ai: {
+			order(item, player) {
+				return get.order({ name: "sha" }, player) + 0.1;
+			},
+		},
 		subSkill: {
 			used: {
 				init(player, skill) {
 					player.storage[skill] = [[], []];
 				},
 				onremove: true,
+				group: "twodcspshichou_directHit",
 			},
 			directHit: {
-				audio: "twodcspshichou",
-				trigger: {
-					player: "useCardToPlayered",
-				},
+				charlotte: true,
+				trigger: { player: "useCardToBegin" },
 				filter(event, trigger, player) {
-					return event.skill == "twodcspshichou";
+					if (!event.target?.isIn()) return false;
+					return event.card.name === "sha" && event.skill == "twodcspshichou";
 				},
 				forced: true,
+				popup: false,
 				async content(event, trigger, player) {
-					const { card } = trigger;
+					const { card, target } = trigger;
+					const storage = player.getStorage("twodcspshichou_used");
+					storage[1].add(trigger.target);
 					let func, prompt;
 					if (get.color(card) == "red") {
 						prompt = "弃置一张装备牌，否则无法响应此【杀】";
@@ -464,12 +467,21 @@ const skills = {
 						func = function (card) {
 							return get.color(card) == "black" && get.position(card) == "h";
 						};
-					}
+					} else return;
 					const {
 						result: { bool },
-					} = await trigger.target.chooseToDiscard("he", func, prompt);
+					} = await target.chooseToDiscard("he", func, prompt).set("ai", card => {
+						const player = get.player(),
+							trigger = get.event().getTrigger();
+						if (get.effect(player, trigger.card, trigger.player, player) >= 0) return 0;
+						const num = player.countCards("hs", { name: "shan" });
+						if (num === 0) return 0;
+						if (card.name === "shan" && num <= 1) return 0;
+						return 8 - get.value(card);
+					});
 					if (!bool) {
-						trigger.getParent().directHit.add(trigger.target);
+						trigger.set("directHit", true);
+						game.log(target, "不可响应", card);
 					}
 				},
 			},
@@ -477,7 +489,7 @@ const skills = {
 	},
 	//SP马超一号
 	onedcspzhuiji: {
-		audio: 2,
+		audio: "zhuiji",
 		trigger: {
 			player: "phaseUseEnd",
 		},
@@ -521,7 +533,7 @@ const skills = {
 		},
 	},
 	onedcspshichou: {
-		audio: 2,
+		audio: "ol_shichou",
 		trigger: {
 			player: "useCardAfter",
 		},
@@ -551,11 +563,11 @@ const skills = {
 				replace: { window() {} },
 			});
 			next.backup("onedcspshichou_backup");
+			next.set("logSkill", event.name);
 			await next;
 		},
 		subSkill: {
 			backup: {
-				audio: "onedcspshichou",
 				filterCard(card) {
 					return get.itemtype(card) == "card";
 				},
@@ -566,6 +578,7 @@ const skills = {
 				filterTarget(card, player, target) {
 					return _status.event.targets && _status.event.targets.includes(target) && lib.filter.filterTarget.apply(this, arguments);
 				},
+				log: false,
 				prompt: "将一张牌当决斗使用",
 				check(card) {
 					return 7 - get.value(card);

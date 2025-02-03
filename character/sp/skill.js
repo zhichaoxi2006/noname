@@ -15326,6 +15326,7 @@ const skills = {
 				if (from.hp >= to.hp) return -Infinity;
 			},
 		},
+		audio: "zhuiji",
 		trigger: { player: "useCardToPlayered" },
 		filter(event, player) {
 			return event.card.name == "sha" && event.target.countCards("he") > 0 && get.distance(player, event.target) == 1;
