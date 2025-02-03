@@ -146,7 +146,7 @@ const skills = {
 	clananran: {
 		audio: 2,
 		trigger: {
-			player: ["phaseUseBegin", "damageBegin"],
+			player: ["phaseUseBegin", "damageEnd"],
 		},
 		async cost(event, trigger, player) {
 			const count = Math.min(4, player.countMark("clananran_used") + 1);
