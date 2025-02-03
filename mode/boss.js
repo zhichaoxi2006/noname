@@ -6762,7 +6762,12 @@ export default () => {
 			mazui2: {
 				trigger: { source: "damageBegin1" },
 				forced: true,
-				mark: "card",
+				mark: true,
+				sourceSkill: "mazui",
+				intro: {
+					content: "expansion",
+					markcount: "expansion",
+				},
 				filter: function (event) {
 					return event.num > 0;
 				},
@@ -6779,6 +6784,7 @@ export default () => {
 				trigger: { source: ["damageEnd", "damageZero"] },
 				forced: true,
 				popup: false,
+				sourceSkill: "mazui",
 				content: function () {
 					player.gain(player.storage.mazui2, "gain2");
 					game.log(player, "获得了", player.storage.mazui2);
