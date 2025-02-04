@@ -50,7 +50,7 @@ const skills = {
 				if (card) list.add(card);
 				if (list.length >= 5) break;
 			}
-			if (cards.length) await player.gain(list, "gain2");
+			if (list.length) await player.gain(list, "gain2");
 		},
 	},
 	friendyangming: {
