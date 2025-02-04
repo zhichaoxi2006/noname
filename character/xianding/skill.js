@@ -702,15 +702,23 @@ const skills = {
 				})
 				.forResult();
 		},
-		onremove(player, skill) {
-			player.removeTip(skill);
+		init(player) {
+			const num = game.countPlayer2(target => {
+				return target.getRoundHistory("useSkill", evt => evt.skill === "dcwoheng").length;
+			});
+			if (num) {
+				player.addTempSkill("dcwoheng_used", "roundStart");
+				player.addMark("dcwoheng", num, false);
+			}
 		},
 		async content(event, trigger, player) {
 			const target = event.target || event.targets[0];
-			if (player.hasSkill("dcwoheng", null, null, false)) {
-				player.addTempSkill("dcwoheng_used", "roundStart");
-				player.addMark("dcwoheng", 1, false);
-			}
+			game.countPlayer(current => {
+				if (current.hasSkill("dcwoheng", null, null, false)) {
+					current.addTempSkill("dcwoheng_used", "roundStart");
+					current.addMark("dcwoheng", 1, false);
+				}
+			});
 			const goon = event.getParent(2).name !== "dcyuhui_buff";
 			const num = goon ? player.countMark("dcwoheng") : 1;
 			if (!target?.isIn()) return;
