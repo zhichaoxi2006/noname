@@ -6,38 +6,67 @@ const skills = {
 	//复活神将
 	luansuo: {
 		audio: 2,
-		locked: true,
-		silent: true,
-		trigger: {
-			player: "phaseBegin",
+		trigger: { player: "phaseBegin" },
+		filter(event, player) {
+			return game.hasPlayer(target => target.countCards("h"));
 		},
-		async content(event, trigger, player) {
-			for (const i of game.players) {
-				i.addTempSkill("luansuo_debuff", { global: ["phaseBeginStart", "phaseAfter"] });
+		forced: true,
+		logTarget(event, player) {
+			return game.filterPlayer(target => target.countCards("h"));
+		},
+		content() {
+			for (const i of event.targets) {
+				i.addTempSkill("luansuo_debuff", ["phaseBeginStart", "phaseAfter"]);
+				i.addGaintag(i.getCards("h"), "luansuo_debuff");
 			}
 		},
 		subSkill: {
 			debuff: {
 				mod: {
 					cardname(card, player) {
-						const suits = _status.discarded.map(item => get.suit(item));
-						if (!suits.includes(get.suit(card))) return "tiesuo";
+						if (get.itemtype(card) !== "card" || get.position(card) !== "h") return;
+						if (card.hasGaintag("luansuo_debuff") && !player.getStorage("luansuo_debuff").includes(get.suit(card))) return "tiesuo";
+					},
+					cardnature(card, player) {
+						if (get.itemtype(card) !== "card" || get.position(card) !== "h") return;
+						if (card.hasGaintag("luansuo_debuff") && !player.getStorage("luansuo_debuff").includes(get.suit(card))) return false;
 					},
 					cardDiscardable(card, player) {
-						if (get.position(card) == "h") return false;
+						if (get.position(card) === "h") return false;
 					},
-					canBeDiscarded(card, player) {
-						if (get.position(card) == "h") return false;
-					},
+					//canBeDiscarded(card, player) {
+					//	if (get.position(card) === "h") return false;
+					//},
 					aiOrder(player, card, num) {
-						if (num > 0 && get.name(card, player) == "huogong") return 0;
+						if (num > 0 && get.name(card, player) === "huogong") return 0;
 					},
 					aiValue(player, card, num) {
-						if (num > 0 && get.name(card, player) == "huogong") return 0.01;
+						if (num > 0 && get.name(card, player) === "huogong") return 0.01;
 					},
 					aiUseful(player, card, num) {
-						if (num > 0 && get.name(card, player) == "huogong") return 0;
+						if (num > 0 && get.name(card, player) === "huogong") return 0;
 					},
+				},
+				charlotte: true,
+				onremove(player, skill) {
+					delete player.storage[skill];
+					player.removeGaintag(skill);
+				},
+				trigger: { global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"] },
+				filter(event, player) {
+					return player.hasCard(card => {
+						if (!card.hasGaintag("luansuo_debuff")) return false;
+						return event.getd().some(cardx => get.suit(card) === get.suit(cardx));
+					}, "h");
+				},
+				silent: true,
+				firstDo: true,
+				content() {
+					const cards = player.getCards("h", card => {
+						if (!card.hasGaintag(event.name)) return false;
+						return trigger.getd().some(cardx => get.suit(card) === get.suit(cardx));
+					});
+					player.removeGaintag(event.name, cards);
 				},
 			},
 		},
@@ -45,50 +74,102 @@ const skills = {
 	fengliao: {
 		audio: 2,
 		zhuanhuanji: true,
-		forced: true,
 		mark: true,
 		marktext: "☯",
 		intro: {
-			content(storage, player, skill) {
-				if (Boolean(player.storage[skill])) {
-					return "你使用牌指定唯一目标后，你对其造成一点火焰伤害。";
-				}
+			content(storage) {
+				if (storage) return "你使用牌指定唯一目标后，你对其造成1点火焰伤害。";
 				return "你使用牌指定唯一目标后，你令其摸一张牌。";
 			},
 		},
-		trigger: {
-			player: "useCardToPlayered",
-		},
-		logTarget: "target",
+		trigger: { player: "useCardToPlayered" },
 		filter(event, player) {
 			return event.targets.length == 1;
 		},
+		forced: true,
+		logTarget: "target",
 		async content(event, trigger, player) {
 			player.changeZhuanhuanji("fengliao");
 			const { target } = trigger;
-			if (Boolean(player.storage["fengliao"])) {
+			if (player.storage.fengliao) {
 				await target.draw();
 			} else {
 				await target.damage("fire", player);
 			}
 		},
+		mod: {
+			aiOrder(player, card, num) {
+				if (num > 0) {
+					const select = get.info(card).selectTarget;
+					let range;
+					if (select == undefined) range = [1, 1];
+					else if (typeof select == "number") range = [select, select];
+					else if (get.itemtype(select) == "select") range = select;
+					else if (typeof select == "function") range = select(card, player);
+					game.checkMod(card, player, range, "selectTarget", player);
+					if (
+						(() => {
+							if (
+								!(() => {
+									if (range[1] !== -1) return range[1] <= 1;
+									return game.countPlayer(i => player.canUse(card, i)) === 1;
+								})()
+							)
+								return false;
+							let targets = game.filterPlayer(i => player.canUse(card, i));
+							if (!targets.length) return false;
+							_status._fengliao_check = true;
+							targets.sort((a, b) => get.effect(b, card, player, player) - get.effect(a, card, player, player));
+							delete _status._fengliao_check;
+							return (player.storage.fengliao ? get.damageEffect(targets[0], player, player, "fire") : get.effect(targets[0], { name: "draw" }, player, player)) > 0;
+						})()
+					)
+						return num + 15;
+				}
+			},
+		},
+		ai: {
+			fireAttack: true,
+			effect: {
+				player(card, player, target) {
+					if (_status._fengliao_check) return;
+					if (!typeof card !== "object" || !player || !target) return;
+					const select = get.info(card).selectTarget;
+					let range;
+					if (select == undefined) range = [1, 1];
+					else if (typeof select == "number") range = [select, select];
+					else if (get.itemtype(select) == "select") range = select;
+					else if (typeof select == "function") range = select(card, player);
+					game.checkMod(card, player, range, "selectTarget", player);
+					if (
+						(() => {
+							if (range[1] !== -1) return !ui.selected.targets.length;
+							return !game.hasPlayer(i => i !== target && player.canUse(card, i));
+						})()
+					)
+						return [
+							1,
+							(() => {
+								_status._fengliao_check = true;
+								const num = player.storage.fengliao ? get.damageEffect(target, player, player, "fire") : get.effect(target, { name: "draw" }, player, player);
+								delete _status._fengliao_check;
+								return num;
+							})(),
+						];
+				},
+			},
+		},
 	},
 	kunyu: {
 		audio: 2,
-		trigger: {
-			player: "dieBegin",
-		},
+		trigger: { player: "dieBegin" },
 		filter(event, player) {
-			const card = get.cardPile(function (c) {
-				return get.tag(c, "fireDamage");
-			}, "cardPile");
-			return Boolean(card);
+			return get.cardPile2(c => get.tag(c, "fireDamage"));
 		},
 		forced: true,
 		async content(event, trigger, player) {
-			const card = get.cardPile(function (c) {
-				return get.tag(c, "fireDamage");
-			}, "cardPile");
+			const card = get.cardPile2(c => get.tag(c, "fireDamage"));
+			if (!card) return;
 			await game.cardsGotoSpecial(card);
 			game.log(player, "将", card, "移出游戏");
 			trigger.cancel();
