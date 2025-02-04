@@ -198,7 +198,7 @@ const cards = {
 	xuanjian: {
 		derivation: "friend_xushu",
 		distance: {
-			attackFrom: -2,
+			attackFrom: -1,
 		},
 		fullskin: true,
 		type: "equip",
@@ -213,6 +213,17 @@ const cards = {
 			tag: {
 				valueswap: 1,
 			},
+		},
+		cardPrompt(card, player) {
+			if (!player?.hasSkill("friendxushugongli")) return lib.translate.xuanjian_info;
+			return (
+				(() => {
+					if (!get.info("friendgongli").isFriendOf(player, "friend_zhugeliang")) return lib.translate.xuanjian_info;
+					return "你可以将一张手牌当作【杀】使用。";
+				})().slice(0, -1) +
+				(get.info("friendgongli").isFriendOf(player, "friend_pangtong") ? "（无距离限制）" : "") +
+				"。"
+			);
 		},
 		skills: ["xuanjian_skill"],
 	},

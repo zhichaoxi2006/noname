@@ -3831,7 +3831,7 @@ export class Get extends GetCompatible {
 				var es = node.getCards("e");
 				for (var i = 0; i < es.length; i++) {
 					const special = [es[i]].concat(es[i].cards || []).find(j => j.name == es[i].name && lib.card[j.name]?.cardPrompt);
-					var str = special ? lib.card[special.name].cardPrompt(special) : lib.translate[es[i].name + "_info"];
+					var str = special ? lib.card[special.name].cardPrompt(special, node) : lib.translate[es[i].name + "_info"];
 					uiintro.add('<div><div class="skill">' + es[i].outerHTML + "</div><div>" + str + "</div></div>");
 					uiintro.content.lastChild.querySelector(".skill>.card").style.transform = "";
 
@@ -4292,7 +4292,7 @@ export class Get extends GetCompatible {
 						}
 					}
 					if (lib.card[name].cardPrompt) {
-						var str = lib.card[name].cardPrompt(node.link || node),
+						var str = lib.card[name].cardPrompt(node.link || node, player),
 							placetext = uiintro.add('<div class="text" style="display:inline">' + str + "</div>");
 						if (!str.startsWith('<div class="skill"')) {
 							uiintro._place_text = placetext;

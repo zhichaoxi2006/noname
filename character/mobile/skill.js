@@ -10,17 +10,29 @@ const skills = {
 			global: "loseAsyncAfter",
 		},
 		filter(event, player) {
-			if (event.getg(player).length < 2) return false;
+			const cards = event.getg?.(player) || [];
+			if (cards.length < 2 || !cards.some(i => get.owner(i) === player && ["h", "e"].includes(get.position(i)))) return false;
 			return event.getParent().name != "friendmanjuan";
 		},
 		async cost(event, trigger, player) {
-			const cards = trigger.getg(player);
+			const cards = trigger.getg(player).filter(i => get.owner(i) === player && ["h", "e"].includes(get.position(i)));
 			const {
-				result: { bool, moved },
-			} = await player.chooseToMove("漫卷：将任意张牌以任意顺序置于牌堆顶").set("list", [
-				["牌堆顶", []],
-				[["本次获得的牌"], cards],
-			]);
+				result: { moved },
+			} = await player
+				.chooseToMove(get.prompt2("friendmanjuan"))
+				.set("list", [
+					["牌堆顶", []],
+					[["获得的牌"], cards],
+				])
+				.set("processAI", list => {
+					let listx = list.map(i => i[1]);
+					let cards = listx[1].filter(card => {
+						if (!get.discardPile(c => get.type2(c) !== get.type2(card))) return false;
+						return get.info("zhiheng").check(card) > 0;
+					});
+					cards = cards.sort((a, b) => get.info("zhiheng").check(b) - get.info("zhiheng").check(a)).slice(0, 5);
+					return [cards, listx[0].removeArray(cardx)];
+				});
 			event.result = {
 				bool: Boolean(moved?.[0]?.length),
 				cost_data: moved,
@@ -35,144 +47,80 @@ const skills = {
 					if (list.includes(c)) return false;
 					return get.type2(c) != get.type2(i);
 				}, "discardPile");
-				if (list.length < 5) {
-					list.add(card);
-				}
+				if (card) list.add(card);
+				if (list.length >= 5) break;
 			}
-			await player.gain(list, "gain2");
+			if (cards.length) await player.gain(list, "gain2");
 		},
 	},
 	friendyangming: {
-		trigger: {
-			player: "phaseUseEnd",
-		},
+		audio: 2,
+		trigger: { player: "phaseUseEnd" },
 		filter(event, player) {
-			return player.hasSkill("friendyangming_mark");
+			return player.getStorage("friendyangming_mark").includes(event);
 		},
+		frequent: true,
 		async content(event, trigger, player) {
-			let num = player.getStorage("friendpangtonggongli").includes("zhugeliang") ? 1 : 0;
+			let num = player.hasSkill("friendpangtonggongli") && get.info("friendgongli").isFriendOf(player, "friend_zhugeliang") ? 1 : 0;
 			num += _status.discarded.map(c => get.suit(c)).unique().length;
-			const cards = get.cards(num);
-			let backup = cards.slice();
-			await player.showCards(cards);
-			while (cards.length) {
-				if (
-					cards.every(card => {
-						return !game.hasPlayer(target => lib.filter.targetEnabled2(card, player, target));
-					})
-				)
-					break;
+			const next = game.cardsGotoOrdering(get.cards(num));
+			await next;
+			let cards = next.cards;
+			await player.showCards(cards, get.translation(player) + "发动了" + get.translation(event.name));
+			while (cards.some(card => player.hasUseTarget(card))) {
 				const { result: result2 } = await player
-					.chooseCardButton(cards, true, "养名：请选择要使用的牌")
+					.chooseCardButton(cards, "养名：请选择要使用的牌")
 					.set("filterButton", button => {
 						const card = button.link;
-						return game.hasPlayer(target => lib.filter.targetEnabled2(card, get.player(), target));
+						return get.player().hasUseTarget(card);
 					})
 					.set("ai", button => {
 						return get.player().getUseValue(button.link);
 					});
 				if (result2.bool) {
 					const card = result2.links[0];
-					game.broadcastAll(card => {
-						lib.skill.friendyangming_backup.viewAs = card;
-						lib.skill.friendyangming_backup.viewAs.cards = [card];
-					}, card);
-					const next = player.chooseToUse();
-					next.set("openskilldialog", `养名：是否使用${get.translation(card)}？`);
-					next.set("forced", true);
-					next.set("norestore", true);
-					next.set("_backupevent", "friendyangming_backup");
-					next.set("custom", {
-						add: {},
-						replace: { window() {} },
-					});
-					next.backup("friendyangming_backup");
-					next.set("addCount", false);
-					player
-						.when("chooseToUseBegin")
-						.filter(evt => evt === next)
-						.then(() => (trigger.filterCard = () => false));
-					const { result: result3 } = await next;
+					player.$gain2(card, false);
+					await game.delayx();
+					const { result: result3 } = await player.chooseUseTarget(card, true, false);
 					if (result3.bool) {
-						cards.remove(card);
+						cards.removeArray(cards.filter(cardx => get.suit(cardx) === get.suit(card)));
 						continue;
-					}
-				}
-				break;
+					} else break;
+				} else break;
 			}
-			if (player.getStorage("friendpangtonggongli").includes("xushu")) {
-				let suit = lib.suit.slice();
-				player.getHistory("useCard").forEach(evt => {
-					suit.remove(get.suit(evt.card));
-				});
-				if (suit.length) {
-					const { result } = player
-						.chooseCardButton(backup)
-						.set("filterButton", button => {
-							const { link } = button;
-							return !get.event("suit").includes(get.suit(link));
-						})
-						.set("suit", suit);
-					await player.gain(result.links, "gain2");
-				}
+			if (player.hasSkill("friendpangtonggongli") && get.info("friendgongli").isFriendOf(player, "friend_xushu") && cards.length) {
+				const { result } = player.chooseCardButton(cards, "养名：是否获得其中一张牌？").set("ai", button => get.value(button.link));
+				if (result.bool) await player.gain(result.links, "gain2");
 			}
 		},
 		group: "friendyangming_check",
 		subSkill: {
-			backup: {
-				filterCard: () => false,
-				selectCard: -1,
-				filterTarget: lib.filter.targetEnabled2,
-				precontent() {
-					delete event.result.skill;
-					const name = event.result.card.name,
-						cards = event.result.card.cards.slice(),
-						rcard = cards[0];
-					event.result.cards = cards;
-					event.result.card = get.autoViewAs(rcard.name == name ? rcard : { name, isCard: true });
-				},
-			},
 			mark: {
 				charlotte: true,
+				onremove: true,
 			},
 			check: {
+				charlotte: true,
 				trigger: {
 					player: "loseAfter",
 					global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
 				},
 				filter(event, player) {
-					if (!player.isPhaseUsing()) return false;
-					const evt = event.getl(player);
-					return evt && evt.cards2 && evt.cards2.length > 0 && player.countCards("h") === 0;
+					if (!player.isPhaseUsing() || player.countCards("h")) return false;
+					const storage = player.getStorage("friendyangming_mark");
+					return !storage.includes(event.getParent("phaseUse")) && event.getl(player)?.cards2?.length > 0;
 				},
 				silent: true,
 				async content(event, trigger, player) {
-					player.addSkill("friendyangming_mark");
+					player.addTempSkill("friendyangming_mark");
+					player.markAuto("friendyangming_mark", [trigger.getParent("phaseUse")]);
 				},
 			},
 		},
 	},
 	friendpangtonggongli: {
 		audio: 2,
-		trigger: {
-			global: "phaseBefore",
-			player: "enterGame",
-		},
-		init(player, skill) {
-			player.storage[skill] = [];
-		},
-		filter(event, player) {
-			if (event.name === "phase") return game.phaseNumber === 0;
-			return true;
-		},
-		async content(event, trigger, player) {
-			if (game.hasPlayer(c => c.isFriendOf(player) && get.is.playerNames(c, "friend_xushu"))) {
-				player.storage[event.name].push("friend_xushu");
-			}
-			if (game.hasPlayer(c => c.isFriendOf(player) && get.is.playerNames(c, "friend_zhugeliang"))) {
-				player.storage[event.name].push("zhugeliang");
-			}
-		},
+		locked: true,
 	},
 	//牢又寄 —— 徐庶
 	friendxiaxing: {
@@ -190,7 +138,7 @@ const skills = {
 		async content(event, trigger, player) {
 			const card = game.createCard2("xuanjian");
 			await player.gain([card], "gain2");
-			await player.chooseUseTarget(card, true);
+			await player.chooseUseTarget(card, true, false);
 		},
 		group: "friendxiaxing_gain",
 		subSkill: {
@@ -200,78 +148,116 @@ const skills = {
 					global: ["loseEnd", "equipEnd", "addJudgeEnd", "gainEnd", "loseAsyncEnd", "addToExpansionEnd"],
 				},
 				filter(event, player) {
-					const storage = player.getStorage("friendqihui");
-					if (storage.length === 0) return false;
-					const cards = event.getd();
-					if (cards) return cards.some(i => i.name == "xuanjian");
-					return false;
+					if (!player.getStorage("friendqihui").length) return false;
+					return event.getd()?.some(i => i.name == "xuanjian");
 				},
 				async cost(event, trigger, player) {
 					const storage = player.getStorage("friendqihui");
+					const gains = trigger.getd().filter(i => i.name == "xuanjian");
 					const {
 						result: { links, bool },
-					} = await player.chooseButton(["选择你要移除的“启诲”标记", [storage.map(c => [c, get.translation(c)]), "tdnodes"]]);
-					if (bool) {
-						storage.removeArray(links);
-					}
+					} = await player.chooseButton(["###" + get.prompt("friendxiaxing") + '###<div class="text center">移去1枚“启诲”标记，获得' + get.translation(gains) + "</div>", [storage.map(c => [c, get.translation(c)]), "tdnodes"]]).set("ai", button => {
+						const player = get.player();
+						if (player.getVEquip("xuanjian")) return 0;
+						return (
+							1 +
+							Math.random() +
+							player.countCards("he", card => {
+								return get.type2(card) === button.link && player.hasValueTarget(card);
+							})
+						);
+					});
 					event.result = {
 						bool: bool,
+						cost_data: links,
 					};
 				},
 				async content(event, trigger, player) {
-					const cards = trigger.getd();
-					const card = cards.find(i => i.name == "xuanjian");
-					await player.gain([card], "gain2");
+					player.unmarkAuto("friendqihui", event.cost_data);
+					await player.gain(
+						trigger.getd().filter(i => i.name == "xuanjian"),
+						"gain2"
+					);
 				},
 			},
 		},
 	},
 	friendqihui: {
 		audio: 2,
-		trigger: {
-			player: "useCard",
-		},
-		forced: true,
-		mark: true,
-		intro: {
-			content: "已记录：$",
-		},
-		init: (player, skill) => (player.storage[skill] = []),
+		trigger: { player: "useCard" },
 		filter(event, player) {
 			const storage = player.getStorage("friendqihui");
-			return !storage.includes(get.type2(event.card));
+			return !storage.includes(get.type2(event.card)) || storage.length >= 3;
 		},
+		forced: true,
 		async content(event, trigger, player) {
-			const storage = player.getStorage("friendqihui");
-			storage.add(get.type2(trigger.card));
-			player.updateMark("friendqihui");
-			if (storage.length === 3) {
+			player.markAuto("friendqihui", [get.type2(trigger.card)]);
+			if (player.getStorage("friendqihui").length >= 3) {
 				const {
 					result: { links },
-				} = await player.chooseButton(["选择你要移除的“启诲”标记", [storage.map(c => [c, get.translation(c)]), "tdnodes"]], [2, 2], true);
-				storage.removeArray(links);
-				player.updateMark("friendqihui");
-				const { result } = await player.chooseButton(
-					[
-						"执行一项",
+				} = await player.chooseButton(["选择你要移去的“启诲”标记", [storage.map(c => [c, get.translation(c)]), "tdnodes"]], [2, 2], true).set("ai", button => {
+					const player = get.player();
+					return (
+						1 +
+						Math.random() +
+						player.countCards("he", card => {
+							return get.type2(card) === button.link && player.hasValueTarget(card);
+						})
+					);
+				});
+				player.unmarkAuto("friendqihui", links);
+				const { result } = await player
+					.chooseButton(
 						[
+							"启诲：请执行一项",
 							[
-								["recover", "回复1点体力并重铸一张牌"],
-								["draw", "摸两张牌，你使用的下一张牌不计入次数且无次数限制"],
+								[
+									["recover", "回复1点体力并重铸一张牌"],
+									["draw", "摸两张牌且使用的下一张牌不计入次数且无次数限制"],
+								],
+								"textbutton",
 							],
-							"textbutton",
 						],
-					],
-					true
-				);
+						true
+					)
+					.set("ai", button => {
+						const player = get.player();
+						if (button.link === "recover")
+							return (
+								get.recoverEffect(player, player, player) +
+								Math.max(
+									...[0].concat(
+										player
+											.getCards("he", card => {
+												return player.canRecast(card);
+											})
+											.map(card => get.info("zhiheng").check(card))
+									)
+								)
+							);
+						return (
+							get.effect(player, { name: "draw" }, player, player) * 2 +
+							Math.max(
+								...[0].concat(
+									player
+										.getCards("he", card => {
+											return player.hasValueTarget(card, false);
+										})
+										.map(card => player.getUseValue(card, false))
+								)
+							)
+						);
+					});
 				if (result.bool) {
 					switch (result.links[0]) {
 						case "recover":
 							await player.recover();
-							const {
-								result: { cards },
-							} = await player.chooseCard().set("prompt", "请重铸一张牌").set("forced", true);
-							await player.recast(cards);
+							if (player.hasCard(card => player.canRecast(card), "he")) {
+								const {
+									result: { cards },
+								} = await player.chooseCard("he", "请重铸一张牌", true);
+								if (cards?.length) await player.recast(cards);
+							}
 							break;
 						case "draw":
 							await player.draw(2);
@@ -280,20 +266,14 @@ const skills = {
 				}
 			}
 		},
+		intro: { content: "已记录：$" },
 		subSkill: {
 			unlimit: {
 				charlotte: true,
-				mod: {
-					cardUsable: (card, player, target) => {
-						return true;
-					},
-				},
-				trigger: {
-					player: "useCard1",
-				},
+				mod: { cardUsable: () => true },
+				trigger: { player: "useCard1" },
 				forced: true,
 				popup: false,
-				silent: true,
 				firstDo: true,
 				content() {
 					player.removeSkill("friendqihui_unlimit");
@@ -306,41 +286,21 @@ const skills = {
 					}
 				},
 				mark: true,
-				intro: {
-					content: "使用的下一张牌不计入次数且无次数限制",
-				},
+				intro: { content: "使用的下一张牌无任何次数限制" },
 			},
 		},
 	},
 	friendxushugongli: {
 		audio: 2,
-		trigger: {
-			global: "phaseBefore",
-			player: "enterGame",
-		},
-		init(player, skill) {
-			player.storage[skill] = [];
-		},
-		filter(event, player) {
-			if (event.name === "phase") return game.phaseNumber === 0;
-			return true;
-		},
-		async content(event, trigger, player) {
-			if (game.hasPlayer(c => c.isFriendOf(player) && get.is.playerNames(c, "friend_zhugeliang"))) {
-				player.storage[event.name].push("zhugeliang");
-			}
-			if (game.hasPlayer(c => c.isFriendOf(player) && get.is.playerNames(c, "friend_pangtong"))) {
-				player.storage[event.name].push("pangtong");
-			}
-		},
+		locked: true,
 	},
 	xuanjian_skill: {
+		equipSkill: true,
 		enable: "chooseToUse",
 		mod: {
-			targetInRange(card, player, target) {
+			targetInRange(card, player) {
 				const evt = get.event();
-				const storage = player.getStorage("friendxushugongli");
-				if (storage.includes("pangtong") && evt.skill === "xuanjian_skill") {
+				if (player.hasSkill("friendxushugongli") && get.info("friendgongli").isFriendOf(player, "friend_pangtong") && evt.skill === "xuanjian_skill") {
 					return true;
 				}
 			},
@@ -354,13 +314,21 @@ const skills = {
 			}
 			return true;
 		},
+		prompt() {
+			return get.info({ name: "xuanjian" }).cardPrompt(null, get.player());
+		},
 		selectCard() {
 			const player = get.player();
-			const storage = player.getStorage("friendxushugongli");
-			if (ui.selected.cards.length && !storage.includes("zhugeliang")) {
-				return -1;
+			if (ui.selected.cards.length) {
+				if (!player.hasSkill("friendxushugongli") || !get.info("friendgongli").isFriendOf(player, "friend_zhugeliang")) return -1;
 			}
 			return 1;
+		},
+		ai: {
+			respondSha: true,
+			skillTagFilter(player, tag, arg) {
+				return arg !== "respond" && player.countCards("hs");
+			},
 		},
 	},
 	//牢又寄 —— 诸葛亮
@@ -375,21 +343,23 @@ const skills = {
 			return true;
 		},
 		round: 1,
-		init(player, skill) {
-			let bool = player.hasSkill("friendzhugelianggongli") && game.hasPlayer(c => c.isFriendOf(player) && get.is.playerNames(c, "friend_pangtong"));
-			player.storage[skill] = [bool ? 4 : 3, null, []];
-		},
 		async cost(event, trigger, player) {
-			const { result } = await player.chooseButton([
-				"请选择一项",
-				[
+			const { result } = await player
+				.chooseButton([
+					get.prompt2("friendyance"),
 					[
-						["trick", `从牌堆中随机获得一张锦囊牌`],
-						["minigame", `执行“卧龙演策”`],
+						[
+							["trick", `从牌堆中随机获得一张锦囊牌`],
+							["minigame", `执行“卧龙演策”`],
+						],
+						"textbutton",
 					],
-					"textbutton",
-				],
-			]);
+				])
+				.set("filterButton", button => {
+					if (button.link !== "minigame") return true;
+					const player = get.player();
+					return typeof player.storage.friendyance !== "number" || player.hasMark("friendyance");
+				});
 			event.result = {
 				bool: result.bool,
 				cost_data: result,
@@ -412,138 +382,161 @@ const skills = {
 				await lib.skill.friendyance.minigame(event, trigger, player);
 			}
 		},
-		/**
-		 * 卧龙演策
-		 * @param { GameEvent } event
-		 * @param { GameEvent } trigger
-		 * @param { Player } player
-		 */
+		derivation: "friendyance_minigame",
+		marktext: "策",
+		intro: { content: "初始可预测#次" },
 		async minigame(event, trigger, player) {
-			const storage = player.getStorage("friendyance", [0, null, []]);
-			if (storage[0] === 0) {
-				return;
+			await event.trigger("friendyance_minigameBegin");
+			if (typeof player.storage.friendyance !== "number") {
+				let bool = player.hasSkill("friendzhugelianggongli") && get.info("friendgongli").isFriendOf(player, "friend_pangtong");
+				player.addMark("friendyance", 3 + bool, false);
 			}
+			const num = player.countMark("friendyance");
+			if (!num) return;
+			player.addSkill("friendyance_record");
+			const storage = player.storage["friendyance_record"];
 			const {
 				result: { control },
-			} = await player.chooseControl("颜色预测", "类型预测").set("prompt", "请选择预测方式");
+			} = await player
+				.chooseControl("颜色预测", "类型预测")
+				.set("prompt", "卧龙演策：请选择预测方式")
+				.set("ai", () => get.rand(0, 1));
 			const type = lib.inpile.map(c => get.type2(c)).unique();
 			const color = Object.keys(lib.color);
 			const list = [];
 			if (control === "颜色预测") {
 				list.addArray(color);
-				storage[1] = "color";
+				storage[2] = "color";
 			} else {
 				list.addArray(type);
-				storage[1] = "type";
+				storage[2] = "type2";
 			}
-			const dialog = [];
-			for (const i of Array.from({ length: storage[0] }, (_, k) => k)) {
+			const dialog = ["卧龙演策：请进行你的预测"];
+			for (const i of Array.from({ length: num }, (_, k) => k)) {
 				const button = list.map(c => [`${c}_${i}`, get.translation(c)]);
-				dialog.push(`第${get.cnNumber(i + 1, true)}张牌的预测`);
+				dialog.push(`<div class="text center">第${get.cnNumber(i + 1, true)}张牌的预测</div>`);
 				dialog.push([button, "tdnodes"]);
 			}
 			const {
 				result: { links },
 			} = await player
-				.chooseButton(dialog, get.select(storage[0]))
+				.chooseButton(dialog, get.select(num))
 				.set("forced", true)
 				.set("filterButton", button => {
-					const { link } = button;
-					const list = [];
-					ui.selected.buttons.forEach(b => {
-						const str = b.link;
-						const end = str.at(-1);
-						list.addArray(end);
-					});
-					if (list.includes(link.at(-1))) {
-						return false;
-					}
-					return true;
-				});
-			player.addSkill("friendyance_record");
+					return parseInt(button.link.at(-1)) === ui.selected.buttons.length;
+				})
+				.set("ai", () => 1 + Math.random());
 			for (const i of links) {
-				const index = i.at(-1);
-				const content = i.replace(`_${index}`, "");
-				storage[2][index] = content;
-				const record = player.getStorage("friendyance_record");
-				record[1].add(content);
+				storage[1].push(i.replace(`_${i.at(-1)}`, ""));
 			}
+			storage[3] = links.length;
 			await event.trigger("friendyance_minigame");
 		},
-		group: "friendyance_check",
 		subSkill: {
 			record: {
 				charlotte: true,
-				onremove: true,
 				init(player, skill) {
-					player.storage[skill] = [[], []];
+					player.storage[skill] = [[], [], null, null, null]; //猜对与否、猜测、猜测类别、猜测次数、是否展示
 				},
+				onremove: true,
+				mark: true,
+				marktext: "阵",
+				intro: {
+					name: "卧龙演策",
+					markcount: () => 0,
+					content([trrList, gussList, type, num, show], player) {
+						if (!show && !player.isUnderControl(true)) return "天机可知却不可说...";
+						return [
+							"剩余猜测：" + get.translation(gussList),
+							"猜测进度：" +
+								trrList
+									.map(i => (i ? "正确" : "错误"))
+									.concat(Array.from({ length: num - trrList.length }, () => "未知"))
+									.join("、"),
+						]
+							.map(str => "<li>" + str)
+							.join("<br>");
+					},
+				},
+				mod: {
+					aiOrder(player, card, num) {
+						if (num > 0) {
+							const storage = player.getStorage("friendyance_record");
+							if (!storage[1]?.length) return;
+							if (player.hasSkill("friendzhugelianggongli") && get.info("friendgongli").isFriendOf(player, "friend_xushu") && storage[3] - 1 === storage[1].length) return;
+							return get[storage[2]](trigger.card) === storage[1][0] ? num + 1145141919810 : num * 0.00001;
+						}
+					},
+				},
+				group: "friendyance_check",
 			},
 			check: {
-				audio: "friendyance",
+				charlotte: true,
 				trigger: {
 					global: "useCard",
+					player: "friendyance_minigameBegin",
+				},
+				filter(event, player) {
+					return event.name !== "useCard" || player.getStorage("friendyance_record")[1].length;
 				},
 				forced: true,
-				filter(event, player) {
-					const storage = player.getStorage("friendyance", [0, null, []]);
-					return storage[2].length;
-				},
+				popup: false,
 				async content(event, trigger, player) {
-					const storage = player.getStorage("friendyance", [0, null, []]);
-					let func,
-						num = player.hasSkill("friendfangqiu_used") ? 1 : 0;
-					if (storage[1] === "color") {
-						func = get.color;
-					} else if (storage[1] === "type") {
-						func = get.type2;
-					}
-					const i = storage[2].shift();
-					const record = player.getStorage("friendyance_record");
-					if (func(trigger.card) == i || (player.hasSkill("friendzhugelianggongli") && game.hasPlayer(c => c.isFriendOf(player) && get.is.playerNames(c, "friend_xushu")) && record.length === 0)) {
-						game.log(player, "预测", "#y正确");
-						record[0].push(true);
-						if (record.filter(b => b === true).length <= 5) {
-							await player.draw();
+					const storage = player.getStorage("friendyance_record");
+					const num = trigger.name === "useCard" && storage[4] ? 1 : 0;
+					if (trigger.name === "useCard") {
+						const i = storage[1].shift();
+						if (get[storage[2]](trigger.card) === i || (player.hasSkill("friendzhugelianggongli") && get.info("friendgongli").isFriendOf(player, "friend_xushu") && storage[3] - 1 === storage[1].length)) {
+							player.popup("预测正确", "wood");
+							game.log(player, "预测", "#y正确");
+							storage[0].push(true);
+							if (storage.filter(b => b === true).length <= 5) {
+								await player.draw();
+							}
+						} else {
+							player.popup("预测错误", "fire");
+							game.log(player, "预测", "#r错误");
+							storage[0].push(false);
 						}
-					} else {
-						game.log(player, "预测", "#r错误");
-						record[0].push(false);
 					}
-					if (storage[2].length === 0) {
-						const trueArr = record[0].filter(b => b === true);
+					if (trigger.name !== "useCard" || !storage[1].length) {
+						const trueArr = storage[0].filter(b => b === true);
 						if (trueArr.length === 0) {
 							await player.loseHp(1 + num);
-							if (storage[0] > 0) {
-								storage[0] -= 1 + num;
-							}
-						} else if (trueArr.length * 2 < record.length) {
-							await player.chooseToDiscard(get.select(1 + num), true);
+							player.removeMark("friendyance", 1 + num, false);
+						}
+						if (trueArr.length * 2 < storage[3]) {
+							await player.chooseToDiscard(1 + num, "he", true);
 						} else {
-							const {
-								result: { control },
-							} = await player.chooseControl(record[1]).set("prompt", `请选择获得的牌`);
-							const card = get.cardPile2(c => {
-								let func;
-								if (storage[1] === "color") {
-									func = get.color;
-								} else if (storage[1] === "type") {
-									func = get.type2;
-								}
-								return func(c) === control;
-							});
-							await player.gain([card], "draw");
-							if (trueArr.length === storage[0]) {
+							const choice = storage[1].unique();
+							const control =
+								choice.length > 1
+									? await player
+											.chooseControl(choice)
+											.set("ai", () => {
+												return get.event().controls.randomGet();
+											})
+											.set("prompt", `请选择获得牌的条件`)
+											.forResult("control")
+									: choice[0];
+							let gains = [];
+							while (gains.length < num) {
+								const card = get.cardPile2(c => {
+									if (gains.includes(card)) return false;
+									return get[storage[2]](c) === control;
+								});
+							}
+							if (gains.length) await player.gain(gains, "draw");
+							else player.chat("一无所获");
+							if (trueArr.length === storage[3]) {
 								await player.draw(2 + num);
-								if (storage[0] < 7) {
-									storage[0]++;
+								if (player.countMark("friendyance") < 7) {
+									player.addMark("friendyance", Math.min(7 - player.countMark("friendyance"), 1 + num), false);
 								}
-								if (player.hasSkill("friendfangqiu_used")) {
-									player.restoreSkill("friendfangqiu");
-								}
+								if (storage[4]) player.restoreSkill("friendfangqiu");
 							}
 						}
-						player.removeSkill("friendfangqiu_used");
+						player.removeSkill("friendyance_record");
 					}
 				},
 			},
@@ -552,24 +545,34 @@ const skills = {
 	friendfangqiu: {
 		audio: 2,
 		limited: true,
-		trigger: {
-			player: "friendyance_minigame",
+		trigger: { player: "friendyance_minigame" },
+		check(event, player) {
+			return event.player === player;
 		},
+		skillAnimation: true,
+		animationColor: "metal",
 		async content(event, trigger, player) {
 			player.awakenSkill("friendfangqiu");
-			const storage = player.getStorage("friendyance");
-			game.log(player, "的预测为：", ...storage[2].map(c => [`#y${c}`, "、"]).flat());
-			player.addSkill("friendfangqiu_used");
-		},
-		subSkill: {
-			used: {
-				charlotte: true,
-				onremove: true,
-			},
+			const storage = player.getStorage("friendyance_record");
+			storage[4] = true;
+			player.popup(storage[1]);
+			game.log(player, "的预测为", "#g" + get.translation(storage[1]));
 		},
 	},
 	friendzhugelianggongli: {
+		audio: 2,
 		locked: true,
+	},
+	//共励
+	friendgongli: {
+		audio: 2,
+		locked: true,
+		isFriendOf(player, name) {
+			return player.getFriends(true).some(target => {
+				if (!target.identityShown) return false;
+				return get.is.playerNames(target, name);
+			});
+		},
 	},
 	//势董昭
 	spmiaolve: {
@@ -13746,8 +13749,7 @@ const skills = {
 		},
 		content() {
 			"step 0";
-			if (!player.storage.jinglve4) player.storage.jinglve4 = [];
-			player.storage.jinglve4.add(target);
+			player.markAuto("jinglve4", [target]);
 			player.chooseButton(["选择一张牌作为「死士」", target.getCards("h")], true).set("ai", function (button) {
 				var target = _status.event.getParent().target;
 				var card = button.link;
