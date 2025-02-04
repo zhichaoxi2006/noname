@@ -1231,9 +1231,9 @@ const skills = {
 			if (player.storage[event.name]) {
 				await player.useCard(get.autoViewAs({ name: "juedou" }, cards), target).set("cards", cards);
 			} else {
-				const suits = get.event().getParent("chooseToUse").olliyong_suits;
-				const card = get.cardPile(c => suits.includes(get.suit(c)), "cardPile");
-				await player.gain([card]);
+				const suits = event.getParent("chooseToUse").olliyong_suits;
+				const card = get.cardPile2(c => suits.includes(get.suit(c)));
+				if (card) await player.gain(card, "gain2");
 				await game.delay(0.5);
 				await target.useCard(new lib.element.VCard({ name: "juedou" }), player, "noai");
 			}
@@ -1243,7 +1243,7 @@ const skills = {
 		zhuanhuanji: true,
 		intro: {
 			content(storage) {
-				if (storage) return "出牌阶段，你可以弃置一张你本回合已使用过的花色的牌，令一名角色视为对你使用【决斗】";
+				if (storage) return "出牌阶段，你可以从牌堆中获得一张你本回合使用过的花色的牌，令一名角色视为对你使用【决斗】";
 				return "出牌阶段，你可以将一张你本回合未使用过的花色的牌当作【决斗】使用";
 			},
 		},
@@ -15326,6 +15326,7 @@ const skills = {
 				if (from.hp >= to.hp) return -Infinity;
 			},
 		},
+		audio: "zhuiji",
 		trigger: { player: "useCardToPlayered" },
 		filter(event, player) {
 			return event.card.name == "sha" && event.target.countCards("he") > 0 && get.distance(player, event.target) == 1;

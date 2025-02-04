@@ -2,6 +2,95 @@ import { lib, game, ui, get, ai, _status } from "../../noname.js";
 
 /** @type { importCharacterConfig['skill'] } */
 const skills = {
+	//TW司马师
+	twjinglve: {
+		audio: "jinglve",
+		enable: "phaseUse",
+		usable: 1,
+		filter(event, player) {
+			if (player.hasSkill("twjinglve2")) return false;
+			return game.hasPlayer(target => lib.skill.twjinglve.filterTarget(null, player, target));
+		},
+		filterTarget(card, player, target) {
+			return target.countCards("h") > 0;
+		},
+		async content(event, trigger, player) {
+			const target = event.target;
+			player.markAuto("jinglve4", [target]);
+			const result = await player
+				.chooseButton(["选择一张牌作为「死士」", target.getCards("h")], true)
+				.set("ai", button => {
+					const card = button.link;
+					const val = get.event().getParent().target.getUseValue(card);
+					return Math.max(val, get.value(card));
+				})
+				.forResult();
+			if (result.bool) {
+				player.storage.twjinglve2 = target;
+				player.storage.twjinglve3 = result.links[0];
+				player.addSkill("twjinglve2");
+			}
+		},
+		ai: {
+			order: 12,
+			result: { target: -1 },
+		},
+	},
+	twjinglve2: {
+		mark: true,
+		intro: {
+			name: "死士",
+			mark(dialog, content, player) {
+				dialog.addText("记录目标");
+				dialog.add([content]);
+				if (player == game.me || player.isUnderControl()) {
+					dialog.addText("死士牌");
+					dialog.add([player.storage.twjinglve3]);
+				}
+			},
+		},
+		sourceSkill: "twjinglve",
+		onremove(player) {
+			delete player.storage.twjinglve2;
+			delete player.storage.twjinglve3;
+		},
+		charlotte: true,
+		trigger: { global: "dieEnd" },
+		filter(event, player) {
+			return event.player === player.storage.twjinglve2;
+		},
+		silent: true,
+		lastDo: true,
+		content() {
+			player.removeSkill("twjinglve2");
+		},
+		group: "twjinglve3",
+	},
+	twjinglve3: {
+		charlotte: true,
+		audio: "jinglve",
+		trigger: { global: ["useCard", "phaseAfter"] },
+		sourceSkill: "twjinglve",
+		filter(event, player) {
+			if (event.player !== player.storage.twjinglve2) return false;
+			if (event.name == "useCard") return event.cards?.includes(card);
+			const card = player.storage.twjinglve3;
+			return get.cardPile(card, "filed") || game.hasPlayer(target => target.getCards("h").includes(card));
+		},
+		forced: true,
+		logTarget: "player",
+		async content(event, trigger, player) {
+			if (trigger.name == "useCard") {
+				trigger.all_excluded = true;
+				trigger.targets.length = 0;
+				game.log(trigger.card, "被无效了");
+			} else {
+				const card = player.storage.twjinglve3;
+				await player.gain(card, ...(get.owner(card) ? [get.owner(card), "give"] : ["gain2"]));
+			}
+			player.removeSkill("twjinglve2");
+		},
+	},
 	//外服谋曹丕
 	//不想你，出生牢丕
 	twxingshang: {

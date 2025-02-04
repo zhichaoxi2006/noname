@@ -146,7 +146,7 @@ const skills = {
 	clananran: {
 		audio: 2,
 		trigger: {
-			player: ["phaseUseBegin", "damageBegin"],
+			player: ["phaseUseBegin", "damageEnd"],
 		},
 		async cost(event, trigger, player) {
 			const count = Math.min(4, player.countMark("clananran_used") + 1);
@@ -210,7 +210,13 @@ const skills = {
 					player.removeGaintag(skill);
 				},
 				mod: {
-					cardEnabled(card, player, result) {
+					cardEnabled(card) {
+						if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
+							if (card.cards.some(c => c.hasGaintag("clananran_tag"))) return false;
+						}
+						if (card.hasGaintag("clananran_tag")) return false;
+					},
+					cardSavable(card) {
 						if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
 							if (card.cards.some(c => c.hasGaintag("clananran_tag"))) return false;
 						}

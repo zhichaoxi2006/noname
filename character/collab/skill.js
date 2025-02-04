@@ -561,7 +561,7 @@ const skills = {
 		},
 		async content(event, trigger, player) {
 			const result = await player.judge(card => (get.color(card) === "red" ? 2 : -2)).forResult();
-			if (result.bool) trigger.cancel();
+			if (result.bool) trigger.getParent().excluded.add(player);
 		},
 		ai: {
 			effect: {
