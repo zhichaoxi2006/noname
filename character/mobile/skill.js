@@ -2044,11 +2044,9 @@ const skills = {
 	},
 	mbsuwang: {
 		audio: 2,
-		trigger: {
-			global: "phaseEnd",
-		},
+		trigger: { global: "phaseEnd" },
 		filter(event, player) {
-			if (player.getHistory("damage").length) return false;
+			if (player.getHistory("damage").length > 1 - ["identity", "doudizhu"].includes(get.mode())) return false;
 			return event.player.hasHistory("useCard", evt => evt.targets && evt.targets.includes(player));
 		},
 		frequent: true,
