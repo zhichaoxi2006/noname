@@ -220,26 +220,18 @@ const skills = {
 							});
 							/** 随机取得发动时机的前，后，取消 */
 							let randomTriggerOpportunity = triggerOpportunity[Math.floor(Math.random() * triggerOpportunity.length)];
-
-							if (randomTrigger.trigger == "loseAfter") {
-								newSkillTran += `当${randomTriggerSource.translate}${randomTrigger.translate}，`;
-								newSkill.trigger = {};
-								newSkill.trigger[randomTriggerSource.target] = randomTrigger.trigger;
-								if (newSkill.trigger.global) newSkill.trigger.global = [newSkill.trigger.global, "loseAsyncAfter"];
-								else newSkill.trigger.global = "loseAsyncAfter";
-								randomTriggerOpportunity = {};
-							} else {
-								newSkillTran += `当${randomTriggerSource.translate}${randomTrigger.translate}${randomTriggerOpportunity.translate}，`;
-								newSkill.trigger = {};
-								if (Array.isArray(randomTriggerOpportunity.trigger)) {
-									const triggerArr = [];
-									for (const trigger of randomTriggerOpportunity.trigger) {
-										triggerArr.push(randomTrigger.trigger + trigger);
-									}
-									newSkill.trigger[randomTriggerSource.target] = triggerArr;
-								} else {
-									newSkill.trigger[randomTriggerSource.target] = randomTrigger.trigger + randomTriggerOpportunity.trigger;
+							newSkillTran += `当${randomTriggerSource.translate}${randomTrigger.translate}${randomTriggerOpportunity.translate}，`;
+							newSkill.trigger = {};
+							if (Object.prototype.toString.call(randomTriggerOpportunity.trigger) === "[object Object]") {
+								newSkill.trigger = randomTriggerOpportunity.trigger;
+							} else if (Array.isArray(randomTriggerOpportunity.trigger)) {
+								const triggerArr = [];
+								for (const trigger of randomTriggerOpportunity.trigger) {
+									triggerArr.push(randomTrigger.trigger + trigger);
 								}
+								newSkill.trigger[randomTriggerSource.target] = triggerArr;
+							} else {
+								newSkill.trigger[randomTriggerSource.target] = randomTrigger.trigger + randomTriggerOpportunity.trigger;
 							}
 
 							/** @type skillFilter 获取随机的发动条件 */
@@ -530,8 +522,8 @@ const skills = {
 
 							const next = player.chooseTarget();
 							next.set("filterTarget", lib.filter.notMe);
-							next.set("prompt", "是否将技能赠予其他角色？");
-							next.set("prompt2", `【${lib.translate[skillName]}】：${lib.translate[skillName + "_info"]}`);
+							next.set("prompt", `是否将【${lib.translate[skillName]}】赠予其他角色？`);
+							next.set("prompt2", lib.translate[skillName + "_info"]);
 							next.set("ai", target => {
 								const player = _status.event.player;
 								const att = get.attitude(player, target);
@@ -642,6 +634,7 @@ const skills = {
 							});
 							const result = await next.forResult();
 							if (result.bool) {
+								player.line(result.targets[0]);
 								await result.targets[0].addSkills(skillName);
 							} else {
 								await player.addSkills(skillName);
@@ -881,9 +874,12 @@ const skills = {
 						},
 					},
 					{
-						trigger: "loseAfter",
+						trigger: {
+							player: "loseAfter",
+							global: "loseAsyncAfter",
+						},
 						translate: "失去的牌因弃置而进入弃牌堆后",
-						filter(event) {
+						filter(event, player) {
 							if (event.type !== "discard" || event.getlx === false) return false;
 							return event.getl?.(player)?.cards2?.some(card => get.position(card) === "d");
 						},
