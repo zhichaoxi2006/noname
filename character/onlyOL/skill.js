@@ -2335,7 +2335,7 @@ const skills = {
 				forced: true,
 				locked: false,
 				content() {
-					player.addMark(event.name, ["useCard", "respond"].includes(trigger.name) ? 1 : Math.min(3, 5 - player.countMark(event.name)));
+					player.addMark("olsbliwen", ["useCard", "respond"].includes(trigger.name) ? 1 : Math.min(3, 5 - player.countMark("olsbliwen")));
 				},
 				mod: {
 					aiOrder(player, card, num) {
