@@ -589,7 +589,6 @@ const skills = {
 	//孙霸
 	dcjiedang: {
 		audio: 2,
-		mark: true,
 		intro: {
 			markcount: "expansion",
 			content: "expansion",
@@ -598,11 +597,12 @@ const skills = {
 			var cards = player.getExpansions(skill);
 			if (cards.length) player.loseToDiscardpile(cards);
 		},
-		trigger: {
-			player: "phaseBegin",
-		},
+		trigger: { player: "phaseBegin" },
+		frequent: true,
 		async content(event, trigger, player) {
-			for (const i of get.players()) {
+			const targets = get.players();
+			player.line(targets);
+			for (const i of targets) {
 				const {
 					result: { bool, cards },
 				} = await i
@@ -615,35 +615,39 @@ const skills = {
 						return 0;
 					})
 					.set("targetx", player)
-					.set("prompt", `将任意张牌置于${get.translation(player)}的武将牌上`);
+					.set("prompt", `是否响应${get.translation(player)}的【结党】？`)
+					.set("prompt2", `将任意张牌置于${get.translation(player)}的武将牌上`);
 				if (bool) {
-					const next = player.addToExpansion(cards, player);
+					i.chat("响应");
+					const next = player.addToExpansion(cards, i, "give");
 					next.gaintag.add("dcjiedang");
 					await next;
 					await i.draw();
-				}
+				} else i.chat("不响应");
 			}
 		},
 		group: "dcjiedang_lose",
 		subSkill: {
 			lose: {
+				audio: "dcjiedang",
 				trigger: {
 					player: ["phaseUseBegin", "phaseJieshuBegin", "dying"],
 				},
-				forced: true,
 				filter(event, player) {
 					return player.getExpansions("dcjiedang").length > 0;
 				},
+				forced: true,
 				async content(event, trigger, player) {
 					const cards = player.getExpansions("dcjiedang");
 					const list = cards.map(c => get.type2(c)).unique();
 					const dialog = ui.create.dialog();
-					dialog.addText("移去一种类型的牌");
+					dialog.addText("结党：移去一种类别的所有“结党”牌并摸等量张牌");
 					dialog.addAuto(cards);
 					const {
 						result: { control },
 					} = await player.chooseControl(list).set("dialog", dialog);
 					const lose = cards.filter(c => get.type(c) == control);
+					if (!lose.length) return;
 					await player.loseToDiscardpile(lose);
 					await player.draw(lose.length);
 				},
@@ -658,9 +662,7 @@ const skills = {
 		forced: true,
 		filter(event, player) {
 			const { source } = event;
-			if (!source) {
-				return false;
-			}
+			if (!source) return false;
 			return source.getHp() > player.getHp() || source.countCards("h") > player.countCards("h");
 		},
 		async content(event, trigger, player) {
