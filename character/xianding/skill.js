@@ -679,15 +679,6 @@ const skills = {
 		trigger: { player: "damageEnd" },
 		enable: "phaseUse",
 		filterTarget: lib.filter.notMe,
-		mark: true,
-		intro: {
-			markcount(num = 0) {
-				return num + 1;
-			},
-			content(num = 0) {
-				return `令一名其他角色摸${get.cnNumber(num + 1)}张牌或弃置${get.cnNumber(num + 1)}张牌`;
-			},
-		},
 		prompt() {
 			const num = get.player().countMark("dcwoheng");
 			return `令一名其他角色摸${get.cnNumber(num + 1)}张牌或弃置${get.cnNumber(num + 1)}张牌`;
@@ -701,15 +692,6 @@ const skills = {
 					return get.effect(target, "dcwoheng", player, player);
 				})
 				.forResult();
-		},
-		init(player) {
-			const num = game.countPlayer2(target => {
-				return target.getRoundHistory("useSkill", evt => evt.skill === "dcwoheng").length;
-			});
-			if (num) {
-				player.addTempSkill("dcwoheng_used", "roundStart");
-				player.addMark("dcwoheng", num, false);
-			}
 		},
 		async content(event, trigger, player) {
 			const target = event.target || event.targets[0];
@@ -801,6 +783,31 @@ const skills = {
 							})()
 					);
 				},
+			},
+		},
+		init(player) {
+			const num = (() => {
+				let num = 0,
+					globalHistory = _status.globalHistory;
+				for (let i = globalHistory.length - 1; i >= 0; i--) {
+					num += globalHistory[i].everything.filter(evt => evt.name === "dcwoheng").length;
+					if (globalHistory[i].isRound) break;
+				}
+				return num;
+			})();
+			if (num) {
+				player.addTempSkill("dcwoheng_used", "roundStart");
+				player.addMark("dcwoheng", num, false);
+			}
+		},
+		onremove: true,
+		mark: true,
+		intro: {
+			markcount(num = 0) {
+				return num + 1;
+			},
+			content(num = 0) {
+				return `令一名其他角色摸${get.cnNumber(num + 1)}张牌或弃置${get.cnNumber(num + 1)}张牌`;
 			},
 		},
 		subSkill: {
