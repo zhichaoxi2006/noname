@@ -2643,11 +2643,11 @@ const skills = {
 		},
 	},
 	noname_zhuyuan: {
+		charlotte: true,
 		enable: "phaseUse",
 		position: "he",
 		selectCard: 4,
 		complexCard: true,
-		charlotte: true,
 		prompt: "将四张花色各不同的牌交一名角色并令你与其获得【铁骑】和【激昂】直到各自回合结束",
 		check(card) {
 			if (ui.selected.cards.length && ui.selected.cards[0].name == "du") return 0;
@@ -2756,29 +2756,27 @@ const skills = {
 		},
 	},
 	noname_duocai: {
+		charlotte: true,
 		trigger: {
-			global: ["loseAfter", "loseAsyncAfter"],
+			global: ["loseAfter", "gainAfter", "equipAfter", "addJudgeAfter", "loseAsyncAfter", "addToExpansionAfter", "cardsDiscardAfter"],
 		},
 		filter(event, player) {
-			if (event.type != "discard" || event.getlx === false) return false;
-			var evt = event.getl(player);
-			var cards = event.cards.slice(0);
-			if (evt && evt.cards) cards.removeArray(evt.cards);
-			return cards.filterInD("d").length > 0 && !player.hasSkill("noname_duocai2");
+			return game.hasPlayer2(i => i !== player && event.getd(i, "cards2").length);
 		},
 		direct: true,
-		charlotte: true,
 		content() {
 			"step 0";
-			if (trigger.delay == false && player != game.me && !player.isOnline()) game.delay();
-			var evt = trigger.getl(player);
-			var cards = trigger.cards.slice(0);
-			cards.removeArray(evt.cards);
-			player.chooseButton([get.prompt("noname_duocai"), cards], [1, cards.length]);
+			if (trigger.delay == false && player != game.me && !player.isOnline()) game.delayx();
+			var cards = game
+				.filterPlayer2(i => i !== player && trigger.getd(i, "cards2").length)
+				.map(target => {
+					return trigger.getd(target, "cards2");
+				})
+				.flat();
+			player.chooseButton([get.prompt2("noname_duocai"), cards], [1, cards.length]).set("ai", but => get.value(but.link));
 			"step 1";
 			if (result.bool) {
 				player.logSkill("noname_duocai");
-				player.addTempSkill("noname_duocai2");
 				player.gain(result.links, "gain2");
 				if (result.links.length > 2) {
 					var filterTarget = function (card, player, target) {
@@ -2808,7 +2806,6 @@ const skills = {
 			}
 		},
 	},
-	noname_duocai2: { charlotte: true },
 	nsbizhao: {
 		unique: true,
 		trigger: { player: "showCharacterAfter" },
