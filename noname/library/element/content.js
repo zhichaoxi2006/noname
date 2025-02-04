@@ -11,6 +11,84 @@ export const Content = {
 	emptyEvent: async event => {
 		await event.trigger(event.name);
 	},
+	_save: function () {
+		"step 0";
+		event.dying = trigger.player;
+		if (!event.acted) event.acted = [];
+		"step 1";
+		if (trigger.player.isDead()) {
+			event.finish();
+			return;
+		}
+		event.acted.push(player);
+		var str = get.translation(trigger.player) + "濒死，是否帮助？";
+		var str2 = "当前体力：" + trigger.player.hp;
+		if (lib.config.tao_enemy && event.dying.side != player.side && lib.config.mode != "identity" && lib.config.mode != "guozhan" && !event.dying.hasSkillTag("revertsave")) {
+			event._result = { bool: false };
+		} else if (player.canSave(event.dying)) {
+			player.chooseToUse({
+				filterCard: function (card, player, event) {
+					event = event || _status.event;
+					return lib.filter.cardSavable(card, player, event.dying);
+				},
+				filterTarget: function (card, player, target) {
+					if (target != _status.event.dying) return false;
+					if (!card) return false;
+					var info = get.info(card);
+					if (!info.singleCard || ui.selected.targets.length == 0) {
+						var mod = game.checkMod(card, player, target, "unchanged", "playerEnabled", player);
+						if (mod == false) return false;
+						var mod = game.checkMod(card, player, target, "unchanged", "targetEnabled", target);
+						if (mod != "unchanged") return mod;
+					}
+					return true;
+				},
+				prompt: str,
+				prompt2: str2,
+				ai1: function (card) {
+					if (typeof card == "string") {
+						var info = get.info(card);
+						if (info.ai && info.ai.order) {
+							if (typeof info.ai.order == "number") {
+								return info.ai.order;
+							} else if (typeof info.ai.order == "function") {
+								return info.ai.order();
+							}
+						}
+					}
+					return 1;
+				},
+				ai2: function (target) {
+					let effect_use = get.effect_use(target);
+					if (effect_use <= 0) return effect_use;
+					return get.effect(target);
+				},
+				type: "dying",
+				targetRequired: true,
+				dying: event.dying,
+			});
+		} else {
+			event._result = { bool: false };
+		}
+		"step 2";
+		if (result.bool) {
+			var player = trigger.player;
+			if (player.hp <= 0 && !trigger.nodying && !player.nodying && player.isAlive() && !player.isOut() && !player.removed) event.goto(0);
+			else trigger.untrigger();
+		} else {
+			for (var i = 0; i < 20; i++) {
+				if (event.acted.includes(event.player.next)) {
+					break;
+				} else {
+					event.player = event.player.next;
+					if (!event.player.isOut()) {
+						event.goto(1);
+						break;
+					}
+				}
+			}
+		}
+	},
 	chooseNumbers: function () {
 		"step 0";
 		event.numbers = [];
@@ -9105,7 +9183,7 @@ export const Content = {
 			next._trigger = event;
 			next.triggername = "_save";
 			next.forceDie = true;
-			next.setContent(lib.skill._save.content);
+			next.setContent("_save");
 		}
 		"step 2";
 		_status.dying.remove(player);
