@@ -104,7 +104,7 @@ const characters = {
 	tw_wujing: ["male", "wu", 4, ["twfenghan", "twcongji"], ["die:wujing"]],
 	tw_wangcan: ["male", "wei", 3, ["twdianyi", "twyingji", "twshanghe"]],
 	tw_wangchang: ["male", "wei", 3, ["twkaiji", "twshepan"], ["clan:太原王氏"]],
-	tw_caozhao: ["male", "wei", 4, ["twfuzuan", "twchongqi"]],
+	tw_caozhao: ["male", "wei", 4, ["twfuzuan", "twchongqi", "twfeifu"]],
 	tw_guohuai: ["male", "wei", 4, ["twjingce", "yuzhang"], ["die:guohuai"]],
 	tw_chengpu: ["male", "wu", 4, ["twlihuo", "twchunlao"], ["die:chengpu"]],
 	tw_zhangmancheng: ["male", "qun", 4, ["twfengji", "twyiju", "twbudao"]],

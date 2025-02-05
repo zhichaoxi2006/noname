@@ -97,7 +97,7 @@ const characters = {
 	zhujianping: ["male", "qun", 3, ["dcxiangmian", "dctianji"]],
 	zhaozhi: ["male", "shu", 3, ["dctongguan", "dcmengjie"]],
 	dc_liuye: ["male", "wei", 3, ["dcpoyuan", "dchuace"]],
-	luyi: ["female", "qun", 3, ["dcyaoyi", "dcfuxue"]],
+	luyi: ["female", "qun", 3, ["dcyaoyi", "dcshoutan", "dcfuxue"]],
 	dingshangwan: ["female", "wei", 3, ["dcfengyan", "dcfudao"]],
 	quanhuijie: ["female", "wu", 3, ["dchuishu", "dcyishu", "dcligong"]],
 	dukui: ["male", "wei", 3, ["dcfanyin", "dcpeiqi"]],
