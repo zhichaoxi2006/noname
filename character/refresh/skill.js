@@ -12585,7 +12585,7 @@ const skills = {
 			}
 			//else game.cardsDiscard(cards);
 		},
-		subSkill: { buff: { inherit: "reluoyi2", sourceSkill: "new_reluoyi" }, },
+		subSkill: { buff: { inherit: "reluoyi2", sourceSkill: "new_reluoyi" } },
 	},
 	new_rewusheng: {
 		mod: {
@@ -13450,41 +13450,9 @@ const skills = {
 			if (player.storage.rerende >= 0) {
 				player.storage.rerende += cards.length;
 				if (player.storage.rerende >= 2) {
-					var list = [];
-					if (
-						lib.filter.cardUsable({ name: "sha" }, player, event.getParent("chooseToUse")) &&
-						game.hasPlayer(function (current) {
-							return player.canUse("sha", current);
-						})
-					) {
-						list.push(["基本", "", "sha"]);
-					}
-					for (var i of lib.inpile_nature) {
-						if (
-							lib.filter.cardUsable({ name: "sha", nature: i }, player, event.getParent("chooseToUse")) &&
-							game.hasPlayer(function (current) {
-								return player.canUse({ name: "sha", nature: i }, current);
-							})
-						) {
-							list.push(["基本", "", "sha", i]);
-						}
-					}
-					if (
-						lib.filter.cardUsable({ name: "tao" }, player, event.getParent("chooseToUse")) &&
-						game.hasPlayer(function (current) {
-							return player.canUse("tao", current);
-						})
-					) {
-						list.push(["基本", "", "tao"]);
-					}
-					if (
-						lib.filter.cardUsable({ name: "jiu" }, player, event.getParent("chooseToUse")) &&
-						game.hasPlayer(function (current) {
-							return player.canUse("jiu", current);
-						})
-					) {
-						list.push(["基本", "", "jiu"]);
-					}
+					var list = get.inpileVCardList(info => {
+						return get.type(info[2]) == "basic" && player.hasUseTarget(new lib.element.VCard({ name: info[2], nature: info[3] }), null, true);
+					});
 					if (list.length) {
 						player.chooseButton(["是否视为使用一张基本牌？", [list, "vcard"]]).set("ai", function (button) {
 							var player = _status.event.player;
