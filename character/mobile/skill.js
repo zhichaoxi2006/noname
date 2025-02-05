@@ -195,7 +195,7 @@ const skills = {
 			if (player.getStorage("friendqihui").length >= 3) {
 				const {
 					result: { links },
-				} = await player.chooseButton(["选择你要移去的“启诲”标记", [storage.map(c => [c, get.translation(c)]), "tdnodes"]], [2, 2], true).set("ai", button => {
+				} = await player.chooseButton(["选择你要移去的“启诲”标记", [player.getStorage("friendqihui").map(c => [c, get.translation(c)]), "tdnodes"]], [2, 2], true).set("ai", button => {
 					const player = get.player();
 					return (
 						1 +
