@@ -17008,7 +17008,6 @@ const skills = {
 				game.delayx();
 			}
 		},
-		derivation: "twfeifu",
 	},
 	twfeifu: {
 		audio: 2,
