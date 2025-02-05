@@ -234,7 +234,7 @@ const skills = {
 						return lib.filter.targetEnabled.apply(this, arguments);
 					})
 					.set("sourcex", targets[1])
-					.set("forced", true)
+					.set("forced", true);
 				const result2 = await next2.forResult();
 				if (!result2.bool) {
 					break;
@@ -1689,16 +1689,14 @@ const skills = {
 		group: "hm_kunjun_advent",
 		subSkill: {
 			advent: {
-				trigger: {
-					global: "phaseBefore",
-					player: "enterGame",
-				},
+				trigger: { global: "gameDrawBegin" },
 				forced: true,
-				filter(event, player) {
-					return event.name != "phase" || game.phaseNumber == 0;
-				},
 				content() {
-					player.draw(4);
+					const me = player,
+						numx = trigger.num;
+					trigger.num = function (player) {
+						return (typeof numx == "function" ? numx(player) : numx) + (player === me ? 4 : 0);
+					};
 				},
 			},
 		},
