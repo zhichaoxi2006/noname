@@ -122,7 +122,7 @@ game.import("card", function () {
 						const num = result.cards.length,
 							he = player.getCards("he");
 						if (!he.length) return;
-						await player.chooseToGive(target, Math.min(he.length, num), `交给${get.translation(target)}${get.cnNumber(num)}张牌`, true);
+						await player.chooseToGive(target, Math.min(he.length, num), `交给${get.translation(target)}${get.cnNumber(num)}张牌`, "he", true);
 					}
 				},
 				ai: {
