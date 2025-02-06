@@ -2110,7 +2110,7 @@ const skills = {
 		},
 		async cost(event, trigger, player) {
 			event.result = await player
-				.chooseTarget(get.prompt("mbbeiming"), "令至多两名角色获得武器牌", [1, 2])
+				.chooseTarget(get.prompt(event.name.slice(0, -5)), "令至多两名角色获得武器牌", [1, 2])
 				.set("ai", target => {
 					return get.attitude(get.player(), target);
 				})
@@ -4036,12 +4036,21 @@ const skills = {
 				player: 1,
 			},
 		},
+		group: "mbxuetu_beiming",
 		subSkill: {
 			used: {
 				charlotte: true,
 				onremove: true,
 			},
 			backup: {},
+			//文钦：你*****
+			beiming: {
+				audio: "mbxuetu",
+				logAudio(event, player) {
+					return player.countMark("mbxuetu_status") == 2 ? ["mbxuetu3.mp3", "mbxuetu4.mp3"] : ["mbxuetu1.mp3", "mbxuetu2.mp3"];
+				},
+				inherit: "mbbeiming",
+			},
 		},
 	},
 	mbweiming: {
@@ -4049,9 +4058,7 @@ const skills = {
 		dutySkill: true,
 		locked: true,
 		group: ["mbweiming_achieve", "mbweiming_fail", "mbweiming_effect"],
-		intro: {
-			content: "已记录$",
-		},
+		intro: { content: "已记录$" },
 		subSkill: {
 			effect: {
 				audio: "mbweiming1.mp3",
