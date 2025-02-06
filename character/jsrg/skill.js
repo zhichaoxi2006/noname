@@ -3267,46 +3267,90 @@ const skills = {
 			storage: { jsrgdanxin: true },
 		},
 		filterCard: true,
+		check(card) {
+			var val = get.value(card);
+			if (get.suit(card) == "heart") return 1 / Math.max(0.1, val);
+			return 6 - val;
+		},
 		position: "hes",
 		precontent() {
 			player.addTempSkill("jsrgdanxin_effect");
 		},
+		ai: {
+			order(item, player) {
+				if (game.hasPlayer(current => player != current && player.canUse({ name: "tuixinzhifu" }, current) && get.effect(current, "jsrgdanxin", player, player) > 0)) return 10;
+				return 5;
+			},
+			result: {
+				target(player, target) {
+					if (player.isDamaged() || (get.attitude(player, target) > 0 && target.isDamaged())) {
+						const bool =
+							(player.hasSkillTag("viewHandcard", null, target, true) && target.hasCard({ suit: "heart" }, "h")) ||
+							target.hasCard(card => {
+								if (["e", "j"].includes(get.position(card))) return get.suit(card) == "heart";
+								return get.suit(card) == "heart" && card.isKnownBy(player);
+							}, "hej");
+						return 1 + get.recoverEffect(player, player, player) + get.recoverEffect(target, player, player) + bool ? 2 : 0;
+					}
+					return lib.card.tuixinzhifu.ai.result.target(player, target);
+				},
+			},
+		},
 		subSkill: {
 			effect: {
-				audio: "jsrgdanxin",
 				trigger: {
+					player: ["gainPlayerCardBefore", "chooseToGiveBefore"],
 					global: "gainAfter",
 				},
-				filter(event, player) {
-					const level = event.player != player ? 1 : 2;
-					if (event.player != player && event.getParent(level).name != "tuixinzhifu") return false;
-					if (event.player == player && event.getParent(level).name != "tuixinzhifu") return false;
-					const card = event.getParent(level + 1).card;
-					return card && card.storage && card.storage.jsrgdanxin;
+				filter(event, player, name) {
+					const level = name != "gainAfter" ? 1 : 2;
+					return event.getParent(level).card?.storage?.jsrgdanxin;
 				},
 				forced: true,
 				popup: false,
 				charlotte: true,
 				async content(event, trigger, player) {
-					const level = trigger.player != player ? 1 : 2;
-					const { targets } = trigger.getParent(level + 1);
-					await player.showCards(trigger.cards);
-					if (trigger.cards.some(card => get.suit(card) == "heart")) {
-						const owners = trigger.cards
-							.filter(card => get.suit(card) == "heart")
-							.map(card => get.owner(card))
-							.toUniqued();
-						for (const owner of owners) {
-							if (owner && owner.isIn()) await owner.recover();
+					if (event.triggername == "gainAfter") {
+						const { targets } = trigger.getParent(2);
+						await player.showCards(trigger.cards);
+						if (trigger.cards.some(card => get.suit(card) == "heart")) {
+							const owners = trigger.cards
+								.filter(card => get.suit(card) == "heart")
+								.map(card => get.owner(card))
+								.toUniqued();
+							for (const owner of owners) {
+								if (owner && owner.isIn()) await owner.recover();
+							}
 						}
+						if (trigger.player == player) return;
+						player.addTempSkill("jsrgdanxin_distance");
+						if (!player.storage.jsrgdanxin_distance) player.storage.jsrgdanxin_distance = {};
+						const id = targets[0].playerid;
+						if (typeof player.storage.jsrgdanxin_distance[id] != "number") player.storage.jsrgdanxin_distance[id] = 0;
+						player.storage.jsrgdanxin_distance[id]++;
+						player.markSkill("jsrgdanxin_distance");
+					} else if (event.triggername == "gainPlayerCardBefore") {
+						trigger.ai = button => {
+							const { player, target } = get.event();
+							const { link: card } = button;
+							if (get.recoverEffect(player, player, player) > 0 && get.suit(card) == "heart") return 10;
+							if (get.attitude(player, target) > 0) {
+								if (get.position(card) == "j") {
+									const cardj = card.viewAs ? { name: card.viewAs } : card;
+									return get.effect(target, cardj, target, player) < 0 ? 11 : 0;
+								} else if (get.position(card) == "e") return get.value(card, target) <= 0 ? 5 : 0;
+								else return 6 - get.value(card);
+							}
+							return get.value(card);
+						};
+					} else {
+						trigger.ai = card => {
+							const { player, target } = get.event();
+							if (get.recoverEffect(target, player, player) > 0 && get.suit(card) == "heart") return 10;
+							if (get.attitude(player, target) > 0) return get.value(card);
+							return 6 - get.value(card);
+						};
 					}
-					if (trigger.player == player) return;
-					player.addTempSkill("jsrgdanxin_distance");
-					if (!player.storage.jsrgdanxin_distance) player.storage.jsrgdanxin_distance = {};
-					const id = targets[0].playerid;
-					if (typeof player.storage.jsrgdanxin_distance[id] != "number") player.storage.jsrgdanxin_distance[id] = 0;
-					player.storage.jsrgdanxin_distance[id]++;
-					player.markSkill("jsrgdanxin_distance");
 				},
 			},
 			distance: {

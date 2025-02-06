@@ -2270,43 +2270,68 @@ const skills = {
 	//OL谋孔融
 	olsbliwen: {
 		audio: 2,
-		trigger: { player: "phaseEnd" },
-		filter(event, player) {
-			return game.hasPlayer(t => t.hasMark("olsbliwen"));
+		mod: {
+			aiOrder(player, card, num) {
+				if (typeof card == "object" && _status.currentPhase === player) {
+					const evt = player.getLastUsed(1);
+					if (evt && evt.card && ((get.suit(evt.card) && get.suit(evt.card) == get.suit(card)) || (evt.card.number && evt.card.number == get.number(card)))) {
+						return num + 10;
+					}
+				}
+			},
+		},
+		trigger: {
+			global: "phaseBefore",
+			player: ["phaseEnd", "useCardAfter", "respondAfter", "enterGame"],
+		},
+		filter(event, player, name) {
+			if (name == "phaseEnd") return game.hasPlayer(t => t.hasMark("olsbliwen"));
+			if (player.countMark("olsbliwen") >= 5) return false;
+			if (!["respond", "useCard"].includes(event.name)) return event.name !== "phase" || game.phaseNumber === 0;
+			const evts = game.getAllGlobalHistory("everything", evt => ["useCard", "respond"].includes(evt.name) && evt.player == player && evt != event);
+			if (!evts.length) return false;
+			const {
+				lastItem: { card },
+			} = evts;
+			return get.suit(card) == get.suit(event.card) || get.type2(card) == get.type2(event.card);
 		},
 		forced: true,
 		locked: false,
 		async content(event, trigger, player) {
-			while (player.hasMark("olsbliwen") && game.hasPlayer(t => t != player && t.countMark("olsbliwen") < 5)) {
-				const result = await player
-					.chooseTarget("是否发动【立文】？", "将任意枚“贤”标记分配给任意其他角色", (card, player, target) => {
-						return target !== player && target.countMark("olsbliwen") < 5;
-					})
-					.set("ai", target => get.attitude(get.event().player, target) * (target.countCards("h") + 1))
-					.forResult();
-				if (result.bool) {
-					player.line(result.targets);
-					player.removeMark("olsbliwen", 1);
-					result.targets[0].addMark("olsbliwen", 1);
-				} else break;
-			}
-			const targets = game.filterPlayer(target => target.hasMark("olsbliwen")).sort((a, b) => b.countMark("olsbliwen") - a.countMark("olsbliwen"));
-			if (!targets.length) return;
-			player.line(targets);
-			for (const target of targets) {
-				const result = await target
-					.chooseToUse(function (card) {
-						const evt = _status.event;
-						if (!lib.filter.cardEnabled(card, evt.player, evt)) return false;
-						return get.position(card) == "h";
-					}, '###立文###<div class="text center">使用一张手牌，或移去所有“贤”标记并令' + get.translation(player) + "摸等量的牌</div>")
-					.set("addCount", false)
-					.forResult();
-				if (!result.bool) {
-					const num = target.countMark("olsbliwen");
-					target.clearMark("olsbliwen");
-					await player.draw(num);
+			if (event.triggername == "phaseEnd") {
+				while (player.hasMark("olsbliwen") && game.hasPlayer(t => t != player && t.countMark("olsbliwen") < 5)) {
+					const result = await player
+						.chooseTarget("是否发动【立文】？", "将任意枚“贤”标记分配给任意其他角色", (card, player, target) => {
+							return target !== player && target.countMark("olsbliwen") < 5;
+						})
+						.set("ai", target => get.attitude(get.event().player, target) * (target.countCards("h") + 1))
+						.forResult();
+					if (result.bool) {
+						player.line(result.targets);
+						player.removeMark("olsbliwen", 1);
+						result.targets[0].addMark("olsbliwen", 1);
+					} else break;
 				}
+				const targets = game.filterPlayer(target => target.hasMark("olsbliwen")).sort((a, b) => b.countMark("olsbliwen") - a.countMark("olsbliwen"));
+				if (!targets.length) return;
+				player.line(targets);
+				for (const target of targets) {
+					const result = await target
+						.chooseToUse(function (card) {
+							const evt = _status.event;
+							if (!lib.filter.cardEnabled(card, evt.player, evt)) return false;
+							return get.position(card) == "h";
+						}, '###立文###<div class="text center">使用一张手牌，或移去所有“贤”标记并令' + get.translation(player) + "摸等量的牌</div>")
+						.set("addCount", false)
+						.forResult();
+					if (!result.bool) {
+						const num = target.countMark("olsbliwen");
+						target.clearMark("olsbliwen");
+						await player.draw(num);
+					}
+				}
+			} else {
+				player.addMark("olsbliwen", ["useCard", "respond"].includes(trigger.name) ? 1 : Math.min(3, 5 - player.countMark("olsbliwen")));
 			}
 		},
 		intro: {
@@ -2314,41 +2339,6 @@ const skills = {
 			content: "mark",
 		},
 		marktext: "贤",
-		group: "olsbliwen_gain",
-		subSkill: {
-			gain: {
-				audio: "olsbliwen",
-				trigger: {
-					global: "phaseBefore",
-					player: ["useCardAfter", "respondAfter", "enterGame"],
-				},
-				filter(event, player) {
-					if (player.countMark("olsbliwen") >= 5) return false;
-					if (!["respond", "useCard"].includes(event.name)) return event.name !== "phase" || game.phaseNumber === 0;
-					const evts = game.getAllGlobalHistory("everything", evt => ["useCard", "respond"].includes(evt.name) && evt.player == player);
-					if (evts.length <= 1) return false;
-					const {
-						lastItem: { card },
-					} = evts;
-					return get.suit(card) == get.suit(event.card) || get.type2(card) == get.type2(event.card);
-				},
-				forced: true,
-				locked: false,
-				content() {
-					player.addMark("olsbliwen", ["useCard", "respond"].includes(trigger.name) ? 1 : Math.min(3, 5 - player.countMark("olsbliwen")));
-				},
-				mod: {
-					aiOrder(player, card, num) {
-						if (typeof card == "object" && _status.currentPhase === player) {
-							const evt = player.getLastUsed(1);
-							if (evt && evt.card && ((get.suit(evt.card) && get.suit(evt.card) == get.suit(card)) || (evt.card.number && evt.card.number == get.number(card)))) {
-								return num + 10;
-							}
-						}
-					},
-				},
-			},
-		},
 		ai: { threaten: 3 },
 	},
 	olsbzhengyi: {

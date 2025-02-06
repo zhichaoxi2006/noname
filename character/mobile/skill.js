@@ -31,7 +31,7 @@ const skills = {
 						return get.info("zhiheng").check(card) > 0;
 					});
 					cards = cards.sort((a, b) => get.info("zhiheng").check(b) - get.info("zhiheng").check(a)).slice(0, 5);
-					return [cards, listx[0].removeArray(cardx)];
+					return [cards, listx[0].removeArray(cards)];
 				});
 			event.result = {
 				bool: Boolean(moved?.[0]?.length),
@@ -4032,25 +4032,14 @@ const skills = {
 				if (status === 1 || player.storage.mbxuetu) return 9;
 				return 2;
 			},
-			result: {
-				player: 1,
-			},
+			result: { player: 1 },
 		},
-		group: "mbxuetu_beiming",
 		subSkill: {
 			used: {
 				charlotte: true,
 				onremove: true,
 			},
 			backup: {},
-			//文钦：你*****
-			beiming: {
-				audio: "mbxuetu",
-				logAudio(event, player) {
-					return player.countMark("mbxuetu_status") == 2 ? ["mbxuetu3.mp3", "mbxuetu4.mp3"] : ["mbxuetu1.mp3", "mbxuetu2.mp3"];
-				},
-				inherit: "mbbeiming",
-			},
 		},
 	},
 	mbweiming: {

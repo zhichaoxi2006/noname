@@ -110,29 +110,20 @@ game.import("card", function () {
 				type: "trick",
 				fullskin: true,
 				enable: true,
-				filterTarget: function (card, player, target) {
+				filterTarget(card, player, target) {
 					return target != player && target.countGainableCards(player, "hej") > 0;
 				},
 				range: { global: 1 },
-				content: function () {
-					"step 0";
-					player.gainPlayerCard(target, "hej", true, [1, 2]);
-					"step 1";
+				async content(event, trigger, player) {
+					const { target } = event;
+					if (!target.countGainableCards(player, "hej")) return;
+					const { result } = await player.gainPlayerCard(target, "hej", true, [1, 2]);
 					if (result.bool && target.isIn()) {
-						var num = result.cards.length,
+						const num = result.cards.length,
 							he = player.getCards("he");
-						if (!he.length) event.finish();
-						else if (he.length < num) event._result = { bool: true, cards: he };
-						else
-							player.chooseCard(
-								"he",
-								true,
-								num,
-								"交给" + get.translation(target) + get.cnNumber(num) + "张牌"
-							);
-					} else event.finish();
-					"step 2";
-					if (result.bool) player.give(result.cards, target);
+						if (!he.length) return;
+						await player.chooseToGive(target, Math.min(he.length, num), `交给${get.translation(target)}${get.cnNumber(num)}张牌`, true);
+					}
 				},
 				ai: {
 					order: 5,
@@ -140,19 +131,17 @@ game.import("card", function () {
 						loseCard: 1,
 						gain: 0.5,
 					},
-					wuxie: function (target, card, player, viewer) {
+					wuxie(target, card, player, viewer) {
 						if (get.attitude(player, target) > 0 && get.attitude(viewer, player) > 0) {
 							return 0;
 						}
 					},
 					result: {
-						target: function (player, target) {
+						target(player, target) {
 							if (get.attitude(player, target) <= 0)
 								return (
 									(target.countCards("he", function (card) {
-										return (
-											get.value(card, target) > 0 && card != target.getEquip("jinhe")
-										);
+										return get.value(card, target) > 0 && card != target.getEquip("jinhe");
 									}) > 0
 										? -0.3
 										: 0.3) * Math.sqrt(player.countCards("h"))
