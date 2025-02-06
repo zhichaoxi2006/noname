@@ -13211,10 +13211,11 @@ const skills = {
 	zhuning: {
 		audio: 2,
 		enable: "phaseUse",
-		usable: 2,
+		usable(skill, player) {
+			return 1 + (player.hasSkill(skill + "_rewrite", null, null, false) ? 1 : 0);
+		},
 		filter(event, player) {
-			if (!player.countCards("he")) return false;
-			return !player.getStat("skill").zhuning || player.hasSkill("zhuning_double");
+			return player.countCards("he") && game.hasPlayer(current => player != current);
 		},
 		filterCard: true,
 		position: "he",
@@ -13230,47 +13231,35 @@ const skills = {
 			if (ui.selected.cards.length >= Math.max(1, player.countCards("h") - player.hp)) return 0;
 			return 10 - get.value(card);
 		},
-		content() {
-			"step 0";
-			player.give(cards, target).gaintag.add("fengxiang_tag");
-			"step 1";
-			var list = [];
-			for (var name of lib.inpile) {
-				var type = get.type(name);
-				if (type != "basic" && type != "trick") continue;
-				var card = { name: name, isCard: true };
-				if (get.tag(card, "damage") > 0 && player.hasUseTarget(card)) {
-					list.push([type, "", name]);
-				}
-				if (name == "sha") {
-					for (var i of lib.inpile_nature) {
-						card.nature = i;
-						if (player.hasUseTarget(card)) list.push([type, "", name, i]);
-					}
-				}
-			}
-			if (list.length) {
-				player.chooseButton(["是否视为使用一张伤害牌？", [list, "vcard"]]).set("ai", function (button) {
-					return _status.event.player.getUseValue({ name: button.link[2] });
-				});
-			} else event.finish();
-			"step 2";
-			if (result.bool) {
-				player.chooseUseTarget({ name: result.links[0][2], nature: result.links[0][3], isCard: true }, true, false);
-			} else event.finish();
-			"step 3";
+		async content(event, trigger, player) {
+			const { cards, target } = event;
+			const next = player.give(cards, target);
+			next.gaintag.add("fengxiang_tag");
+			await next;
+			const list = get.inpileVCardList(info => {
+				const card = { name: info[2], nature: info[3], isCard: true };
+				if (!["basic", "trick"].includes(get.type(info[2])) || !get.tag(card, "damage")) return false;
+				return player.hasUseTarget(card);
+			});
+			if (!list.length) return;
+			const links = await player
+				.chooseButton(["是否视为使用一张伤害牌？", [list, "vcard"]])
+				.set("ai", button => {
+					return get.player().getUseValue({ name: button.link[2], nature: button.link[3] });
+				})
+				.forResultLinks();
+			if (!links.length) return;
+			await player.chooseUseTarget({ name: links[0][2], nature: links[0][3], isCard: true }, true, false);
 			if (
-				!player.hasHistory("sourceDamage", function (evt) {
+				!player.hasHistory("sourceDamage", evt => {
 					if (!evt.card) return false;
-					var evtx = evt.getParent("useCard");
+					const evtx = evt.getParent("useCard");
 					return evtx.card == evt.card && evtx.getParent(2) == event;
 				})
 			)
-				player.addTempSkill("zhuning_double");
+				player.addTempSkill(event.name + "_rewrite", "phaseUseEnd");
 		},
-		subSkill: {
-			double: {},
-		},
+		subSkill: { rewrite: { charlotte: true } },
 		ai: {
 			fireAttack: true,
 			order: 4,
@@ -13284,7 +13273,7 @@ const skills = {
 					if (target.hasJudge("lebu")) return 0;
 					var nh = target.countCards("h");
 					var np = player.countCards("h");
-					if (player.hp == player.maxHp || player.storage.rerende < 0 || player.countCards("h") <= 1) {
+					if (player.hp == player.maxHp || player.countCards("h") <= 1) {
 						if (nh >= np - 1 && np <= player.hp && !target.hasSkill("haoshi")) return 0;
 					}
 					return Math.max(1, 5 - nh);
