@@ -5756,7 +5756,7 @@ const skills = {
 			return player.getExpansions("twshenyi").some(card => player.hasValueTarget(card));
 		},
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player;
 			var result = yield player
 				.chooseBool()

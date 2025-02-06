@@ -3177,7 +3177,7 @@ const skills = {
 			return target ? lib.skill.dcweiwan.getWeiWanEffect(player, card, target) : 0;
 		},
 		usable: 1,
-		content: function* (event, map) {
+		*content(event, map) {
 			let player = map.player,
 				target = event.target;
 			let suit = get.suit(event.cards[0], player);
@@ -3277,7 +3277,7 @@ const skills = {
 		},
 		logTarget: "player",
 		line: false,
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player,
 				trigger = map.trigger,
 				target = trigger.player;
@@ -3303,7 +3303,7 @@ const skills = {
 		audio: 2,
 		trigger: { player: "phaseZhunbeiBegin" },
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player;
 			let result;
 			result = yield player.chooseTarget(get.prompt2("dcdingji")).set("ai", target => {
@@ -3412,7 +3412,7 @@ const skills = {
 		position: "he",
 		complexCard: true,
 		onremove: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player;
 			let cards = [];
 			const bannedTypes = [];
@@ -3505,7 +3505,7 @@ const skills = {
 			});
 		},
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player;
 			const choices = [];
 			const choiceList = ["令一名角色将手牌数摸或弃置至与其体力值相同", "令一名角色将体力回复或失去至与其手牌数相同"];
@@ -3607,7 +3607,7 @@ const skills = {
 			return event.name != "phase" || game.phaseNumber == 0;
 		},
 		group: "dcjiaowei_prevent",
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player;
 			var cards = player.getCards("h");
 			player.addGaintag(cards, "dcjiaowei_tag");
@@ -3631,7 +3631,7 @@ const skills = {
 					if (!event.source || !event.source.isIn()) return false;
 					return event.source.countCards("h") <= player.countCards("h", card => card.hasGaintag("dcjiaowei_tag"));
 				},
-				content: function* (event, map) {
+				*content(event, map) {
 					map.trigger.cancel();
 				},
 				ai: {
@@ -3681,7 +3681,7 @@ const skills = {
 				})
 			);
 		},
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player,
 				trigger = map.trigger;
 			const history = player.getHistory("useCard");
@@ -3731,7 +3731,7 @@ const skills = {
 			const num = Math.pow(2, player.countMark("dccaisi_more"));
 			return `从${player == _status.currentPhase ? "" : "弃"}牌堆中随机获得${get.cnNumber(num)}张非基本牌`;
 		},
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player,
 				trigger = map.trigger;
 			const position = player == _status.currentPhase ? "cardPile2" : "discardPile";
@@ -3763,7 +3763,7 @@ const skills = {
 		filter(event, player) {
 			return player.getHistory("useCard").length > player.getHp() || player.getHistory("gain").reduce((sum, evt) => sum + evt.cards.length, 0) > player.getHp();
 		},
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player;
 			if (player.maxHp < game.countPlayer2()) {
 				yield player.gainMaxHp();
@@ -3794,7 +3794,7 @@ const skills = {
 			else str += `摸${get.cnNumber(-delt)}张牌`;
 			return `${str}，然后选择两名角色，前者视为对后者使用一张【杀】，且这两者的非锁定技失效。`;
 		},
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player;
 			if (player.countCards("h") < player.maxHp) yield player.drawTo(player.maxHp);
 			if (game.countPlayer() < 2) {
@@ -3946,7 +3946,7 @@ const skills = {
 					ai2(target) {
 						return get.attitude(get.player(), target);
 					},
-					precontent: function* (event, map) {
+					*precontent(event, map) {
 						var player = map.player,
 							target = event.result.targets[0];
 						player.logSkill("dcshizong", target);

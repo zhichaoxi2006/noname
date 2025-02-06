@@ -6097,7 +6097,7 @@ const skills = {
 			return player.countCards("he") && player.maxHp > 0;
 		},
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				num = player.maxHp;
 			var result = yield player
@@ -6218,7 +6218,7 @@ const skills = {
 			return player.getExpansions("dclingxi").length >= num;
 		},
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				cards = player.getExpansions("dclingxi");
 			var num = player.getHistory("useSkill", evt => evt.skill == "dczhifou").length + 1;
@@ -6594,7 +6594,7 @@ const skills = {
 			);
 		},
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				trigger = map.trigger;
 			var storage = player.storage.dcsbmengmou;
@@ -6773,7 +6773,7 @@ const skills = {
 			return player.countDiscardableCards(player, "he");
 		},
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player;
 			var result = yield player.chooseTarget(get.prompt2("dc_zj_b"), lib.filter.notMe).set("ai", target => {
 				var player = _status.event.player;
@@ -6817,7 +6817,7 @@ const skills = {
 		filter(event, player) {
 			return player.canMoveCard();
 		},
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player;
 			event.pushHandler("onNextMoveCard", (event, option) => {
 				if (_status.connectMode && event.step == 1 && event._result.bool && option.state == "end") {
@@ -6868,7 +6868,7 @@ const skills = {
 			return game.hasPlayer(current => current.countCards("e") > 0);
 		},
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player;
 			let result = yield player
 				.chooseTarget(get.prompt("dcnuanhui"), "选择一名装备区有牌的角色，该角色可以依次使用X张基本牌（X为其装备区牌数且至少为1）", (card, player, target) => {
@@ -6992,7 +6992,7 @@ const skills = {
 		audio: 2,
 		trigger: { player: "phaseZhunbeiBegin" },
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player;
 			if (_status.connectMode)
 				game.broadcastAll(() => {
@@ -7118,7 +7118,7 @@ const skills = {
 			return Math.max(...[event.targets[0], player].map(source => get.effect(event.targets[0], sha, source, player))) > 0;
 		},
 		logTarget: "targets",
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player,
 				trigger = map.trigger,
 				target = trigger.targets[0];
@@ -7163,7 +7163,7 @@ const skills = {
 		},
 		frequent: true,
 		check: () => true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player;
 			var count = game.countPlayer(current => get.distance(player, current) <= 1);
 			var cards = game.cardsGotoOrdering(get.cards(count)).cards;
@@ -8526,7 +8526,7 @@ const skills = {
 			if (event.name == "die") return true;
 			return event.name != "phase" || game.phaseNumber == 0;
 		},
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player;
 			player.removeSkill("dctongye_buff");
 			player.addSkill("dctongye_buff");
