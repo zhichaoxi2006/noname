@@ -6534,6 +6534,7 @@ export class Player extends HTMLDivElement {
 				next._triggered = null;
 				next.notrigger = true;
 			} else if (argument == "unreal") next.unreal = true;
+			else if (argument == "nohujia") next.nohujia = true;
 			else if (get.itemtype(argument) == "nature" && argument != "stab") next.nature = argument;
 			else if (get.itemtype(argument) == "natures") {
 				const natures = argument.split(lib.natureSeparator).remove("stab");

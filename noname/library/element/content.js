@@ -8880,7 +8880,7 @@ export const Content = {
 		event.trigger("damageBegin4");
 		"step 4";
 		//moved changeHujia to changeHp
-		if (player.hujia > 0 && !player.hasSkillTag("nohujia")) {
+		if (player.hujia > 0 && !player.hasSkillTag("nohujia") && !event.nohujia) {
 			var damageAudioInfo = lib.natureAudio.hujia_damage[event.nature];
 			if (!damageAudioInfo || damageAudioInfo == "normal") {
 				damageAudioInfo = "effect/hujia_damage" + (num > 1 ? "2" : "") + ".mp3";
@@ -9094,7 +9094,7 @@ export const Content = {
 		//add to GlobalHistory
 		game.getGlobalHistory().changeHp.push(event);
 		//changeHujia moved here
-		if (num < 0 && player.hujia > 0 && event.getParent().name == "damage" && !player.hasSkillTag("nohujia")) {
+		if (num < 0 && player.hujia > 0 && event.getParent().name == "damage" && !player.hasSkillTag("nohujia") && !event.getParent().nohujia) {
 			event.hujia = Math.min(-num, player.hujia);
 			event.getParent().hujia = event.hujia;
 			event.num += event.hujia;
