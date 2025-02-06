@@ -13399,16 +13399,18 @@ const skills = {
 		audioname: ["gz_jun_liubei"],
 		audioname2: { shen_caopi: "rerende_shen_caopi" },
 		enable: "phaseUse",
+		filter(event, player) {
+			return player.countCards("h") && game.hasPlayer(current => get.info("rerende").filterTarget(null, player, current));
+		},
+		filterTarget(card, player, target) {
+			if (player == target) return false;
+			return !player.getStorage("rerende_targeted").includes(target);
+		},
 		filterCard: true,
 		selectCard: [1, Infinity],
 		discard: false,
 		lose: false,
 		delay: false,
-		filterTarget(card, player, target) {
-			if (player.storage.rerende2 && player.storage.rerende2.includes(target)) return false;
-			return player != target;
-		},
-		onremove: ["rerende", "rerende2"],
 		check(card) {
 			if (ui.selected.cards.length && ui.selected.cards[0].name == "du") return 0;
 			if (!ui.selected.cards.length && card.name == "du") return 20;
@@ -13427,77 +13429,27 @@ const skills = {
 			}
 			return 10 - get.value(card);
 		},
-		content() {
-			"step 0";
-			var evt = _status.event.getParent("phaseUse");
-			if (evt && evt.name == "phaseUse" && !evt.rerende) {
-				var next = game.createEvent("rerende_clear");
-				_status.event.next.remove(next);
-				evt.after.push(next);
-				evt.rerende = true;
-				next.player = player;
-				next.setContent(lib.skill.rerende1.content);
-			}
-			if (!Array.isArray(player.storage.rerende2)) {
-				player.storage.rerende2 = [];
-			}
-			player.storage.rerende2.push(target);
-			player.give(cards, target);
-			"step 1";
-			if (typeof player.storage.rerende != "number") {
-				player.storage.rerende = 0;
-			}
-			if (player.storage.rerende >= 0) {
-				player.storage.rerende += cards.length;
-				if (player.storage.rerende >= 2) {
-					var list = get.inpileVCardList(info => {
-						return get.type(info[2]) == "basic" && player.hasUseTarget(new lib.element.VCard({ name: info[2], nature: info[3] }), null, true);
-					});
-					if (list.length) {
-						player.chooseButton(["是否视为使用一张基本牌？", [list, "vcard"]]).set("ai", function (button) {
-							var player = _status.event.player;
-							var card = {
-								name: button.link[2],
-								nature: button.link[3],
-								isCard: true,
-							};
-							if (card.name == "tao") {
-								if (player.hp == 1 || (player.hp == 2 && !player.hasShan()) || player.needsToDiscard()) {
-									return 5;
-								}
-								return 1;
-							}
-							if (card.name == "sha") {
-								if (
-									game.hasPlayer(function (current) {
-										return player.canUse(card, current) && get.effect(current, card, player, player) > 0;
-									})
-								) {
-									if (card.nature == "fire") return 2.95;
-									if (card.nature == "thunder" || card.nature == "ice") return 2.92;
-									return 2.9;
-								}
-								return 0;
-							}
-							if (card.name == "jiu") {
-								return 0.5;
-							}
-							return 0;
-						});
-					} else {
-						event.finish();
-					}
-					player.storage.rerende = -1;
-				} else {
-					event.finish();
-				}
-			} else {
-				event.finish();
-			}
-			"step 2";
-			if (result && result.bool && result.links[0]) {
-				var card = { name: result.links[0][2], nature: result.links[0][3] };
-				player.chooseUseTarget(card, true);
+		async content(event, trigger, player) {
+			const { target, cards, name } = event;
+			player.addTempSkill(name + "_targeted", "phaseUseAfter");
+			player.markAuto(name + "_targeted", [target]);
+			let num = 0;
+			player.getHistory("lose", evt => {
+				if (evt.getParent(2).name == name) num += evt.cards.length;
+			});
+			await player.give(cards, target);
+			const list = get.inpileVCardList(info => {
+				return get.type(info[2]) == "basic" && player.hasUseTarget(new lib.element.VCard({ name: info[2], nature: info[3] }), null, true);
+			});
+			if (num < 2 && num + cards.length > 1 && list.length) {
+				const links = await player
+					.chooseButton(["是否视为使用一张基本牌？", [list, "vcard"]])
+					.set("ai", button => {
+						return get.player().getUseValue({ name: button.link[2], nature: button.link[3], isCard: true });
+					})
+					.forResultLinks();
+				if (!links?.length) return;
+				await player.chooseUseTarget(get.autoViewAs({ name: links[0][2], nature: links[0][3], isCard: true }), true);
 			}
 		},
 		ai: {
@@ -13541,14 +13493,11 @@ const skills = {
 			},
 			threaten: 0.8,
 		},
-	},
-	rerende1: {
-		trigger: { player: "phaseUseBegin" },
-		silent: true,
-		sourceSkill: "rerende",
-		content() {
-			player.storage.rerende = 0;
-			player.storage.rerende2 = [];
+		subSkill: {
+			targeted: {
+				onremove: true,
+				charlotte: true,
+			},
 		},
 	},
 	liyu: {
