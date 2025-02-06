@@ -4429,7 +4429,7 @@ const skills = {
 		},
 		direct: true,
 		locked: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				trigger = map.trigger;
 			if (trigger.name != "phaseZhunbei") {
@@ -4651,7 +4651,7 @@ const skills = {
 		},
 		forced: true,
 		logTarget: "player",
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				trigger = map.trigger,
 				target = trigger.player;
@@ -4789,7 +4789,7 @@ const skills = {
 				return false;
 			});
 		},
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player;
 			map.trigger.cancel();
 			var num = player.countDiscardableCards(player, "he");
@@ -9465,127 +9465,121 @@ const skills = {
 	},
 	mbdaoshu: {
 		audio: 3,
-		group: "mbdaoshu_use",
-		subSkill: {
-			use: {
-				audio: "mbdaoshu1",
-				enable: "phaseUse",
-				filter(event, player) {
-					return game.hasPlayer(target => lib.skill.mbdaoshu_use.filterTarget(event, player, target));
-				},
-				filterTarget(card, player, target) {
-					if (!["guozhan", "identity"].includes(get.mode()) && target.isFriendOf(player)) return false;
-					return target != player && target.countCards("h") >= 2;
-				},
-				usable: 1,
-				prompt: () => lib.translate.mbdaoshu_info,
-				content: function* (event, map) {
-					var player = map.player,
-						target = event.target;
-					var targets = [player],
-						names = lib.inpile.randomGets(3);
-					if (!names.length) return;
-					var map = {};
-					names.forEach(name => (map[get.translation(name)] = name));
-					if (get.mode() != "identity" && get.mode() != "guozhan") targets.addArray(player.getFriends());
-					targets.remove(target);
-					targets.sortBySeat();
-					var result = yield target
-						.chooseButton(["盗书：请选择伪装的牌和牌名", target.getCards("h"), [Object.keys(map), "tdnodes"]], 2, true)
-						.set("filterButton", button => {
-							var map = _status.event.map;
-							if (!ui.selected.buttons.length) return true;
-							if (typeof button.link == typeof ui.selected.buttons[0].link) return false;
-							if (typeof button.link == "string") return get.name(ui.selected.buttons[0].link, false) != map[button.link];
-							return map[ui.selected.buttons[0].link] != get.name(button.link, false);
-						})
-						.set("ai", button => {
-							var map = _status.event.map;
-							if (!ui.selected.buttons.length) {
-								if (typeof button.link == "object") {
-									if (Object.values(map).some(name => lib.card.list.some(card => card[0] == get.suit(button.link, false) && card[1] == get.number(button.link, false) && card[2] == name))) return 5;
-									return 3.5 + Math.random();
-								}
-								return 0;
-							}
-							if (typeof button.link == "string") {
-								var cardx = ui.selected.buttons[0].link;
-								if (lib.card.list.some(card => card[0] == get.suit(cardx, false) && card[1] == get.number(cardx, false) && card[2] == map[button.link])) return 2 + Math.random();
-								return 1;
-							}
-							return 0;
-						})
-						.set("map", map);
-					if (result.bool) {
-						var guessWinner = [];
-						if (typeof result.links[0] == "string") result.links.reverse();
-						var OriginCard = result.links[0],
-							ChangeName = map[result.links[1]],
-							cards = target.getCards("h").slice();
-						var card = game.createCard(ChangeName, get.suit(OriginCard, false), get.number(OriginCard, false));
-						cards[cards.indexOf(OriginCard)] = card;
-						if (_status.connectMode) {
-							var list = targets.map(target2 => [target2, ["请猜测" + get.translation(target) + "伪装的手牌", cards], true]);
-							var result2 = yield player
-								.chooseButtonOL(list)
-								.set("switchToAuto", () => (_status.event.result = "ai"))
-								.set("processAI", () => {
-									var cards = _status.event.cards.slice();
-									var card = cards.find(card => lib.card.list.some(cardx => cardx[2] == card.name) && !lib.card.list.some(cardx => cardx[2] == card.name && cardx[0] == get.suit(card, false) && cardx[0] == get.number(card, false)));
-									return {
-										bool: true,
-										links: card ? card : cards.randomGet(),
-									};
-								})
-								.set("cards", cards);
-							for (var i in result2) {
-								if (result2[i].links[0] == card) guessWinner.push(lib.playerOL[i]);
-							}
-						} else {
-							var guessTargets = targets.slice();
-							while (guessTargets.length) {
-								var target2 = guessTargets.shift();
-								var result2 = yield target2
-									.chooseButton(["请猜测" + get.translation(target) + "伪装的手牌", cards], true)
-									.set("ai", button => {
-										var cards = _status.event.cards.slice();
-										var card = cards.find(card => lib.card.list.some(cardx => cardx[2] == get.name(card, false)) && !lib.card.list.some(cardx => cardx[2] == get.name(card, false) && cardx[0] == get.suit(card, false) && cardx[0] == get.number(card, false)));
-										return button.link == card ? 3 : 1 + Math.random();
-									})
-									.set("cards", cards);
-								if (result2.bool) {
-									if (result2.links[0] == card) guessWinner.push(target2);
-								}
-							}
+		enable: "phaseUse",
+		filter(event, player) {
+			return game.hasPlayer(target => lib.skill.mbdaoshu.filterTarget(event, player, target));
+		},
+		filterTarget(card, player, target) {
+			if (!["guozhan", "identity"].includes(get.mode()) && target.isFriendOf(player)) return false;
+			return target != player && target.countCards("h") >= 2;
+		},
+		usable: 1,
+		logAudio: () => 1,
+		*content(event, map) {
+			var player = map.player,
+				target = event.target;
+			var targets = [player],
+				names = lib.inpile.randomGets(3);
+			if (!names.length) return;
+			var map = {};
+			names.forEach(name => (map[get.translation(name)] = name));
+			if (get.mode() != "identity" && get.mode() != "guozhan") targets.addArray(player.getFriends());
+			targets.remove(target);
+			targets.sortBySeat();
+			var result = yield target
+				.chooseButton(["盗书：请选择伪装的牌和牌名", target.getCards("h"), [Object.keys(map), "tdnodes"]], 2, true)
+				.set("filterButton", button => {
+					var map = _status.event.map;
+					if (!ui.selected.buttons.length) return true;
+					if (typeof button.link == typeof ui.selected.buttons[0].link) return false;
+					if (typeof button.link == "string") return get.name(ui.selected.buttons[0].link, false) != map[button.link];
+					return map[ui.selected.buttons[0].link] != get.name(button.link, false);
+				})
+				.set("ai", button => {
+					var map = _status.event.map;
+					if (!ui.selected.buttons.length) {
+						if (typeof button.link == "object") {
+							if (Object.values(map).some(name => lib.card.list.some(card => card[0] == get.suit(button.link, false) && card[1] == get.number(button.link, false) && card[2] == name))) return 5;
+							return 3.5 + Math.random();
 						}
-						targets.forEach(target2 => {
-							if (guessWinner.includes(target2)) {
-								target2.popup("判断正确", "wood");
-								game.log(target2, "猜测", "#g正确");
-								game.broadcastAll(() => {
-									if (lib.config.background_speak) game.playAudio("skill", "mbdaoshu2");
-								});
-								target2.line(target);
-								target.damage(1, target2);
-							} else {
-								target2.popup("判断错误", "fire");
-								game.log(target2, "猜测", "#y错误");
-								game.broadcastAll(() => {
-									if (lib.config.background_speak) game.playAudio("skill", "mbdaoshu3");
-								});
-								if (target2.countCards("h") >= 2) target2.discard(target2.getCards("h").randomGets(2));
-								else target2.loseHp();
-							}
-						});
+						return 0;
 					}
-				},
-				ai: {
-					order: 9,
-					result: {
-						target(player, target) {
-							return -1 / target.countCards("h");
-						},
-					},
+					if (typeof button.link == "string") {
+						var cardx = ui.selected.buttons[0].link;
+						if (lib.card.list.some(card => card[0] == get.suit(cardx, false) && card[1] == get.number(cardx, false) && card[2] == map[button.link])) return 2 + Math.random();
+						return 1;
+					}
+					return 0;
+				})
+				.set("map", map);
+			if (result.bool) {
+				var guessWinner = [];
+				if (typeof result.links[0] == "string") result.links.reverse();
+				var OriginCard = result.links[0],
+					ChangeName = map[result.links[1]],
+					cards = target.getCards("h").slice();
+				var card = game.createCard(ChangeName, get.suit(OriginCard, false), get.number(OriginCard, false));
+				cards[cards.indexOf(OriginCard)] = card;
+				if (_status.connectMode) {
+					var list = targets.map(target2 => [target2, ["请猜测" + get.translation(target) + "伪装的手牌", cards], true]);
+					var result2 = yield player
+						.chooseButtonOL(list)
+						.set("switchToAuto", () => (_status.event.result = "ai"))
+						.set("processAI", () => {
+							var cards = _status.event.cards.slice();
+							var card = cards.find(card => lib.card.list.some(cardx => cardx[2] == card.name) && !lib.card.list.some(cardx => cardx[2] == card.name && cardx[0] == get.suit(card, false) && cardx[0] == get.number(card, false)));
+							return {
+								bool: true,
+								links: card ? card : cards.randomGet(),
+							};
+						})
+						.set("cards", cards);
+					for (var i in result2) {
+						if (result2[i].links[0] == card) guessWinner.push(lib.playerOL[i]);
+					}
+				} else {
+					var guessTargets = targets.slice();
+					while (guessTargets.length) {
+						var target2 = guessTargets.shift();
+						var result2 = yield target2
+							.chooseButton(["请猜测" + get.translation(target) + "伪装的手牌", cards], true)
+							.set("ai", button => {
+								var cards = _status.event.cards.slice();
+								var card = cards.find(card => lib.card.list.some(cardx => cardx[2] == get.name(card, false)) && !lib.card.list.some(cardx => cardx[2] == get.name(card, false) && cardx[0] == get.suit(card, false) && cardx[0] == get.number(card, false)));
+								return button.link == card ? 3 : 1 + Math.random();
+							})
+							.set("cards", cards);
+						if (result2.bool) {
+							if (result2.links[0] == card) guessWinner.push(target2);
+						}
+					}
+				}
+				targets.forEach(target2 => {
+					if (guessWinner.includes(target2)) {
+						target2.popup("判断正确", "wood");
+						game.log(target2, "猜测", "#g正确");
+						game.broadcastAll(() => {
+							if (lib.config.background_speak) game.playAudio("skill", "mbdaoshu2");
+						});
+						target2.line(target);
+						target.damage(1, target2);
+					} else {
+						target2.popup("判断错误", "fire");
+						game.log(target2, "猜测", "#y错误");
+						game.broadcastAll(() => {
+							if (lib.config.background_speak) game.playAudio("skill", "mbdaoshu3");
+						});
+						if (target2.countCards("h") >= 2) target2.discard(target2.getCards("h").randomGets(2));
+						else target2.loseHp();
+					}
+				});
+			}
+		},
+		ai: {
+			order: 9,
+			result: {
+				target(player, target) {
+					return -1 / target.countCards("h");
 				},
 			},
 		},

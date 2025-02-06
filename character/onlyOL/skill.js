@@ -4316,7 +4316,7 @@ const skills = {
 			return player.getHistory("gain", evt => evt.getParent(event.name) == event).length + player.getHistory("lose", evt => evt.getParent(event.name) == event && evt.hs.length).length;
 		},
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player;
 			var trigger = map.trigger;
 			var result = yield player
@@ -4413,7 +4413,7 @@ const skills = {
 		limited: true,
 		skillAnimation: true,
 		animationColor: "fire",
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player;
 			var trigger = map.trigger;
 			player.awakenSkill("olsbranji");
@@ -4501,7 +4501,7 @@ const skills = {
 		trigger: { player: "phaseDrawEnd" },
 		direct: true,
 		logAudio: index => (typeof index === "number" ? "rejiangchi" + index + ".mp3" : 2),
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player;
 			var choiceList = ["摸一张牌，本回合使用【杀】的次数上限-1，且【杀】不计入手牌上限。", "重铸一张牌，本回合使用【杀】无距离限制，且使用【杀】的次数上限+1。"],
 				list = ["cancel2"];

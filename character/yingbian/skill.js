@@ -24,7 +24,7 @@ const skills = {
 		},
 		popname: true,
 		ignoreMod: true,
-		precontent: function* (event, map) {
+		*precontent(event, map) {
 			var player = map.player;
 			var evt = event.getParent();
 			if (evt.dialog && typeof evt.dialog == "object") evt.dialog.close();
@@ -84,7 +84,7 @@ const skills = {
 			return target && target.isIn();
 		},
 		forced: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				trigger = map.trigger;
 			if (!trigger.card || !trigger.cards || !trigger.cards.length) {
@@ -119,7 +119,7 @@ const skills = {
 				trigger: { global: "phaseEnd" },
 				forced: true,
 				popup: false,
-				content: function* (event, map) {
+				*content(event, map) {
 					var player = map.player;
 					var mapx = {};
 					var history = player.getHistory("damage").concat(player.getHistory("sourceDamage"));

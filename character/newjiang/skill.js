@@ -4490,7 +4490,7 @@ const skills = {
 			targets.remove(event.player);
 			return targets.length == game.countPlayer() - 2;
 		},
-		content: function* () {},
+		*content() {},
 		mod: {
 			targetEnabled(card) {
 				if (get.type2(card) == "trick" && get.tag(card, "damage") > 0) return false;

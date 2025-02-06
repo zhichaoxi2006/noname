@@ -6065,7 +6065,7 @@ const skills = {
 		enable: "phaseUse",
 		filterTarget: lib.filter.notMe,
 		usable: 1,
-		content: function* (event, map) {
+		*content(event, map) {
 			const player = map.player,
 				target = event.target;
 			const choiceList = ["重铸一张牌", "使用一张【杀】", "弃置两张牌"],
@@ -6177,7 +6177,7 @@ const skills = {
 				},
 				forced: true,
 				locked: false,
-				content: function* (event, map) {
+				*content(event, map) {
 					let num = 0,
 						player = map.player;
 					if (player.getHistory("lose", evt => evt.getParent(2).name == "recast").length) num++;
@@ -6982,7 +6982,7 @@ const skills = {
 			}
 			return event.target.getHp() <= 2 || player.getDamagedHp() > 1 || !player.hasCard({ color: "black" }, "hes");
 		},
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				trigger = map.trigger,
 				result = map.result;

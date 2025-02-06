@@ -1662,7 +1662,7 @@ const skills = {
 			return player.getHp() > 0;
 		},
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player;
 			var str = get.cnNumber(player.getHp());
 			var choiceList = ["令至多" + str + "名体力值大于等于你的角色各失去1点体力", "令至多" + str + "名手牌数大于等于你的角色各弃置一张手牌"],
@@ -1779,7 +1779,7 @@ const skills = {
 		},
 		direct: true,
 		zhuSkill: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				target = map.trigger.player;
 			var result = yield target.chooseBool(get.prompt("starhaoshou", player), "令" + get.translation(player) + "回复1点体力").set("choice", get.recoverEffect(player, target, target) > 0);

@@ -462,7 +462,7 @@ const skills = {
 					return player.getHistory("sourceDamage").indexOf(event) == 0 && player.getStorage("remingjian_buff").some(i => i.isIn());
 				},
 				direct: true,
-				content: function* (event, map) {
+				*content(event, map) {
 					const player = map.player;
 					const masters = player
 						.getStorage("remingjian_buff")

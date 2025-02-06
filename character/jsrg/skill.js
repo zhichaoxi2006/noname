@@ -4292,7 +4292,7 @@ const skills = {
 			return event.isFirstTarget && event.targets.length == 1 && event.target.isIn();
 		},
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				trigger = map.trigger,
 				target = trigger.target;
@@ -4550,7 +4550,7 @@ const skills = {
 		group: ["jsrgfuni_unlimit", "jsrgfuni_zero"],
 		forced: true,
 		direct: true,
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				trigger = map.trigger;
 			var count = Math.ceil(game.countPlayer() / 2);
@@ -5712,7 +5712,7 @@ const skills = {
 				check(card) {
 					return 6 - get.value(card);
 				},
-				precontent: function* (event, map) {
+				*precontent(event, map) {
 					var player = map.player;
 					var targets = game.filterPlayer(current => current.hasSkill("jsrghuozhong"));
 					var result;
@@ -5888,7 +5888,7 @@ const skills = {
 		filter(event, player) {
 			return game.hasPlayer(i => i != player);
 		},
-		content: function* (event, map) {
+		*content(event, map) {
 			var player = map.player,
 				trigger = map.trigger,
 				targets = game.filterPlayer(i => i != player);
