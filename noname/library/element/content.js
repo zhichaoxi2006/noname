@@ -9260,6 +9260,7 @@ export const Content = {
 		"step 1";
 		if (player.dieAfter) player.dieAfter(source);
 		"step 2";
+		game.callHook("checkDie", [event, player]);
 		event.trigger("die");
 		"step 3";
 		if (player.isDead()) {
