@@ -3472,6 +3472,7 @@ export class Player extends HTMLDivElement {
 			this.maxHp,
 			this.hujia
 		);
+		game.callHook("checkUpdate", [this]);
 		this.$update(...arguments);
 	}
 	$update() {
