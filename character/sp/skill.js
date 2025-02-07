@@ -557,11 +557,10 @@ const skills = {
 		forced: true,
 		logTarget: "player",
 		async content(event, trigger, player) {
-			const { result } = await trigger.player.chooseToGive(player, true, "h");
-			if (result?.bool && result.cards?.length) {
-				player.addTempSkill("olzhaohuo_tag");
-				player.addGaintag(result.cards, "olzhaohuo_tag");
-			}
+			player.addTempSkill("olzhaohuo_tag");
+			const next = trigger.player.chooseToGive(player, true, "h");
+			next.gaintag.add("olzhaohuo_tag");
+			await next;
 		},
 		subSkill: {
 			tag: {
@@ -591,12 +590,8 @@ const skills = {
 		selectTarget: [1, Infinity],
 		async content(event, trigger, player) {
 			const { target } = event;
-			if (target.countCards("h") == 0) {
-				await target.draw();
-			}
-			if (target.countCards("h") <= player.countCards("h")) {
-				await target.draw();
-			}
+			if (!target.countCards("h")) await target.draw();
+			if (target.countCards("h") <= player.countCards("h")) await target.draw();
 		},
 		ai: {
 			order: 10,

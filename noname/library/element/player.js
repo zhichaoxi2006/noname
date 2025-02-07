@@ -4770,6 +4770,7 @@ export class Player extends HTMLDivElement {
 		if (next.ai == undefined) next.ai = get.unuseful;
 		next.setContent("chooseToGive");
 		next._args = args;
+		next.gaintag = [];
 		return next;
 	}
 	chooseToDiscard() {
@@ -5458,6 +5459,7 @@ export class Player extends HTMLDivElement {
 		if (next.complexSelect !== false) next.complexSelect = true;
 		next.setContent("gainPlayerCard");
 		next._args = Array.from(arguments);
+		next.gaintag = [];
 		return next;
 	}
 	/**
@@ -5870,6 +5872,7 @@ export class Player extends HTMLDivElement {
 			next.drawDeck = 1;
 		}
 		next.result = [];
+		next.gaintag = [];
 		return next;
 	}
 	randomDiscard() {
@@ -9012,13 +9015,14 @@ export class Player extends HTMLDivElement {
 	 * 快速获取一名角色当前轮次/倒数第X轮次的历史
 	 *	@template {Exclude< keyof ActionHistory, 'isRound'|'isMe'>} T
 	 * @param {T} key
-	 * @param {(event:GameEventPromise)=>boolean} filter 筛选条件
+	 * @param {(event:GameEventPromise)=>boolean} filter 筛选条件，不填写默认为lib.filter.all
 	 * @param {number} [num] 获取倒数第num轮的历史，默认为0，表示当前轮
 	 * @param {boolean} [keep] 若为true,则获取倒数第num轮到现在的所有历史
 	 * @param {GameEventPromise} last 代表最后一个事件，获取该事件之前的历史
 	 */
-	getRoundHistory(key, filter, num, keep, last) {
+	getRoundHistory(key, filter = lib.filter.all, num, keep, last) {
 		if (!num) num = 0;
+		if (!filter || typeof filter != "function") filter = lib.filter.all;
 		const player = this;
 		let evts = [],
 			history = player.actionHistory;

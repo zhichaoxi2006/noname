@@ -1,4 +1,5 @@
 const characters = {
+	zhanghuai: ["female", "wu", 3, ["dclaoyan", "dcjueyan"], ["name:张|null"]],
 	xuxin: ["female", "wu", 3, ["dcyuxian", "dcminshan"]],
 	v_lvbu: ["male", "qun", 5, ["dcxiaowu", "dcbaguan"]],
 	wu_lukang: ["male", "wu", 4, ["dckegou", "dcjiduan", "dcdixian"]],
