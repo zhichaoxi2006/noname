@@ -1,5 +1,3 @@
-const characterReplaces = {
-	wuban: ["clan_wuban", "dc_wuban", "wuban", "xin_wuban", "ty_wuban"],
-};
+const characterReplaces = {};
 
 export default characterReplaces;
