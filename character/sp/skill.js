@@ -516,21 +516,52 @@ const skills = {
 		},
 	},
 	//OL陶谦
-	olzhaohuo: {
-		trigger: {
-			global: "damageEnd",
-		},
-		forced: true,
+	olzongluan: {
+		audio: 2,
+		trigger: { player: "phaseZhunbeiBegin" },
 		filter(event, player) {
-			if (event.player == player || player != _status.currentPhase || !event.player.isIn()) return false;
-			return event.player.getHistory("damage").length == 1;
+			return game.hasPlayer(t => t.hasUseTarget(new lib.element.VCard({ name: "sha", isCard: true })));
+		},
+		async cost(event, trigger, player) {
+			event.result = await player
+				.chooseTarget(get.prompt2("olzongluan"), (card, player, target) => {
+					return target.hasUseTarget(new lib.element.VCard({ name: "sha", isCard: true }));
+				})
+				.set("ai", target => {
+					const player = get.player(),
+						card = new lib.element.VCard({ name: "sha", isCard: true });
+					let targets = game.filterPlayer(current => {
+						if (!target.canUse(card, current)) return false;
+						return get.effect(current, card, target, player) > 0;
+					});
+					if (targets.some(current => get.effect(current, card, target, target) > 0)) {
+						targets = targets.filter(current => get.effect(current, card, target, target) > 0);
+					} else targets = [targets.sort((a, b) => get.effect(b, card, target, target) - get.effect(a, card, target, target))[0]];
+					return targets.reduce((sum, current) => sum + get.effect(current, card, target, player), 0);
+				})
+				.forResult();
 		},
 		async content(event, trigger, player) {
-			const { result } = await trigger.player.chooseToGive(player, true);
-			for (const i of result.cards) {
-				i.addGaintag("olzhaohuo_tag");
+			await event.targets[0].chooseUseTarget(new lib.element.VCard({ name: "sha", isCard: true }), true, false).set("selectTarget", [1, Infinity]);
+			const num = game.countPlayer(c => c.hasHistory("damage", evt => evt.getParent(4).name == "olzongluan"));
+			if (num > 0) await player.chooseToDiscard(num, true, "he");
+		},
+	},
+	olzhaohuo: {
+		audio: 2,
+		trigger: { global: "damageEnd" },
+		filter(event, player) {
+			if (event.player == player || player != _status.currentPhase || !event.player.isIn()) return false;
+			return event.player.getHistory("damage").indexOf(event) === 0 && event.player.countCards("h");
+		},
+		forced: true,
+		logTarget: "player",
+		async content(event, trigger, player) {
+			const { result } = await trigger.player.chooseToGive(player, true, "h");
+			if (result?.bool && result.cards?.length) {
+				player.addTempSkill("olzhaohuo_tag");
+				player.addGaintag(result.cards, "olzhaohuo_tag");
 			}
-			player.addTempSkill("olzhaohuo_tag");
 		},
 		subSkill: {
 			tag: {
@@ -539,41 +570,21 @@ const skills = {
 					player.removeGaintag(skill);
 				},
 				mod: {
-					cardEnabled(card, player, result) {
-						if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
-							if (card.cards.some(c => c.hasGaintag("olzhaohuo_tag"))) return false;
-						}
-						if (get.itemtype(card) == "card") {
-							if (card.hasGaintag("olzhaohuo_tag")) return false;
-						}
+					cardEnabled2(card) {
+						if ([card].concat(card.cards || []).some(c => get.itemtype(c) === "card" && c.hasGaintag("olzhaohuo_tag"))) return false;
 					},
-					cardRespondable(card, player, result) {
-						if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
-							if (card.cards.some(c => c.hasGaintag("olzhaohuo_tag"))) return false;
-						}
-						if (get.itemtype(card) == "card") {
-							if (card.hasGaintag("olzhaohuo_tag")) return false;
-						}
-					},
-					cardSavable(card, player, target, result) {
-						if (get.itemtype(card) == "vcard" && Array.isArray(card.cards)) {
-							if (card.cards.some(c => c.hasGaintag("olzhaohuo_tag"))) return false;
-						}
-						if (get.itemtype(card) == "card") {
-							if (card.hasGaintag("olzhaohuo_tag")) return false;
-						}
-					},
-					cardDiscardable(card, player, result) {
-						if (card.hasGaintag("olzhaohuo_tag")) return false;
-					},
-					ignoredHandcard(card, player, current) {
+					ignoredHandcard(card) {
 						if (card.hasGaintag("olzhaohuo_tag")) return true;
+					},
+					cardDiscardable(card, player, name) {
+						if (name === "phaseDiscard" && card.hasGaintag("olzhaohuo_tag")) return false;
 					},
 				},
 			},
 		},
 	},
 	olwenren: {
+		audio: 2,
 		enable: "phaseUse",
 		usable: 1,
 		filterTarget: true,
@@ -587,55 +598,9 @@ const skills = {
 				await target.draw();
 			}
 		},
-	},
-	olzongluan: {
-		trigger: {
-			player: "phaseZhunbeiBegin",
-		},
-		async cost(event, trigger, player) {
-			const { result } = await player.chooseTarget("令一名角色视为对其攻击范围内的任意名角色各使用一张【杀】");
-			event.result = result;
-		},
-		async content(event, trigger, player) {
-			const { targets } = event;
-			const targetx = targets[0];
-			const list = [];
-			while (true) {
-				const vcard = new lib.element.VCard({ name: "sha", isCard: true });
-				let bool = game.players.every(i => {
-					if (list.includes(i)) return true;
-					const vcard = new lib.element.VCard({ name: "sha", isCard: true });
-					return !lib.filter.filterTarget(vcard, targetx, i);
-				});
-				if (!bool) {
-					const {
-						result: { bool: boolx, targets },
-					} = await targetx
-						.chooseTarget("选择一名角色，视为对其使用一张【杀】")
-						.set("targetxs", list)
-						.set("ai", function (target) {
-							return get.effect(target, vcard, targetx);
-						})
-						.set("filterTarget", function (card, player, target) {
-							const targetxs = get.event("targetxs");
-							if (targetxs.includes(target)) return false;
-							const vcard = new lib.element.VCard({ name: "sha", isCard: true });
-							return lib.filter.filterTarget(vcard, player, target);
-						});
-					if (boolx) {
-						await targetx.useCard(vcard, targets);
-						list.addArray(targets);
-					} else {
-						break;
-					}
-				} else {
-					break;
-				}
-			}
-			const num = game.countPlayer(c => c.getHistory("damage", evt => evt.getParent(3).name == "olzongluan").length > 0);
-			if (num > 0) {
-				await player.chooseToDiscard(num, true);
-			}
+		ai: {
+			order: 10,
+			result: { target: 1 },
 		},
 	},
 	//OL薛灵芸
