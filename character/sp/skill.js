@@ -3514,7 +3514,7 @@ const skills = {
 						if (!result.bool) return;
 						cards = result.moved[0];
 					}
-					await game.cardsGotoPile(cards, "insert");
+					await player.lose(cards, ui.cardPile, false, "blank", "insert").set("log", false);
 				},
 			},
 		},
