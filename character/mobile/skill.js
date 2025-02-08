@@ -9509,39 +9509,21 @@ const skills = {
 					cards = target.getCards("h").slice();
 				var card = game.createCard(ChangeName, get.suit(OriginCard, false), get.number(OriginCard, false));
 				cards[cards.indexOf(OriginCard)] = card;
-				if (_status.connectMode) {
-					var list = targets.map(target2 => [target2, ["请猜测" + get.translation(target) + "伪装的手牌", cards], true]);
-					var result2 = yield player
-						.chooseButtonOL(list)
-						.set("switchToAuto", () => (_status.event.result = "ai"))
-						.set("processAI", () => {
-							var cards = _status.event?.getParent()?.cards?.slice() ?? _status.event.dialog.buttons.map(button => button.link);
-							var card = cards.find(card => lib.card.list.some(cardx => cardx[2] == card.name) && !lib.card.list.some(cardx => cardx[2] == card.name && cardx[0] == get.suit(card, false) && cardx[0] == get.number(card, false)));
-							return {
-								bool: true,
-								links: card ? card : cards.randomGet(),
-							};
-						})
-						.set("cards", cards);
-					for (var i in result2) {
-						if (result2[i].links[0] == card) guessWinner.push(lib.playerOL[i]);
-					}
-				} else {
-					var guessTargets = targets.slice();
-					while (guessTargets.length) {
-						var target2 = guessTargets.shift();
-						var result2 = yield target2
-							.chooseButton(["请猜测" + get.translation(target) + "伪装的手牌", cards], true)
-							.set("ai", button => {
-								var cards = _status.event.cards.slice();
-								var card = cards.find(card => lib.card.list.some(cardx => cardx[2] == get.name(card, false)) && !lib.card.list.some(cardx => cardx[2] == get.name(card, false) && cardx[0] == get.suit(card, false) && cardx[0] == get.number(card, false)));
-								return button.link == card ? 3 : 1 + Math.random();
-							})
-							.set("cards", cards);
-						if (result2.bool) {
-							if (result2.links[0] == card) guessWinner.push(target2);
-						}
-					}
+				var list = targets.map(target2 => [target2, ["请猜测" + get.translation(target) + "伪装的手牌", cards], true]);
+				var result2 = yield player
+					.chooseButtonOL(list)
+					.set("switchToAuto", () => (_status.event.result = "ai"))
+					.set("processAI", () => {
+						var cards = _status.event.getParent().cards ?? _status.event.dialog.buttons.map(button => button.link);
+						var card = cards.find(card => lib.card.list.some(cardx => cardx[2] == card.name) && !lib.card.list.some(cardx => cardx[2] == card.name && cardx[0] == get.suit(card, false) && cardx[0] == get.number(card, false)));
+						return {
+							bool: true,
+							links: card ? card : cards.randomGet(),
+						};
+					})
+					.set("cards", cards);
+				for (var i in result2) {
+					if (result2[i].links?.[0] == card) guessWinner.push((_status.connectMode ? lib.playerOL : game.playerMap)[i]);
 				}
 				targets.forEach(target2 => {
 					if (guessWinner.includes(target2)) {
@@ -9558,7 +9540,7 @@ const skills = {
 						game.broadcastAll(() => {
 							if (lib.config.background_speak) game.playAudio("skill", "mbdaoshu3");
 						});
-						if (target2.countCards("h") >= 2) target2.discard(target2.getCards("h").randomGets(2));
+						if (target2.countDiscardableCards(target, "h") >= 2) target2.discard(target2.getDiscardableCards(target, "h").randomGets(2));
 						else target2.loseHp();
 					}
 				});
@@ -9573,7 +9555,6 @@ const skills = {
 			},
 		},
 	},
-	mbdaoshu1: { audio: true },
 	spdaizui: {
 		audio: 2,
 		trigger: { player: "damageBegin2" },
