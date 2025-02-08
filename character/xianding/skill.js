@@ -51,7 +51,8 @@ const skills = {
 		audio: 2,
 		trigger: { player: "useCardAfter" },
 		filter(event, player) {
-			if (!event.targets || event.targets.length !== 1 || !event.targets[0].isIn()) return false;
+			if (!event.targets || event.targets.length !== 1) return false;
+			if (event.targets[0] === player || !event.targets[0].isIn()) return false;
 			return player.storage.dcjueyan[3] || player.canCompare(event.targets[0]);
 		},
 		logTarget: event => event.targets[0],
@@ -67,12 +68,15 @@ const skills = {
 			const goon = storage[3] || (await player.chooseToCompare(target).forResult("bool"));
 			if (!goon) return;
 			let list = ["造成伤害", "回复体力", "获得手牌"],
-				choices = [list[0]];
+				choices = list.slice();///[list[0]];
 			let choiceList = ["依次对你与" + get.translation(target) + "各造成" + storage[0] + "点伤害", "回复" + storage[1] + "点体力", "获得" + get.translation(target) + get.cnNumber(storage[2]) + "张手牌"];
+			/*
+			因为可以叠数值所以不能执行的也能选（?）
 			if (player.isDamaged()) choices.add("回复体力");
 			else choiceList[1] = '<span style="opacity:0.5">' + choiceList[1] + "（无法选择）</span>";
 			if (target.countCards("h")) choices.add("获得手牌");
 			else choiceList[2] = '<span style="opacity:0.5">' + choiceList[2] + "（无法选择）</span>";
+			*/
 			const choice =
 				choices.length > 1
 					? await player

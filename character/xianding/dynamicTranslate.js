@@ -125,9 +125,13 @@ const dynamicTranslates = {
 		let str = lib.translate[skill + "_info"];
 		if (!storage) return str;
 		let regex = /\[\d+\]/g;
+		let index = 0;
 		let result = str.replace(regex, (match, offset, string) => {
-			const index = (string.match(regex) || []).indexOf(match);
-			if (index < storage.length - 1) return `[${storage[index]}]`;
+			if (index < storage.length - 1) {
+				const resultx = `[${storage[index]}]`;
+				index++;
+				return resultx;
+			}
 			return match;
 		});
 		if (storage[3]) {
