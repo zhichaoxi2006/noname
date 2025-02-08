@@ -11598,26 +11598,9 @@ const skills = {
 				.sortBySeat();
 			event.targets2 = event.targets.slice(0);
 			player.lose(card, ui.ordering).relatedEvent = trigger;
-			if (!event.targets.length) event.goto(5);
-			else if (_status.connectMode) event.goto(3);
+			if (!event.targets.length) event.goto(3);
 			event.betrays = [];
 			"step 1";
-			event.target = targets.shift();
-			event.target.chooseButton([event.prompt, [["reguhuo_ally", "reguhuo_betray"], "vcard"]], true, function (button) {
-				var player = _status.event.player;
-				var evt = _status.event.getParent("reguhuo_guess");
-				if (!evt) return Math.random();
-				var ally = button.link[2] == "reguhuo_ally";
-				if (ally && (player.hp <= 1 || get.attitude(player, evt.player) >= 0)) return 1.1;
-				return Math.random();
-			});
-			"step 2";
-			if (result.links[0][2] == "reguhuo_betray") {
-				event.betrays.push(target);
-				target.addExpose(0.2);
-			}
-			event.goto(targets.length ? 1 : 5);
-			"step 3";
 			var list = event.targets.map(function (target) {
 				return [target, [event.prompt, [["reguhuo_ally", "reguhuo_betray"], "vcard"]], true];
 			});
@@ -11636,21 +11619,22 @@ const skills = {
 						links: [["", "", choice]],
 					};
 				});
-			"step 4";
+			"step 2";
 			for (var i in result) {
 				if (result[i].links[0][2] == "reguhuo_betray") {
-					event.betrays.push(lib.playerOL[i]);
-					lib.playerOL[i].addExpose(0.2);
+					var current = (_status.connectMode ? lib.playerOL : game.playerMap)[i];
+					event.betrays.push(current);
+					current.addExpose(0.2);
 				}
 			}
-			"step 5";
+			"step 3";
 			for (var i of event.targets2) {
 				var b = event.betrays.includes(i);
 				i.popup(b ? "质疑" : "不质疑", b ? "fire" : "wood");
 				game.log(i, b ? "#y质疑" : "#g不质疑");
 			}
 			game.delay();
-			"step 6";
+			"step 4";
 			player.showCards(trigger.cards);
 			if (event.betrays.length) {
 				event.betrays.sortBySeat();
@@ -11668,7 +11652,7 @@ const skills = {
 					event.finish();
 				}
 			} else event.finish();
-			"step 7";
+			"step 5";
 			game.delayx();
 		},
 		contentx() {
