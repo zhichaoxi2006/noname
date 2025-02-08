@@ -2078,6 +2078,7 @@ export class Player extends HTMLDivElement {
 	 * @param { 'main' | 'vice' | boolean } checkShow
 	 */
 	trySkillAnimate(name, popname, checkShow) {
+		game.callHook("checkSkillAnimate", [this, name, popname]);
 		if (!game.online && lib.config.skill_animation_type != "off" && lib.skill[name] && lib.skill[name].skillAnimation) {
 			if (lib.config.skill_animation_type == "default") {
 				checkShow = checkShow || "main";
@@ -3472,6 +3473,7 @@ export class Player extends HTMLDivElement {
 			this.maxHp,
 			this.hujia
 		);
+		game.callHook("checkUpdate", [this]);
 		this.$update(...arguments);
 	}
 	$update() {
