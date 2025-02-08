@@ -253,6 +253,11 @@ export const checkDie = {};
  */
 export const checkUpdate = {};
 
+/**
+ * @type {(NonameAssemblyType["checkSkillAnimate"])}
+ */
+export const checkSkillAnimate = {};
+
 export const addSkillCheck = {};
 
 export const removeSkillCheck = {

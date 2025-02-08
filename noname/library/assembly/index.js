@@ -200,6 +200,8 @@ export const defaultHookcompatition = {
 
 	checkUpdate: new NonameAssembly("checkUpdate"),
 
+	checkSkillAnimate: new NonameAssembly("checkSkillAnimate"),
+
 	addSkillCheck: new NonameAssembly("addSkillCheck"),
 	removeSkillCheck: new NonameAssembly("removeSkillCheck"),
 };
