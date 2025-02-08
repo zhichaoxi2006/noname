@@ -4747,6 +4747,7 @@ export const Content = {
 		"step 4";
 		if (event.boolline) player.line(target, "green");
 		event.done = target.gain(event.cards, player);
+		event.done.gaintag.addArray(event.gaintag);
 		event.done.giver = player;
 		if (event.delay !== false) event.done.animate = event.visibleMove ? "give" : "giveAuto";
 		else {
@@ -6898,9 +6899,11 @@ export const Content = {
 		if (!event.chooseonly) {
 			if (event.delay !== false) {
 				var next = player.gain(event.cards, target, event.visibleMove ? "give" : "giveAuto", "bySelf");
+				next.gaintag.addArray(event.gaintag);
 				event.done = next;
 			} else {
 				var next = player.gain(event.cards, target, "bySelf");
+				next.gaintag.addArray(event.gaintag);
 				event.done = next;
 				target[event.visibleMove ? "$give" : "$giveAuto"](cards, player);
 				if (event.visibleMove) next.visible = true;
@@ -8027,7 +8030,7 @@ export const Content = {
 				player.$draw(cards.length);
 			}
 		}
-		if (event.gaintag) next.gaintag.addArray(event.gaintag);
+		next.gaintag.addArray(event.gaintag);
 		event.result = cards;
 	},
 	discard: function () {
