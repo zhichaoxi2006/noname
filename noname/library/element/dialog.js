@@ -3,6 +3,7 @@ import { lib } from "../index.js";
 import { _status } from "../../status/index.js";
 import { ui } from "../../ui/index.js";
 import { game } from "../../../noname.js";
+import { Pagination } from "../../util/pagination.js";
 
 export class Dialog extends HTMLDivElement {
 	/** @type { HTMLDivElement } */
@@ -86,6 +87,18 @@ export class Dialog extends HTMLDivElement {
 		// @ts-ignore
 		dialog._args = args;
 		return dialog;
+	}
+	/**
+	 *
+	 * @param { object } map
+	 */
+	addPagination(map = {}) {
+		/** @type { HTMLDivElement } */
+		// 传入初始配置
+		const p = new Pagination(map);
+		this.paginationMap.set(map.insertAfter, p);
+		// 渲染元素
+		p.renderPageDOM();
 	}
 	/**
 	 *

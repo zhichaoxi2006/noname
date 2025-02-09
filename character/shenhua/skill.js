@@ -807,7 +807,7 @@ const skills = {
 		},
 	},
 	drlt_zhenggu_mark: {
-		charlotte:true,
+		charlotte: true,
 		init(player, skill) {
 			if (!player.storage[skill]) player.storage[skill] = [];
 		},
@@ -4182,9 +4182,7 @@ const skills = {
 		unique: true,
 		init(player) {
 			if (!player.storage.huashen) {
-				player.storage.huashen = {
-					owned: {},
-				};
+				player.storage.huashen = { owned: {} };
 			}
 		},
 		intro: {
@@ -4250,6 +4248,9 @@ const skills = {
 				} else {
 					return "没有化身";
 				}
+			},
+			markcount(storage = {}) {
+				return Object.keys(storage.owned).length;
 			},
 		},
 		addHuashen(player) {
@@ -4349,6 +4350,34 @@ const skills = {
 				for (let i = 0; i < event.dialog.buttons.length; i++) {
 					event.dialog.buttons[i].classList.add("pointerdiv");
 					event.dialog.buttons[i].classList.add("selectable");
+				}
+				const buttons = dialog.content.querySelector(".buttons");
+				const array = dialog.buttons.filter(item => !item.classList.contains("nodisplay") && item.style.display !== "none");
+				const groups = array
+					.map(i => get.character(i.link).group)
+					.unique()
+					.sort((a, b) => {
+						const getNum = g => (lib.group.includes(g) ? lib.group.indexOf(g) : lib.group.length);
+						return getNum(a) - getNum(b);
+					});
+				if (groups.length > 1) {
+					event.dialog.classList.add("fullheight");
+					event.dialog.addPagination({
+						data: array,
+						totalPageCount: groups.length,
+						container: dialog.content,
+						insertAfter: buttons,
+						onPageChange(state) {
+							const { pageNumber, data } = state;
+							data.forEach(item => {
+								const group = get.character(item.link).group;
+								item.classList[groups.indexOf(group) + 1 === pageNumber ? "remove" : "add"]("nodisplay");
+							});
+						},
+						pageLimitForCN: ["上一势力", "下一势力"],
+						pageNumberForCN: groups.map(i => get.plainText(lib.translate[i + "2"] || lib.translate[i] || "无").slice(0, 1)),
+						changePageEvent: "click",
+					});
 				}
 				event.dialog.open();
 				event.custom.replace.button = function (button) {
@@ -4483,6 +4512,7 @@ const skills = {
 						player.sex = lib.character[character].sex;
 						//player.group=lib.character[character][1];
 						//player.node.name.dataset.nature=get.groupnature(player.group);
+						/*
 						const mark = player.marks.huashen;
 						if (!mark) return;
 						mark.style.transition = "all 0.3s";
@@ -4498,14 +4528,15 @@ const skills = {
 								mark.show();
 							}, 50);
 						}, 200);
+						*/
 					},
 					player,
 					character,
 					old
 				);
 				get.character().group;
-				game.log(player, "将性别变为了", "#y" + get.translation(lib.character[character].sex) + "性");
-				await player.changeGroup(lib.character[character].group);
+				game.log(player, "将性别变为了", "#y" + get.translation(get.character(character).sex) + "性");
+				await player.changeGroup(get.character(character).group);
 			}
 			player.storage.huashen.current2 = skill;
 			if (!player.additionalSkills.huashen || !player.additionalSkills.huashen.includes(skill)) {
