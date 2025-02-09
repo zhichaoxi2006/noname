@@ -11175,7 +11175,7 @@ const skills = {
 					var dialog = get.idDialog(id);
 					if (dialog) {
 						//禁止翻页
-						var paginationInstance = dialog.paginationMap?.get(event.dialog.content.querySelector(".buttons"));
+						var paginationInstance = dialog.paginationMap?.get(dialog.content.querySelector(".buttons"));
 						if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = true;
 						for (var i = 0; i < dialog.buttons.length; i++) {
 							if (dialog.buttons[i].link == card) {
@@ -11209,7 +11209,7 @@ const skills = {
 					var dialog = get.idDialog(id);
 					if (dialog) {
 						//允许翻页
-						var paginationInstance = dialog.paginationMap?.get(event.dialog.content.querySelector(".buttons"));
+						var paginationInstance = dialog.paginationMap?.get(dialog.content.querySelector(".buttons"));
 						if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = false;
 						for (var i = 0; i < dialog.buttons.length; i++) {
 							dialog.buttons[i].classList.remove("selectedx");

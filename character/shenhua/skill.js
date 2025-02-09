@@ -4401,13 +4401,18 @@ const skills = {
 				}
 				event.dialog.open();
 				event.custom.replace.button = function (button) {
+					const paginationInstance = event.dialog.paginationMap?.get(event.dialog.content.querySelector(".buttons"));
 					if (!event.dialog.contains(button.parentNode)) return;
 					if (event.control) event.control.style.opacity = 1;
 					if (button.classList.contains("selectedx")) {
+						//二次选择已选择的武将牌解禁更换操作
+						if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = false;
 						event.button = null;
 						button.classList.remove("selectedx");
 						if (event.control) event.control.replacex(["cancel2"]);
 					} else {
+						//否则禁止更换操作
+						if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = true;
 						if (event.button) event.button.classList.remove("selectedx");
 						button.classList.add("selectedx");
 						event.button = button;
@@ -4416,11 +4421,14 @@ const skills = {
 					game.check();
 				};
 				event.custom.replace.window = function () {
+					//解禁更换操作
+					const paginationInstance = event.dialog.paginationMap?.get(event.dialog.content.querySelector(".buttons"));
+					if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = false;
 					if (event.button) {
 						event.button.classList.remove("selectedx");
 						event.button = null;
 					}
-					event.control.replacex(["cancel2"]);
+					if (event.control) event.control.replacex(["cancel2"]);
 				};
 				event.switchToAuto = function () {
 					const cards = [];
