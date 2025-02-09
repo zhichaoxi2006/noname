@@ -843,8 +843,11 @@ const skills = {
 						.reverse();
 					if (color.length) {
 						let dialog;
+						const videoId = lib.status.videoId++;
 						if (color.length > 1) {
 							dialog = ui.create.dialog("椒遇：选择获得一种颜色的牌");
+							dialog.videoId = videoId;
+							if (!event.isMine()) dialog.style.display = "none";
 							for (const c of color) {
 								dialog.addText(get.translation(c) + "牌", true);
 								dialog.add([event.cards.filter(card => get.color(card) == c), "card"]);
@@ -873,6 +876,10 @@ const skills = {
 										.set("dialog", dialog)
 										.forResult()
 								: { control: color[0] };
+						if (dialog) {
+							if (player.isOnline2()) player.send("closeDialog", videoId);
+							dialog.close();
+						}
 						const control = result.control;
 						if (control) {
 							player.popup(control);
