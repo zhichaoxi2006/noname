@@ -11021,12 +11021,12 @@ const skills = {
 		audio: 2,
 		trigger: {
 			global: "phaseBefore",
-			player: ["enterGame", "phaseBegin", "phaseEnd", "rehuashen"],
+			player: ["enterGame", "phaseBegin", "phaseEnd"],
 		},
 		filter(event, player, name) {
 			if (event.name != "phase") return true;
 			if (name == "phaseBefore") return game.phaseNumber == 0;
-			return player.storage.rehuashen && player.storage.rehuashen.character.length > 0;
+			return player.storage.rehuashen?.character?.length > 0;
 		},
 		direct: true,
 		content() {
@@ -11066,8 +11066,36 @@ const skills = {
 					event.videoId
 				);
 			}
-			event.dialog = ui.create.dialog(get.prompt("rehuashen"), [cards, (item, type, position, noclick, node) => lib.skill.rehuashen.$createButton(item, type, position, noclick, node)]);
+			var dialog = (event.dialog = ui.create.dialog(get.prompt("rehuashen"), [cards, (item, type, position, noclick, node) => lib.skill.rehuashen.$createButton(item, type, position, noclick, node)]));
 			event.dialog.videoId = event.videoId;
+			var buttons = dialog.content.querySelector(".buttons");
+			var array = dialog.buttons.filter(item => !item.classList.contains("nodisplay") && item.style.display !== "none");
+			var groups = array
+				.map(i => get.character(i.link).group)
+				.unique()
+				.sort((a, b) => {
+					const getNum = g => (lib.group.includes(g) ? lib.group.indexOf(g) : lib.group.length);
+					return getNum(a) - getNum(b);
+				});
+			if (groups.length > 1) {
+				event.dialog.classList.add("fullheight");
+				event.dialog.addPagination({
+					data: array,
+					totalPageCount: groups.length,
+					container: dialog.content,
+					insertAfter: buttons,
+					onPageChange(state) {
+						const { pageNumber, data } = state;
+						data.forEach(item => {
+							const group = get.character(item.link).group;
+							item.classList[groups.indexOf(group) + 1 === pageNumber ? "remove" : "add"]("nodisplay");
+						});
+					},
+					pageLimitForCN: ["上一势力", "下一势力"],
+					pageNumberForCN: groups.map(i => get.plainText(lib.translate[i + "2"] || lib.translate[i] || "无").slice(0, 1)),
+					changePageEvent: "click",
+				});
+			}
 			if (!event.isMine()) {
 				event.dialog.style.display = "none";
 			}
@@ -11113,9 +11141,7 @@ const skills = {
 			var prompt = event.control == "弃置化身" ? "选择制衡至多两张化身" : "选择要切换的化身";
 			var func = function (id, prompt) {
 				var dialog = get.idDialog(id);
-				if (dialog) {
-					dialog.content.childNodes[0].innerHTML = prompt;
-				}
+				if (dialog) dialog.content.childNodes[0].innerHTML = prompt;
 			};
 			if (player.isOnline2()) {
 				player.send(func, event.videoId, prompt);
@@ -11128,6 +11154,9 @@ const skills = {
 				var func = function (card, id) {
 					var dialog = get.idDialog(id);
 					if (dialog) {
+						//禁止翻页
+						var paginationInstance = dialog.paginationMap?.get(event.dialog.content.querySelector(".buttons"));
+						if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = true;
 						for (var i = 0; i < dialog.buttons.length; i++) {
 							if (dialog.buttons[i].link == card) {
 								dialog.buttons[i].classList.add("selectedx");
@@ -11159,6 +11188,9 @@ const skills = {
 				var func = function (id) {
 					var dialog = get.idDialog(id);
 					if (dialog) {
+						//允许翻页
+						var paginationInstance = dialog.paginationMap?.get(event.dialog.content.querySelector(".buttons"));
+						if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = false;
 						for (var i = 0; i < dialog.buttons.length; i++) {
 							dialog.buttons[i].classList.remove("selectedx");
 							dialog.buttons[i].classList.remove("unselectable");

@@ -522,7 +522,7 @@ const skills = {
 							let gains = [];
 							while (gains.length < num) {
 								const card = get.cardPile2(c => {
-									if (gains.includes(card)) return false;
+									if (gains.includes(c)) return false;
 									return get[storage[2]](c) === control;
 								});
 							}
