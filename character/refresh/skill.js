@@ -11070,6 +11070,7 @@ const skills = {
 			event.dialog.videoId = event.videoId;
 			var buttons = dialog.content.querySelector(".buttons");
 			var array = dialog.buttons.filter(item => !item.classList.contains("nodisplay") && item.style.display !== "none");
+			var choosed = player.storage.rehuashen.choosed;
 			var groups = array
 				.map(i => get.character(i.link).group)
 				.unique()
@@ -11077,23 +11078,41 @@ const skills = {
 					const getNum = g => (lib.group.includes(g) ? lib.group.indexOf(g) : lib.group.length);
 					return getNum(a) - getNum(b);
 				});
-			if (groups.length > 1) {
-				event.dialog.style.bottom = (parseInt(event.dialog.style.top || '0', 10) + 220) + 'px';
+			if (Boolean(choosed.length) || groups.length > 1) {
+				event.dialog.style.bottom = (parseInt(event.dialog.style.top || "0", 10) + get.is.phoneLayout() ? 230 : 220) + "px";
 				event.dialog.addPagination({
 					data: array,
-					totalPageCount: groups.length,
+					totalPageCount: groups.length + Boolean(choosed.length),
 					container: dialog.content,
 					insertAfter: buttons,
 					onPageChange(state) {
 						const { pageNumber, data } = state;
 						data.forEach(item => {
-							const group = get.character(item.link).group;
-							item.classList[groups.indexOf(group) + 1 === pageNumber ? "remove" : "add"]("nodisplay");
+							item.classList[
+								(() => {
+									const name = item.link,
+										goon = Boolean(choosed.length);
+									if (goon && pageNumber === 1) return choosed.includes(name);
+									const group = get.character(name).group;
+									return groups.indexOf(group) + (1 + goon) === pageNumber;
+								})()
+									? "remove"
+									: "add"
+							]("nodisplay");
 						});
 						ui.update();
 					},
-					pageLimitForCN: ["上一势力", "下一势力"],
-					pageNumberForCN: groups.map(i => get.plainText(lib.translate[i + "2"] || lib.translate[i] || "无").slice(0, 1)),
+					pageLimitForCN: ["←", "→"],
+					pageNumberForCN: (Boolean(choosed.length) ? ["常用"] : []).concat(
+						groups.map(i => {
+							const isChineseChar = char => {
+								const regex = /[\u4e00-\u9fff\u3400-\u4dbf\ud840-\ud86f\udc00-\udfff\ud870-\ud87f\udc00-\udfff\ud880-\ud88f\udc00-\udfff\ud890-\ud8af\udc00-\udfff\ud8b0-\ud8bf\udc00-\udfff\ud8c0-\ud8df\udc00-\udfff\ud8e0-\ud8ff\udc00-\udfff\ud900-\ud91f\udc00-\udfff\ud920-\ud93f\udc00-\udfff\ud940-\ud97f\udc00-\udfff\ud980-\ud9bf\udc00-\udfff\ud9c0-\ud9ff\udc00-\udfff]/u;
+								return regex.test(char);
+							}; //友情提醒：regex为基本汉字区间到扩展G区的Unicode范围的正则表达式，非加密/混淆
+							const str = get.plainText(lib.translate[i + "2"] || lib.translate[i] || "无");
+							return isChineseChar(str.slice(0, 1)) ? str.slice(0, 1) : str;
+						})
+					),
 					changePageEvent: "click",
 				});
 			}
@@ -11216,6 +11235,7 @@ const skills = {
 				game.stopCountChoose();
 			}
 			if (event.control == "弃置化身") return;
+			player.storage.rehuashen.choosed.add(event.card);
 			if (player.storage.rehuashen.current != event.card) {
 				const old = player.storage.rehuashen.current;
 				player.storage.rehuashen.current = event.card;
@@ -11246,6 +11266,7 @@ const skills = {
 			if (!player.storage[skill]) {
 				player.storage[skill] = {
 					character: [],
+					choosed: [],
 					map: {},
 				};
 			}
