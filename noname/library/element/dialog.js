@@ -23,7 +23,7 @@ export class Dialog extends HTMLDivElement {
 	noforcebutton;
 	/** @type { boolean } */
 	noopen;
-	/** 
+	/**
 	 * dialog添加数据是否支持分页
 	 * @type { boolean }
 	 **/
@@ -33,7 +33,7 @@ export class Dialog extends HTMLDivElement {
 	 * @type { Map<HTMLElement, InstanceType<typeof import("../../util/pagination.js").Pagination>> }
 	 */
 	paginationMap;
-	/** 
+	/**
 	 * 根据数据类型，为每一个类型分配一页的最大数据量
 	 * @type { Map<keyof UI['create']['buttonPresets'], number> }
 	 */
@@ -89,14 +89,13 @@ export class Dialog extends HTMLDivElement {
 		return dialog;
 	}
 	/**
-	 *
-	 * @param { object } map
+	 * 添加分页组件到页面
+	 * @param {Pagination} state - 分页组件的配置对象
 	 */
-	addPagination(map = {}) {
-		/** @type { HTMLDivElement } */
+	addPagination(state = {}) {
 		// 传入初始配置
-		const p = new Pagination(map);
-		this.paginationMap.set(map.insertAfter, p);
+		const p = new Pagination(state);
+		this.paginationMap.set(state.insertAfter, p);
 		// 渲染元素
 		p.renderPageDOM();
 	}
@@ -106,7 +105,7 @@ export class Dialog extends HTMLDivElement {
 	 */
 	addNewRow(...args) {
 		this.classList.add("addNewRow");
-		this.classList.remove('nobutton');
+		this.classList.remove("nobutton");
 		//参数归一化
 		let itemOptions = parameterNormolize();
 		//设置比例字符串
