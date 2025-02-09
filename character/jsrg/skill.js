@@ -9645,58 +9645,64 @@ const skills = {
 	//刘备
 	jsrgjishan: {
 		audio: 4,
-		trigger: { global: "damageBegin4" },
-		usable: 1,
-		filter(event, player) {
-			return player.hp > 0;
+		trigger: {
+			source: "damageSource",
+			global: "damageBegin4",
 		},
-		logTarget: "player",
+		filter(event, player, name) {
+			if (player.getStorage("jsrgjishan_used").includes(name)) return false;
+			if (name == "damageBegin4") return player.hp > 0;
+			return game.hasPlayer(current => current.isMinHp() && player.getStorage("jsrgjishan").includes(current));
+		},
+		async cost(event, trigger, player) {
+			const { triggername, skill } = event,
+				{ player: target } = trigger;
+			if (triggername == "damageBegin4") {
+				const bool = await player.chooseBool(get.prompt(skill, target), "失去1点体力并防止此伤害，然后你与其各摸一张牌").set("choice", get.info(skill).check(trigger, player)).forResultBool();
+				event.result = {
+					bool: bool,
+					targets: [target],
+				};
+			} else
+				event.result = await player
+					.chooseTarget(get.prompt(skill), "令一名体力值最小且你对其发动过〖积善①〗的角色回复1点体力", (card, player, target) => {
+						return target.isMinHp() && player.getStorage("jsrgjishan").includes(target);
+					})
+					.set("ai", target => {
+						const player = get.player();
+						return get.recoverEffect(target, player, player);
+					})
+					.forResult();
+		},
+		async content(event, trigger, player) {
+			const {
+				triggername,
+				name,
+				targets: [target],
+			} = event;
+			player.addTempSkill(name + "_used");
+			player.markAuto(name + "_used", [triggername]);
+			if (triggername == "damageBegin4") {
+				player.markAuto(name, [target]);
+				trigger.cancel();
+				await player.loseHp();
+				await game.asyncDraw([player, target].sortBySeat(_status.currentPhase));
+			} else await target.recover();
+		},
 		onremove: true,
-		prompt2: "失去1点体力并防止此伤害，然后你与其各摸一张牌",
 		check(event, player) {
 			return get.damageEffect(event.player, event.source, _status.event.player, event.nature) * event.num < get.effect(player, { name: "losehp" }, player, _status.event.player) + get.effect(player, { name: "draw" }, player, _status.event.player) + get.effect(event.player, { name: "draw" }, player, _status.event.player) / 2;
 		},
-		logAudio: () => 2,
-		group: "jsrgjishan_recover",
-		content() {
-			"step 0";
-			trigger.cancel();
-			player.loseHp();
-			player.markAuto("jsrgjishan", [trigger.player]);
-			"step 1";
-			if (player.isIn() && trigger.player.isIn()) {
-				var targets = [player, trigger.player];
-				targets.sortBySeat(_status.currentPhase);
-				targets[0].draw("nodelay");
-				targets[1].draw();
-			}
+		logAudio(event, player, name) {
+			if (name == "damageBegin4") return ["jsrgjishan1.mp3", "jsrgjishan2.mp3"];
+			return ["jsrgjishan3.mp3", "jsrgjishan4.mp3"];
 		},
 		intro: { content: "已帮助$抵挡过伤害" },
 		ai: { expose: 0.2 },
 		subSkill: {
-			recover: {
-				audio: "jsrgjishan",
-				trigger: { source: "damageSource" },
-				filter(event, player) {
-					return game.hasPlayer(current => {
-						return current.isMinHp() && player.getStorage("jsrgjishan").includes(current);
-					});
-				},
-				usable: 1,
-				logAudio: () => ["jsrgjishan3.mp3", "jsrgjishan4.mp3"],
-				async cost(event, trigger, player) {
-					event.result = await player
-						.chooseTarget(get.prompt("jsrgjishan_recover"), "令一名体力值最小且你对其发动过〖积善①〗的角色回复1点体力", (card, player, target) => {
-							return target.isMinHp() && player.getStorage("jsrgjishan").includes(target);
-						})
-						.set("ai", target => {
-							return get.recoverEffect(target, _status.event.player, _status.event.player);
-						})
-						.forResult();
-				},
-				async content(event, trigger, player) {
-					await event.targets[0].recover();
-				},
+			used: {
+				charlotte: true,
+				onremove: true,
 			},
 		},
 	},

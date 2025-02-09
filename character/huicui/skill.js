@@ -205,7 +205,7 @@ const skills = {
 			const target = event.targets[0];
 			player.changeZhuanhuanji(event.name);
 			const cards = await player
-				.choosePlayerCard(target, true, `请选择${get.translation(target)}一张手牌展示`, "visible")
+				.choosePlayerCard(target, true, `请选择${get.translation(target)}一张手牌展示`, "visible", "h")
 				.set("ai", button => {
 					const { player, target } = get.event(),
 						{ link } = button;
