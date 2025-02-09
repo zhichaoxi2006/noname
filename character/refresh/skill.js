@@ -11078,7 +11078,7 @@ const skills = {
 					return getNum(a) - getNum(b);
 				});
 			if (groups.length > 1) {
-				event.dialog.classList.add("fullheight");
+				event.dialog.style.bottom = (parseInt(event.dialog.style.top || '0', 10) + 220) + 'px';
 				event.dialog.addPagination({
 					data: array,
 					totalPageCount: groups.length,
@@ -11090,6 +11090,7 @@ const skills = {
 							const group = get.character(item.link).group;
 							item.classList[groups.indexOf(group) + 1 === pageNumber ? "remove" : "add"]("nodisplay");
 						});
+						ui.update();
 					},
 					pageLimitForCN: ["上一势力", "下一势力"],
 					pageNumberForCN: groups.map(i => get.plainText(lib.translate[i + "2"] || lib.translate[i] || "无").slice(0, 1)),
