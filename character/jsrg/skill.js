@@ -11213,35 +11213,37 @@ const skills = {
 		logAudio: index => (typeof index === "number" ? "jsrgweisi" + index + ".mp3" : 2),
 		usable: 1,
 		filterTarget(card, player, target) {
-			return target.countCards("h") && target != player;
+			return target != player;
 		},
 		async content(event, trigger, player) {
-			const target = event.target;
-			const result = await target
-				.chooseCard("将任意张手牌移出游戏直到本回合结束", [1, Infinity], "h")
-				.set("ai", card => {
-					const { numx, player } = get.event();
-					if (player.countCards("h", "sha") <= numx) return 9;
-					if (get.name(card, player) == "sha") return 0;
-					return 5;
-				})
-				.set("numx", player.countCards("h") / 4)
-				.forResult();
-			if (result.bool) {
-				const next = target.addToExpansion(result.cards, "giveAuto", target);
-				next.gaintag.add("jsrgweisi");
-				await next;
-				target
-					.when({
-						global: ["phaseBefore", "phaseAfter"],
+			const { target } = event;
+			if (target.countCards("h")) {
+				const result = await target
+					.chooseCard("将任意张手牌移出游戏直到本回合结束", [1, Infinity], "h")
+					.set("ai", card => {
+						const { numx, player } = get.event();
+						if (player.countCards("h", "sha") <= numx) return 9;
+						if (get.name(card, player) == "sha") return 0;
+						return 5;
 					})
-					.then(() => {
-						const cards = player.getExpansions("jsrgweisi");
-						if (cards.length) {
-							player.gain(cards, "draw");
-							game.log(player, "收回了" + get.cnNumber(cards.length) + "张“威肆”牌");
-						}
-					});
+					.set("numx", player.countCards("h") / 4)
+					.forResult();
+				if (result.bool) {
+					const next = target.addToExpansion(result.cards, "giveAuto", target);
+					next.gaintag.add("jsrgweisi");
+					await next;
+					target
+						.when({
+							global: ["phaseBefore", "phaseAfter"],
+						})
+						.then(() => {
+							const cards = player.getExpansions("jsrgweisi");
+							if (cards.length) {
+								player.gain(cards, "draw");
+								game.log(player, "收回了" + get.cnNumber(cards.length) + "张“威肆”牌");
+							}
+						});
+				}
 			}
 			const card = { name: "juedou", isCard: true };
 			player
@@ -11268,9 +11270,7 @@ const skills = {
 		},
 		ai: {
 			order: 9,
-			result: {
-				target: -1,
-			},
+			result: { target: -1 },
 		},
 	},
 	jsrgdangyi: {

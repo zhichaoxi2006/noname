@@ -10905,7 +10905,7 @@ const skills = {
 				0
 			);
 		},
-		group: "oldaili_record",
+		group: ["oldaili_record", "oldaili_show"],
 		locked: false,
 		check(event, player) {
 			if (get.distance(event.player, player, "absolute") == 1 && !player.isTurnedOver()) return false;
@@ -10964,6 +10964,19 @@ const skills = {
 						trigger.cards.filter(i => get.owner(i) == player)
 					);
 					player.markSkill("oldaili");
+				},
+			},
+			show: {
+				trigger: { player: "drawAfter" },
+				filter(event, player) {
+					return event.result?.length && event.getParent().name == "oldaili";
+				},
+				forced: true,
+				charlotte: true,
+				popup: false,
+				firstDo: true,
+				content() {
+					player.showCards(trigger.result);
 				},
 			},
 		},
@@ -12083,97 +12096,77 @@ const skills = {
 	//屈晃
 	olqiejian: {
 		audio: 2,
-		trigger: {
-			global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
-		},
-		direct: true,
-		filter(event, player) {
-			return game.hasPlayer(current => {
-				if (current.countCards("h")) return false;
-				var evt = event.getl(current);
-				return evt && evt.hs && evt.hs.length && !player.getStorage("olqiejian_ban").includes(current);
-			});
-		},
-		content() {
-			"step 0";
-			event.targets = game
+		trigger: { global: ["loseAfter", "equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"] },
+		getIndex(event, player) {
+			return game
 				.filterPlayer(current => {
 					if (current.countCards("h")) return false;
-					var evt = trigger.getl(current);
-					return evt && evt.hs && evt.hs.length && !player.getStorage("olqiejian_ban").includes(current);
+					const evt = event.getl(current);
+					return evt?.hs?.length && !player.getStorage("olqiejian_ban").includes(current);
 				})
 				.sortBySeat(_status.currentPhase);
-			"step 1";
-			var target = targets.shift();
-			event.target = target;
-			if (target.isIn()) {
-				player
-					.chooseBool(get.prompt2("olqiejian", target))
-					.set("ai", () => {
-						return _status.event.bool;
-					})
-					.set(
-						"bool",
-						get.attitude(player, target) > 0 ||
-							target.hasCard(card => {
-								return get.value(card, target) * get.sgnAttitude(player, target) < -6;
-							}, "ej")
-					);
-			} else event.goto(5);
-			"step 2";
+		},
+		filter: (event, player, name, target) => target?.isIn(),
+		logTarget: (event, player, name, target) => target,
+		check: (event, player, name, target) =>
+			get.attitude(player, target) > 0 ||
+			target.hasCard(card => {
+				return get.value(card, target) * get.sgnAttitude(player, target) < -6;
+			}, "ej"),
+		async content(event, trigger, player) {
+			const {
+				targets: [target],
+			} = event;
+			await player.draw("nodelay");
+			await target.draw();
+			const targets = [player, target].filter(i => i.countDiscardableCards(player, "ej"));
+			const result = !targets.length
+				? { bool: false, targets: [] }
+				: await player
+						.chooseTarget("切谏：选择一名角色", `弃置你或${get.translation(target)}场上的一张牌；或点击“取消”令你于本轮不能再对其发动此技能`, (card, player, target) => {
+							return get.event("targets").includes(target);
+						})
+						.set("ai", target => {
+							const player = get.player();
+							const sign = get.sgnAttitude(player, target);
+							return (
+								6 -
+								target
+									.getCards("ej")
+									.map(i => {
+										let val = 0;
+										if (get.position(i) == "e") val = get.value(i, target);
+										else {
+											val = get.effect(
+												player,
+												{
+													name: i.viewAs || i.name,
+													cards: [i],
+												},
+												target,
+												target
+											);
+										}
+										return sign * val;
+									})
+									.sort((a, b) => a - b)[0]
+							);
+						})
+						.set("targets", targets)
+						.forResult();
 			if (result.bool) {
-				player.logSkill("olqiejian", target);
-				player.draw("nodelay");
-				target.draw();
-			} else event.goto(5);
-			"step 3";
-			player
-				.chooseTarget("切谏：选择一名角色", "弃置你或其场上的一张牌；或点击“取消”令你于本轮不能再对其发动此技能", (card, player, target) => {
-					return (target == player || target == _status.event.getParent().target) && target.countDiscardableCards(player, "ej") > 0;
-				})
-				.set("ai", target => {
-					var sign = get.sgnAttitude(_status.event.player, target);
-					return (
-						6 -
-						target
-							.getCards("ej")
-							.map(i => {
-								var val = 0;
-								if (get.position(i) == "e") val = get.value(i, target);
-								else {
-									val = get.effect(
-										player,
-										{
-											name: i.viewAs || i.name,
-											cards: [i],
-										},
-										target,
-										target
-									);
-								}
-								return sign * val;
-							})
-							.sort((a, b) => a - b)[0]
-					);
-				});
-			"step 4";
-			if (result.bool) {
-				var targetx = result.targets[0];
-				player.discardPlayerCard(targetx, "ej", true);
+				const targetx = result.targets[0];
+				if (targetx.countDiscardableCards(player, "ej")) await player.discardPlayerCard(targetx, "ej", true);
 			} else {
-				player.addTempSkill("olqiejian_ban", "roundStart");
-				player.markAuto("olqiejian_ban", [target]);
+				player.addTempSkill(event.name + "_ban", "roundStart");
+				player.markAuto(event.name + "_ban", [target]);
 			}
-			"step 5";
-			if (targets.length) event.goto(1);
 		},
 		subSkill: {
 			ban: {
 				onremove: true,
 				charlotte: true,
-				intro: {
-					content: "本轮不能再对$发动〖切谏〗",
-				},
+				intro: { content: "本轮不能再对$发动〖切谏〗" },
 			},
 		},
 	},
@@ -18540,10 +18533,10 @@ const skills = {
 		ai: {
 			effect: {
 				target(card, player, target) {
-					if (!_status.olxiuhao_judging && get.tag(card, "damage") && get.attitude(target, player) > 0 && player != target && (!target.storage.counttrigger || !target.storage.counttrigger.olxiuhao)) return [0, 0.5, 0, 0.5];
+					if (!_status.olxiuhao_judging && get.tag(card, "damage") && get.attitude(target, player) > 0 && player != target && !target.storage.counttrigger?.olxiuhao) return [0, 0.5, 0, 0.5];
 				},
 				player(card, player, target) {
-					if (!_status.olxiuhao_judging && get.tag(card, "damage") && get.attitude(player, target) > 0 && player != target && (!player.storage.counttrigger || !player.storage.counttrigger.olxiuhao)) return [0, 0.5, 0, 0.5];
+					if (!_status.olxiuhao_judging && get.tag(card, "damage") && get.attitude(player, target) > 0 && player != target && !player.storage.counttrigger?.olxiuhao) return [0, 0.5, 0, 0.5];
 				},
 			},
 		},
