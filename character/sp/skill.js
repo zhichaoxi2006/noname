@@ -4719,9 +4719,9 @@ const skills = {
 		audio: 2,
 		trigger: { player: "useCardToPlayered" },
 		filter(event, player) {
-			if (event.targets.length != 1 || event.target == player || event.target.hasSkill("nodist")) return false;
-			if (event.card.name != "sha") return false;
 			const { target } = event;
+			if (event.targets.length != 1 || target == player || [player, target].some(i => i.hasSkill("undist")) || !target.isIn()) return false;
+			if (event.card.name != "sha") return false;
 			const [left, right, left2, right2] = get.info("saodi").getTargets(player, target);
 			return (target == left2 && left.some(i => i.countDiscardableCards(player, "h"))) || (target == right2 && right.some(i => i.countDiscardableCards(player, "h")));
 		},
@@ -4874,7 +4874,7 @@ const skills = {
 		ai: {
 			effect: {
 				player_use(card, player, target) {
-					if (!target || player._olqingya_judging || ui.selected.targets.length || player == target || target.hasSkill("nodist")) return;
+					if (!target || player._olqingya_judging || ui.selected.targets.length || player == target || target.hasSkill("undist")) return;
 					if (typeof card != "object" || card.name != "sha") return false;
 					player._olqingya_judging = true;
 					var effect = lib.skill.olqingya.aiJudge(player, target);
@@ -16992,9 +16992,9 @@ const skills = {
 		audio: 2,
 		trigger: { player: "useCardToPlayer" },
 		filter(event, player) {
-			if (event.targets.length != 1 || event.target == player || event.target.hasSkill("nodist")) return false;
-			if (event.card.name != "sha" && get.type(event.card) != "trick") return false;
 			const { target } = event;
+			if (event.targets.length != 1 || target == player || [player, target].some(i => i.hasSkill("undist")) || !target.isIn()) return false;
+			if (event.card.name != "sha" && get.type(event.card) != "trick") return false;
 			const [left, right, left2, right2] = get.info("saodi").getTargets(player, target);
 			return (target == left2 && left.some(i => lib.filter.targetEnabled2(event.card, player, i))) || (target == right2 && right.some(i => lib.filter.targetEnabled2(event.card, player, i)));
 		},
@@ -17092,7 +17092,7 @@ const skills = {
 		ai: {
 			effect: {
 				player_use(card, player, target) {
-					if (!target || player._saodi_judging || ui.selected.targets.length || player == target || target.hasSkill("nodist")) return;
+					if (!target || player._saodi_judging || ui.selected.targets.length || player == target || target.hasSkill("undist")) return;
 					if (typeof card != "object" || (card.name != "sha" && get.type(card) != "trick")) return false;
 					player._saodi_judging = true;
 					var effect = lib.skill.saodi.aiJudge(card, player, target);
