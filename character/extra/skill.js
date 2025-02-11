@@ -1504,8 +1504,9 @@ const skills = {
 			if (!info || info.charlotte || info.equipSkill) return false;
 			return !player.getStorage("jingyu_used").includes(skill);
 		},
-		locked: true,
-		async cost(event, trigger, player) {
+		direct: true,
+		forced: true,
+		async content(event, trigger, player) {
 			if (!player.storage.jingyu_used) {
 				player
 					.when({ global: "roundStart" })
@@ -1516,9 +1517,7 @@ const skills = {
 			}
 			let skill = get.sourceSkillFor(trigger);
 			player.markAuto("jingyu_used", skill);
-			event.result = { bool: true };
-		},
-		async content(event, trigger, player) {
+			player.logSkill(event.name);
 			await player.draw();
 		},
 		ai: { threaten: 6 },
