@@ -11070,6 +11070,7 @@ const skills = {
 			event.dialog.videoId = event.videoId;
 			var buttons = dialog.content.querySelector(".buttons");
 			var array = dialog.buttons.filter(item => !item.classList.contains("nodisplay") && item.style.display !== "none");
+			var choosed = player.storage.rehuashen.choosed;
 			var groups = array
 				.map(i => get.character(i.link).group)
 				.unique()
@@ -11077,23 +11078,47 @@ const skills = {
 					const getNum = g => (lib.group.includes(g) ? lib.group.indexOf(g) : lib.group.length);
 					return getNum(a) - getNum(b);
 				});
-			if (groups.length > 1) {
-				event.dialog.classList.add("fullheight");
+			if (choosed.length > 0 || groups.length > 1) {
+				event.dialog.style.bottom = (parseInt(event.dialog.style.top || "0", 10) + get.is.phoneLayout() ? 230 : 220) + "px";
 				event.dialog.addPagination({
 					data: array,
-					totalPageCount: groups.length,
+					totalPageCount: groups.length + Math.sign(choosed.length),
 					container: dialog.content,
 					insertAfter: buttons,
 					onPageChange(state) {
-						const { pageNumber, data } = state;
+						const { pageNumber, data, pageElement } = state;
+						const { groups, choosed } = pageElement;
 						data.forEach(item => {
-							const group = get.character(item.link).group;
-							item.classList[groups.indexOf(group) + 1 === pageNumber ? "remove" : "add"]("nodisplay");
+							item.classList[
+								(() => {
+									const name = item.link,
+										goon = choosed.length > 0;
+									if (goon && pageNumber === 1) return choosed.includes(name);
+									const group = get.character(name).group;
+									return groups.indexOf(group) + (1 + goon) === pageNumber;
+								})()
+									? "remove"
+									: "add"
+							]("nodisplay");
 						});
+						ui.update();
 					},
-					pageLimitForCN: ["上一势力", "下一势力"],
-					pageNumberForCN: groups.map(i => get.plainText(lib.translate[i + "2"] || lib.translate[i] || "无").slice(0, 1)),
+					pageLimitForCN: ["←", "→"],
+					pageNumberForCN: (choosed.length > 0 ? ["常用"] : []).concat(
+						groups.map(i => {
+							const isChineseChar = char => {
+								const regex = /[\u4e00-\u9fff\u3400-\u4dbf\ud840-\ud86f\udc00-\udfff\ud870-\ud87f\udc00-\udfff\ud880-\ud88f\udc00-\udfff\ud890-\ud8af\udc00-\udfff\ud8b0-\ud8bf\udc00-\udfff\ud8c0-\ud8df\udc00-\udfff\ud8e0-\ud8ff\udc00-\udfff\ud900-\ud91f\udc00-\udfff\ud920-\ud93f\udc00-\udfff\ud940-\ud97f\udc00-\udfff\ud980-\ud9bf\udc00-\udfff\ud9c0-\ud9ff\udc00-\udfff]/u;
+								return regex.test(char);
+							}; //友情提醒：regex为基本汉字区间到扩展G区的Unicode范围的正则表达式，非加密/混淆
+							const str = get.plainText(lib.translate[i + "2"] || lib.translate[i] || "无");
+							return isChineseChar(str.slice(0, 1)) ? str.slice(0, 1) : str;
+						})
+					),
 					changePageEvent: "click",
+					pageElement: {
+						groups: groups,
+						choosed: choosed,
+					},
 				});
 			}
 			if (!event.isMine()) {
@@ -11155,7 +11180,7 @@ const skills = {
 					var dialog = get.idDialog(id);
 					if (dialog) {
 						//禁止翻页
-						var paginationInstance = dialog.paginationMap?.get(event.dialog.content.querySelector(".buttons"));
+						var paginationInstance = dialog.paginationMap?.get(dialog.content.querySelector(".buttons"));
 						if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = true;
 						for (var i = 0; i < dialog.buttons.length; i++) {
 							if (dialog.buttons[i].link == card) {
@@ -11189,7 +11214,7 @@ const skills = {
 					var dialog = get.idDialog(id);
 					if (dialog) {
 						//允许翻页
-						var paginationInstance = dialog.paginationMap?.get(event.dialog.content.querySelector(".buttons"));
+						var paginationInstance = dialog.paginationMap?.get(dialog.content.querySelector(".buttons"));
 						if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = false;
 						for (var i = 0; i < dialog.buttons.length; i++) {
 							dialog.buttons[i].classList.remove("selectedx");
@@ -11215,6 +11240,7 @@ const skills = {
 				game.stopCountChoose();
 			}
 			if (event.control == "弃置化身") return;
+			player.storage.rehuashen.choosed.add(event.card);
 			if (player.storage.rehuashen.current != event.card) {
 				const old = player.storage.rehuashen.current;
 				player.storage.rehuashen.current = event.card;
@@ -11245,6 +11271,7 @@ const skills = {
 			if (!player.storage[skill]) {
 				player.storage[skill] = {
 					character: [],
+					choosed: [],
 					map: {},
 				};
 			}
