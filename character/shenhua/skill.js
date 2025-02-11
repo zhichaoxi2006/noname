@@ -4361,20 +4361,21 @@ const skills = {
 						const getNum = g => (lib.group.includes(g) ? lib.group.indexOf(g) : lib.group.length);
 						return getNum(a) - getNum(b);
 					});
-				if (Boolean(choosed.length) || groups.length > 1) {
+				if (choosed.length > 0 || groups.length > 1) {
 					event.dialog.style.bottom = (parseInt(event.dialog.style.top || "0", 10) + get.is.phoneLayout() ? 230 : 220) + "px";
 					event.dialog.addPagination({
 						data: array,
-						totalPageCount: groups.length + Boolean(choosed.length),
+						totalPageCount: groups.length + Math.sign(choosed.length),
 						container: dialog.content,
 						insertAfter: buttons,
 						onPageChange(state) {
-							const { pageNumber, data } = state;
+							const { pageNumber, data, pageElement } = state;
+							const { groups, choosed } = pageElement;
 							data.forEach(item => {
 								item.classList[
 									(() => {
 										const name = item.link,
-											goon = Boolean(choosed.length);
+											goon = choosed.length > 0;
 										if (goon && pageNumber === 1) return choosed.includes(name);
 										const group = get.character(name).group;
 										return groups.indexOf(group) + (1 + goon) === pageNumber;
@@ -4386,7 +4387,7 @@ const skills = {
 							ui.update();
 						},
 						pageLimitForCN: ["←", "→"],
-						pageNumberForCN: (Boolean(choosed.length) ? ["常用"] : []).concat(
+						pageNumberForCN: (choosed.length > 0 ? ["常用"] : []).concat(
 							groups.map(i => {
 								const isChineseChar = char => {
 									const regex = /[\u4e00-\u9fff\u3400-\u4dbf\ud840-\ud86f\udc00-\udfff\ud870-\ud87f\udc00-\udfff\ud880-\ud88f\udc00-\udfff\ud890-\ud8af\udc00-\udfff\ud8b0-\ud8bf\udc00-\udfff\ud8c0-\ud8df\udc00-\udfff\ud8e0-\ud8ff\udc00-\udfff\ud900-\ud91f\udc00-\udfff\ud920-\ud93f\udc00-\udfff\ud940-\ud97f\udc00-\udfff\ud980-\ud9bf\udc00-\udfff\ud9c0-\ud9ff\udc00-\udfff]/u;
@@ -4397,6 +4398,10 @@ const skills = {
 							})
 						),
 						changePageEvent: "click",
+						pageElement: {
+							groups: groups,
+							choosed: choosed,
+						},
 					});
 				}
 				event.dialog.open();
