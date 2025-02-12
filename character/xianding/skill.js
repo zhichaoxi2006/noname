@@ -353,16 +353,23 @@ const skills = {
 			});
 			if (card) player.gain(card, "draw").gaintag.add("dcxiaowu");
 			else player.chat("孩子们怎么没有牌");
-			player.when({ source: "damageSource" }).then(() => {
-				delete player.getStat().skill.dcxiaowu;
-				game.log(player, "重置了", "#g【骁武】");
-			});
+			player
+				.when({ source: "damageSource" })
+				.filter(evt => player.getStat().skill.dcxiaowu)
+				.then(() => {
+					delete player.getStat().skill.dcxiaowu;
+					game.log(player, "重置了", "#g【骁武】");
+				});
 		},
 		locked: false,
 		mod: {
 			aiValue(player, card, num) {
 				if (card.name === "zhangba") return num + 1145141919810;
 			},
+		},
+		ai: {
+			order: 10,
+			result: { player: 1 },
 		},
 		subSkill: {
 			effect: {
@@ -372,9 +379,7 @@ const skills = {
 						if (get.number(card) === "unsure" || card.cards?.some(card => card.hasGaintag("dcxiaowu"))) return Infinity;
 					},
 				},
-				trigger: {
-					player: "useCard1",
-				},
+				trigger: { player: "useCard1" },
 				filter(event, player) {
 					return (
 						event.addCount !== false &&
