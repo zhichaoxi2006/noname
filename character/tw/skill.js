@@ -15011,12 +15011,7 @@ const skills = {
 		locked: false,
 		viewAs: { name: "sha", storage: { twjiange: true } },
 		viewAsFilter(player) {
-			if (
-				!player.countCards("hes", function (card) {
-					return get.type(card) != "basic";
-				})
-			)
-				return false;
+			if (!player.countCards("hes", card => get.type(card) != "basic")) return false;
 		},
 		position: "hes",
 		selectCard() {
@@ -15045,20 +15040,15 @@ const skills = {
 			},
 			respondSha: true,
 			skillTagFilter(player) {
-				if (
-					!player.countCards("hes", function (card) {
-						return get.type(card) != "basic";
-					})
-				)
-					return false;
+				if (!player.countCards("hes", card => get.type(card) != "basic")) return false;
 			},
 		},
 		mod: {
 			targetInRange(card) {
-				if (card.storage && card.storage.twjiange) return true;
+				if (card.storage?.twjiange) return true;
 			},
 			cardUsable(card, player, num) {
-				if (card.storage && card.storage.twjiange) return Infinity;
+				if (card.storage?.twjiange) return Infinity;
 			},
 		},
 	},
@@ -15095,20 +15085,18 @@ const skills = {
 					if (event.card.name != "sha") return false;
 					if (event.getParent(2).name != "twxiawang") return false;
 					if (!player.hasHistory("sourceDamage", evt => evt.card == event.card)) return false;
-					for (var phase of lib.phaseName) {
-						var evt = event.getParent(phase);
-						if (evt && evt.name == phase) return true;
-					}
-					return false;
+					return lib.phaseName.some(phase => {
+						const evt = event.getParent(phase);
+						return evt?.name === phase;
+					});
 				},
 				content() {
-					player.popup();
-					player.removeSkill("twjiange_damage");
-					for (var phase of lib.phaseName) {
-						var evt = event.getParent(phase);
-						if (evt && evt.name == phase) {
-							var name = ["准备", "判定", "摸牌", "出牌", "弃牌", "结束"][lib.phaseName.indexOf(phase)];
-							game.log(player, "令", _status.currentPhase, "结束了" + name + "阶段");
+					player.removeSkill(event.name);
+					for (const phase of lib.phaseName) {
+						const evt = event.getParent(phase);
+						if (evt?.name === phase) {
+							const name = get.translation(phase);
+							game.log(player, "令", _status.currentPhase, "结束了" + name);
 							player.line(_status.currentPhase, "thunder");
 							evt.skipped = true;
 						}
