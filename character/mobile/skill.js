@@ -183,7 +183,7 @@ const skills = {
 		},
 	},
 	friendqihui: {
-		audio: 2,
+		audio: 3,
 		trigger: { player: "useCard" },
 		filter(event, player) {
 			const storage = player.getStorage("friendqihui");
@@ -333,7 +333,7 @@ const skills = {
 	},
 	//牢又寄 —— 诸葛亮
 	friendyance: {
-		audio: 2,
+		audio: 7,
 		trigger: {
 			global: "roundStart",
 			player: "phaseZhunbeiBegin",
@@ -343,6 +343,8 @@ const skills = {
 			return true;
 		},
 		round: 1,
+		popup: false,
+		logAudio: index => (typeof index === "number" ? "friendyance" + index + ".mp3" : "friendyance" + get.rand(2, 3) + ".mp3"),
 		async cost(event, trigger, player) {
 			const { result } = await player
 				.chooseButton([
@@ -372,6 +374,7 @@ const skills = {
 				},
 			} = event;
 			if (choice === "trick") {
+				player.logSkill("friendyance", null, null, null, [1]);
 				const card = get.cardPile2(c => get.type2(c) === "trick");
 				if (card) {
 					await player.gain(card, "draw");
@@ -379,6 +382,7 @@ const skills = {
 					player.chat("一无所获");
 				}
 			} else {
+				player.logSkill("friendyance");
 				await lib.skill.friendyance.minigame(event, trigger, player);
 			}
 		},
@@ -502,12 +506,15 @@ const skills = {
 					if (trigger.name !== "useCard" || !storage[1].length) {
 						const trueArr = storage[0].filter(b => b === true);
 						if (trueArr.length === 0) {
+							player.logSkill("friendyance", null, null, null, [4]);
 							await player.loseHp(1 + num);
 							player.removeMark("friendyance", 1 + num, false);
 						}
 						if (trueArr.length * 2 < storage[3]) {
+							player.logSkill("friendyance", null, null, null, [5]);
 							await player.chooseToDiscard(1 + num, "he", true);
 						} else {
+							player.logSkill("friendyance", null, null, null, [6]);
 							const choice = storage[1].unique();
 							const control =
 								choice.length > 1
@@ -529,6 +536,7 @@ const skills = {
 							if (gains.length) await player.gain(gains, "draw");
 							else player.chat("一无所获");
 							if (trueArr.length === storage[3]) {
+								player.logSkill("friendyance", null, null, null, [7]);
 								await player.draw(2 + num);
 								if (player.countMark("friendyance") < 7) {
 									player.addMark("friendyance", Math.min(7 - player.countMark("friendyance"), 1 + num), false);
@@ -543,7 +551,7 @@ const skills = {
 		},
 	},
 	friendfangqiu: {
-		audio: 2,
+		audio: 3,
 		limited: true,
 		trigger: { player: "friendyance_minigame" },
 		check(event, player) {
