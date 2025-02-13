@@ -60,7 +60,7 @@ const skills = {
 			const [target] = event.targets,
 				storage = player.storage.dcjueyan;
 			if (!storage[3] && get.attitude(player, target) > 0) return false;
-			return Math.max(...[(get.damageEffect(player, player, player) + get.damageEffect(target, player, player)) * storage[0], get.recoverEffect(player, player, player) * storage[1], get.effect(target, { name: "guohe_copy", position: "h" }, player, player) * Math.min(target.countGainableCards(player, "h") - !storage[3], storage[2])]) > 0;
+			return Math.max(...[(get.damageEffect(player, player, player) + get.damageEffect(target, player, player)) * storage[0], get.recoverEffect(player, player, player) * storage[1], get.effect(target, { name: "shunshou_copy", position: "h" }, player, player) * Math.min(target.countGainableCards(player, "h") - !storage[3], storage[2])]) > 0;
 		},
 		async content(event, trigger, player) {
 			const [target] = trigger.targets,
@@ -68,7 +68,7 @@ const skills = {
 			const goon = storage[3] || (await player.chooseToCompare(target).forResult("bool"));
 			if (!goon) return;
 			let list = ["造成伤害", "回复体力", "获得手牌"],
-				choices = list.slice();///[list[0]];
+				choices = list.slice(); ///[list[0]];
 			let choiceList = ["依次对你与" + get.translation(target) + "各造成" + storage[0] + "点伤害", "回复" + storage[1] + "点体力", "获得" + get.translation(target) + get.cnNumber(storage[2]) + "张手牌"];
 			/*
 			因为可以叠数值所以不能执行的也能选（?）
@@ -88,7 +88,7 @@ const skills = {
 								const map = {
 									造成伤害: (get.damageEffect(player, player, player) + get.damageEffect(target, player, player)) * storage[0],
 									回复体力: get.recoverEffect(player, player, player) * storage[1],
-									获得手牌: get.effect(target, { name: "guohe_copy", position: "h" }, player, player) * Math.min(target.countGainableCards(player, "h"), storage[2]),
+									获得手牌: get.effect(target, { name: "shunshou_copy", position: "h" }, player, player) * Math.min(target.countGainableCards(player, "h"), storage[2]),
 								};
 								return get
 									.event()
@@ -109,7 +109,7 @@ const skills = {
 					await player.recover(storage[1]);
 					break;
 				case 2:
-					await player.gainPlayerCard(target, "he", storage[2], true);
+					await player.gainPlayerCard(target, "h", storage[2], true);
 					break;
 			}
 			player.storage[event.name][index] = 1;
@@ -148,7 +148,11 @@ const skills = {
 			player.addTip(skill, [get.translation(skill), ...player.storage[skill].slice(0, 3)].join(" "));
 		},
 		intro: {
-			markcount: storage => storage.slice(0, 3).map(i => i.toString()).join(""),
+			markcount: storage =>
+				storage
+					.slice(0, 3)
+					.map(i => i.toString())
+					.join(""),
 			content: storage => "当前选项数值为：" + storage.slice(0, 3),
 		},
 	},
@@ -349,16 +353,23 @@ const skills = {
 			});
 			if (card) player.gain(card, "draw").gaintag.add("dcxiaowu");
 			else player.chat("孩子们怎么没有牌");
-			player.when({ source: "damageSource" }).then(() => {
-				delete player.getStat().skill.dcxiaowu;
-				game.log(player, "重置了", "#g【骁武】");
-			});
+			player
+				.when({ source: "damageSource" })
+				.filter(evt => player.getStat().skill.dcxiaowu)
+				.then(() => {
+					delete player.getStat().skill.dcxiaowu;
+					game.log(player, "重置了", "#g【骁武】");
+				});
 		},
 		locked: false,
 		mod: {
 			aiValue(player, card, num) {
 				if (card.name === "zhangba") return num + 1145141919810;
 			},
+		},
+		ai: {
+			order: 10,
+			result: { player: 1 },
 		},
 		subSkill: {
 			effect: {
@@ -368,9 +379,7 @@ const skills = {
 						if (get.number(card) === "unsure" || card.cards?.some(card => card.hasGaintag("dcxiaowu"))) return Infinity;
 					},
 				},
-				trigger: {
-					player: "useCard1",
-				},
+				trigger: { player: "useCard1" },
 				filter(event, player) {
 					return (
 						event.addCount !== false &&

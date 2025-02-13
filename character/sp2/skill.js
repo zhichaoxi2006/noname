@@ -14,16 +14,12 @@ const skills = {
 			const info = get.info(event.card);
 			if (info.allowMultiple == false) return false;
 			if (event.targets && !info.multitarget) {
-				if (
-					game.hasPlayer(current => {
-						return !event.targets.includes(current) && lib.filter.targetEnabled2(event.card, player, current) && lib.filter.targetInRange(event.card, player, current);
-					})
-				)
-					return true;
+				return game.hasPlayer(current => {
+					return !event.targets.includes(current) && lib.filter.targetEnabled2(event.card, player, current) && lib.filter.targetInRange(event.card, player, current);
+				});
 			}
 			return false;
 		},
-		logTarget: "player",
 		async cost(event, trigger, player) {
 			const { result } = await player
 				.chooseButton([
@@ -37,16 +33,14 @@ const skills = {
 					],
 				])
 				.set("filterButton", button => {
-					const player = get.player(),
-						event = get.event().getTrigger().getParent();
+					const { player, evt: event } = get.event();
 					if (button.link == "extraTarget") {
 						return lib.skill.starlianzhan.filterx(event, player);
 					}
 					return true;
 				})
 				.set("ai", button => {
-					const player = get.player(),
-						event = get.event().getTrigger().getParent();
+					const { player, evt: event } = get.event();
 					if (button.link == "extraTarget") {
 						const targets = game.filterPlayer(current => {
 							return !event.targets.includes(current) && lib.filter.targetEnabled2(event.card, player, current) && lib.filter.targetInRange(event.card, player, current);
@@ -54,7 +48,8 @@ const skills = {
 						return Math.max(...targets.map(target => get.effect(target, event.card, player, player)));
 					}
 					return event.targets.reduce((sum, target) => sum + get.effect(target, event.card, player, player), 0);
-				});
+				})
+				.set("evt", trigger.getParent());
 			event.result = {
 				bool: result.bool,
 				cost_data: result.links,

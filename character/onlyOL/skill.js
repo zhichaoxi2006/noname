@@ -3704,9 +3704,9 @@ const skills = {
 					cardEnabled(card, player) {
 						if (!player.storage.olsbyufeng_block) return;
 						const storage = player.getStorage("olsbyufeng_block");
-						let evt = _status.event;
+						let evt = get.event();
 						if (evt.name != "chooseToUse") evt = evt.getParent("chooseToUse");
-						if (!evt || !evt.respondTo || !storage.includes(evt.respondTo[1])) return;
+						if (!evt || !evt.respondTo || !storage.some(i => i.cardid == evt.respondTo[1].cardid)) return;
 						const num = get.number(card);
 						if (num != "unsure" && typeof num == "number" && num < get.number(evt.respondTo[1])) return false;
 					},
@@ -3730,8 +3730,8 @@ const skills = {
 				popup: false,
 				firstDo: true,
 				content() {
-					player.unmarkAuto("olsbyufeng_block", [trigger.card]);
-					if (!player.getStorage("olsbyufeng_block").length) player.removeSkill("olsbyufeng_block");
+					player.unmarkAuto(event.name, [trigger.card]);
+					if (!player.getStorage(event.name).length) player.removeSkill(event.name);
 				},
 			},
 		},
