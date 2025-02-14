@@ -9698,28 +9698,6 @@ const skills = {
 		intro: { content: "已帮助$抵挡过伤害" },
 		ai: { expose: 0.2 },
 		subSkill: {
-			recover: {
-				audio: ["jsrgjishan3.mp3", "jsrgjishan4.mp3"],
-				trigger: { source: "damageSource" },
-				filter(event, player) {
-					return game.hasPlayer(current => {
-						return current.isMinHp() && player.getStorage("jsrgjishan").includes(current);
-					});
-				},
-				usable: 1,
-				async cost(event, trigger, player) {
-					event.result = await player
-						.chooseTarget(get.prompt("jsrgjishan_recover"), "令一名体力值最小且你对其发动过〖积善①〗的角色回复1点体力", (card, player, target) => {
-							return target.isMinHp() && player.getStorage("jsrgjishan").includes(target);
-						})
-						.set("ai", target => {
-							return get.recoverEffect(target, _status.event.player, _status.event.player);
-						})
-						.forResult();
-				},
-				async content(event, trigger, player) {
-					await event.targets[0].recover();
-				},
 			used: {
 				charlotte: true,
 				onremove: true,
