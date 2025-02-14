@@ -125,6 +125,11 @@ export async function cordovaReady() {
 					throw new Error("您的安卓兼容版客户端版本过低，请升级至最新版");
 				}
 				break;
+			case "com.widget.noname.cola":
+				if (versionCode < 10320) {
+					throw new Error("您的安卓增强版客户端版本过低，请升级至最新版");
+				}
+				break;
 			default:
 				// todo: 懒人包提示
 		}
