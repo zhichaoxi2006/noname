@@ -1366,11 +1366,14 @@ export const otherMenu = function (/** @type { boolean | undefined } */ connectM
 					agentText += dedent`安卓应用包名: ${window.NonameAndroidBridge.getPackageName()}<br/>`;
 				}
 
+				if (typeof window.NonameAndroidBridge?.getPackageVersionCode === "function") {
+					agentText += dedent`安卓应用版本: ${window.NonameAndroidBridge.getPackageVersionCode()}<br/>`;
+				}
+
 				if (typeof window.device === "object") {
 					agentText += dedent`安卓版本: ${device.version}<br/>
 					安卓SDK版本: ${device.sdkVersion}<br/>
-					设备制造商: ${device.manufacturer}<br/>
-					`;
+					设备制造商: ${device.manufacturer}<br/>`;
 				}
 			}
 			else if (lib.device === 'ios') {
