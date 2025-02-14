@@ -1,6 +1,9 @@
+import { GeneratorFunction } from "../../../../util/index.js";
 import { _status, ai, game, get, lib, ui } from "../../../../../noname.js";
 import ContentCompilerBase from "./ContentCompilerBase.js";
+import ContentCompiler from "./ContentCompiler.js";
 import { GameEvent } from "../../gameEvent.js";
+
 export default class YieldCompiler extends ContentCompilerBase {
 	type = "yield";
 	static #mapArgs(event) {
@@ -28,29 +31,37 @@ export default class YieldCompiler extends ContentCompilerBase {
 		};
 	}
 	filter(content) {
-		return typeof content === "function" && content.constructor.name === "GeneratorFunction";
+		return typeof content === "function" && content instanceof GeneratorFunction;
 	}
 	compile(content) {
 		const compiler = this;
-		return async function (event) {
+		const middleware = async function (event) {
 			const args = YieldCompiler.#mapArgs(event);
-			//@ts-ignore
-			const generator = Reflect.apply(content, this, [event, args]);
+			const generator =
+				//@ts-ignore
+				Reflect.apply(content, this, [event, args]);
+
 			let result = null;
 			let done = false;
-			while (!event.finished) {
-				if (done) {
-					event.finish();
-					break;
-				}
+
+			while (!done) {
 				let value = null;
-				compiler.beforeExecute(event);
-				if (!compiler.isPrevented(event)) ({ value, done = false } = generator.next(result));
-				await event.waitNext();
-				result = value instanceof GameEvent ? value.result : value;
-				compiler.afterExecute(event);
+
+				if (!compiler.isPrevented(event)) {
+					({ value, done = true } = generator.next(result));
+					if (done) {
+						break;
+					}
+					result = await (value instanceof GameEvent ? value.forResult() : value);
+				}
+
+				const nextResult = await event.waitNext();
+				result ??= nextResult;
 			}
+
 			generator.return();
 		};
+
+		return ContentCompiler.compile([middleware]);
 	}
 }

@@ -807,7 +807,7 @@ const skills = {
 		},
 	},
 	drlt_zhenggu_mark: {
-		charlotte:true,
+		charlotte: true,
 		init(player, skill) {
 			if (!player.storage[skill]) player.storage[skill] = [];
 		},
@@ -4182,9 +4182,7 @@ const skills = {
 		unique: true,
 		init(player) {
 			if (!player.storage.huashen) {
-				player.storage.huashen = {
-					owned: {},
-				};
+				player.storage.huashen = { owned: {}, choosed: [] };
 			}
 		},
 		intro: {
@@ -4250,6 +4248,9 @@ const skills = {
 				} else {
 					return "没有化身";
 				}
+			},
+			markcount(storage = {}) {
+				return Object.keys(storage.owned).length;
 			},
 		},
 		addHuashen(player) {
@@ -4350,34 +4351,89 @@ const skills = {
 					event.dialog.buttons[i].classList.add("pointerdiv");
 					event.dialog.buttons[i].classList.add("selectable");
 				}
+				const buttons = dialog.content.querySelector(".buttons");
+				const array = dialog.buttons.filter(item => !item.classList.contains("nodisplay") && item.style.display !== "none");
+				const choosed = player.storage.huashen.choosed;
+				const groups = array
+					.map(i => get.character(i.link).group)
+					.unique()
+					.sort((a, b) => {
+						const getNum = g => (lib.group.includes(g) ? lib.group.indexOf(g) : lib.group.length);
+						return getNum(a) - getNum(b);
+					});
+				if (choosed.length > 0 || groups.length > 1) {
+					event.dialog.style.bottom = (parseInt(event.dialog.style.top || "0", 10) + get.is.phoneLayout() ? 230 : 220) + "px";
+					event.dialog.addPagination({
+						data: array,
+						totalPageCount: groups.length + Math.sign(choosed.length),
+						container: dialog.content,
+						insertAfter: buttons,
+						onPageChange(state) {
+							const { pageNumber, data, pageElement } = state;
+							const { groups, choosed } = pageElement;
+							data.forEach(item => {
+								item.classList[
+									(() => {
+										const name = item.link,
+											goon = choosed.length > 0;
+										if (goon && pageNumber === 1) return choosed.includes(name);
+										const group = get.character(name).group;
+										return groups.indexOf(group) + (1 + goon) === pageNumber;
+									})()
+										? "remove"
+										: "add"
+								]("nodisplay");
+							});
+							ui.update();
+						},
+						pageLimitForCN: ["←", "→"],
+						pageNumberForCN: (choosed.length > 0 ? ["常用"] : []).concat(
+							groups.map(i => {
+								const isChineseChar = char => {
+									const regex = /[\u4e00-\u9fff\u3400-\u4dbf\ud840-\ud86f\udc00-\udfff\ud870-\ud87f\udc00-\udfff\ud880-\ud88f\udc00-\udfff\ud890-\ud8af\udc00-\udfff\ud8b0-\ud8bf\udc00-\udfff\ud8c0-\ud8df\udc00-\udfff\ud8e0-\ud8ff\udc00-\udfff\ud900-\ud91f\udc00-\udfff\ud920-\ud93f\udc00-\udfff\ud940-\ud97f\udc00-\udfff\ud980-\ud9bf\udc00-\udfff\ud9c0-\ud9ff\udc00-\udfff]/u;
+									return regex.test(char);
+								}; //友情提醒：regex为基本汉字区间到扩展G区的Unicode范围的正则表达式，非加密/混淆
+								const str = get.plainText(lib.translate[i + "2"] || lib.translate[i] || "无");
+								return isChineseChar(str.slice(0, 1)) ? str.slice(0, 1) : str;
+							})
+						),
+						changePageEvent: "click",
+						pageElement: {
+							groups: groups,
+							choosed: choosed,
+						},
+					});
+				}
 				event.dialog.open();
 				event.custom.replace.button = function (button) {
+					const paginationInstance = event.dialog.paginationMap?.get(event.dialog.content.querySelector(".buttons"));
 					if (!event.dialog.contains(button.parentNode)) return;
 					if (event.control) event.control.style.opacity = 1;
 					if (button.classList.contains("selectedx")) {
+						//二次选择已选择的武将牌解禁更换操作
+						if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = false;
 						event.button = null;
 						button.classList.remove("selectedx");
-						if (event.control) {
-							event.control.replacex(["cancel2"]);
-						}
+						if (event.control) event.control.replacex(["cancel2"]);
 					} else {
-						if (event.button) {
-							event.button.classList.remove("selectedx");
-						}
+						//否则禁止更换操作
+						if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = true;
+						if (event.button) event.button.classList.remove("selectedx");
 						button.classList.add("selectedx");
 						event.button = button;
-						if (event.control && button.link) {
-							event.control.replacex(player.storage.huashen.owned[button.link]);
-						}
+						if (event.control && button.link) event.control.replacex(player.storage.huashen.owned[button.link]);
 					}
 					game.check();
 				};
 				event.custom.replace.window = function () {
+					//解禁更换操作
+					const paginationInstance = event.dialog.paginationMap?.get(event.dialog.content.querySelector(".buttons"));
+					if (paginationInstance?.state) paginationInstance.state.pageRefuseChanged = false;
 					if (event.button) {
 						event.button.classList.remove("selectedx");
 						event.button = null;
 					}
-					event.control.replacex(["cancel2"]);
+					if (event.control) event.control.replacex(["cancel2"]);
 				};
 				event.switchToAuto = function () {
 					const cards = [];
@@ -4472,6 +4528,7 @@ const skills = {
 			if (!map.logged) player.logSkill("huashen");
 			const skill = map.skill,
 				character = map.character;
+			player.storage.huashen.choosed.add(character);
 			if (character != player.storage.huashen.current) {
 				const old = player.storage.huashen.current;
 				player.storage.huashen.current = character;
@@ -4483,6 +4540,7 @@ const skills = {
 						player.sex = lib.character[character].sex;
 						//player.group=lib.character[character][1];
 						//player.node.name.dataset.nature=get.groupnature(player.group);
+						/*
 						const mark = player.marks.huashen;
 						if (!mark) return;
 						mark.style.transition = "all 0.3s";
@@ -4498,14 +4556,15 @@ const skills = {
 								mark.show();
 							}, 50);
 						}, 200);
+						*/
 					},
 					player,
 					character,
 					old
 				);
 				get.character().group;
-				game.log(player, "将性别变为了", "#y" + get.translation(lib.character[character].sex) + "性");
-				await player.changeGroup(lib.character[character].group);
+				game.log(player, "将性别变为了", "#y" + get.translation(get.character(character).sex) + "性");
+				await player.changeGroup(get.character(character).group);
 			}
 			player.storage.huashen.current2 = skill;
 			if (!player.additionalSkills.huashen || !player.additionalSkills.huashen.includes(skill)) {

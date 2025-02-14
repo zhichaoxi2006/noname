@@ -1019,8 +1019,7 @@ const skills = {
 		group: ["jilin_kanpo", "jilin_change"],
 		subSkill: {
 			kanpo: {
-				audio: "jilin",
-				logAudio: () => ["jilin2.mp3", "jilin3.mp3"],
+				audio: ["jilin2.mp3", "jilin3.mp3"],
 				trigger: {
 					target: "useCardToTarget",
 				},
@@ -1072,8 +1071,7 @@ const skills = {
 				},
 			},
 			change: {
-				audio: "jilin",
-				logAudio: () => ["jilin4.mp3", "jilin5.mp3"],
+				audio: ["jilin4.mp3", "jilin5.mp3"],
 				trigger: {
 					player: "phaseBegin",
 				},
@@ -1172,8 +1170,7 @@ const skills = {
 		group: "yingyou_draw",
 		subSkill: {
 			draw: {
-				audio: "yingyou",
-				logAudio: () => ["yingyou3.mp3", "yingyou4.mp3"],
+				audio: ["yingyou3.mp3", "yingyou4.mp3"],
 				trigger: {
 					player: "loseAfter",
 					global: ["equipAfter", "addJudgeAfter", "gainAfter", "loseAsyncAfter", "addToExpansionAfter"],
@@ -1504,6 +1501,7 @@ const skills = {
 			if (!info || info.charlotte || info.equipSkill) return false;
 			return !player.getStorage("jingyu_used").includes(skill);
 		},
+		direct: true,
 		forced: true,
 		async content(event, trigger, player) {
 			if (!player.storage.jingyu_used) {
@@ -1516,11 +1514,10 @@ const skills = {
 			}
 			let skill = get.sourceSkillFor(trigger);
 			player.markAuto("jingyu_used", skill);
+			player.logSkill(event.name);
 			await player.draw();
 		},
-		ai: {
-			threaten: 6,
-		},
+		ai: { threaten: 6 },
 	},
 	lvxin: {
 		audio: 2,
@@ -1593,9 +1590,7 @@ const skills = {
 		},
 		subSkill: {
 			recover: {
-				trigger: {
-					player: ["useSkill", "logSkillBegin", "useCard", "respond"],
-				},
+				trigger: { player: ["useSkill", "logSkillBegin", "useCard", "respond"] },
 				filter(event, player) {
 					if (["global", "equip"].includes(event.type)) return false;
 					if ((get.info(event.skill) || {}).charlotte) return false;
@@ -1607,17 +1602,13 @@ const skills = {
 				onremove: true,
 				charlotte: true,
 				async content(event, trigger, player) {
-					player.recover(player.countMark("lvxin_recover"));
-					player.removeSkill("lvxin_recover");
+					player.recover(player.countMark(event.name));
+					player.removeSkill(event.name);
 				},
-				intro: {
-					content: "下次发动技能时回复#点体力",
-				},
+				intro: { content: "下次发动技能时回复#点体力" },
 			},
 			lose: {
-				trigger: {
-					player: ["useSkill", "logSkillBegin", "useCard", "respond"],
-				},
+				trigger: { player: ["useSkill", "logSkillBegin", "useCard", "respond"] },
 				filter(event, player) {
 					if (["global", "equip"].includes(event.type)) return false;
 					if ((get.info(event.skill) || {}).charlotte) return false;
@@ -1629,12 +1620,10 @@ const skills = {
 				onremove: true,
 				charlotte: true,
 				async content(event, trigger, player) {
-					player.loseHp(player.countMark("lvxin_lose"));
-					player.removeSkill("lvxin_lose");
+					player.loseHp(player.countMark(event.name));
+					player.removeSkill(event.name);
 				},
-				intro: {
-					content: "下次发动技能时失去#点体力",
-				},
+				intro: { content: "下次发动技能时失去#点体力" },
 			},
 		},
 		ai: {

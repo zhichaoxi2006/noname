@@ -4747,6 +4747,7 @@ export const Content = {
 		"step 4";
 		if (event.boolline) player.line(target, "green");
 		event.done = target.gain(event.cards, player);
+		event.done.gaintag.addArray(event.gaintag);
 		event.done.giver = player;
 		if (event.delay !== false) event.done.animate = event.visibleMove ? "give" : "giveAuto";
 		else {
@@ -5827,6 +5828,12 @@ export const Content = {
 	},
 	chooseButtonOL: function () {
 		"step 0";
+		event.targets = event.list.slice();
+		if (!_status.connectMode) {
+			event.result = {};
+			event.goto(7);
+			return;
+		}
 		//ui.arena.classList.add('markhidden');
 		for (var i = 0; i < event.list.length; i++) {
 			var current = event.list[i];
@@ -5882,14 +5889,25 @@ export const Content = {
 		"step 4";
 		game.me.unwait(result);
 		"step 5";
-		if (!event.resultOL) {
-			game.pause();
-		}
+		if (!event.resultOL) game.pause();
 		"step 6";
 		/*game.broadcastAll(function(){
 			ui.arena.classList.remove('markhidden');
 		});*/
 		event.result = event.resultOL;
+		event.finish();
+		"step 7";
+		if (event.list.length) {
+			var current = event.list.shift();
+			event.target = current.shift();
+			var next = event.target.chooseButton.apply(event.target, current);
+			next.callback = event.callback;
+			next.switchToAuto = event.switchToAuto;
+			next.processAI = event.processAI;
+		}
+		"step 8";
+		event.result[target.playerid] = result;
+		if (event.list.length) event.goto(7);
 	},
 	chooseCard: function () {
 		"step 0";
@@ -6898,9 +6916,11 @@ export const Content = {
 		if (!event.chooseonly) {
 			if (event.delay !== false) {
 				var next = player.gain(event.cards, target, event.visibleMove ? "give" : "giveAuto", "bySelf");
+				next.gaintag.addArray(event.gaintag);
 				event.done = next;
 			} else {
 				var next = player.gain(event.cards, target, "bySelf");
+				next.gaintag.addArray(event.gaintag);
 				event.done = next;
 				target[event.visibleMove ? "$give" : "$giveAuto"](cards, player);
 				if (event.visibleMove) next.visible = true;
@@ -7311,11 +7331,49 @@ export const Content = {
 
 		if (event.animate != false) {
 			if (event.throw !== false) {
-				player.$throw(cards);
-				if (lib.config.sync_speed && cards[0] && cards[0].clone) {
+				let throw_cards = cards;
+				let virtualCard_str = false;
+				if (!throw_cards.length && lib.config.card_animation_info) {
+					const virtualCard = ui.create.card();
+					virtualCard._destroy = true;
+					virtualCard.expired = true;
+					const info = lib.card[card.name],
+						number = card.number;
+					virtualCard.init([get.suit(card), typeof number == "number" ? number : "虚拟", card.name, card.nature]);
+					virtualCard_str = virtualCard.querySelector(".info").innerHTML;
+					throw_cards = [virtualCard];
+				}
+				player.$throw(throw_cards);
+				if (lib.config.card_animation_info) {
+					game.broadcastAll(
+						function (cards, card, card_cards, str) {
+							for (let nodex of cards) {
+								let node = nodex.clone;
+								if (nodex._tempName) {
+									nodex._tempName.delete();
+									delete nodex._tempName;
+								}
+								if (!node) continue;
+								if (str) node.querySelector(".info").innerHTML = str;
+								if (cards.length > 1 || !card.isCard || card.name != node.name || card.nature != node.nature || !card.cards.length) {
+									ui.create.cardTempName(card, node);
+									if (node._tempName && card_cards?.length <= 0) {
+										node._tempName.innerHTML = node._tempName.innerHTML.slice(0, node._tempName.innerHTML.indexOf("<span", -1));
+										node._tempName.innerHTML += "<span style='color:black'>虚拟</span></span>";
+									}
+								}
+							}
+						},
+						throw_cards,
+						event.card,
+						event.cards,
+						virtualCard_str
+					);
+				}
+				if (lib.config.sync_speed && throw_cards[0] && throw_cards[0].clone) {
 					var waitingForTransition = get.time();
 					event.waitingForTransition = waitingForTransition;
-					cards[0].clone.listenTransition(function () {
+					throw_cards[0].clone.listenTransition(function () {
 						if (_status.waitingForTransition == waitingForTransition && _status.paused) {
 							game.resume();
 						}
@@ -8027,7 +8085,7 @@ export const Content = {
 				player.$draw(cards.length);
 			}
 		}
-		if (event.gaintag) next.gaintag.addArray(event.gaintag);
+		next.gaintag.addArray(event.gaintag);
 		event.result = cards;
 	},
 	discard: function () {
@@ -8115,11 +8173,50 @@ export const Content = {
 			if (directDiscard.length) game.cardsGotoOrdering(directDiscard);
 		}
 		if (event.animate != false && event.throw !== false) {
-			for (var i = 0; i < cards.length; i++) {
-				player.$throw(cards[i]);
-				if (event.highlight) {
-					cards[i].clone.classList.add("thrownhighlight");
-					game.addVideo("highlightnode", player, get.cardInfo(cards[i]));
+			let throw_cards = cards;
+			let virtualCard_str = false;
+			if (!throw_cards.length && lib.config.card_animation_info) {
+				const virtualCard = ui.create.card();
+				virtualCard._destroy = true;
+				virtualCard.expired = true;
+				const info = lib.card[card.name],
+					number = card.number;
+				virtualCard.init([get.suit(card), typeof number == "number" ? number : "虚拟", card.name, card.nature]);
+				virtualCard_str = virtualCard.querySelector(".info").innerHTML;
+				throw_cards = [virtualCard];
+			}
+			player.$throw(throw_cards);
+			if (lib.config.card_animation_info) {
+				game.broadcastAll(
+					function (cards, card, card_cards, str, judgeing) {
+						for (let nodex of cards) {
+							let node = nodex.clone;
+							if (nodex._tempName) {
+								nodex._tempName.delete();
+								delete nodex._tempName;
+							}
+							if (!node) continue;
+							if (str) node.querySelector(".info").innerHTML = str;
+							if ((cards.length > 1 || !card.isCard || card.name != node.name || card.nature != node.nature || !card.cards.length) && !judgeing) {
+								ui.create.cardTempName(card, node);
+								if (node._tempName && card_cards?.length <= 0) {
+									node._tempName.innerHTML = node._tempName.innerHTML.slice(0, node._tempName.innerHTML.indexOf("<span", -1));
+									node._tempName.innerHTML += "<span style='color:black'>虚拟</span></span>";
+								}
+							}
+						}
+					},
+					throw_cards,
+					event.card,
+					event.cards,
+					virtualCard_str,
+					event.highlight
+				);
+			}
+			if (event.highlight) {
+				for (var i = 0; i < throw_cards.length; i++) {
+					throw_cards[i].clone.classList.add("thrownhighlight");
+					game.addVideo("highlightnode", player, get.cardInfo(throw_cards[i]));
 				}
 			}
 			if (event.highlight) {
@@ -8129,7 +8226,7 @@ export const Content = {
 							cards[i].clone.classList.add("thrownhighlight");
 						}
 					}
-				}, cards);
+				}, throw_cards);
 			}
 		}
 		event.trigger("respond");

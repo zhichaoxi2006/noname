@@ -1,5 +1,7 @@
+import { GeneratorFunction } from "../../../../util/index.js";
 import { EventContent, GameEvent } from "./IContentCompiler.ts";
 import { _status, ai, game, get, lib, ui } from "../../../../../noname.js";
+import ContentCompiler from "./ContentCompiler.ts";
 import ContentCompilerBase from "./ContentCompilerBase.ts";
 
 export default class YieldCompiler extends ContentCompilerBase {
@@ -31,12 +33,12 @@ export default class YieldCompiler extends ContentCompilerBase {
 	}
 
 	filter(content: EventContent): boolean {
-		return typeof content === "function" && content.constructor.name === "GeneratorFunction";
+		return typeof content === "function" && content instanceof GeneratorFunction;
 	}
 
 	compile(content: EventContent) {
 		const compiler = this;
-		return async function (event: GameEvent) {
+		const middleware = async function (event: GameEvent) {
 			const args = YieldCompiler.#mapArgs(event);
 			const generator: Generator<any, void, any> =
 				//@ts-ignore
@@ -45,24 +47,24 @@ export default class YieldCompiler extends ContentCompilerBase {
 			let result: any = null;
 			let done: boolean = false;
 
-			while (!event.finished) {
-				if (done) {
-					event.finish();
-					break;
-				}
+			while (!done) {
 				let value: any = null;
 
-				compiler.beforeExecute(event);
+				if (!compiler.isPrevented(event)) {
+					({ value, done = true } = generator.next(result));
+					if (done) {
+						break;
+					}
+					result = await (value instanceof GameEvent ? value.forResult() : value);
+				}
 
-				if (!compiler.isPrevented(event)) ({ value, done = false } = generator.next(result));
-
-				await event.waitNext();
-				result = value instanceof GameEvent ? value.result : value;
-
-				compiler.afterExecute(event);
+				const nextResult = await event.waitNext();
+				event._result = result ?? nextResult ?? event._result;
 			}
 
 			generator.return();
 		};
+
+		return ContentCompiler.compile([middleware]);
 	}
 }

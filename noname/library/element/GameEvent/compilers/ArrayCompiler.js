@@ -3,7 +3,7 @@ import { GameEvent } from "../../gameEvent.js";
 export default class ArrayCompiler extends ContentCompilerBase {
 	type = "array";
 	filter(content) {
-		return Array.isArray(content);
+		return Array.isArray(content) && content.every(item => typeof item === "function");
 	}
 	compile(content) {
 		if (!Array.isArray(content)) throw new ReferenceError("content必须是一个数组");
@@ -23,7 +23,7 @@ export default class ArrayCompiler extends ContentCompilerBase {
 				if (!compiler.isPrevented(event)) {
 					const original = content[event.step];
 					//@ts-ignore
-					const next = await Reflect.apply(original, this, [event, event._trigger, event.player]);
+					const next = await Reflect.apply(original, this, [event, event._trigger, event.player, event._result]);
 					result = next instanceof GameEvent ? next.result : next;
 				}
 				const nextResult = await event.waitNext();

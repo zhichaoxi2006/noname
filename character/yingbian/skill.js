@@ -3153,55 +3153,55 @@ const skills = {
 	},
 	jyishi: {
 		audio: 2,
-		trigger: {
-			global: ["loseAfter", "loseAsyncAfter"],
-		},
+		trigger: { global: ["loseAfter", "loseAsyncAfter"] },
 		usable: 1,
-		direct: true,
 		preHidden: true,
 		filter(event, player) {
-			var target = _status.currentPhase;
+			const target = _status.currentPhase;
 			if (!target || !target.isIn() || event.type != "discard" || !target.isPhaseUsing()) return false;
 			if (target == player) return false;
-			var evt = event.getl(target);
-			for (var i of evt.hs) {
-				if (get.position(i, true) == "d") return true;
-			}
-			return false;
+			const evt = event.getl(target);
+			return evt?.hs?.someInD("d");
 		},
-		content() {
-			"step 0";
-			event.target = _status.currentPhase;
-			event.cards = trigger.getl(event.target).hs.filterInD("d");
-			var str = "是否发动【宜室】令" + get.translation(event.target) + "获得一张牌";
-			if (event.cards.length > 1) str += "，然后获得其余的牌";
+		async cost(event, trigger, player) {
+			const target = _status.currentPhase,
+				cards = trigger.getl(target).hs.filterInD("d");
+			event.cards = cards;
+			let str = "是否发动【宜室】令" + get.translation(target) + "获得其中一张牌";
+			if (cards.length > 1) str += "，然后获得其余的牌";
 			str += "？";
-			player
-				.chooseButton([str, event.cards])
-				.set("ai", function (button) {
-					var card = button.link;
-					var source = _status.event.source;
+			const {
+				result: { bool, links },
+			} = await player
+				.chooseButton([str, cards])
+				.set("ai", button => {
+					const card = button.link;
+					const { player, source } = get.event();
 					if (get.attitude(player, source) > 0) return Math.max(1, source.getUseValue(card, null, true));
-					var cards = _status.event.getParent().cards.slice(0);
+					const cards = get.event().getParent().cards.slice(0);
 					if (cards.length == 1) return -get.value(card);
 					cards.remove(card);
 					return get.value(cards) - get.value(card) - 2;
 				})
-				.set("source", event.target)
-				.setHiddenSkill(event.name);
-			"step 1";
-			if (result.bool) {
-				player.logSkill("jyishi", target);
-				if (cards.length > 1) {
-					target.$gain2(result.links[0]);
-					target.gain(result.links[0], "log");
-				} else trigger.player.gain(result.links[0], "gain2");
-				cards.remove(result.links[0]);
-				if (cards.length) player.gain(cards, "gain2");
-			} else player.storage.counttrigger.jyishi--;
+				.set("source", target)
+				.setHiddenSkill(event.skill);
+			event.result = {
+				bool: bool,
+				targets: [target],
+				cost_data: links,
+			};
+		},
+		async content(event, trigger, player) {
+			const {
+					targets: [target],
+					cost_data: links,
+				} = event,
+				cards = trigger.getl(target).hs.filterInD("d");
+			await target.gain(links, "gain2");
+			cards.remove(links[0]);
+			if (cards.length) await player.gain(cards, "gain2");
 		},
 	},
-	jyishi2: { charlotte: true },
 	shiduo: {
 		audio: 2,
 		enable: "phaseUse",
