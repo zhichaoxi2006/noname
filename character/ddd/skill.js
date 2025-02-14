@@ -653,55 +653,54 @@ const skills = {
 	},
 	dddqiaoduan: {
 		trigger: { global: "linkAfter" },
-		direct: true,
 		usable: 1,
 		filter(event, player) {
-			var num = game.countPlayer(current => current.isLinked());
+			const num = game.countPlayer(current => current.isLinked());
 			if (event.player.isLinked()) {
 				return player.countCards("he") >= num && game.hasPlayer(current => current.isDamaged());
 			} else {
 				return num > 0;
 			}
 		},
-		content() {
-			"step 0";
+		async cost(event, trigger, player) {
+			const num = game.countPlayer(current => current.isLinked());
+			const { skill } = event;
 			if (trigger.player.isLinked()) {
-				var num = game.countPlayer(current => current.isLinked());
-				player.chooseCardTarget({
-					prompt: get.prompt("dddqiaoduan"),
-					prompt2: "操作提示：选择" + get.cnNumber(num) + "张牌和一名已受伤的角色。将这些牌置于牌堆底（先选择的在上），然后该角色回复1点体力。",
-					filterCard: true,
-					selectCard: num,
-					filterTarget: (card, player, target) => target.isDamaged(),
-					ai1: card => 5 - get.value(card),
-					ai2: target => {
-						var player = _status.event.player;
-						return get.recoverEffect(target, player, player);
-					},
-				});
-			} else event.goto(2);
-			"step 1";
-			if (result.bool) {
-				player.logSkill("dddqiaoduan", result.targets[0]);
-				player.loseToDiscardpile(result.cards, ui.cardPile);
-				result.targets[0].recover();
-			} else player.storage.counttrigger.dddqiaoduan--;
-			event.finish();
-			"step 2";
-			var num = game.countPlayer(current => current.isLinked());
-			player.chooseTarget(get.prompt("dddqiaoduan"), [1, num], "令至多" + get.cnNumber(num) + "名角色各摸一张牌").set("ai", function (target) {
-				var player = _status.event.player;
-				var att = get.attitude(player, target) / Math.sqrt(1 + target.countCards("h"));
-				if (target.hasSkillTag("nogain")) att /= 10;
-				return att;
-			});
-			"step 3";
-			if (result.bool) {
-				var targets = result.targets.sortBySeat();
-				player.logSkill("dddqiaoduan", targets);
-				game.asyncDraw(targets);
-				game.delayex();
-			} else player.storage.counttrigger.dddqiaoduan--;
+				event.result = await player
+					.chooseCardTarget({
+						prompt: get.prompt(skill),
+						prompt2: `操作提示：选择${get.cnNumber(num)}张牌和一名已受伤的角色。将这些牌置于牌堆底（先选择的在上），然后该角色回复1点体力。`,
+						filterCard: true,
+						selectCard: num,
+						filterTarget: (card, player, target) => target.isDamaged(),
+						ai1: card => 5 - get.value(card),
+						ai2: target => {
+							const player = get.player();
+							return get.recoverEffect(target, player, player);
+						},
+					})
+					.forResult();
+			} else {
+				event.result = await player
+					.chooseTarget(get.prompt(skill), [1, num], `令至多${get.cnNumber(num)}名角色各摸一张牌`)
+					.set("ai", target => {
+						const player = get.player();
+						let att = get.attitude(player, target) / Math.sqrt(1 + target.countCards("h"));
+						if (target.hasSkillTag("nogain")) att /= 10;
+						return att;
+					})
+					.forResult();
+			}
+		},
+		async content(event, trigger, player) {
+			const { targets, cards } = event;
+			if (cards?.length) {
+				await player.loseToDiscardpile(cards, ui.cardPile);
+				await targets[0].recover();
+			} else {
+				await game.asyncDraw(targets.sortBySeat());
+				await game.delayex();
+			}
 		},
 	},
 	//孙亮

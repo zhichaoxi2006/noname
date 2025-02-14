@@ -476,8 +476,8 @@ export class Is {
 	 * @returns
 	 */
 	zhuanhuanji(skill, player) {
-		const info = lib.skill[skill],
-			{ zhuanhuanji } = info || {};
+		const info = get.info(skill),
+			{ zhuanhuanji } = info;
 		if ("zhuanhuanji2" in info) {
 			const { zhuanhuanji2 } = info;
 			if (typeof zhuanhuanji2 === "function") return Boolean(zhuanhuanji2(skill, player));

@@ -178,6 +178,9 @@ export class Library {
 		xiaotao_emotion: 20,
 		xiaojiu_emotion: 20,
 		biexiao_emotion: 18,
+		chaijun_emotion: 43,
+		huangdou_emotion: 20,
+		maoshu_emotion: 18,
 	};
 	animate = {
 		skill: {},
@@ -3212,6 +3215,12 @@ export class Library {
 					intro: "开启后出现属性伤害、回复体力等情况时会显示动画",
 					init: false,
 					unfrequent: true,
+				},
+				card_animation_info: {
+					name: "卡牌动画信息(Beta)",
+					intro: "开启后会在卡牌动画中显示一些信息来源并启用虚拟牌动画(Beta测试功能，如遇异常可关闭该功能)",
+					init: false,
+					unfrequent: false,
 				},
 				skill_animation_type: {
 					name: "技能特效",
@@ -9708,6 +9717,9 @@ export class Library {
 		xiaojiu_emotion: "小酒表情",
 		xiaokuo_emotion: "小扩表情",
 		biexiao_emotion: "憋笑表情",
+		chaijun_emotion: "柴郡表情",
+		huangdou_emotion: "黄豆表情",
+		maoshu_emotion: "猫鼠表情",
 
 		pause: "暂停",
 		config: "选项",

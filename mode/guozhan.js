@@ -8819,37 +8819,33 @@ export default () => {
 				audio: "tianxiang",
 				audioname: ["daxiaoqiao", "re_xiaoqiao", "ol_xiaoqiao"],
 				trigger: { player: "damageBegin4" },
-				direct: true,
 				preHidden: true,
 				usable: 1,
 				filter(event, player) {
 					return (
-						player.countCards("h", function (card) {
-							return _status.connectMode || get.suit(card, player) == "heart";
+						player.countCards("h", card => {
+							return _status.connectMode || (get.suit(card, player) == "heart" && lib.filter.cardDiscardable(card, player));
 						}) > 0 && event.num > 0
 					);
 				},
-				content() {
-					"step 0";
-					player
+				async cost(event, trigger, player) {
+					event.result = await player
 						.chooseCardTarget({
 							filterCard(card, player) {
 								return get.suit(card) == "heart" && lib.filter.cardDiscardable(card, player);
 							},
-							filterTarget(card, player, target) {
-								return player != target;
-							},
+							filterTarget: lib.filter.notMe,
 							ai1(card) {
 								return 10 - get.value(card);
 							},
 							ai2(target) {
-								var att = get.attitude(_status.event.player, target);
-								var trigger = _status.event.getTrigger();
-								var da = 0;
-								if (_status.event.player.hp == 1) {
+								const att = get.attitude(get.player(), target);
+								const trigger = get.event().getTrigger();
+								let da = 0;
+								if (get.player().hp == 1) {
 									da = 10;
 								}
-								var eff = get.damageEffect(target, trigger.source, target);
+								const eff = get.damageEffect(target, trigger.source, target);
 								if (att == 0) return 0.1 + da;
 								if (eff >= 0 && att > 0) {
 									return att + da;
@@ -8860,51 +8856,37 @@ export default () => {
 								}
 								return -att + da;
 							},
-							prompt: get.prompt("gztianxiang"),
-							prompt2: lib.translate.gztianxiang_info,
+							prompt: get.prompt(event.skill),
+							prompt2: lib.translate[`${event.skill}_info`],
 						})
-						.setHiddenSkill(event.name);
-					"step 1";
-					if (result.bool) {
-						player.discard(result.cards);
-						var target = result.targets[0];
-						player
-							.chooseControlList(
-								true,
-								function (event, player) {
-									var target = _status.event.target;
-									var att = get.attitude(player, target);
-									if (target.hasSkillTag("maihp")) att = -att;
-									if (att > 0) {
-										return 0;
-									} else {
-										return 1;
-									}
-								},
-								["令" + get.translation(target) + "受到伤害来源对其造成的1点伤害，然后摸X张牌（X为其已损失体力值且至多为5）", "令" + get.translation(target) + "失去1点体力，然后获得" + get.translation(result.cards)]
-							)
-							.set("target", target);
-						player.logSkill(event.name, target);
-						trigger.cancel();
-						event.target = target;
-						event.card = result.cards[0];
+						.setHiddenSkill(event.skill)
+						.forResult();
+				},
+				async content(event, trigger, player) {
+					const {
+						cards,
+						targets: [target],
+					} = event;
+					trigger.cancel();
+					await player.discard(cards);
+					const { result } = await player
+						.chooseControlList(true, (event, player) => get.event().index, [`令${get.translation(target)}受到伤害来源对其造成的1点伤害，然后摸X张牌（X为其已损失体力值且至多为5）`, `令${get.translation(target)}失去1点体力，然后获得${get.translation(cards)}`])
+						.set(
+							"index",
+							(() => {
+								let att = get.attitude(player, target);
+								if (target.hasSkillTag("maihp")) att = -att;
+								return att > 0 ? 0 : 1;
+							})()
+						);
+					if (typeof result.index != "number") return;
+					if (result.index == 0) {
+						await target.damage(trigger.source || "nosource", "nocard");
+						if (target.getDamagedHp()) await target.draw(Math.min(5, target.getDamagedHp()));
 					} else {
-						player.storage.counttrigger.gztianxiang--;
-						event.finish();
+						await target.loseHp();
+						if (cards[0].isInPile()) await target.gain(cards, "gain2");
 					}
-					"step 2";
-					if (typeof result.index == "number") {
-						event.index = result.index;
-						if (result.index) {
-							event.related = event.target.loseHp();
-						} else {
-							event.related = event.target.damage(trigger.source || "nosource", "nocard");
-						}
-					} else event.finish();
-					"step 3";
-					//if(event.related.cancelled||target.isDead()) return;
-					if (event.index && card.isInPile()) target.gain(card, "gain2");
-					else if (target.getDamagedHp()) target.draw(Math.min(5, target.getDamagedHp()));
 				},
 				ai: {
 					maixie_defend: true,
